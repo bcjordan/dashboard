@@ -2,10 +2,24 @@
   = link_to_if current != 'manage', t('teacher.students.manage'), manage_followers_path
 |
 %span{ style: 'color: #ffa400;'}
-  = link_to_if current != 'sections', t('teacher.sections.manage'), sections_followers_path
+  = link_to_if current != 'sections', t('teacher.sections.manage'), sections_path
 |
 %span{ style: 'color: #ffa400;'}
   = link_to_if current != 'report', t('teacher.rollup'), followers_path
 |
 %span{ style: 'color: #ffa400;'}
   = link_to_if current != 'activity', t('teacher.activity'), student_usage_path
+- unless current_user.sections.blank?
+  |
+  %span{ style: 'color: #ffa400;'}
+    Select a section: 
+    - options_select = options_from_collection_for_select(current_user.sections, :id, :name, @section.try(:id))
+    = select_tag('section_id', options_select, style: 'margin: 0 7px 0px 4px', id: 'section_nav')
+  :javascript
+  $(
+    $("#section_nav").change(function() {
+      var section_url = "/sections/" + $("#section_nav").val();
+      window.location.href = section_url;
+    });
+  });
+

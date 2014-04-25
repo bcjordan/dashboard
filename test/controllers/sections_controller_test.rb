@@ -52,7 +52,7 @@ class SectionsControllerTest < ActionController::TestCase
     section = assigns(:section)
     assert_equal @laurel, section.user
 
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
 
   test "should not create section if not signed in" do
@@ -74,7 +74,7 @@ class SectionsControllerTest < ActionController::TestCase
     assert_equal @laurel, section.user
     assert_equal section.name, @chris_section.name
 
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
 
   test "should not create section with blank name" do
@@ -96,7 +96,7 @@ class SectionsControllerTest < ActionController::TestCase
     end
 
     # kind of pretends it worked...
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
 
 
@@ -112,7 +112,7 @@ class SectionsControllerTest < ActionController::TestCase
     assert_equal @laurel_section_1, section
     assert_equal "Ha", section.name
 
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
 
   test "should not update section if not signed in" do
@@ -132,7 +132,7 @@ class SectionsControllerTest < ActionController::TestCase
     assert_not_equal "Ha", @laurel_section_1.reload.name
 
     assert flash.alert
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
 
 
@@ -161,13 +161,13 @@ class SectionsControllerTest < ActionController::TestCase
   test "should update section with the same name as another teacher's section" do
     patch :update, id: @laurel_section_2, section: { :name => @chris_section.name }
     section = assigns(:section)
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
   
   test "should not update section owned by another teacher" do
     patch :update, id: @chris_section, section: { :name => "Ha" }
     section = assigns(:section)
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
 
   test "should destroy section" do
@@ -182,6 +182,6 @@ class SectionsControllerTest < ActionController::TestCase
     assert_equal nil, @follower.section
     assert_equal nil, @follower.section_id
 
-    assert_redirected_to sections_followers_path
+    assert_redirected_to sections_path
   end
 end

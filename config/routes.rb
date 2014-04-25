@@ -7,7 +7,7 @@ Dashboard::Application.routes.draw do
   resources :videos
   resources :concepts
   resources :activities
-  resources :sections, only: [:new, :create, :edit, :update, :destroy]
+  resources :sections
   resources :level_sources, path: '/sh/', only: [:show, :edit] do
     member do
       get 'generate_image'

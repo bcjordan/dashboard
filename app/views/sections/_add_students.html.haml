@@ -1,0 +1,28 @@
+No students yet.
+Add students!
+
+%h4{ id:'add_students' } Sign up for your students
+
+- if @user.errors.any?
+  #error_explanation
+    %ul
+      - @user.errors.full_messages.each do |msg|
+        %li= msg
+
+= form_for(@user, url: { controller: :followers, action: :create_student }) do |f|
+  = render partial: 'followers/new_student_form', locals: { f: f, user: @user }
+
+
+%h4{ id:'add_students' } Ask your students to register themselves
+
+%p
+  Instead of making you spend a lot of time individually importing student data, you can set up your class quickly
+  by asking them to signup. Your students will need to choose usernames and passwords, but they WON'T be required to
+  provide an email address. If a student forgets their password, you will be able to reset it for them.
+%p
+  Ask your students to visit
+  %b= link_to 'http://code.org/join', 'http://code.org/join'
+  and enter their section-code:
+  %b= @section.code
+  = link_to '(Send in email)', build_invite_mailto(@section, current_user), target: :_blank
+  %br/
