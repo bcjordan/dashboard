@@ -28,6 +28,14 @@ class LevelsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "should get new karel" do
+    get :new, type: 'karel'
+
+    css = css_select "#level_type"
+    assert_equal "karel", css.first.attributes['value']
+    assert_response :success
+  end
+
 # this test is not working because Level::BUILDER is nil in tests
 #  test "should get builder" do
 #    get :builder, game_id: @level.game

@@ -1,7 +1,8 @@
-- if !support_primary_locale?
+-# Temporarily comment out banner about locale not being supported.
+-# if !support_primary_locale?
   #warning-banner
     = link_to "Non-English translations coming soon. Help us translate!", 'http://eepurl.com/Im_In'
-- elsif ie_version === 8
+- if ie_version === 8
   #warning-banner= t("compatability.working")
 - elsif ie_version > 0 && ie_version < 8
   #warning-banner= t("compatability.upgrade")

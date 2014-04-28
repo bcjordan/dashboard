@@ -4632,6 +4632,17 @@ exports.mod = function(number, mod) {
   return ((number % mod) + mod) % mod;
 };
 
+/**
+ * Generates an array of integers from start to end inclusive
+ */
+exports.range = function(start, end) {
+  var ints = [];
+  for (var i = start; i <= end; i++) {
+    ints.push(i);
+  }
+  return ints;
+};
+
 },{}],32:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {

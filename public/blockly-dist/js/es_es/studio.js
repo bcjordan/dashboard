@@ -2123,8 +2123,6 @@ exports.setBackground = function (id, value) {
 exports.setSpriteEmotion = function (id, spriteIndex, value) {
   BlocklyApps.highlight(id);
   Studio.sprite[spriteIndex].emotion = value;
-  // call display right away since the frame number may have changed:
-  Studio.displaySprite(spriteIndex);
 };
 
 exports.setSpriteSpeed = function (id, spriteIndex, value) {
@@ -2676,7 +2674,7 @@ exports.install = function(blockly, skin) {
       var dropdownArray =
           this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
 
-      this.setHSV(312, 0.32, 0.62);
+      this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
           .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
@@ -2838,7 +2836,7 @@ module.exports = {
     },
     'timeoutFailureTick': 100,
     'toolbox':
-      tb('<block type="studio_moveDistance"><title name="DIR">1</title></block>' +
+      tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
          blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
@@ -2862,7 +2860,7 @@ module.exports = {
     ],
     'timeoutFailureTick': 100,
     'toolbox':
-      tb('<block type="studio_moveDistance"><title name="DIR">1</title></block>' +
+      tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
          blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
@@ -2893,7 +2891,7 @@ module.exports = {
     },
     'timeoutFailureTick': 200,
     'toolbox':
-      tb('<block type="studio_moveDistance"><title name="DIR">1</title></block>' +
+      tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
          blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
@@ -2988,19 +2986,19 @@ module.exports = {
     'startBlocks':
      '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
         <next><block type="studio_move"> \
-                <title name="DIR">3</title></block> \
+                <title name="DIR">8</title></block> \
         </next></block> \
       <block type="studio_whenRight" deletable="false" x="20" y="100"> \
         <next><block type="studio_move"> \
-                <title name="DIR">1</title></block> \
+                <title name="DIR">2</title></block> \
         </next></block> \
       <block type="studio_whenUp" deletable="false" x="20" y="180"> \
         <next><block type="studio_move"> \
-                <title name="DIR">0</title></block> \
+                <title name="DIR">1</title></block> \
         </next></block> \
       <block type="studio_whenDown" deletable="false" x="20" y="260"> \
         <next><block type="studio_move"> \
-                <title name="DIR">2</title></block> \
+                <title name="DIR">4</title></block> \
         </next></block> \
       <block type="studio_whenGameIsRunning" deletable="false" x="20" y="340"> \
         <next><block type="studio_moveDistance"> \
@@ -3009,7 +3007,7 @@ module.exports = {
           <next><block type="studio_moveDistance"> \
                   <title name="SPRITE">1</title> \
                   <title name="DISTANCE">400</title> \
-                  <title name="DIR">2</title></block> \
+                  <title name="DIR">4</title></block> \
           </next></block> \
       </next></block> \
       <block type="studio_whenSpriteCollided" deletable="false" x="20" y="440"></block>'
@@ -3200,6 +3198,7 @@ var feedback = require('../feedback.js');
 var dom = require('../dom');
 
 var Direction = tiles.Direction;
+var NextTurn = tiles.NextTurn;
 var SquareType = tiles.SquareType;
 var Emotions = tiles.Emotions;
 
@@ -3865,6 +3864,8 @@ BlocklyApps.reset = function(first) {
     Studio.sprite[i].queuedY = 0;
     Studio.sprite[i].queuedYContext = -1;
     Studio.sprite[i].flags = 0;
+    Studio.sprite[i].dir = 0;
+    Studio.sprite[i].displayDir = Direction.SOUTH;
     Studio.sprite[i].emotion = Emotions.NORMAL;
     Studio.sprite[i].xMoveQueue = [];
     Studio.sprite[i].yMoveQueue = [];
@@ -4173,17 +4174,51 @@ Studio.onPuzzleComplete = function() {
 };
 
 var spriteFrameNumber = function (index) {
+  var sprite = Studio.sprite[index];
   var showThisAnimFrame = 0;
-  if ((Studio.sprite[index].flags & SpriteFlags.ANIMATION) &&
+  if ((sprite.flags & SpriteFlags.TURNS) &&
+      (sprite.displayDir !== Direction.SOUTH)) {
+    var frameOffset = 1;
+    frameOffset += (sprite.flags & SpriteFlags.EMOTIONS) ?
+                    SpriteOffsets.EMOTIONS : 0;
+    // BUGBUG: +1's are temporary until we get a new PNG
+    frameOffset += (sprite.flags & SpriteFlags.ANIMATION) ?
+                    SpriteOffsets.ANIMATION + 1 : 0;
+    frameOffset += 1;
+    
+    var frameDirection;
+    switch (sprite.displayDir) {
+      case Direction.NORTH:
+      case Direction.NORTHEAST:
+      case Direction.NORTHWEST:
+        // BUGBUG: need new frames once we get a new PNG
+        frameDirection = 2;
+        break;
+      case Direction.EAST:
+        frameDirection = 0;
+        break;
+      case Direction.WEST:
+        frameDirection = 1;
+        break;
+      case Direction.SOUTHEAST:
+        frameDirection = 3;
+        break;
+      case Direction.SOUTHWEST:
+        frameDirection = 4;
+        break;
+    }
+    return frameOffset + frameDirection;
+  }
+  if ((sprite.flags & SpriteFlags.ANIMATION) &&
       Studio.tickCount &&
       Math.round(Studio.tickCount / 20) % 2) {
     // BUGBUG: +2 is temporary until we get a new PNG
-    showThisAnimFrame = (Studio.sprite[index].flags & SpriteFlags.EMOTIONS) ?
+    showThisAnimFrame = (sprite.flags & SpriteFlags.EMOTIONS) ?
                          SpriteOffsets.EMOTIONS + 2 : 0;
   }
-  if (Studio.sprite[index].emotion !== Emotions.NORMAL &&
-      Studio.sprite[index].flags & SpriteFlags.EMOTIONS) {
-    return showThisAnimFrame ? showThisAnimFrame : Studio.sprite[index].emotion;
+  if (sprite.emotion !== Emotions.NORMAL &&
+      sprite.flags & SpriteFlags.EMOTIONS) {
+    return showThisAnimFrame ? showThisAnimFrame : sprite.emotion;
   }
   return showThisAnimFrame;
 };
@@ -4210,10 +4245,42 @@ Studio.displaySprite = function(i) {
   var xOffset = (Studio.SPRITE_WIDTH - 2.083333) * spriteFrameNumber(i);
 
   var spriteIcon = document.getElementById('sprite' + i);
+  var spriteClipRect = document.getElementById('spriteClipRect' + i);
+
+  var xCoordPrev = spriteClipRect.getAttribute('x');
+  var yCoordPrev = spriteClipRect.getAttribute('y');
+  
+  var dirPrev = Studio.sprite[i].dir;
+  if (dirPrev === 0) {
+    // direction not yet set, start at SOUTH (forward facing)
+    Studio.sprite[i].dir = Direction.SOUTH;
+  }
+  else if ((xCoord != xCoordPrev) || (yCoord != yCoordPrev)) {
+    Studio.sprite[i].dir = 0;
+    if (xCoord < xCoordPrev) {
+      Studio.sprite[i].dir |= Direction.WEST;
+    } else if (xCoord > xCoordPrev) {
+      Studio.sprite[i].dir |= Direction.EAST;
+    }
+    if (yCoord < yCoordPrev) {
+      Studio.sprite[i].dir |= Direction.NORTH;
+    } else if (yCoord > yCoordPrev) {
+      Studio.sprite[i].dir |= Direction.SOUTH;
+    }
+  }
+  
+  if (Studio.sprite[i].dir !== Studio.sprite[i].displayDir) {
+    // Every other frame, assign a new displayDir from state table
+    // (only one turn at a time):
+    if (Studio.tickCount && (0 === Studio.tickCount % 2)) {
+      Studio.sprite[i].displayDir =
+          NextTurn[Studio.sprite[i].displayDir][Studio.sprite[i].dir];
+    }
+  }
+  
   spriteIcon.setAttribute('x', xCoord - xOffset);
   spriteIcon.setAttribute('y', yCoord);
   
-  var spriteClipRect = document.getElementById('spriteClipRect' + i);
   spriteClipRect.setAttribute('x', xCoord);
   spriteClipRect.setAttribute('y', yCoord);
 
@@ -4247,12 +4314,13 @@ Studio.setBackground = function (value) {
 Studio.setSprite = function (index, value) {
   // Inherit some flags from the skin:
   Studio.sprite[index].flags &= ~SF_SKINS_MASK;
-  Studio.sprite[index].flags |= skinTheme(value).spriteFlags;
+  Studio.sprite[index].flags |= (value !== 'hidden') ?
+                                  skinTheme(value).spriteFlags : 0;
   
   var element = document.getElementById('sprite' + index);
   element.setAttribute('visibility',
                        (value === 'hidden') ? 'hidden' : 'visible');
-  if (value != 'hidden') {
+  if (value !== 'hidden') {
     element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
                            skinTheme(value).sprite);
     element.setAttribute('width',
@@ -4451,17 +4519,105 @@ var checkFinished = function () {
 },{"../../locale/es_es/common":34,"../../locale/es_es/studio":35,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":9,"../templates/page.html":27,"./api":11,"./blocks":12,"./controls.html":13,"./extraControlRows.html":14,"./tiles":19,"./visualization.html":20}],19:[function(require,module,exports){
 'use strict';
 
-/**
- * Constants for cardinal directions.  Subsequent code assumes these are
- * in the range 0..3 and that opposites have an absolute difference of 2.
- * @enum {number}
- */
 exports.Direction = {
-  NORTH: 0,
-  EAST: 1,
-  SOUTH: 2,
-  WEST: 3
+  NORTH: 1,
+  EAST: 2,
+  SOUTH: 4,
+  WEST: 8,
+  NORTHEAST: 3,
+  SOUTHEAST: 6,
+  SOUTHWEST: 12,
+  NORTHWEST: 9,
 };
+
+var Dir = exports.Direction;
+
+//
+// Turn state machine, use as NextTurn[fromDir][toDir]
+//
+
+exports.NextTurn = {};
+
+exports.NextTurn[Dir.NORTH] = {};
+exports.NextTurn[Dir.NORTH][Dir.NORTH] = Dir.NORTH;
+exports.NextTurn[Dir.NORTH][Dir.EAST] = Dir.NORTHEAST;
+exports.NextTurn[Dir.NORTH][Dir.SOUTH] = Dir.NORTHEAST;
+exports.NextTurn[Dir.NORTH][Dir.WEST] = Dir.NORTHWEST;
+exports.NextTurn[Dir.NORTH][Dir.NORTHEAST] = Dir.NORTHEAST;
+exports.NextTurn[Dir.NORTH][Dir.SOUTHEAST] = Dir.NORTHEAST;
+exports.NextTurn[Dir.NORTH][Dir.SOUTHWEST] = Dir.NORTHWEST;
+exports.NextTurn[Dir.NORTH][Dir.NORTHWEST] = Dir.NORTHWEST;
+
+exports.NextTurn[Dir.EAST] = {};
+exports.NextTurn[Dir.EAST][Dir.NORTH] = Dir.NORTHEAST;
+exports.NextTurn[Dir.EAST][Dir.EAST] = Dir.EAST;
+exports.NextTurn[Dir.EAST][Dir.SOUTH] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.EAST][Dir.WEST] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.EAST][Dir.NORTHEAST] = Dir.NORTHEAST;
+exports.NextTurn[Dir.EAST][Dir.SOUTHEAST] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.EAST][Dir.SOUTHWEST] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.EAST][Dir.NORTHWEST] = Dir.NORTHEAST;
+
+exports.NextTurn[Dir.SOUTH] = {};
+exports.NextTurn[Dir.SOUTH][Dir.NORTH] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.SOUTH][Dir.EAST] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.SOUTH][Dir.SOUTH] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTH][Dir.WEST] = Dir.SOUTHWEST;
+exports.NextTurn[Dir.SOUTH][Dir.NORTHEAST] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.SOUTH][Dir.SOUTHEAST] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.SOUTH][Dir.SOUTHWEST] = Dir.SOUTHWEST;
+exports.NextTurn[Dir.SOUTH][Dir.NORTHWEST] = Dir.SOUTHWEST;
+
+exports.NextTurn[Dir.WEST] = {};
+exports.NextTurn[Dir.WEST][Dir.NORTH] = Dir.NORTHWEST;
+exports.NextTurn[Dir.WEST][Dir.EAST] = Dir.SOUTHWEST;
+exports.NextTurn[Dir.WEST][Dir.SOUTH] = Dir.SOUTHWEST;
+exports.NextTurn[Dir.WEST][Dir.WEST] = Dir.WEST;
+exports.NextTurn[Dir.WEST][Dir.NORTHEAST] = Dir.NORTHWEST;
+exports.NextTurn[Dir.WEST][Dir.SOUTHEAST] = Dir.SOUTHWEST;
+exports.NextTurn[Dir.WEST][Dir.SOUTHWEST] = Dir.SOUTHWEST;
+exports.NextTurn[Dir.WEST][Dir.NORTHWEST] = Dir.NORTHWEST;
+
+exports.NextTurn[Dir.NORTHEAST] = {};
+exports.NextTurn[Dir.NORTHEAST][Dir.NORTH] = Dir.NORTH;
+exports.NextTurn[Dir.NORTHEAST][Dir.EAST] = Dir.EAST;
+exports.NextTurn[Dir.NORTHEAST][Dir.SOUTH] = Dir.EAST;
+exports.NextTurn[Dir.NORTHEAST][Dir.WEST] = Dir.NORTH;
+exports.NextTurn[Dir.NORTHEAST][Dir.NORTHEAST] = Dir.NORTHEAST;
+exports.NextTurn[Dir.NORTHEAST][Dir.SOUTHEAST] = Dir.EAST;
+exports.NextTurn[Dir.NORTHEAST][Dir.SOUTHWEST] = Dir.EAST;
+exports.NextTurn[Dir.NORTHEAST][Dir.NORTHWEST] = Dir.NORTH;
+
+exports.NextTurn[Dir.SOUTHEAST] = {};
+exports.NextTurn[Dir.SOUTHEAST][Dir.NORTH] = Dir.EAST;
+exports.NextTurn[Dir.SOUTHEAST][Dir.EAST] = Dir.EAST;
+exports.NextTurn[Dir.SOUTHEAST][Dir.SOUTH] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTHEAST][Dir.WEST] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTHEAST][Dir.NORTHEAST] = Dir.EAST;
+exports.NextTurn[Dir.SOUTHEAST][Dir.SOUTHEAST] = Dir.SOUTHEAST;
+exports.NextTurn[Dir.SOUTHEAST][Dir.SOUTHWEST] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTHEAST][Dir.NORTHWEST] = Dir.SOUTH;
+
+exports.NextTurn[Dir.SOUTHWEST] = {};
+exports.NextTurn[Dir.SOUTHWEST][Dir.NORTH] = Dir.WEST;
+exports.NextTurn[Dir.SOUTHWEST][Dir.EAST] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTHWEST][Dir.SOUTH] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTHWEST][Dir.WEST] = Dir.WEST;
+exports.NextTurn[Dir.SOUTHWEST][Dir.NORTHEAST] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTHWEST][Dir.SOUTHEAST] = Dir.SOUTH;
+exports.NextTurn[Dir.SOUTHWEST][Dir.SOUTHWEST] = Dir.SOUTHWEST;
+exports.NextTurn[Dir.SOUTHWEST][Dir.NORTHWEST] = Dir.WEST;
+
+exports.NextTurn[Dir.NORTHWEST] = {};
+exports.NextTurn[Dir.NORTHWEST][Dir.NORTH] = Dir.NORTH;
+exports.NextTurn[Dir.NORTHWEST][Dir.EAST] = Dir.NORTH;
+exports.NextTurn[Dir.NORTHWEST][Dir.SOUTH] = Dir.WEST;
+exports.NextTurn[Dir.NORTHWEST][Dir.WEST] = Dir.WEST;
+exports.NextTurn[Dir.NORTHWEST][Dir.NORTHEAST] = Dir.NORTH;
+exports.NextTurn[Dir.NORTHWEST][Dir.SOUTHEAST] = Dir.WEST;
+exports.NextTurn[Dir.NORTHWEST][Dir.SOUTHWEST] = Dir.WEST;
+exports.NextTurn[Dir.NORTHWEST][Dir.NORTHWEST] = Dir.NORTHWEST;
+
 
 exports.Emotions = {
   NORMAL: 0,
@@ -4781,6 +4937,17 @@ exports.escapeHtml = function(unsafe) {
  */
 exports.mod = function(number, mod) {
   return ((number % mod) + mod) % mod;
+};
+
+/**
+ * Generates an array of integers from start to end inclusive
+ */
+exports.range = function(start, end) {
+  var ints = [];
+  for (var i = start; i <= end; i++) {
+    ints.push(i);
+  }
+  return ints;
 };
 
 },{}],33:[function(require,module,exports){

@@ -1,11 +1,14 @@
 %h2 Upload a CSV file of your level
 
 
-= link_to "Maze Builder Form", "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0AiC6nqpbvNmgdDZJMy1NdkhrQW5jVThreDlKRzYwTXc&usp=drive_web#gid=0"
+- if @type == 'maze'
+  = link_to "Maze Builder Form", "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0AiC6nqpbvNmgdDZJMy1NdkhrQW5jVThreDlKRzYwTXc&usp=drive_web#gid=0"
+- else
+  = link_to "Karel Builder Form", "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0Au-CEJJ_kBL3dGpmbmcxQnF6Z0lZZDcxY0p2LWFIaGc&usp=drive_web#gid=0"
 
 = form_for [@game, @level], html: {multipart: true} do |level_form|
   = hidden_field_tag :size, 8
-  = hidden_field_tag :level_type, "maze"
+  = hidden_field_tag :level_type, @type
   = file_field_tag "maze_source"
   = level_form.text_area :instructions, placeholder: "Instructions", rows: 4
   = level_form.text_area :name, placeholder: "Level Name", rows: 4

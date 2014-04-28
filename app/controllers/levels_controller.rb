@@ -70,40 +70,23 @@ class LevelsController < ApplicationController
   # POST /levels.json
   def create
     authorize! :create, :level
+    params.merge!(user: current_user)
+
     case params[:level_type]
     when 'maze', 'karel'
-      create_maze
+      begin
+        @level = Maze.create_from_level_builder(params, level_params)
+      rescue ArgumentError
+        render status: :not_acceptable, text: "There is a non integer value in the grid." and return
+      end
+
+      redirect_to game_level_url(@level.game, @level)
     when 'artist'
-      create_artist
+      @level = Turtle.create_from_level_builder(params)
+      render json: { redirect: game_level_url(@level.game, @level) }
     else
       raise "Unkown level type #{params[:level_type]}"
     end
-  end
-
-  def create_maze
-    contents = CSV.new(params[:maze_source].read)
-    game = Game.custom_maze
-    size = params[:size].to_i
-
-    begin
-      maze = Level.parse_maze(contents, params[:type], size)
-    rescue ArgumentError
-      render status: :not_acceptable, text: "There is a non integer value in the grid." and return
-    end
-
-    skin = params[:type] == 'maze' ? 'birds' : 'farmer'
-    @level = Level.create(level_params.merge(game: game, user: current_user, level_num: 'custom', skin: skin))
-    @level.properties.update(maze)
-    @level.save!
-    redirect_to game_level_url(game, @level)
-  end
-
-  def create_artist
-    game = Game.find(params[:game_id])
-    @level = Level.create(instructions: params[:instructions], name: params[:name], x: params[:x], y: params[:y], start_direction: params[:start_direction], game: game, user: current_user, level_num: 'custom', skin: 'artist')
-    solution = LevelSource.lookup(@level, params[:program])
-    @level.update(solution_level_source: solution)
-    render json: { redirect: game_level_url(game, @level) }
   end
 
   # DELETE /levels/1
@@ -115,7 +98,8 @@ class LevelsController < ApplicationController
 
   def new
     authorize! :create, :level
-    case params[:type]
+    @type = params[:type]
+    case @type
     when 'artist'
       artist_builder
     when 'maze', 'karel'
@@ -155,6 +139,6 @@ class LevelsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def level_params
-      params[:level].permit([:name, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, {concept_ids: []}])
+      params[:level].permit([:name, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, {concept_ids: []}])
     end
 end
