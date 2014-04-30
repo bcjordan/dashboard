@@ -635,15 +635,24 @@ BlocklyApps.resizeHeaders = function() {
 /**
  * Highlight the block (or clear highlighting).
  * @param {?string} id ID of block that triggered this action.
+ * @param {boolean} spotlight Optional.  Highlight entire block if true
  */
-BlocklyApps.highlight = function(id) {
+BlocklyApps.highlight = function(id, spotlight) {
   if (id) {
     var m = id.match(/^block_id_(\d+)$/);
     if (m) {
       id = m[1];
     }
   }
-  Blockly.mainWorkspace.highlightBlock(id);
+
+  Blockly.mainWorkspace.highlightBlock(id, spotlight);
+};
+
+/**
+ * Remove highlighting from all blocks
+ */
+BlocklyApps.clearHighlighting = function () {
+  BlocklyApps.highlight(null);
 };
 
 /**
@@ -832,6 +841,7 @@ BlocklyApps.report = function(options) {
 BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
+  BlocklyApps.clearHighlighting();
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -874,13 +884,19 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/zh_tw/common":42,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":27,"./templates/buttons.html":29,"./templates/instructions.html":31,"./templates/learn.html":32,"./templates/makeYourOwn.html":33,"./utils":40,"./xml":41}],3:[function(require,module,exports){
+},{"../locale/zh_tw/common":43,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":28,"./templates/buttons.html":30,"./templates/instructions.html":32,"./templates/learn.html":33,"./templates/makeYourOwn.html":34,"./utils":41,"./xml":42}],3:[function(require,module,exports){
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
 
 exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
+};
+
+exports.createCategory = function(name, blocks, custom) {
+  return '<category name="' + name + '"' +
+          (custom ? ' custom="' + custom + '"' : '') +
+          '>' + blocks + '</category>';
 };
 
 },{}],4:[function(require,module,exports){
@@ -950,7 +966,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":28,"./utils.js":40,"url":54}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":29,"./utils.js":41,"url":55}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
 var INFINITE_LOOP_TRAP_RE =
     new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
@@ -1410,7 +1426,7 @@ exports.createSharingDiv = function(options) {
     // don't even try if our caller didn't give us something that can be shared
     // options.response.level_source is the url that we are sharing
     return null;
-  } 
+  }
 
   // set up the twitter share url
   var twitterUrl = "https://twitter.com/intent/tweet?url=" +
@@ -1709,7 +1725,7 @@ var getMissingRequiredBlocks = function () {
             break;
           }
         } else {
-          window.alert('Bad test: ' + test);
+          throw new Error('Bad test: ' + test);
         }
       }
       if (!usedRequiredBlock) {
@@ -1836,7 +1852,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/zh_tw/common":42,"./codegen":6,"./dom":7,"./templates/buttons.html":29,"./templates/code.html":30,"./templates/readonly.html":35,"./templates/sharing.html":36,"./templates/showCode.html":37,"./templates/trophy.html":38,"./utils":40}],9:[function(require,module,exports){
+},{"../locale/zh_tw/common":43,"./codegen":6,"./dom":7,"./templates/buttons.html":30,"./templates/code.html":31,"./templates/readonly.html":36,"./templates/sharing.html":37,"./templates/showCode.html":38,"./templates/trophy.html":39,"./utils":41}],9:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -2130,7 +2146,7 @@ exports.notFinished = function() {
   return !Maze.checkSuccess();
 };
 
-},{"./tiles":20}],11:[function(require,module,exports){
+},{"./tiles":21}],11:[function(require,module,exports){
 /**
  * Blockly Demo: Maze
  *
@@ -2537,7 +2553,28 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/zh_tw/maze":43,"../codegen":6}],12:[function(require,module,exports){
+},{"../../locale/zh_tw/maze":44,"../codegen":6}],12:[function(require,module,exports){
+module.exports= (function() {
+  var t = function anonymous(locals, filters, escape, rethrow) {
+escape = escape || function (html){
+  return String(html)
+    .replace(/&(?!#?[a-zA-Z0-9]+;)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/'/g, '&#39;')
+    .replace(/"/g, '&quot;');
+};
+var buf = [];
+with (locals || {}) { (function(){ 
+ buf.push('');1; var msg = require('../../locale/zh_tw/maze') ; buf.push('\n\n<td id="step-cell">\n  <button id="stepButton" class="launch ', escape((4,  showStepButton ? '' : 'hide' )), '">\n    <img src="', escape((5,  assetUrl('media/1x1.gif') )), '">\n    ', escape((6,  msg.step() )), '\n  </button>\n</td>\n'); })();
+} 
+return buf.join('');
+};
+  return function(locals) {
+    return t(locals, require("ejs").filters);
+  }
+}());
+},{"../../locale/zh_tw/maze":44,"ejs":45}],13:[function(require,module,exports){
 var levelBase = require('../level_base');
 var Direction = require('./tiles').Direction;
 var msg = require('../../locale/zh_tw/maze');
@@ -4038,7 +4075,7 @@ module.exports = {
   }
 };
 
-},{"../../locale/zh_tw/maze":43,"../level_base":9,"./karelStartBlocks.xml":13,"./tiles":20,"./toolboxes/karel1.xml":21,"./toolboxes/karel2.xml":22,"./toolboxes/karel3.xml":23}],13:[function(require,module,exports){
+},{"../../locale/zh_tw/maze":44,"../level_base":9,"./karelStartBlocks.xml":14,"./tiles":21,"./toolboxes/karel1.xml":22,"./toolboxes/karel2.xml":23,"./toolboxes/karel3.xml":24}],14:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4070,11 +4107,12 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/maze":43,"ejs":44}],14:[function(require,module,exports){
+},{"../../locale/zh_tw/maze":44,"ejs":45}],15:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
 var reqBlocks = require('./requiredBlocks');
 var blockUtils = require('../block_utils');
+var utils = require('../utils');
 
 //TODO: Fix hacky level-number-dependent toolbox.
 var toolbox = function(page, level) {
@@ -4678,12 +4716,28 @@ module.exports = {
   }
 };
 
+
 // Merge in Karel levels.
 for (var levelId in karelLevels) {
   module.exports['karel_' + levelId] = karelLevels[levelId];
 }
 
-},{"../block_utils":3,"./karelLevels":12,"./requiredBlocks":17,"./startBlocks.xml":19,"./tiles":20,"./toolboxes/maze.xml":24}],15:[function(require,module,exports){
+// Add some step levels
+function cloneWithStep(level, step, stepOnly) {
+  var obj = utils.extend({}, module.exports[level]);
+
+  obj.step = step;
+  obj.stepOnly = stepOnly;
+  module.exports[level + '_step'] = obj;
+}
+
+cloneWithStep('2_1', true, false);
+cloneWithStep('2_2', true, false);
+cloneWithStep('2_17', true, false);
+cloneWithStep('karel_1_9', true, false);
+cloneWithStep('karel_2_9', true, false);
+
+},{"../block_utils":3,"../utils":41,"./karelLevels":13,"./requiredBlocks":18,"./startBlocks.xml":20,"./tiles":21,"./toolboxes/maze.xml":25}],16:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -4701,7 +4755,7 @@ window.mazeMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":11,"./levels":14,"./maze":16,"./skins":18}],16:[function(require,module,exports){
+},{"../appMain":1,"./blocks":11,"./levels":15,"./maze":17,"./skins":19}],17:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -4756,6 +4810,12 @@ var skin;
  */
 var stepSpeed;
 
+/**
+ * Actions in BlocklyApps.log are a tuple in the form [command, block_id]
+ */
+var ACTION_COMMAND = 0;
+var ACTION_BLOCK_ID = 1;
+
 //TODO: Make configurable.
 BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
 
@@ -4780,6 +4840,8 @@ var loadLevel = function() {
   Maze.initialDirtMap = level.initialDirt;
   Maze.finalDirtMap = level.finalDirt;
   Maze.startDirection = level.startDirection;
+
+  Maze.animating_ = false;
 
   // Override scalars.
   for (var key in level.scale) {
@@ -5124,10 +5186,15 @@ Maze.init = function(config) {
     data: {
       localeDirection: BlocklyApps.localeDirection(),
       visualization: require('./visualization.html')(),
+      controls: require('./controls.html')({
+        assetUrl: BlocklyApps.assetUrl,
+        showStepButton: level.step
+      }),
       blockUsed: undefined,
       idealBlockNumber: undefined,
-      blockCounterClass: 'block-counter-default'
-    }
+      blockCounterClass: 'block-counter-default',
+    },
+    hideRunButton: level.stepOnly
   });
 
   config.loadAudio = function() {
@@ -5182,6 +5249,13 @@ Maze.init = function(config) {
     resetDirt();
 
     drawMap();
+
+    var stepButton = document.getElementById('stepButton');
+    dom.addClickTouchEvent(stepButton, stepButtonClick);
+
+    // base also calls BlocklyApps.resetButtonClick
+    var resetButton = document.getElementById('resetButton');
+    dom.addClickTouchEvent(resetButton, Maze.resetButtonClick);
   };
 
   config.getDisplayWidth = function() {
@@ -5191,6 +5265,19 @@ Maze.init = function(config) {
 
   BlocklyApps.init(config);
 };
+
+/**
+ * Handle a click on the step button.  If we're already animating, we should
+ * perform a single step.  Otherwise, we call beginAttempt which will do
+ * some initial setup, and then perform the first step.
+ */
+function stepButtonClick() {
+  if (Maze.animating_) {
+    Maze.performStep(true);
+  } else {
+    Maze.beginAttempt(true);
+  }
+}
 
 var dirtPositionToIndex = function(row, col) {
   return Maze.COLS * row + col;
@@ -5360,13 +5447,15 @@ BlocklyApps.reset = function(first) {
   // Kill all tasks.
   timeoutList.clearTimeouts();
 
+  Maze.animating_ = false;
+
   // Move Pegman into position.
   Maze.pegmanX = Maze.start_.x;
   Maze.pegmanY = Maze.start_.y;
 
   Maze.pegmanD = Maze.startDirection;
   if (first) {
-    Maze.scheduleFinish(false);
+    Maze.scheduleDance(false);
     timeoutList.setTimeout(function() {
       stepSpeed = 100;
       Maze.scheduleTurn(Maze.startDirection);
@@ -5381,9 +5470,9 @@ BlocklyApps.reset = function(first) {
     // Move the finish icon into position.
     var finishIcon = document.getElementById('finish');
     finishIcon.setAttribute('x', Maze.SQUARE_SIZE * (Maze.finish_.x + 0.5) -
-        finishIcon.getAttribute('width') / 2);
+      finishIcon.getAttribute('width') / 2);
     finishIcon.setAttribute('y', Maze.SQUARE_SIZE * (Maze.finish_.y + 0.9) -
-        finishIcon.getAttribute('height'));
+      finishIcon.getAttribute('height'));
     finishIcon.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
                               skin.goal);
   }
@@ -5468,6 +5557,10 @@ BlocklyApps.reset = function(first) {
  */
 // XXX This is the only method used by the templates!
 BlocklyApps.runButtonClick = function() {
+  Maze.beginAttempt(false);
+};
+
+Maze.beginAttempt = function (stepMode) {
   // Only allow a single top block on some levels.
   if (level.singleTopBlock &&
       Blockly.mainWorkspace.getTopBlocks().length > 1) {
@@ -5476,16 +5569,33 @@ BlocklyApps.runButtonClick = function() {
   }
   var runButton = document.getElementById('runButton');
   var resetButton = document.getElementById('resetButton');
+  var stepButton = document.getElementById('stepButton');
   // Ensure that Reset button is at least as wide as Run button.
   if (!resetButton.style.minWidth) {
     resetButton.style.minWidth = runButton.offsetWidth + 'px';
   }
   runButton.style.display = 'none';
   resetButton.style.display = 'inline';
+  stepButton.style.display = stepMode ? 'inline' : 'none';
   Blockly.mainWorkspace.traceOn(true);
   BlocklyApps.reset(false);
   BlocklyApps.attempts++;
-  Maze.execute();
+  Maze.execute(stepMode);
+};
+
+Maze.resetButtonClick = function () {
+  var stepButton = document.getElementById('stepButton');
+  stepButton.style.display = level.step ? 'inline' : 'none';
+
+  if (Maze.cachedBlockState) {
+    // restore moveable/deletable/editable state from before we started stepping
+    Maze.cachedBlockState.forEach(function (cached) {
+      cached.block.setMovable(cached.movable);
+      cached.block.setDeletable(cached.deletable);
+      cached.block.setEditable(cached.editable);
+    });
+    Maze.cachedBlockState = [];
+  }
 };
 
 /**
@@ -5504,15 +5614,16 @@ var ResultType = {
  * BlocklyApps.displayFeedback when appropriate
  */
 var displayFeedback = function() {
-  if (!Maze.waitingForReport && !Maze.waitingForAnimate) {
-    BlocklyApps.displayFeedback({
-      app: 'maze', //XXX
-      skin: skin.id,
-      feedbackType: Maze.testResults,
-      response: Maze.response,
-      level: level
-    });
+  if (Maze.waitingForReport || Maze.animating_) {
+    return;
   }
+  BlocklyApps.displayFeedback({
+    app: 'maze', //XXX
+    skin: skin.id,
+    feedbackType: Maze.testResults,
+    response: Maze.response,
+    level: level
+  });
 };
 
 /**
@@ -5531,14 +5642,14 @@ Maze.onReportComplete = function(response) {
 /**
  * Execute the user's code.  Heaven help us...
  */
-Maze.execute = function() {
+Maze.execute = function(stepMode) {
   BlocklyApps.log = [];
   BlocklyApps.ticks = 100; //TODO: Set higher for some levels
   var code = Blockly.Generator.workspaceToCode('JavaScript');
   Maze.result = ResultType.UNSET;
   Maze.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Maze.waitingForReport = false;
-  Maze.waitingForAnimate = false;
+  Maze.animating_ = false;
   Maze.response = null;
 
   // Check for empty top level blocks to warn user about bugs,
@@ -5624,7 +5735,6 @@ Maze.execute = function() {
   var textBlocks = Blockly.Xml.domToText(xml);
 
   Maze.waitingForReport = true;
-  Maze.waitingForAnimate = true;
 
   // Report result to server.
   BlocklyApps.report({
@@ -5639,7 +5749,23 @@ Maze.execute = function() {
   // BlocklyApps.log now contains a transcript of all the user's actions.
   // Reset the maze and animate the transcript.
   BlocklyApps.reset(false);
+  Maze.animating_ = true;
 
+  Maze.cachedBlockState = [];
+  if (stepMode) {
+    // Disable all blocks, caching their state first
+    Blockly.mainWorkspace.getAllBlocks().forEach(function (block) {
+      Maze.cachedBlockState.push({
+        block: block,
+        movable: block.isMovable(),
+        deletable: block.isDeletable(),
+        editable: block.isEditable()
+      });
+      block.setMovable(false);
+      block.setDeletable(true);
+      block.setEditable(false);
+    });
+  }
 
   // Removing the idle animation and replace with pegman sprite
   if (skin.idlePegmanAnimation) {
@@ -5650,36 +5776,64 @@ Maze.execute = function() {
   }
 
   // Speeding up specific levels
-  var scaledStepSpeed =
-      stepSpeed * Maze.scale.stepSpeed * skin.movePegmanAnimationSpeedScale;
-  timeoutList.setTimeout(Maze.animate, scaledStepSpeed);
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
+  timeoutList.setTimeout(function () {
+    Maze.performStep(stepMode);
+  }, scaledStepSpeed);
 };
 
 /**
  * Iterate through the recorded path and animate pegman's actions.
  */
-Maze.animate = function() {
+Maze.performStep = function(stepMode) {
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
+  // set this on every step, as clicking elsewhere in the workspace while
+  // running/stepping will turn it off
+  Blockly.mainWorkspace.traceOn(true);
+
   var action = BlocklyApps.log.shift();
   if (!action) {
-    BlocklyApps.highlight(null);
-    if (Maze.result == ResultType.TIMEOUT) {
-      Maze.waitingForAnimate = false;
-      displayFeedback();
-    } else {
-      window.setTimeout(function() {
-        Maze.waitingForAnimate = false;
-        displayFeedback();
-      }, 1000);
-    }
+    BlocklyApps.clearHighlighting();
+    Maze.animating_ = false;
+    window.setTimeout(displayFeedback(),
+      Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
   }
 
-  BlocklyApps.highlight(action[1]);
+  animateAction(action, stepMode);
 
-  switch (action[0]) {
+  var performNextStep = false;
+  if (stepMode) {
+    // If we've run out of steps, finish things up
+    if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
+      BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
+      performNextStep = true;
+    }
+  } else {
+    performNextStep = true;
+  }
+
+  if (performNextStep) {
+    // Speeding up specific levels
+    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+      skin.movePegmanAnimationSpeedScale;
+    timeoutList.setTimeout(function () {
+      Maze.performStep(false);
+    }, scaledStepSpeed);
+  }
+};
+
+/**
+ * Animates a single action
+ */
+function animateAction (action, stepMode) {
+  BlocklyApps.highlight(action[ACTION_BLOCK_ID], stepMode);
+
+  switch (action[ACTION_COMMAND]) {
     case 'north':
       Maze.animatedMove(Direction.NORTH);
       break;
@@ -5726,7 +5880,7 @@ Maze.animate = function() {
         case BlocklyApps.TestResults.FREE_PLAY:
         case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
         case BlocklyApps.TestResults.ALL_PASS:
-          Maze.scheduleFinish(true);
+          Maze.scheduleDance(true);
           break;
         default:
           timeoutList.setTimeout(function() {
@@ -5748,12 +5902,7 @@ Maze.animate = function() {
       // action[0] is null if generated by BlocklyApps.checkTimeout().
       break;
   }
-
-  // Speeding up specific levels
-  var scaledStepSpeed =
-      stepSpeed * Maze.scale.stepSpeed * skin.movePegmanAnimationSpeedScale;
-  timeoutList.setTimeout(Maze.animate, scaledStepSpeed);
-};
+}
 
 Maze.animatedMove = function (direction) {
   var positionChange = tiles.directionToDxDy(direction);
@@ -6017,7 +6166,7 @@ Maze.setTileTransparent = function() {
  * Schedule the animations and sound for a victory dance.
  * @param {boolean} sound Play the victory sound.
  */
-Maze.scheduleFinish = function(sound) {
+Maze.scheduleDance = function(sound) {
   var frame = tiles.directionToFrame(Maze.pegmanD);
   Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 16);
 
@@ -6037,22 +6186,23 @@ Maze.scheduleFinish = function(sound) {
   if (sound) {
     BlocklyApps.playAudio('win', {volume: 0.5});
   }
-  stepSpeed = 150;  // Slow down victory animation a bit.
+
+  var danceSpeed = 150;  // Slow down victory animation a bit.
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 18);
-  }, stepSpeed);
+  }, danceSpeed);
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 20);
-  }, stepSpeed * 2);
+  }, danceSpeed * 2);
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 18);
-  }, stepSpeed * 3);
+  }, danceSpeed * 3);
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 20);
-  }, stepSpeed * 4);
+  }, danceSpeed * 4);
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
-  }, stepSpeed * 5);
+  }, danceSpeed * 5);
 };
 
 /**
@@ -6188,7 +6338,7 @@ Maze.checkSuccess = function() {
   return false;
 };
 
-},{"../../locale/zh_tw/common":42,"../../locale/zh_tw/maze":43,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":26,"../templates/page.html":34,"../timeoutList":39,"../utils":40,"./api":10,"./tiles":20,"./visualization.html":25}],17:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"../../locale/zh_tw/maze":44,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":27,"../templates/page.html":35,"../timeoutList":40,"../utils":41,"./api":10,"./controls.html":12,"./tiles":21,"./visualization.html":26}],18:[function(require,module,exports){
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
 var TURN_LEFT = {'test': 'turnLeft', 'type': 'maze_turn', 'titles': {'DIR': 'turnLeft'}};
 var TURN_RIGHT = {'test': 'turnRight', 'type': 'maze_turn', 'titles': {'DIR': 'turnRight'}};
@@ -6208,7 +6358,7 @@ module.exports = {
   IS_PATH_FORWARD: IS_PATH_FORWARD,
   FOR_LOOP: FOR_LOOP
 };
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -6334,7 +6484,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":26}],19:[function(require,module,exports){
+},{"../skins":27}],20:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6355,7 +6505,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],20:[function(require,module,exports){
+},{"ejs":45}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -6418,7 +6568,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":40}],21:[function(require,module,exports){
+},{"../utils":41}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6439,7 +6589,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],22:[function(require,module,exports){
+},{"ejs":45}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6465,7 +6615,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/zh_tw/common":42,"../../../locale/zh_tw/maze":43,"ejs":44}],23:[function(require,module,exports){
+},{"../../../locale/zh_tw/common":43,"../../../locale/zh_tw/maze":44,"ejs":45}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6499,7 +6649,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/zh_tw/common":42,"ejs":44}],24:[function(require,module,exports){
+},{"../../../locale/zh_tw/common":43,"ejs":45}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6520,7 +6670,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],25:[function(require,module,exports){
+},{"ejs":45}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6541,7 +6691,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],26:[function(require,module,exports){
+},{"ejs":45}],27:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -6581,7 +6731,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -6786,7 +6936,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6807,7 +6957,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],29:[function(require,module,exports){
+},{"ejs":45}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6828,7 +6978,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":42,"ejs":44}],30:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"ejs":45}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6849,7 +6999,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],31:[function(require,module,exports){
+},{"ejs":45}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6870,7 +7020,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":42,"ejs":44}],32:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"ejs":45}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6893,7 +7043,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":42,"ejs":44}],33:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"ejs":45}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6914,7 +7064,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":42,"ejs":44}],34:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"ejs":45}],35:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6927,8 +7077,11 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/zh_tw/common'); ; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((3,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((5,  msg.rotateText() )), '<br>', escape((5,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');9; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');14; };; buf.push('\n');15; // A spot for the server to inject some HTML for help content.
-var helpArea = function(html) {; buf.push('  ');16; if (html) {; buf.push('    <div id="helpArea">\n      ', (17,  html ), '\n    </div>\n  ');19; }; buf.push('');19; };; buf.push('\n');20; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((21,  msg.typeCode() )), '\n    <br>\n    // ', escape((23,  msg.typeHint() )), '\n    <br>\n  </div>\n');26; }; ; buf.push('\n\n<div id="visualization">\n  ', (29,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch">\n          <img src="', escape((38,  assetUrl('media/1x1.gif') )), '" class="run icon21">\n          ', escape((39,  msg.runProgram() )), '\n        </button>\n        <button id="resetButton" class="launch" style="display: none">\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="stop icon21">\n            ', escape((43,  msg.resetProgram() )), '\n        </button>\n      </td>\n      ');46; if (data.controls) { ; buf.push('\n        ', (47,  data.controls ), '\n      ');48; } ; buf.push('\n    </tr>\n    ');50; if (data.extraControlRows) { ; buf.push('\n      ', (51,  data.extraControlRows ), '\n    ');52; } ; buf.push('\n  </table>\n\n  ');55; instructions() ; buf.push('\n  ');56; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((61,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((62,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((64,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((65,  data.blockCounterClass )), '>\n        ', escape((66,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((69,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((71,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');77; codeArea() ; buf.push('\n'); })();
+ buf.push('');1;
+  var msg = require('../../locale/zh_tw/common');
+  var hideRunButton = locals.hideRunButton || false;
+; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');17; };; buf.push('\n');18; // A spot for the server to inject some HTML for help content.
+var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <img src="', escape((41,  assetUrl('media/1x1.gif') )), '" class="run icon21">\n          ', escape((42,  msg.runProgram() )), '\n        </button>\n        <button id="resetButton" class="launch" style="display: none">\n          <img src="', escape((45,  assetUrl('media/1x1.gif') )), '" class="stop icon21">\n            ', escape((46,  msg.resetProgram() )), '\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((67,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((68,  data.blockCounterClass )), '>\n        ', escape((69,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((72,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((74,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');80; codeArea() ; buf.push('\n'); })();
 } 
 return buf.join('');
 };
@@ -6936,7 +7089,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":42,"ejs":44}],35:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"ejs":45}],36:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6958,7 +7111,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],36:[function(require,module,exports){
+},{"ejs":45}],37:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6979,7 +7132,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":42,"ejs":44}],37:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"ejs":45}],38:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7000,7 +7153,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":42,"ejs":44}],38:[function(require,module,exports){
+},{"../../locale/zh_tw/common":43,"ejs":45}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7021,7 +7174,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":44}],39:[function(require,module,exports){
+},{"ejs":45}],40:[function(require,module,exports){
 var list = [];
 
 /**
@@ -7035,11 +7188,11 @@ exports.setTimeout = function (fn, time) {
  * Clears all timeouts in our list and resets the list
  */
 exports.clearTimeouts = function () {
-  list.forEach(window.clearTimeout);
+  list.forEach(window.clearTimeout, window);
   list = [];
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -7092,7 +7245,7 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -7120,7 +7273,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.zh=function(n){return "other"}
 exports.blocklyMessage = function(d){return "模組化"};
 
@@ -7249,7 +7402,7 @@ exports.signup = function(d){return "報名參加簡介課程"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":55}],43:[function(require,module,exports){
+},{"messageformat":56}],44:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.zh=function(n){return "other"}
 exports.avoidCowAndRemove = function(d){return "避開牛隻，並且移除1鏟泥土"};
 
@@ -7339,6 +7492,8 @@ exports.repeatUntilBlocked = function(d){return "當前面有路時"};
 
 exports.repeatUntilFinish = function(d){return "重覆直到完成"};
 
+exports.step = function(d){return "Step"};
+
 exports.turnLeft = function(d){return "向左轉"};
 
 exports.turnRight = function(d){return "向右轉"};
@@ -7352,7 +7507,7 @@ exports.whileTooltip = function(d){return "重覆程式積木內的動作，直�
 exports.yes = function(d){return "確定"};
 
 
-},{"messageformat":55}],44:[function(require,module,exports){
+},{"messageformat":56}],45:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7711,7 +7866,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":45,"./utils":46,"fs":47,"path":49}],45:[function(require,module,exports){
+},{"./filters":46,"./utils":47,"fs":48,"path":50}],46:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -7914,7 +8069,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7940,9 +8095,9 @@ exports.escape = function(html){
 };
  
 
-},{}],47:[function(require,module,exports){
-
 },{}],48:[function(require,module,exports){
+
+},{}],49:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7997,7 +8152,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8225,7 +8380,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":48}],50:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":49}],51:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -8736,7 +8891,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8822,7 +8977,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8909,13 +9064,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":51,"./encode":52}],54:[function(require,module,exports){
+},{"./decode":52,"./encode":53}],55:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -9548,7 +9703,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":50,"querystring":53}],55:[function(require,module,exports){
+},{"punycode":51,"querystring":54}],56:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -11131,4 +11286,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[15])
+},{}]},{},[16])

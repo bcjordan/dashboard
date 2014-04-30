@@ -1,6 +1,11 @@
 require "csv"
 
 class Maze < Level
+  # Fix STI routing http://stackoverflow.com/a/9463495
+  def self.model_name
+    Level.model_name
+  end
+
   def self.create_from_level_builder(params, level_params)
     contents = CSV.new(params[:maze_source].read)
     game = Game.custom_maze

@@ -1,4 +1,9 @@
 class Turtle < Level
+  # Fix STI routing http://stackoverflow.com/a/9463495
+  def self.model_name
+    Level.model_name
+  end
+
   def self.create_from_level_builder(params)
     game = Game.find(params[:game_id])
     level = create(instructions: params[:instructions], name: params[:name], x: params[:x], y: params[:y], start_direction: params[:start_direction], game: game, level_num: 'custom', skin: 'artist')

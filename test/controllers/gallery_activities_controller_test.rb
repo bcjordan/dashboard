@@ -16,6 +16,18 @@ class GalleryActivitiesControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "should show index with thousands of pictures with a delimiter in the count" do
+    GalleryActivity.stubs(:count).returns(14320) # mock because actually creating takes forever
+
+    # index is public
+    get :index
+
+    assert_response :success
+
+    assert_select 'b', '14,320'
+  end
+
+
   test "should show index to user" do
     sign_in @user
     get :index

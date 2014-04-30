@@ -192,4 +192,10 @@ class LevelsControllerTest < ActionController::TestCase
     assert_routing({method: "post", path: "/games/1/levels"}, {controller: "levels", action: "create", game_id: "1"})
   end
 
+  test "should use level for route helper" do
+    level = create(:turtle)
+    get :edit, id: level, game_id: level.game
+    css = css_select "form[action=#{game_level_path(level.game, level)}]"
+    assert_not css.empty?
+  end
 end

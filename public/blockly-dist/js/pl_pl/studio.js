@@ -635,15 +635,24 @@ BlocklyApps.resizeHeaders = function() {
 /**
  * Highlight the block (or clear highlighting).
  * @param {?string} id ID of block that triggered this action.
+ * @param {boolean} spotlight Optional.  Highlight entire block if true
  */
-BlocklyApps.highlight = function(id) {
+BlocklyApps.highlight = function(id, spotlight) {
   if (id) {
     var m = id.match(/^block_id_(\d+)$/);
     if (m) {
       id = m[1];
     }
   }
-  Blockly.mainWorkspace.highlightBlock(id);
+
+  Blockly.mainWorkspace.highlightBlock(id, spotlight);
+};
+
+/**
+ * Remove highlighting from all blocks
+ */
+BlocklyApps.clearHighlighting = function () {
+  BlocklyApps.highlight(null);
 };
 
 /**
@@ -832,6 +841,7 @@ BlocklyApps.report = function(options) {
 BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
+  BlocklyApps.clearHighlighting();
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -881,6 +891,12 @@ exports.createToolbox = function(blocks) {
 
 exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
+};
+
+exports.createCategory = function(name, blocks, custom) {
+  return '<category name="' + name + '"' +
+          (custom ? ' custom="' + custom + '"' : '') +
+          '>' + blocks + '</category>';
 };
 
 },{}],4:[function(require,module,exports){
@@ -1410,7 +1426,7 @@ exports.createSharingDiv = function(options) {
     // don't even try if our caller didn't give us something that can be shared
     // options.response.level_source is the url that we are sharing
     return null;
-  } 
+  }
 
   // set up the twitter share url
   var twitterUrl = "https://twitter.com/intent/tweet?url=" +
@@ -1709,7 +1725,7 @@ var getMissingRequiredBlocks = function () {
             break;
           }
         } else {
-          window.alert('Bad test: ' + test);
+          throw new Error('Bad test: ' + test);
         }
       }
       if (!usedRequiredBlock) {
@@ -2174,21 +2190,17 @@ var Emotions = tiles.Emotions;
 var generateSetterCode = function (opts) {
   var value = opts.ctx.getTitleValue('VALUE');
   if (value === "random") {
-    var randomIndex = opts.random || 1;
-    var allValues = opts.ctx.VALUES.slice(randomIndex).map(function (item) {
+    var randomIndex = opts.random || 0;
+    // opts.random is the index of where the 'random' items is in beginning of
+    // the VALUES table (defaults to 0).
+    var allValues = opts.ctx.VALUES.slice(randomIndex + 1).map(function (item) {
       return item[1];
     });
     value = 'Studio.random([' + allValues + '])';
   }
 
-  if (opts.index) {
-    return 'Studio.' + opts.name + '(\'block_id_' + opts.ctx.id + '\', ' +
-      (opts.ctx.getTitleValue(opts.index) || '0') + ', ' + value + ');\n';
-  }
-  else {
-    return 'Studio.' + opts.name + '(\'block_id_' + opts.ctx.id + '\', ' +
-      value + ');\n';
-  }
+  return 'Studio.' + opts.name + '(\'block_id_' + opts.ctx.id + '\', ' +
+    (opts.extraParams ? opts.extraParams + ', ' : '') + value + ');\n';
 };
 
 exports.setSpriteCount = function(blockly, count) {
@@ -2405,10 +2417,10 @@ exports.install = function(blockly, skin) {
        [msg.moveSprite6(), '5']];
   
   blockly.Blocks.studio_move.DIR =
-      [[msg.up(), Direction.NORTH.toString()],
-       [msg.down(), Direction.SOUTH.toString()],
-       [msg.left(), Direction.WEST.toString()],
-       [msg.right(), Direction.EAST.toString()]];
+      [[msg.moveDirectionUp(), Direction.NORTH.toString()],
+       [msg.moveDirectionDown(), Direction.SOUTH.toString()],
+       [msg.moveDirectionLeft(), Direction.WEST.toString()],
+       [msg.moveDirectionRight(), Direction.EAST.toString()]];
 
   generator.studio_move = function() {
     // Generate JavaScript for moving.
@@ -2455,25 +2467,43 @@ exports.install = function(blockly, skin) {
      [msg.moveSprite6(), '5']];
 
   blockly.Blocks.studio_moveDistance.DIR =
-      [[msg.up(), Direction.NORTH.toString()],
-       [msg.down(), Direction.SOUTH.toString()],
-       [msg.left(), Direction.WEST.toString()],
-       [msg.right(), Direction.EAST.toString()]];
+      [[msg.moveDirectionUp(), Direction.NORTH.toString()],
+       [msg.moveDirectionDown(), Direction.SOUTH.toString()],
+       [msg.moveDirectionLeft(), Direction.WEST.toString()],
+       [msg.moveDirectionRight(), Direction.EAST.toString()],
+       [msg.moveDirectionRandom(), 'random']];
 
   blockly.Blocks.studio_moveDistance.DISTANCE =
       [[msg.moveDistance25(), '25'],
        [msg.moveDistance50(), '50'],
        [msg.moveDistance100(), '100'],
        [msg.moveDistance200(), '200'],
-       [msg.moveDistance400(), '400']];
+       [msg.moveDistance400(), '400'],
+       [msg.moveDistanceRandom(), 'random']];
 
   generator.studio_moveDistance = function() {
     // Generate JavaScript for moving.
+
+    var allDistances = this.DISTANCE.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var distParam = this.getTitleValue('DISTANCE');
+    if (distParam === 'random') {
+      distParam = 'Studio.random([' + allDistances + '])';
+    }
+    var allDirections = this.DIR.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var dirParam = this.getTitleValue('DIR');
+    if (dirParam === 'random') {
+      dirParam = 'Studio.random([' + allDirections + '])';
+    }
+
     return 'Studio.moveDistance(\'block_id_' + this.id +
         '\', executionCtx || 0, ' +
         (this.getTitleValue('SPRITE') || '0') + ', ' +
-        this.getTitleValue('DIR') + ', ' +
-        this.getTitleValue('DISTANCE') + ');\n';
+        dirParam + ', ' +
+        distParam + ');\n';
   };
 
   blockly.Blocks.studio_playSound = {
@@ -2578,7 +2608,7 @@ exports.install = function(blockly, skin) {
   generator.studio_setSpriteSpeed = function () {
     return generateSetterCode({
       ctx: this,
-      index: 'SPRITE',
+      extraParams: (this.getTitleValue('SPRITE') || '0'),
       name: 'setSpriteSpeed'});
   };
 
@@ -2604,11 +2634,11 @@ exports.install = function(blockly, skin) {
   blockly.Blocks.studio_setBackground.VALUES =
       [[msg.setBackgroundRandom(), 'random'],
        [msg.setBackgroundCave(), '"cave"'],
-       [msg.setBackgroundSanta(), '"santa"'],
-       [msg.setBackgroundScifi(), '"scifi"'],
+       [msg.setBackgroundNight(), '"night"'],
+       [msg.setBackgroundCloudy(), '"cloudy"'],
        [msg.setBackgroundUnderwater(), '"underwater"'],
        [msg.setBackgroundHardcourt(), '"hardcourt"'],
-       [msg.setBackgroundRetro(), '"retro"']];
+       [msg.setBackgroundBlack(), '"black"']];
 
   generator.studio_setBackground = function() {
     return generateSetterCode({ctx: this, name: 'setBackground'});
@@ -2661,8 +2691,11 @@ exports.install = function(blockly, skin) {
        [msg.setSpriteOrange(), '"orange"']];
 
   generator.studio_setSprite = function() {
-    return generateSetterCode(
-              {ctx: this, random: 2, index: 'SPRITE', name: 'setSprite'});
+    return generateSetterCode({
+      ctx: this,
+      random: 2,
+      extraParams: (this.getTitleValue('SPRITE') || '0'),
+      name: 'setSprite'});
   };
 
   blockly.Blocks.studio_setSpriteEmotion = {
@@ -2707,8 +2740,10 @@ exports.install = function(blockly, skin) {
        [msg.setSpriteEmotionSad(), Emotions.SAD.toString()]];
 
   generator.studio_setSpriteEmotion = function() {
-    return generateSetterCode(
-              {ctx: this, index: 'SPRITE', name: 'setSpriteEmotion'});
+    return generateSetterCode({
+      ctx: this,
+      extraParams: (this.getTitleValue('SPRITE') || '0'),
+      name: 'setSpriteEmotion'});
   };
 
   blockly.Blocks.studio_saySprite = {
@@ -2802,10 +2837,12 @@ return buf.join('');
 },{"../../locale/pl_pl/studio":35,"ejs":36}],15:[function(require,module,exports){
 /*jshint multistr: true */
 
+var msg = require('../../locale/pl_pl/studio');
 var blockUtils = require('../block_utils');
 var Direction = require('./tiles').Direction;
 var tb = blockUtils.createToolbox;
 var blockOfType = blockUtils.blockOfType;
+var createCategory = blockUtils.createCategory;
 
 /*
  * Configuration for all levels.
@@ -3056,9 +3093,67 @@ module.exports = {
       <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
       <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
   },
+  '100': {
+    'requiredBlocks': [
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'softButtons': [
+      'leftButton',
+      'rightButton',
+      'downButton',
+      'upButton'
+    ],
+    'minWorkspaceHeight': 800,
+    'freePlay': true,
+    'map': [
+      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'toolbox':
+      tb(createCategory(msg.catActions(),
+                          blockOfType('studio_move') +
+                          blockOfType('studio_moveDistance') +
+                          blockOfType('studio_playSound') +
+                          blockOfType('studio_incrementScore') +
+                          blockOfType('studio_saySprite') +
+                          blockOfType('studio_setSpriteSpeed') +
+                          blockOfType('studio_setSpriteEmotion') +
+                          blockOfType('studio_setBackground') +
+                          blockOfType('studio_setSprite')) +
+         createCategory(msg.catEvents(),
+                          blockOfType('studio_whenSpriteClicked') +
+                          blockOfType('studio_whenSpriteCollided') +
+                          blockOfType('studio_whenGameIsRunning')) +
+         createCategory(msg.catControl(),
+                          blockOfType('controls_repeat')) +
+         createCategory(msg.catLogic(),
+                          blockOfType('controls_if') +
+                          blockOfType('logic_compare') +
+                          blockOfType('logic_operation') +
+                          blockOfType('logic_negate') +
+                          blockOfType('logic_boolean')) +
+         createCategory(msg.catMath(),
+                          blockOfType('math_number') +
+                          blockOfType('math_arithmetic')) +
+         createCategory(msg.catVariables(), '', 'VARIABLE')),
+    'startBlocks':
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
+      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
+      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
+      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+  },
 };
 
-},{"../block_utils":3,"./tiles":19}],16:[function(require,module,exports){
+},{"../../locale/pl_pl/studio":35,"../block_utils":3,"./tiles":19}],16:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Studio = require('./studio');
@@ -3098,16 +3193,16 @@ exports.load = function(assetUrl, id) {
   skin.hardcourt = {
     background: skin.assetUrl('background.png'),
   };
-  skin.retro = {
+  skin.black = {
     background: skin.assetUrl('retro_background.png'),
   };
   skin.cave = {
     background: skin.assetUrl('background_cave.png'),
   };
-  skin.santa = {
+  skin.night = {
     background: skin.assetUrl('background_santa.png'),
   };
-  skin.scifi = {
+  skin.cloudy = {
     background: skin.assetUrl('background_scifi.png'),
   };
   skin.underwater = {
@@ -3226,10 +3321,11 @@ var SpriteFlags = {
 var SF_SKINS_MASK =
   SpriteFlags.EMOTIONS | SpriteFlags.ANIMATION | SpriteFlags.TURNS;
 
-var SpriteOffsets = {
-  EMOTIONS: 3,
+var SpriteCounts = {
+  NORMAL: 1,
   ANIMATION: 1,
   TURNS: 7,
+  EMOTIONS: 3,
 };
 
 var ArrowIds = {
@@ -3442,7 +3538,7 @@ var performQueuedMoves = function(i)
       var newQX = Studio.sprite[i].queuedX - (nextX - Studio.sprite[i].x);
       Studio.sprite[i].queuedX = newQX;
       // for very small numbers, reset to integer zero
-      if ("0.00" === newQX.toFixed(2)) {
+      if ("0.00" === Math.abs(newQX).toFixed(2)) {
         Studio.sprite[i].queuedX = 0;
       }
     }
@@ -3476,7 +3572,7 @@ var performQueuedMoves = function(i)
       var newQY = Studio.sprite[i].queuedY - (nextY - Studio.sprite[i].y);
       Studio.sprite[i].queuedY = newQY;
       // for very small numbers, reset to integer zero
-      if ("0.00" === newQY.toFixed(2)) {
+      if ("0.00" === Math.abs(newQY).toFixed(2)) {
         Studio.sprite[i].queuedY = 0;
       }
     }
@@ -4173,66 +4269,46 @@ Studio.onPuzzleComplete = function() {
                      });
 };
 
+var frameDirTable = {};
+frameDirTable[Direction.SOUTHEAST]  = 0;
+frameDirTable[Direction.EAST]       = 1;
+frameDirTable[Direction.NORTHEAST]  = 2;
+frameDirTable[Direction.NORTH]      = 3;
+frameDirTable[Direction.NORTHWEST]  = 4;
+frameDirTable[Direction.WEST]       = 5;
+frameDirTable[Direction.SOUTHWEST]  = 6;
+
 var spriteFrameNumber = function (index) {
   var sprite = Studio.sprite[index];
   var showThisAnimFrame = 0;
   if ((sprite.flags & SpriteFlags.TURNS) &&
       (sprite.displayDir !== Direction.SOUTH)) {
-    var frameOffset = 1;
-    frameOffset += (sprite.flags & SpriteFlags.EMOTIONS) ?
-                    SpriteOffsets.EMOTIONS : 0;
-    // BUGBUG: +1's are temporary until we get a new PNG
-    frameOffset += (sprite.flags & SpriteFlags.ANIMATION) ?
-                    SpriteOffsets.ANIMATION + 1 : 0;
-    frameOffset += 1;
-    
-    var frameDirection;
-    switch (sprite.displayDir) {
-      case Direction.NORTH:
-      case Direction.NORTHEAST:
-      case Direction.NORTHWEST:
-        // BUGBUG: need new frames once we get a new PNG
-        frameDirection = 2;
-        break;
-      case Direction.EAST:
-        frameDirection = 0;
-        break;
-      case Direction.WEST:
-        frameDirection = 1;
-        break;
-      case Direction.SOUTHEAST:
-        frameDirection = 3;
-        break;
-      case Direction.SOUTHWEST:
-        frameDirection = 4;
-        break;
-    }
-    return frameOffset + frameDirection;
+    return sprite.firstTurnFrameNum + frameDirTable[sprite.displayDir];
   }
   if ((sprite.flags & SpriteFlags.ANIMATION) &&
       Studio.tickCount &&
       Math.round(Studio.tickCount / 20) % 2) {
-    // BUGBUG: +2 is temporary until we get a new PNG
-    showThisAnimFrame = (sprite.flags & SpriteFlags.EMOTIONS) ?
-                         SpriteOffsets.EMOTIONS + 2 : 0;
+    showThisAnimFrame = sprite.firstAnimFrameNum;
   }
   if (sprite.emotion !== Emotions.NORMAL &&
       sprite.flags & SpriteFlags.EMOTIONS) {
-    return showThisAnimFrame ? showThisAnimFrame : sprite.emotion;
+    return showThisAnimFrame ?
+            showThisAnimFrame :
+            sprite.firstEmotionFrameNum + (sprite.emotion - 1);
   }
   return showThisAnimFrame;
 };
 
 var spriteTotalFrames = function (index) {
-  var frames = 1;
-  if (Studio.sprite[index].flags & SpriteFlags.EMOTIONS) {
-    frames += SpriteOffsets.EMOTIONS;
-  }
+  var frames = SpriteCounts.NORMAL;
   if (Studio.sprite[index].flags & SpriteFlags.ANIMATION) {
-    frames += SpriteOffsets.ANIMATION;
+    frames += SpriteCounts.ANIMATION;
   }
   if (Studio.sprite[index].flags & SpriteFlags.TURNS) {
-    frames += SpriteOffsets.TURNS;
+    frames += SpriteCounts.TURNS;
+  }
+  if (Studio.sprite[index].flags & SpriteFlags.EMOTIONS) {
+    frames += SpriteCounts.EMOTIONS;
   }
   return frames;
 };
@@ -4241,8 +4317,7 @@ Studio.displaySprite = function(i) {
   var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
   var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
   
-  // BUGBUG: -2 is temporary until we get a fixed bitmap
-  var xOffset = (Studio.SPRITE_WIDTH - 2.083333) * spriteFrameNumber(i);
+  var xOffset = Studio.SPRITE_WIDTH * spriteFrameNumber(i);
 
   var spriteIcon = document.getElementById('sprite' + i);
   var spriteClipRect = document.getElementById('spriteClipRect' + i);
@@ -4311,6 +4386,16 @@ Studio.setBackground = function (value) {
     skinTheme(value).background);
 };
 
+var computeSpriteFrameNums = function (index) {
+  var flags = Studio.sprite[index].flags;
+  Studio.sprite[index].firstAnimFrameNum = SpriteCounts.NORMAL;
+  Studio.sprite[index].firstTurnFrameNum = SpriteCounts.NORMAL +
+      ((flags & SpriteFlags.ANIMATION) ? SpriteCounts.ANIMATION : 0);
+  Studio.sprite[index].firstEmotionFrameNum =
+      Studio.sprite[index].firstTurnFrameNum +
+      ((flags & SpriteFlags.TURNS) ? SpriteCounts.TURNS : 0);
+};
+
 Studio.setSprite = function (index, value) {
   // Inherit some flags from the skin:
   Studio.sprite[index].flags &= ~SF_SKINS_MASK;
@@ -4324,7 +4409,8 @@ Studio.setSprite = function (index, value) {
     element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
                            skinTheme(value).sprite);
     element.setAttribute('width',
-                         (Studio.SPRITE_WIDTH - 2.083333) * spriteTotalFrames(index));
+                         Studio.SPRITE_WIDTH * spriteTotalFrames(index));
+    computeSpriteFrameNums(index);
     // call display right away since the frame number may have changed:
     Studio.displaySprite(index);
   }
@@ -4803,8 +4889,11 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/pl_pl/common'); ; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((3,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((5,  msg.rotateText() )), '<br>', escape((5,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');9; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');14; };; buf.push('\n');15; // A spot for the server to inject some HTML for help content.
-var helpArea = function(html) {; buf.push('  ');16; if (html) {; buf.push('    <div id="helpArea">\n      ', (17,  html ), '\n    </div>\n  ');19; }; buf.push('');19; };; buf.push('\n');20; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((21,  msg.typeCode() )), '\n    <br>\n    // ', escape((23,  msg.typeHint() )), '\n    <br>\n  </div>\n');26; }; ; buf.push('\n\n<div id="visualization">\n  ', (29,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch">\n          <img src="', escape((38,  assetUrl('media/1x1.gif') )), '" class="run icon21">\n          ', escape((39,  msg.runProgram() )), '\n        </button>\n        <button id="resetButton" class="launch" style="display: none">\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="stop icon21">\n            ', escape((43,  msg.resetProgram() )), '\n        </button>\n      </td>\n      ');46; if (data.controls) { ; buf.push('\n        ', (47,  data.controls ), '\n      ');48; } ; buf.push('\n    </tr>\n    ');50; if (data.extraControlRows) { ; buf.push('\n      ', (51,  data.extraControlRows ), '\n    ');52; } ; buf.push('\n  </table>\n\n  ');55; instructions() ; buf.push('\n  ');56; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((61,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((62,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((64,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((65,  data.blockCounterClass )), '>\n        ', escape((66,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((69,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((71,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');77; codeArea() ; buf.push('\n'); })();
+ buf.push('');1;
+  var msg = require('../../locale/pl_pl/common');
+  var hideRunButton = locals.hideRunButton || false;
+; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');17; };; buf.push('\n');18; // A spot for the server to inject some HTML for help content.
+var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <img src="', escape((41,  assetUrl('media/1x1.gif') )), '" class="run icon21">\n          ', escape((42,  msg.runProgram() )), '\n        </button>\n        <button id="resetButton" class="launch" style="display: none">\n          <img src="', escape((45,  assetUrl('media/1x1.gif') )), '" class="stop icon21">\n            ', escape((46,  msg.resetProgram() )), '\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((67,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((68,  data.blockCounterClass )), '>\n        ', escape((69,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((72,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((74,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');80; codeArea() ; buf.push('\n'); })();
 } 
 return buf.join('');
 };
@@ -5137,9 +5226,21 @@ var MessageFormat = require("messageformat");MessageFormat.locale.pl = function 
   }
   return 'other';
 };
-exports.continue = function(d){return "Kontynuuj"};
+exports.catActions = function(d){return "Actions"};
 
-exports.down = function(d){return "down"};
+exports.catControl = function(d){return "Loops"};
+
+exports.catEvents = function(d){return "Events"};
+
+exports.catLogic = function(d){return "Logic"};
+
+exports.catMath = function(d){return "Math"};
+
+exports.catProcedures = function(d){return "Functions"};
+
+exports.catVariables = function(d){return "Variables"};
+
+exports.continue = function(d){return "Kontynuuj"};
 
 exports.finalLevel = function(d){return "Gratulacje! Rozwiązałeś końcową łamigłówkę."};
 
@@ -5149,9 +5250,17 @@ exports.incrementScoreTooltip = function(d){return "Add one to the player or opp
 
 exports.incrementPlayerScore = function(d){return "zwiększ wynik gracza"};
 
-exports.left = function(d){return "left"};
-
 exports.makeYourOwn = function(d){return "Make Your Own Story"};
+
+exports.moveDirectionDown = function(d){return "down"};
+
+exports.moveDirectionLeft = function(d){return "left"};
+
+exports.moveDirectionRight = function(d){return "right"};
+
+exports.moveDirectionUp = function(d){return "up"};
+
+exports.moveDirectionRandom = function(d){return "random"};
 
 exports.moveDistance25 = function(d){return "25 pixels"};
 
@@ -5162,6 +5271,8 @@ exports.moveDistance100 = function(d){return "100 pixels"};
 exports.moveDistance200 = function(d){return "200 pixels"};
 
 exports.moveDistance400 = function(d){return "400 pixels"};
+
+exports.moveDistanceRandom = function(d){return "random pixels"};
 
 exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
 
@@ -5237,8 +5348,6 @@ exports.repeatUntil = function(d){return "powtarzaj aż"};
 
 exports.repeatUntilFinish = function(d){return "powtarzaj aż będzie koniec"};
 
-exports.right = function(d){return "right"};
-
 exports.saySprite = function(d){return "say"};
 
 exports.saySprite1 = function(d){return "character 1 say"};
@@ -5259,15 +5368,15 @@ exports.scoreText = function(d){return "Wynik: "+v(d,"playerScore")+": "+v(d,"op
 
 exports.setBackgroundRandom = function(d){return "set random scene"};
 
+exports.setBackgroundBlack = function(d){return "set black background"};
+
 exports.setBackgroundCave = function(d){return "set cave background"};
+
+exports.setBackgroundCloudy = function(d){return "set cloudy background"};
 
 exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
 
-exports.setBackgroundRetro = function(d){return "set retro scene"};
-
-exports.setBackgroundSanta = function(d){return "set santa background"};
-
-exports.setBackgroundScifi = function(d){return "set sci-fi background"};
+exports.setBackgroundNight = function(d){return "set night background"};
 
 exports.setBackgroundUnderwater = function(d){return "set underwater background"};
 
@@ -5334,8 +5443,6 @@ exports.setSprite4 = function(d){return "set character 4"};
 exports.setSprite5 = function(d){return "set character 5"};
 
 exports.setSprite6 = function(d){return "set character 6"};
-
-exports.up = function(d){return "up"};
 
 exports.whenDown = function(d){return "kiedy strzałka w dół"};
 

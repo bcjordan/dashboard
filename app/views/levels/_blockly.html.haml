@@ -24,7 +24,7 @@
       showVideo(#{@autoplay_video_info.to_json})
 
   -# use local[:symbol] to access locals passed into this render partial (defaults to false if not present)
-  - local = Hash.new(false).merge!(local_assigns)
+  - local = Hash.new(false).merge!(local_assigns.delete_if{|_,v|v.nil?})
 
   :javascript
     var level = #{level.to_json};

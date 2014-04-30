@@ -165,3 +165,4 @@ puts suiteSuccessCount.to_s + " succeeded.  " + suiteFailCount.to_s +
   ".  Total duration: " + suiteDuration.round(2).to_s +
   " seconds.  Average test duration: " + averageTestDuration.round(2).to_s + " seconds."
 
+exit suiteFailCount

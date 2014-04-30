@@ -41,6 +41,9 @@ FactoryGirl.define do
     end
   end
 
+  factory :turtle, :parent => Level, :class => Turtle do
+  end
+
   factory :level_source do
     level
     data '<xml/>'
