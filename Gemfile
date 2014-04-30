@@ -3,7 +3,6 @@ ruby '2.0.0'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.0.3'
-gem 'rails-i18n', '~> 4.0.0'
 
 gem 'mysql2', '0.3.13'
 gem 'seamless_database_pool'
@@ -106,3 +105,4 @@ gem 'videojs_rails'
 
 gem 'retryable' # retry code blocks when they throw exceptions
 
+gem 'i18nema', group: :fast_loc  # faster locale backend (active in dev environment or FAST_LOC=true)
