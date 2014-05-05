@@ -17,7 +17,7 @@ class Artist < Level
     level
   end
 
-  def toolbox
+  def toolbox(type)
     k1_blocks_category + '<category id="actions" name="Actions">
       <block type="draw_move">
         <value name="VALUE">
