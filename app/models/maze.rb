@@ -1,6 +1,7 @@
 require "csv"
 
 class Maze < Level
+  BUILDER_FORM = "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0AiC6nqpbvNmgdDZJMy1NdkhrQW5jVThreDlKRzYwTXc&usp=drive_web#gid=0"
   # Fix STI routing http://stackoverflow.com/a/9463495
   def self.model_name
     Level.model_name
@@ -9,6 +10,11 @@ class Maze < Level
   # List of possible skins, the first is used as a default.
   def self.skins
     ['birds', 'pvz']
+  end
+
+  # An array of [name, value] pairs where the value is a start direction.
+  def self.start_directions
+    [['Up', 0], ['Right', 1], ['Down', 2], ['Left', 3]]
   end
 
   def self.create_from_level_builder(params, level_params)
