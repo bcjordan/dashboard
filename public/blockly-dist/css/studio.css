@@ -100,10 +100,10 @@ button.share:focus {
   font-size: 16px;
   text-anchor: middle; }
 
-.studio-speech-rect {
+.studio-speech-bubble-path {
   fill: white;
   stroke: black;
-  stroke-width: 5;
+  stroke-width: 3;
   opacity: 0.9; }
 
 .studio-score {

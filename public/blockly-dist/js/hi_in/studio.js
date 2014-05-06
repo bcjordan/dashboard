@@ -3493,6 +3493,7 @@ var SPEECH_BUBBLE_PADDING = 5;
 var SPEECH_BUBBLE_LINE_HEIGHT = 20;
 var SPEECH_BUBBLE_MAX_LINES = 2;
 var SPEECH_BUBBLE_V_OFFSET = 5;
+var SPEECH_BUBBLE_H_OFFSET = 50;
 
 var twitterOptions = {
   text: studioMsg.shareStudioTwitter(),
@@ -3598,15 +3599,9 @@ var drawMap = function() {
       spriteSpeechBubble.setAttribute('id', 'speechBubble' + i);
       spriteSpeechBubble.setAttribute('visibility', 'hidden');
       
-      var speechRect = document.createElementNS(Blockly.SVG_NS, 'rect');
-      speechRect.setAttribute('id', 'speechBubbleRect' + i);
-      speechRect.setAttribute('class', 'studio-speech-rect');
-      speechRect.setAttribute('x', 0);
-      speechRect.setAttribute('y', 0);
-      speechRect.setAttribute('rx', SPEECH_BUBBLE_RADIUS);
-      speechRect.setAttribute('ry', SPEECH_BUBBLE_RADIUS);
-      speechRect.setAttribute('width', SPEECH_BUBBLE_WIDTH);
-      speechRect.setAttribute('height', SPEECH_BUBBLE_HEIGHT);
+      var speechRect = document.createElementNS(Blockly.SVG_NS, 'path');
+      speechRect.setAttribute('id', 'speechBubblePath' + i);
+      speechRect.setAttribute('class', 'studio-speech-bubble-path');
 
       var speechText = document.createElementNS(Blockly.SVG_NS, 'text');
       speechText.setAttribute('id', 'speechBubbleText' + i);
@@ -3810,13 +3805,17 @@ var showSpeechBubbles = function() {
       sayQueue.shift();
       var bblText = document.getElementById('speechBubbleText' + sayCmd.index);
       var bblHeight = setSpeechText(bblText, sayCmd.text);
-      var speechBubbleRect =
-          document.getElementById('speechBubbleRect' + sayCmd.index);
-      speechBubbleRect.setAttribute('height', bblHeight);
+      var speechBubblePath =
+          document.getElementById('speechBubblePath' + sayCmd.index);
       var speechBubble = document.getElementById('speechBubble' + sayCmd.index);
+
+      speechBubblePath.setAttribute('height', bblHeight);
+      updateSpeechBubblePath(speechBubblePath);
+      
       // displaySprite will reposition the bubble
       Studio.displaySprite(sayCmd.index);
       speechBubble.setAttribute('visibility', 'visible');
+
       window.clearTimeout(Studio.sprite[sayCmd.index].bubbleTimeout);
       Studio.sprite[sayCmd.index].bubbleTimeout = window.setTimeout(
           delegate(this, Studio.hideSpeechBubble, sayCmd),
@@ -4523,6 +4522,20 @@ var spriteTotalFrames = function (index) {
   return frames;
 };
 
+var updateSpeechBubblePath = function (element) {
+  var height = +element.getAttribute('height');
+  var onTop = 'true' === element.getAttribute('onTop');
+  var onRight = 'true' === element.getAttribute('onRight');
+  element.setAttribute('d',
+                       createSpeechBubblePath(0,
+                                              0,
+                                              SPEECH_BUBBLE_WIDTH,
+                                              height,
+                                              SPEECH_BUBBLE_RADIUS,
+                                              onTop,
+                                              onRight));
+};
+
 Studio.displaySprite = function(i) {
   var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
   var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
@@ -4570,13 +4583,30 @@ Studio.displaySprite = function(i) {
   spriteClipRect.setAttribute('y', yCoord);
 
   var speechBubble = document.getElementById('speechBubble' + i);
-  var speechBubbleRect = document.getElementById('speechBubbleRect' + i);
-  var bblHeight = +speechBubbleRect.getAttribute('height');
+  var speechBubblePath = document.getElementById('speechBubblePath' + i);
+  var bblHeight = +speechBubblePath.getAttribute('height');
+  var wasOnTop = 'true' === speechBubblePath.getAttribute('onTop');
+  var wasOnRight = 'true' === speechBubblePath.getAttribute('onRight');
+  var nowOnTop = true;
+  var nowOnRight = true;
   var ySpeech = yCoord - (bblHeight + SPEECH_BUBBLE_PADDING);
   if (ySpeech < 0) {
     ySpeech = yCoord + Studio.SPRITE_HEIGHT + SPEECH_BUBBLE_PADDING;
+    nowOnTop = false;
   }
-  var xSpeech = Math.min(xCoord, Studio.MAZE_WIDTH - SPEECH_BUBBLE_WIDTH);
+  var xSpeech = xCoord + SPEECH_BUBBLE_H_OFFSET;
+  if (xSpeech > Studio.MAZE_WIDTH - SPEECH_BUBBLE_WIDTH) {
+    xSpeech = xCoord + Studio.SPRITE_WIDTH -
+                (SPEECH_BUBBLE_WIDTH + SPEECH_BUBBLE_H_OFFSET);
+    nowOnRight = false;
+  }
+  speechBubblePath.setAttribute('onTop', nowOnTop);
+  speechBubblePath.setAttribute('onRight', nowOnRight);
+  
+  if (wasOnTop !== nowOnTop || wasOnRight !== nowOnRight) {
+    updateSpeechBubblePath(speechBubblePath);
+  }
+  
   speechBubble.setAttribute('transform',
                             'translate(' + xSpeech + ',' + ySpeech + ')');
 };
@@ -4633,9 +4663,59 @@ Studio.setSprite = function (index, value) {
   }
 };
 
+var p = function (x,y) {
+  return x + " " + y + " ";
+};
+
+var TIP_HEIGHT = 15;
+var TIP_WIDTH = 25;
+var TIP_X_SHIFT = 10;
+
+//
+// createSpeechBubblePath creates a SVG path that looks like a rounded rect
+// plus a 'tip' that points back to the sprite.
+//
+// x, y is the top left position. w, h, r are width/height/radius (for corners)
+// onTop, onRight are booleans that are used to tell this function if the
+//     bubble is appearing on top and on the right of the sprite.
+//
+// Thanks to Remy for the original rounded rect path function
+/*
+http://www.remy-mellet.com/blog/179-draw-rectangle-with-123-or-4-rounded-corner/
+*/
+
+var createSpeechBubblePath = function (x, y, w, h, r, onTop, onRight) {
+  var strPath = "M"+p(x+r,y); //A
+  if (!onTop) {
+    if (onRight) {
+      strPath+="L"+p(x+r-TIP_X_SHIFT,y-TIP_HEIGHT)+"L"+p(x+r+TIP_WIDTH,y);
+    } else {
+      strPath+="L"+p(x+w-r-TIP_WIDTH,y)+"L"+p(x+w-TIP_X_SHIFT,y-TIP_HEIGHT);
+    }
+  }
+  strPath+="L"+p(x+w-r,y);
+  strPath+="Q"+p(x+w,y)+p(x+w,y+r); //B
+  strPath+="L"+p(x+w,y+h-r)+"Q"+p(x+w,y+h)+p(x+w-r,y+h); //C
+  if (onTop) {
+    if (onRight) {
+      strPath+="L"+p(x+r+TIP_WIDTH,y+h)+"L"+p(x+r-TIP_X_SHIFT,y+h+TIP_HEIGHT);
+    } else {
+      strPath+="L"+p(x+w-TIP_X_SHIFT,y+h+TIP_HEIGHT)+"L"+p(x+w-r-TIP_WIDTH,y+h);
+    }
+  }
+  strPath+="L"+p(x+r,y+h);
+  strPath+="Q"+p(x,y+h)+p(x,y+h-r); //D
+  strPath+="L"+p(x,y+r)+"Q"+p(x,y)+p(x+r,y); //A
+  strPath+="Z";
+  return strPath;
+};
+
 Studio.hideSpeechBubble = function (sayCmd) {
   var speechBubble = document.getElementById('speechBubble' + sayCmd.index);
   speechBubble.setAttribute('visibility', 'hidden');
+  speechBubble.removeAttribute('onTop');
+  speechBubble.removeAttribute('onRight');
+  speechBubble.removeAttribute('height');
   Studio.sayComplete++;
   if (sayCmd.calledFromWhenGameRunning) {
     Studio.loopingPendingSayCmds--;
