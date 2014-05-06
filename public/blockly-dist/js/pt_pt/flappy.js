@@ -360,6 +360,11 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
+  // Allow empty blocks if editing required blocks.
+  if (config.level.edit_required_blocks) {
+    BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
+  }
+
   var div = document.getElementById('blockly');
   var options = {
     toolbox: config.level.toolbox
@@ -1156,6 +1161,9 @@ exports.displayFeedback = function(options) {
   }
   if (showCode) {
     feedback.appendChild(showCode);
+  }
+  if (options.level.is_k1) {
+    feedback.className += " k1";
   }
 
   feedback.appendChild(getFeedbackButtons(
@@ -3213,14 +3221,6 @@ Flappy.execute = function() {
   Flappy.waitingForReport = false;
   Flappy.response = null;
 
-  // Check for empty top level blocks to warn user about bugs,
-  // especially ones that lead to infinite loops.
-  if (feedback.hasEmptyTopLevelBlocks()) {
-    Flappy.testResults = BlocklyApps.TestResults.EMPTY_BLOCK_FAIL;
-    displayFeedback();
-    return;
-  }
-
   if (level.editCode) {
     var codeTextbox = document.getElementById('codeTextbox');
     var code = dom.getText(codeTextbox);
@@ -4762,7 +4762,7 @@ exports.nextStageTrophies = function(d){return "Parabéns! Completaste a fase "+
 
 exports.numBlocksNeeded = function(d){return "Parabéns! Completaste o puzzle "+v(d,"puzzleNumber")+". (Apesar disso, poderias ter usado somente "+p(d,"numBlocks",0,"pt",{"one":"1 bloco","other":n(d,"numBlocks")+" blocos"})+".)"};
 
-exports.numLinesOfCodeWritten = function(d){return "Acabaste de escrever "+p(d,"numTrophies",0,"pt",{"one":"1 linha","other":n(d,"numTrophies")+" linhas"})+" de código!"};
+exports.numLinesOfCodeWritten = function(d){return "Acabaste de escrever "+p(d,"numLines",0,"pt",{"one":"1 linha","other":n(d,"numLines")+" linhas"})+" de código!"};
 
 exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" de "+v(d,"stage_total")};
 

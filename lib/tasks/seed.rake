@@ -29,7 +29,8 @@ namespace :seed do
   end
 
   task scripts: [:environment, :games, :custom_levels] do
-    Script.setup
+    Script.setup(Dir.glob("config/scripts/default/*.yml"), Dir.glob('config/scripts/**/*.script').flatten)
+    Script.update_script_locales
   end
 
   # Generate the database entry from the custom levels json file

@@ -35,6 +35,9 @@
     = f.label :step_mode
     = f.select :step_mode, options_for_select([['Run Button Only', 0], ['Run and Step', 1], ['Step Button Only', 2]], :selected => @level.step_mode)
   .field
+    = f.label :is_k1, "Is K1 level?"
+    = f.check_box :is_k1
+  .field
     = f.label 'concepts'
     %br/
     = f.collection_select :concept_ids, Concept.cached, :id, :name, { :selected => @level.concept_ids }, { :multiple => true, :name => 'level[concept_ids][]', :style => 'height: 160px' }

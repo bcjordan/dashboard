@@ -51,6 +51,7 @@ FactoryGirl.define do
   end
 
   factory :script do
+    sequence(:name) { |n| "Bogus Script #{n}" }
   end
   
   factory :script_level do
