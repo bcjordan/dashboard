@@ -40,4 +40,12 @@ class ScriptTest < ActiveSupport::TestCase
     assert_equal script_id, x[4].script_id
     assert_not_equal script_level_id, x[4].id
   end
+
+  test 'should not create two scripts with same name' do
+    create(:script, :name => 'script')
+    raise = assert_raises ActiveRecord::RecordInvalid do
+      create(:script, :name => 'Script')
+    end
+    assert_equal 'Validation failed: Name has already been taken', raise.message
+  end
 end
