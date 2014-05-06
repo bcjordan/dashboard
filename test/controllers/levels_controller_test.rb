@@ -28,6 +28,11 @@ class LevelsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "should get new maze" do
+    get :new, game_id: @level.game, type: "Maze"
+    assert_response :success
+  end
+
   test "should get new karel" do
     get :new, type: 'Karel'
 
@@ -215,6 +220,12 @@ class LevelsControllerTest < ActionController::TestCase
     patch :update, id: @level, game_id: @level.game, level: {  }
     level = assigns(:level)
     assert_redirected_to game_level_path(level.game, level)
+  end
+
+  test "should update artist with integer start direction" do
+    artist = create(:artist)
+    patch :update, :level => {:start_direction => "180"}, id: artist, game_id: artist.game
+    assert_equal 180, assigns(:level).start_direction
   end
 
   test "should destroy level" do

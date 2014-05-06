@@ -16,21 +16,15 @@
     %br/
     = f.text_area :instructions
   .field
-    = f.label :level_url
-    %br/
-    = f.text_field :level_url
-  .field
-    = f.label :level_num
-    %br/
-    = f.text_field :level_num
-  .field
-    = f.label :ideal_level_source_id
-    %br/
-    = f.text_field :ideal_level_source_id
-  .field
     = f.label :skin
     %br/
     = f.select :skin, options_for_select(@level.class.skins)
+  .field
+    = f.label :start_direction
+    - if @level.class.start_directions.present?
+      = f.select :start_direction, options_for_select(@level.class.start_directions)
+    - else
+      = f.text_field :start_direction
   .field
     = f.label :step_mode
     = f.select :step_mode, options_for_select([['Run Button Only', 0], ['Run and Step', 1], ['Step Button Only', 2]], :selected => @level.step_mode)
