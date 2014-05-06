@@ -101,6 +101,7 @@ class Artist < Level
       <block type="controls_repeat_simplified">
         <title name="TIMES">5</title>
       </block>
+      <block type="draw_colour_simple"></block>
       <block type="simple_move_up"></block>
       <block type="simple_move_down"></block>
       <block type="simple_move_left"></block>
