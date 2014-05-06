@@ -86,6 +86,18 @@ class LevelsControllerTest < ActionController::TestCase
     assert assigns(:level).is_k1
   end
 
+  test "should create maze levels with k1 off" do
+    maze = fixture_file_upload("maze_level.csv", "r")
+    game = Game.find_by_name("CustomMaze")
+
+    assert_difference('Level.count') do
+      post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :step_mode => 1, :type => 'Maze', :is_k1 => false}, :game_id => game.id, :program => @program, :maze_source => maze, :size => 8
+    end
+
+    assert assigns(:level)
+    assert !assigns(:level).is_k1
+  end
+
   test "should not create invalid maze level" do
     maze = fixture_file_upload("maze_level_invalid.csv", "r")
     game = Game.find_by_name("CustomMaze")
