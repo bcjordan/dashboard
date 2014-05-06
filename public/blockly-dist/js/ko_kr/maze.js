@@ -5291,7 +5291,6 @@ Maze.resetButtonClick = function () {
   var stepButton = document.getElementById('stepButton');
   stepButton.style.display = level.step ? 'inline' : 'none';
 
-  Blockly.mainWorkspace.setEnableToolbox(true);
   if (Maze.cachedBlockStates) {
     // restore moveable/deletable/editable state from before we started stepping
     Maze.cachedBlockStates.forEach(function (cached) {
@@ -5450,11 +5449,13 @@ Maze.execute = function(stepMode) {
   BlocklyApps.reset(false);
   Maze.animating_ = true;
 
+  // Disable toolbox while running
+  Blockly.mainWorkspace.setEnableToolbox(false);
+
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
       throw new Error('Unexpected cachedBlockStates');
     }
-    Blockly.mainWorkspace.setEnableToolbox(false);
     // Disable all blocks, caching their state first
     Blockly.mainWorkspace.getAllBlocks().forEach(function (block) {
       Maze.cachedBlockStates.push({
@@ -5501,6 +5502,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;

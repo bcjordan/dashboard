@@ -4948,7 +4948,7 @@ Turtle.init = function(config) {
     // (execute) and the infinite loop detection function.
     //XXX Not sure if this is still right.
     Blockly.JavaScript.addReservedWords('Turtle,code');
- 
+
     // Helper for creating canvas elements.
     var createCanvas = function(id, width, height) {
       var el = document.createElement('canvas');
@@ -4957,19 +4957,19 @@ Turtle.init = function(config) {
       el.height = height;
       return el;
     };
-  
+
     // Create hidden canvases.
     Turtle.ctxAnswer = createCanvas('answer', 400, 400).getContext('2d');
     Turtle.ctxImages = createCanvas('images', 400, 400).getContext('2d');
-    Turtle.ctxScratch = createCanvas('scratch', 400, 400).getContext('2d');    
+    Turtle.ctxScratch = createCanvas('scratch', 400, 400).getContext('2d');
     Turtle.ctxFeedback = createCanvas('feedback', 154, 154).getContext('2d');
-  
+
     // Create display canvas.
     var display = createCanvas('display', 400, 400);
     var visualization = document.getElementById('visualization');
     visualization.appendChild(display);
     Turtle.ctxDisplay = display.getContext('2d');
-    
+
     // Set their initial contents.
     Turtle.loadTurtle();
     Turtle.drawImages();
@@ -5188,6 +5188,9 @@ Turtle.execute = function() {
   BlocklyApps.reset();
   BlocklyApps.playAudio('start', {volume : 0.5, loop : true});
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
+
+  // Disable toolbox while running
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5586,6 +5589,9 @@ Turtle.checkAnswer = function() {
   }
 
   BlocklyApps.report(reportData);
+
+  // reenable toolbox
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
