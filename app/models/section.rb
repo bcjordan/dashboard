@@ -1,7 +1,9 @@
 class Section < ActiveRecord::Base
   belongs_to :user
+
   has_many :followers, dependent: :nullify
   has_many :students, through: :followers, source: :student_user
+  accepts_nested_attributes_for :students
 
   validates :name, uniqueness: { scope: :user_id }
   validates :name, presence: true

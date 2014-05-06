@@ -7,8 +7,8 @@
     $("#section_nav").change(function() {
       var section_url = "/sections/" + $("#section_nav").val();
       window.location.href = section_url;
-    });
-  });
+    })
+  );
 |
 %span{ style: 'color: #ffa400;'}
   = link_to_if current != 'sections', t('teacher.sections.manage'), sections_path

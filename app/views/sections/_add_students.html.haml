@@ -1,17 +1,47 @@
-No students yet.
-Add students!
-
 %h4{ id:'add_students' } Sign up for your students
 
-- if @user.errors.any?
+- if @section.errors.any?
   #error_explanation
     %ul
-      - @user.errors.full_messages.each do |msg|
+      - @section.errors.full_messages.each do |msg|
         %li= msg
 
-= form_for(@user, url: { controller: :followers, action: :create_student }) do |f|
-  = render partial: 'followers/new_student_form', locals: { f: f, user: @user }
+= form_for(@section, :url => {controller: 'sections', action: 'update_students', id: @section}) do |f|
+  %table{id: 'add-students-form'}
+    %tr
+      %th Name
+      %th Username
+      %th Password
+    - @section.students.each do |student|
+      = fields_for 'section[students_attributes][]', student, index: nil do |user_f|
+        %tr
+          %td
+            = user_f.text_field :name
+          %td
+            = user_f.text_field :username
+          %td
+            = user_f.text_field :password
+  = f.submit
 
+%table{style:"display:none"}
+  %tr{id:"form-row-prototype"}
+    %td
+      %input{class:"input-xlarge", class:"name", name:"section[students_attributes][][name]", placeholder:"eg. John Smith", type:"text"}
+    %td
+      %input{class:"input-xlarge", class:"username", name:"section[students_attributes][][username]", placeholder:"eg. johnsmith583", type:"text"}
+    %td
+      %input{class:"input-xlarge", class:"username", name:"section[students_attributes][][password]", placeholder:"eg. johnsmith583", type:"text"}
+
+:javascript
+  function appendRow() {
+    // append a copy of the prototype row and attach myself as an event handler to the last row in the table
+    var selector = ".form-row:last .name";
+    $('#add-students-form').off('change', selector, appendRow);
+    $("#form-row-prototype").clone(true).removeAttr('id').attr('class', 'form-row').appendTo("#add-students-form");
+    $('#add-students-form').on('change', selector, appendRow);
+  }
+
+  $(appendRow());
 
 %h4{ id:'add_students' } Ask your students to register themselves
 

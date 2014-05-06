@@ -7,7 +7,12 @@ Dashboard::Application.routes.draw do
   resources :videos
   resources :concepts
   resources :activities
-  resources :sections
+  resources :sections do
+    member do
+      get 'edit_students'
+      patch 'update_students'
+    end
+  end
   resources :level_sources, path: '/sh/', only: [:show, :edit] do
     member do
       get 'generate_image'

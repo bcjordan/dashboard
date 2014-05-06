@@ -10,12 +10,6 @@ class SectionsController < ApplicationController
   end
   
   def show
-    @followers = current_user.followers.
-      where(section: @section).
-      order('users.name').
-      includes([:student_user, :section])
-
-    @user = User.new # create student form
   end
 
   def new
@@ -23,6 +17,13 @@ class SectionsController < ApplicationController
   end
 
   def edit
+  end
+
+  def edit_students
+    @followers = current_user.followers.
+      where(section: @section).
+      order('users.name').
+      includes([:student_user, :section])
   end
 
   def create
@@ -44,6 +45,24 @@ class SectionsController < ApplicationController
         format.html { redirect_to sections_path, notice: I18n.t('crud.updated', model: Section.model_name.human) }
       else
         format.html { render action: 'edit' }
+      end
+    end
+  end
+
+  def update_students
+    # remove blank form rows
+    params[:section][:students_attributes].reject! {|student| student.values.all?(&:blank?)}
+
+    # add provider::manual so email is not required
+    params[:section][:students_attributes].each do |student|
+      student[:provider] = User::PROVIDER_MANUAL
+    end
+
+    respond_to do |format|
+      if @section.update(section_params)
+        format.html { redirect_to sections_path, notice: I18n.t('crud.updated', model: Section.model_name.human) }
+      else
+        format.html { render action: 'edit_students' }
       end
     end
   end
@@ -73,6 +92,6 @@ class SectionsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def section_params
-    params.require(:section).permit(:name)
+    params.require(:section).permit(:name, :students_attributes => [:name, :username, :provider])
   end
 end
