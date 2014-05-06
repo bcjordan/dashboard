@@ -16,6 +16,8 @@
   = level_form.select :start_direction, options_for_select([['Up', 0], ['Right', 1], ['Down', 2], ['Left', 3]])
   = level_form.label 'Step options'
   = level_form.select :step_mode, options_for_select([['Run Button Only', 0], ['Run and Step', 1], ['Step Button Only', 2]])
+  = level_form.label 'Is K1 level?'
+  = level_form.check_box :is_k1
   = level_form.submit "Create Level"
 
 :javascript

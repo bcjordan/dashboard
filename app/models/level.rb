@@ -31,6 +31,11 @@ class Level < ActiveRecord::Base
   def toolbox
   end
 
+  # Overriden by different level types.
+  def self.skins
+    []
+  end
+
   def self.custom_levels
     where("user_id IS NOT NULL")
   end

@@ -70,8 +70,12 @@ class LevelsController < ApplicationController
   # POST /levels.json
   def create
     authorize! :create, :level
-    params.merge!(user: current_user)
     type_class = level_params[:type].constantize
+
+    # Set some defaults.
+    params[:level].reverse_merge!(skin: type_class.skins.first)
+    params.merge!(user: current_user)
+
     begin
       @level = type_class.create_from_level_builder(params, level_params)
     rescue ArgumentError
@@ -131,6 +135,6 @@ class LevelsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def level_params
-      params[:level].permit([:name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, {concept_ids: []}])
+      params[:level].permit([:name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, :is_k1, {concept_ids: []}])
     end
 end

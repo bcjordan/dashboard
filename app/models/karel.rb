@@ -1,4 +1,9 @@
 class Karel < Maze
+  # List of possible skins, the first is used as a default.
+  def self.skins
+    ['farmer', 'farmer_night']
+  end
+
   # Karel level builder mazes have the information for three 2D arrays embeded
   #   into one.
   # final_dirt is always zeroed out until it is removed from Blockly.

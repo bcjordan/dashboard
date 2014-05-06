@@ -4,9 +4,14 @@ class Artist < Level
     Level.model_name
   end
 
+  # List of possible skins, the first is used as a default.
+  def self.skins
+    ['artist', 'artist_zombie']
+  end
+
   def self.create_from_level_builder(params, level_params)
     game = Game.find(params[:game_id])
-    level = create(level_params.merge(user: params[:user], x: params[:x], y: params[:y], start_direction: params[:start_direction], game: game, level_num: 'custom', skin: 'artist'))
+    level = create(level_params.merge(user: params[:user], x: params[:x], y: params[:y], start_direction: params[:start_direction], game: game, level_num: 'custom'))
     solution = LevelSource.lookup(level, params[:program])
     level.update(solution_level_source: solution)
     level
@@ -96,6 +101,7 @@ class Artist < Level
       <block type="controls_repeat_simplified">
         <title name="TIMES">5</title>
       </block>
+      <block type="draw_colour_simple"></block>
       <block type="simple_move_up"></block>
       <block type="simple_move_down"></block>
       <block type="simple_move_left"></block>

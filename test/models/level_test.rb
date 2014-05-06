@@ -78,9 +78,11 @@ class LevelTest < ActiveSupport::TestCase
   end
 
   test "create turtle level from level builder" do
-    level = Artist.create_from_level_builder(@turtle_data.merge(:program=>"<hey>"), @custom_turtle_data)
+    program = "hey"
+    level = Artist.create_from_level_builder(@turtle_data.merge!(program: program), {})
 
     assert_equal "Artist", level.type
+    assert_equal program, level.solution_level_source.try(:data)
   end
 
   test "basic toolbox check" do

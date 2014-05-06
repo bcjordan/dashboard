@@ -6,15 +6,18 @@ class Maze < Level
     Level.model_name
   end
 
+  # List of possible skins, the first is used as a default.
+  def self.skins
+    ['birds', 'pvz']
+  end
+
   def self.create_from_level_builder(params, level_params)
     contents = CSV.new(params[:maze_source].read)
     game = Game.custom_maze
     size = params[:size].to_i
 
     maze = parse_maze(contents, size)
-
-    skin = params[:type] == 'maze' ? 'birds' : 'farmer'
-    level = create(level_params.merge(user: params[:user], game: game, level_num: 'custom', skin: skin))
+    level = create(level_params.merge(user: params[:user], game: game, level_num: 'custom'))
     level.properties.update(maze)
     level.save!
     level

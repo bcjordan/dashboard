@@ -74,6 +74,30 @@ class LevelsControllerTest < ActionController::TestCase
     assert assigns(:level).step_mode
   end
 
+  test "should create maze levels with k1 on" do
+    maze = fixture_file_upload("maze_level.csv", "r")
+    game = Game.find_by_name("CustomMaze")
+
+    assert_difference('Level.count') do
+      post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :step_mode => 1, :type => 'Maze', :is_k1 => true}, :game_id => game.id, :program => @program, :maze_source => maze, :size => 8
+    end
+
+    assert assigns(:level)
+    assert assigns(:level).is_k1
+  end
+
+  test "should create maze levels with k1 off" do
+    maze = fixture_file_upload("maze_level.csv", "r")
+    game = Game.find_by_name("CustomMaze")
+
+    assert_difference('Level.count') do
+      post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :step_mode => 1, :type => 'Maze', :is_k1 => false}, :game_id => game.id, :program => @program, :maze_source => maze, :size => 8
+    end
+
+    assert assigns(:level)
+    assert !assigns(:level).is_k1
+  end
+
   test "should not create invalid maze level" do
     maze = fixture_file_upload("maze_level_invalid.csv", "r")
     game = Game.find_by_name("CustomMaze")
@@ -210,5 +234,30 @@ class LevelsControllerTest < ActionController::TestCase
     get :edit, id: level, game_id: level.game
     css = css_select "form[action=#{game_level_path(level.game, level)}]"
     assert_not css.empty?
+  end
+
+  test "should use first skin as default" do
+    maze = fixture_file_upload("maze_level.csv", "r")
+    game = Game.find_by_name("CustomMaze")
+
+    post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :type => 'Maze'}, :game_id => game.id, :program => @program, :maze_source => maze, :size => 8
+    assert_equal Maze.skins.first, assigns(:level).skin
+  end
+
+  test "should use skin from params on create" do
+    maze = fixture_file_upload("maze_level.csv", "r")
+    game = Game.find_by_name("CustomMaze")
+
+    post :create, :level => {:skin => Maze.skins.last, :name => "NewCustomLevel", :instructions => "Some Instructions", :type => 'Maze'}, :game_id => game.id, :program => @program, :maze_source => maze, :size => 8
+    assert_equal Maze.skins.last, assigns(:level).skin
+  end
+
+  test "edit form should include skins" do
+    level = create(:artist)
+    skins = level.class.skins
+    get :edit, id: level, game_id: level.game
+    skin_select = css_select "#level_skin option"
+    values = skin_select.map { |option| option.attributes["value"] }
+    assert_equal skins, values
   end
 end

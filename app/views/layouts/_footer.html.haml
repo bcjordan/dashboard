@@ -8,7 +8,7 @@
           = hidden_field_tag :return_to, request.url
           = select_tag :locale, options_for_select(options_for_locale_select, locale), onchange: 'switchLocale();'
       .span9{style:(@full_width ? (@share && mobile? ? "width: 160px; margin-left: 0px;" : "width: 615px;") : "")}
-        = link_to t('footer.feedback'), 'http://codeorg.uservoice.com/forums/228116-code-org-tutorials'
+        = link_to t('footer.feedback'), 'http://support.code.org/'
         = ' - '
         = link_to t('footer.translate'), 'http://eepurl.com/Im_In'
         %br/

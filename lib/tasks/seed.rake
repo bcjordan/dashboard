@@ -32,7 +32,8 @@ namespace :seed do
   end
 
   task scripts: [:environment, :games, :custom_levels, :multis, :matches] do
-    Script.setup
+    Script.setup(Dir.glob("config/scripts/default/*.yml"), Dir.glob('config/scripts/**/*.script').flatten)
+    Script.update_script_locales
   end
 
   # cronjob that detects changes to .multi files
