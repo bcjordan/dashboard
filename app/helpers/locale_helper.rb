@@ -28,7 +28,7 @@ module LocaleHelper
   def options_for_locale_select
     options = []
     Dashboard::Application::LOCALES.each do |locale, data|
-      if I18n.available_locales.include? locale.to_sym
+      if I18n.available_locales.include?(locale.to_sym) && data.is_a?(Hash)
         name = data[:native]
         name = (data[:debug] ? "#{name} DBG" : name)
         options << [name, locale]
@@ -52,7 +52,7 @@ module LocaleHelper
 
   # Parses and ranks locale code strings from the Accept-Language header.
   def accepted_locales
-    header = request.env.fetch('HTTP_ACCEPT_LANGUAGE', '')
+    header = request.env.fetch('HTTP_X_VARNISH_ACCEPT_LANGUAGE', '')
     begin
       header.split(',').map { |entry|
         locale, weight = entry.split(';')
@@ -76,7 +76,7 @@ module LocaleHelper
     ([cookies[:language_], current_user.try(:locale)] +
      accepted_locales + accepted_languages +
      [I18n.default_locale]
-    ).reject(&:nil?).map(&:to_s)
+    ).reject(&:nil?).map(&:to_s).map(&:downcase)
   end
 
   # Looks up a localized string driven by a database value.

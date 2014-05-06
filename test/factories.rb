@@ -26,7 +26,7 @@ FactoryGirl.define do
     app "maze"
   end
 
-  factory :level do
+  factory :level, :class => Level do
     sequence(:name) { |n| "Level #{n}" }
     sequence(:level_num) {|n| "1_2_#{n}" }
     
@@ -41,7 +41,7 @@ FactoryGirl.define do
     end
   end
 
-  factory :turtle, :parent => Level, :class => Turtle do
+  factory :artist, :parent => Level, :class => Artist do
   end
 
   factory :level_source do
@@ -51,6 +51,7 @@ FactoryGirl.define do
   end
 
   factory :script do
+    sequence(:name) { |n| "Bogus Script #{n}" }
   end
   
   factory :script_level do

@@ -54,7 +54,7 @@ module.exports = function(app, levels, options) {
   };
 
   options.skin = options.skinsModule.load(BlocklyApps.assetUrl, options.skinId);
-  blocksCommon.install(Blockly);
+  blocksCommon.install(Blockly, options.skin);
   options.blocksModule.install(Blockly, options.skin);
 
   addReadyListener(function() {
@@ -279,6 +279,7 @@ BlocklyApps.init = function(config) {
     var width = Math.max(minWidth, widthDimension);
     var scale = widthDimension / width;
     var content = ['width=' + width,
+                   'minimal-ui',
                    'initial-scale=' + scale,
                    'maximum-scale=' + scale,
                    'minimum-scale=' + scale,
@@ -905,15 +906,11 @@ exports.createCategory = function(name, blocks, custom) {
  */
 'use strict';
 
-var REPEAT_IMAGE_URL = 'media/sharedBlocks/repeat.png';
-var REPEAT_IMAGE_WIDTH = 53;
-var REPEAT_IMAGE_HEIGHT = 57;
-
 /**
  * Install extensions to Blockly's language and JavaScript generator
  * @param blockly instance of Blockly
  */
-exports.install = function(blockly) {
+exports.install = function(blockly, skin) {
   // Re-uses the repeat block generator from core
   blockly.JavaScript.controls_repeat_simplified = blockly.JavaScript.controls_repeat;
 
@@ -923,8 +920,7 @@ exports.install = function(blockly) {
       this.setHelpUrl(blockly.Msg.CONTROLS_REPEAT_HELPURL);
       this.setHSV(322, 0.90, 0.95);
       this.appendStatementInput('DO')
-        .appendTitle(new blockly.FieldImage(
-          blockly.assetUrl(REPEAT_IMAGE_URL), REPEAT_IMAGE_WIDTH, REPEAT_IMAGE_HEIGHT));
+        .appendTitle(new blockly.FieldImage(skin.repeatImage));
       this.appendDummyInput()
         .appendTitle(blockly.Msg.CONTROLS_REPEAT_TITLE_REPEAT)
         .appendTitle(new Blockly.FieldTextInput('10',
@@ -1934,15 +1930,17 @@ exports.load = function(assetUrl, id) {
     staticAvatar: skinUrl('static_avatar.png'),
     winAvatar: skinUrl('win_avatar.png'),
     failureAvatar: skinUrl('failure_avatar.png'),
-    leftArrow: skinUrl('left.png'),
-    downArrow: skinUrl('down.png'),
-    upArrow: skinUrl('up.png'),
-    rightArrow: skinUrl('right.png'),
-    leftJumpArrow: skinUrl('left_jump.png'),
-    downJumpArrow: skinUrl('down_jump.png'),
-    upJumpArrow: skinUrl('up_jump.png'),
-    rightJumpArrow: skinUrl('right_jump.png'),
-    offsetLineSlice: skinUrl('offset_line_slice.png'),
+    repeatImage: assetUrl('media/common_images/repeat-arrows.png'),
+    leftArrow: assetUrl('media/common_images/move-west-arrow.png'),
+    downArrow: assetUrl('media/common_images/move-south-arrow.png'),
+    upArrow: assetUrl('media/common_images/move-north-arrow.png'),
+    rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
+    downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
+    upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
+    rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -2856,6 +2854,7 @@ exports.showTurtle = function(id) {
 
 var Colours = require('./core').Colours;
 var msg = require('../../locale/eu_es/turtle');
+var commonMsg = require('../../locale/eu_es/common');
 
 // Install extensions to Blockly's language and JavaScript generator.
 exports.install = function(blockly, skin) {
@@ -3275,26 +3274,18 @@ exports.install = function(blockly, skin) {
     SHORT_MOVE_LENGTH: 25,
     LONG_MOVE_LENGTH: 100,
     DIRECTION_CONFIGS: {
-      left: { letter: 'W', moveFunction: 'moveLeft', image: skin.leftArrow, image_width: 42, image_height: 42 },
-      right: { letter: 'E', moveFunction: 'moveRight', image: skin.rightArrow, image_width: 42, image_height: 42 },
-      up: { letter: 'N', moveFunction: 'moveUp', image: skin.upArrow, image_width: 42, image_height: 42 },
-      down: { letter: 'S', moveFunction: 'moveDown', image: skin.downArrow, image_width: 42, image_height: 42 },
-      jump_left: { letter: 'W', moveFunction: 'jumpLeft', image: skin.leftJumpArrow, image_width: 42, image_height: 42 },
-      jump_right: { letter: 'E', moveFunction: 'jumpRight', image: skin.rightJumpArrow, image_width: 42, image_height: 42 },
-      jump_up: { letter: 'N', moveFunction: 'jumpUp', image: skin.upJumpArrow, image_width: 42, image_height: 42 },
-      jump_down: { letter: 'S', moveFunction: 'jumpDown', image: skin.downJumpArrow, image_width: 42, image_height: 42 },
-      jump_left_long: { letter: 'W long', moveFunction: 'jumpLeft', image: skin.leftJumpArrow, image_width: 42, image_height: 42 },
-      jump_right_long: { letter: 'E long', moveFunction: 'jumpRight', image: skin.rightJumpArrow, image_width: 42, image_height: 42 },
-      jump_up_long: { letter: 'N long', moveFunction: 'jumpUp', image: skin.upJumpArrow, image_width: 42, image_height: 42 },
-      jump_down_long: { letter: 'S long', moveFunction: 'jumpDown', image: skin.downJumpArrow, image_width: 42, image_height: 42 },
-      jump_left_short: { letter: 'W short', moveFunction: 'jumpLeft', image: skin.leftJumpArrow, image_width: 42, image_height: 42 },
-      jump_right_short: { letter: 'E short', moveFunction: 'jumpRight', image: skin.rightJumpArrow, image_width: 42, image_height: 42 },
-      jump_up_short: { letter: 'N short', moveFunction: 'jumpUp', image: skin.upJumpArrow, image_width: 42, image_height: 42 },
-      jump_down_short: { letter: 'S short', moveFunction: 'jumpDown', image: skin.downJumpArrow, image_width: 42, image_height: 42 }
+      left: { letter: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, image_width: 42, image_height: 42 },
+      right: { letter: commonMsg.directionEastLetter(), moveFunction: 'moveRight', image: skin.rightArrow, image_width: 42, image_height: 42 },
+      up: { letter: commonMsg.directionNorthLetter(), moveFunction: 'moveUp', image: skin.upArrow, image_width: 42, image_height: 42 },
+      down: { letter: commonMsg.directionSouthLetter(), moveFunction: 'moveDown', image: skin.downArrow, image_width: 42, image_height: 42 },
+      jump_left: { letter: commonMsg.directionWestLetter(), moveFunction: 'jumpLeft', image: skin.leftJumpArrow, image_width: 42, image_height: 42 },
+      jump_right: { letter: commonMsg.directionEastLetter(), moveFunction: 'jumpRight', image: skin.rightJumpArrow, image_width: 42, image_height: 42 },
+      jump_up: { letter: commonMsg.directionNorthLetter(), moveFunction: 'jumpUp', image: skin.upJumpArrow, image_width: 42, image_height: 42 },
+      jump_down: { letter: commonMsg.directionSouthLetter(), moveFunction: 'jumpDown', image: skin.downJumpArrow, image_width: 42, image_height: 42 },
     },
     LENGTHS: [
-      ['short', "SHORT_MOVE_LENGTH"],
-      ['long', "LONG_MOVE_LENGTH"]
+      [skin.shortLineDraw, "SHORT_MOVE_LENGTH"],
+      [skin.longLineDraw, "LONG_MOVE_LENGTH"]
     ],
     generateBlocksForAllDirections: function() {
       SimpleMove.generateBlocksForDirection("up");
@@ -3306,31 +3297,38 @@ exports.install = function(blockly, skin) {
       generator["simple_move_" + direction] = SimpleMove.generateCodeGenerator(direction);
       generator["simple_jump_" + direction] = SimpleMove.generateCodeGenerator('jump_' + direction);
       generator["simple_move_" + direction + "_length"] = SimpleMove.generateCodeGenerator(direction, true);
-      generator["simple_jump_" + direction + "_long"] = SimpleMove.generateCodeGenerator('jump_' + direction, false, SimpleMove.LONG_MOVE_LENGTH);
-      generator["simple_jump_" + direction + "_short"] = SimpleMove.generateCodeGenerator('jump_' + direction, false, SimpleMove.SHORT_MOVE_LENGTH);
-      blockly.Blocks['simple_move_' + direction + '_length'] = SimpleMove.generateBlock(direction, true);
-      blockly.Blocks['simple_jump_' + direction + '_long'] = SimpleMove.generateBlock('jump_' + direction + '_long');
-      blockly.Blocks['simple_jump_' + direction + '_short'] = SimpleMove.generateBlock('jump_' + direction + '_short');
-      blockly.Blocks['simple_move_' + direction] = SimpleMove.generateBlock(direction);
-      blockly.Blocks['simple_jump_' + direction] = SimpleMove.generateBlock('jump_' + direction);
+      blockly.Blocks['simple_move_' + direction + '_length'] = SimpleMove.generateMoveBlock(direction, true);
+      blockly.Blocks['simple_move_' + direction] = SimpleMove.generateMoveBlock(direction);
+      blockly.Blocks['simple_jump_' + direction] = SimpleMove.generateJumpBlock('jump_' + direction);
     },
-    generateBlock: function(direction, hasLengthInput) {
+    generateMoveBlock: function(direction, hasLengthInput) {
       var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
       return {
         helpUrl: '',
         init: function () {
           this.setHSV(184, 1.00, 0.74);
-          var input = this.appendDummyInput()
-            .appendTitle(directionConfig.letter)
-            .appendTitle(new blockly.FieldImage(directionConfig.image, directionConfig.image_width, directionConfig.image_height));
+          var input = this.appendDummyInput().appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
-          this.setTooltip(msg.jumpTooltip());
           if (hasLengthInput) {
-            var dropdown = new blockly.FieldDropdown(SimpleMove.LENGTHS);
+            var dropdown = new blockly.FieldImageDropdown(SimpleMove.LENGTHS);
             dropdown.setValue(SimpleMove.LENGTHS[0][1]);
             input.appendTitle(dropdown, 'length');
           }
+        }
+      };
+    },
+    generateJumpBlock: function(direction) {
+      var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
+      return {
+        helpUrl: '',
+        init: function () {
+          this.setHSV(184, 1.00, 0.74);
+          this.appendDummyInput().appendTitle(commonMsg.jump() + " " + directionConfig.letter);
+          this.appendDummyInput().appendTitle(new blockly.FieldImage(directionConfig.image));
+          this.setPreviousStatement(true);
+          this.setNextStatement(true);
         }
       };
     },
@@ -3343,11 +3341,6 @@ exports.install = function(blockly, skin) {
         }
         return 'Turtle.' + SimpleMove.DIRECTION_CONFIGS[direction].moveFunction + '(' + length + ',' + '\'block_id_' + this.id + '\');\n';
       };
-    },
-    stretchedLine: function(width) {
-      var lineImage = new blockly.FieldImage(skin.offsetLineSlice, width, 9);
-      lineImage.setPreserveAspectRatio("none");
-      return lineImage;
     }
   };
 
@@ -3461,7 +3454,30 @@ exports.install = function(blockly, skin) {
     return 'Turtle.penColour(' + colour + ', \'block_id_' +
         this.id + '\');\n';
   };
-  
+
+  blockly.Blocks.draw_colour_simple = {
+    // Simplified dropdown block for setting the colour.
+    init: function() {
+      var colours = [Colours.RED, Colours.BLACK, Colours.PINK, Colours.ORANGE,
+        Colours.YELLOW, Colours.GREEN, Colours.BLUE, Colours.AQUAMARINE, Colours.PLUM];
+      this.setHSV(42, 0.89, 0.99);
+      var colourField = new Blockly.FieldColourDropdown(colours, 45, 35);
+      this.appendDummyInput()
+          .appendTitle(msg.setColour())
+          .appendTitle(colourField, 'COLOUR');
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.colourTooltip());
+    }
+  };
+
+  generator.draw_colour_simple = function() {
+    // Generate JavaScript for setting the colour.
+    var colour = this.getTitleValue('COLOUR') || '\'#000000\'';
+    return 'Turtle.penColour("' + colour + '", \'block_id_' +
+        this.id + '\');\n';
+  };
+
   blockly.Blocks.up_big = {
     helpUrl: '',
     init: function() {
@@ -3507,7 +3523,7 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/eu_es/turtle":37,"./core":27}],26:[function(require,module,exports){
+},{"../../locale/eu_es/common":36,"../../locale/eu_es/turtle":37,"./core":27}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3606,14 +3622,6 @@ var blocks = {
   SIMPLE_MOVE_DOWN_LENGTH: blockUtils.blockOfType('simple_move_down_length'),
   SIMPLE_MOVE_LEFT_LENGTH: blockUtils.blockOfType('simple_move_left_length'),
   SIMPLE_MOVE_RIGHT_LENGTH: blockUtils.blockOfType('simple_move_right_length'),
-  SIMPLE_JUMP_UP_LONG: blockUtils.blockOfType('simple_jump_up_long'),
-  SIMPLE_JUMP_DOWN_LONG: blockUtils.blockOfType('simple_jump_down_long'),
-  SIMPLE_JUMP_LEFT_LONG: blockUtils.blockOfType('simple_jump_left_long'),
-  SIMPLE_JUMP_RIGHT_LONG: blockUtils.blockOfType('simple_jump_right_long'),
-  SIMPLE_JUMP_UP_SHORT: blockUtils.blockOfType('simple_jump_up_short'),
-  SIMPLE_JUMP_DOWN_SHORT: blockUtils.blockOfType('simple_jump_down_short'),
-  SIMPLE_JUMP_LEFT_SHORT: blockUtils.blockOfType('simple_jump_left_short'),
-  SIMPLE_JUMP_RIGHT_SHORT: blockUtils.blockOfType('simple_jump_right_short'),
   simpleMoveBlocks: function() {
     return this.SIMPLE_MOVE_UP +
       this.SIMPLE_MOVE_DOWN +
@@ -3631,16 +3639,6 @@ var blocks = {
       this.SIMPLE_MOVE_DOWN_LENGTH +
       this.SIMPLE_MOVE_LEFT_LENGTH +
       this.SIMPLE_MOVE_RIGHT_LENGTH;
-  },
-  simpleJumpLengthBlocks: function() {
-    return this.SIMPLE_JUMP_UP_LONG +
-      this.SIMPLE_JUMP_UP_SHORT +
-      this.SIMPLE_JUMP_DOWN_LONG +
-      this.SIMPLE_JUMP_DOWN_SHORT +
-      this.SIMPLE_JUMP_LEFT_LONG +
-      this.SIMPLE_JUMP_LEFT_SHORT +
-      this.SIMPLE_JUMP_RIGHT_LONG +
-      this.SIMPLE_JUMP_RIGHT_SHORT;
   }
 };
 
@@ -4367,7 +4365,7 @@ module.exports = {
     answer: [],
     freePlay: true,
     initialY: 300,
-    toolbox: toolbox(5, 6),
+    toolbox: toolbox(5, 7),
     startBlocks: '',
     startDirection: 0,
     sliderSpeed: 1.0
@@ -4377,7 +4375,7 @@ module.exports = {
     answer: [],
     freePlay: false,
     initialY: 300,
-    toolbox: toolbox(5, 6),
+    toolbox: toolbox(5, 7),
     startBlocks: '',
     startDirection: 0,
     sliderSpeed: 1.0
@@ -4390,8 +4388,8 @@ module.exports = {
         blocks.simpleMoveBlocks() +
         blocks.simpleJumpBlocks() +
         blocks.simpleMoveLengthBlocks() +
-        blocks.simpleJumpLengthBlocks() +
-        blockUtils.blockOfType('controls_repeat_simplified')
+        blockUtils.blockOfType('controls_repeat_simplified') +
+        blockUtils.blockOfType('draw_colour_simple')
       ),
     startBlocks: '',
     startDirection: 0,
@@ -4821,14 +4819,15 @@ Level 10 [free play]
 ; buf.push('    ');219; // because we want to offer simplified getters and no setters.
 ; buf.push('    ');219; if (page == 2 && level >= 6) {; buf.push('      <category name="', escape((219,  msg.catVariables() )), '">\n        <block type="variables_get_counter"></block>\n      </category>\n    ');222; } else if (page == 3 && level >= 6 && level < 10) {; buf.push('      <category name="', escape((222,  msg.catVariables() )), '">\n        ');223; if (level >= 9) {; buf.push('          <block type="variables_get_counter"></block>\n        ');224; }; buf.push('        ');224; if (level >= 6) {; buf.push('          <block type="variables_get_length"></block>\n        ');225; }; buf.push('      </category>\n    ');226; } else if (page == 3 && level == 10) {; buf.push('      <category name="', escape((226,  msg.catVariables() )), '" custom="VARIABLE">\n      </category>\n    ');228; }; buf.push('  ');228; } else if (page == 4) {; buf.push('    ');228; // Actions: draw_move, draw_turn.
 ; buf.push('    <block type="draw_move_by_constant"></block>\n    <block type="draw_turn_by_constant">\n      <title name="VALUE">90</title>\n    </block>\n    ');232; if (level == 11) {; buf.push('    <block id="draw-width" type="draw_width">\n      <value name="WIDTH">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n    </block>\n    ');239; }; buf.push('    ');239; // Colour: draw_colour with colour_picker and colour_random.
-; buf.push('    <block id="draw-color" type="draw_colour">\n      <value name="COLOUR">\n        <block type="colour_picker"></block>\n      </value>\n    </block>\n    <block id="draw-color" type="draw_colour">\n      <value name="COLOUR">\n        <block type="colour_random"></block>\n      </value>\n    </block>\n    <block type="controls_repeat">\n      <title name="TIMES">4</title>\n    </block>\n  ');252; } else if (page == 5) {; buf.push('    ');252; // Actions: draw_move, draw_turn.
-; buf.push('    <category id="actions" name="', escape((252,  msg.catTurtle() )), '">\n      <block type="draw_move">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="jump">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">50</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_turn">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">90</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_pen"></block>\n      <block id="draw-width" type="draw_width">\n        <value name="WIDTH">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n      </block>\n    </category>\n    ');283; // Colour: draw_colour with colour_picker and colour_random.
-; buf.push('    <category name="', escape((283,  msg.catColour() )), '">\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_picker"></block>\n        </value>\n      </block>\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_random"></block>\n        </value>\n      </block>\n    </category>\n    ');295; // Functions
-; buf.push('    <category name="', escape((295,  msg.catProcedures() )), '" custom="PROCEDURE"></category>\n    ');296; // Control: controls_for_counter and repeat.
-; buf.push('    <category name="', escape((296,  msg.catControl() )), '">\n      <block type="controls_for_counter">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n        <value name="BY">\n          <block type="math_number">\n            <title name="NUM">10</title>\n          </block>\n        </value>\n      </block>\n      ');314; if (level < 6) {; buf.push('        <block type="controls_repeat">\n          <title name="TIMES">4</title>\n        </block>\n      ');317; } else {; buf.push('        <block type="controls_repeat_ext">\n          <value name="TIMES">\n            <block type="math_number">\n              <title name="NUM">10</title>\n            </block>\n          </value>\n        </block>\n      ');324; }; buf.push('    </category>\n  ');325; // Logic
-; buf.push('    <category name="', escape((325,  msg.catLogic() )), '">\n      <block type="controls_if"></block>\n      <block type="logic_compare"></block>\n      <block type="logic_operation"></block>\n      <block type="logic_negate"></block>\n      <block type="logic_boolean"></block>\n      <block type="logic_null"></block>\n      <block type="logic_ternary"></block>\n    </category>\n    ');334; // Math: Just number blocks until final level.
-; buf.push('    <category name="', escape((334,  msg.catMath() )), '">\n      <block type="math_number"></block>\n      <block type="math_arithmetic" inline="true"></block>\n      <block type="math_random_int">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="math_random_float"></block>\n     </category>\n    ');351; // Variables
-; buf.push('    <category name="', escape((351,  msg.catVariables() )), '" custom="VARIABLE">\n    </category>\n  ');353; }; buf.push('</xml>\n'); })();
+; buf.push('    <block id="draw-color" type="draw_colour">\n      <value name="COLOUR">\n        <block type="colour_picker"></block>\n      </value>\n    </block>\n    <block id="draw-color" type="draw_colour">\n      <value name="COLOUR">\n        <block type="colour_random"></block>\n      </value>\n    </block>\n    <block type="controls_repeat">\n      <title name="TIMES">4</title>\n    </block>\n  ');252; } else if (page == 5) {; buf.push('  ');252; // K1 simplified blocks for editor: keep in sync with Dashboard artist.rb
+; buf.push('    ');252; if (level >= 7) {; buf.push('      <category name="K1 Simplified">\n        <block type="controls_repeat_simplified">\n          <title name="TIMES">5</title>\n        </block>\n        <block type="draw_colour_simple"></block>\n        <block type="simple_move_up"></block>\n        <block type="simple_move_down"></block>\n        <block type="simple_move_left"></block>\n        <block type="simple_move_right"></block>\n        <block type="simple_move_up_length"></block>\n        <block type="simple_move_down_length"></block>\n        <block type="simple_move_left_length"></block>\n        <block type="simple_move_right_length"></block>\n        <block type="simple_jump_up"></block>\n        <block type="simple_jump_down"></block>\n        <block type="simple_jump_left"></block>\n        <block type="simple_jump_right"></block>\n      </category>\n    ');270; }; buf.push('    ');270; // Actions: draw_move, draw_turn.
+; buf.push('    <category id="actions" name="', escape((270,  msg.catTurtle() )), '">\n      <block type="draw_move">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="jump">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">50</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_turn">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">90</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_pen"></block>\n      <block id="draw-width" type="draw_width">\n        <value name="WIDTH">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n      </block>\n    </category>\n    ');301; // Colour: draw_colour with colour_picker and colour_random.
+; buf.push('    <category name="', escape((301,  msg.catColour() )), '">\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_picker"></block>\n        </value>\n      </block>\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_random"></block>\n        </value>\n      </block>\n    </category>\n    ');313; // Functions
+; buf.push('    <category name="', escape((313,  msg.catProcedures() )), '" custom="PROCEDURE"></category>\n    ');314; // Control: controls_for_counter and repeat.
+; buf.push('    <category name="', escape((314,  msg.catControl() )), '">\n      <block type="controls_for_counter">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n        <value name="BY">\n          <block type="math_number">\n            <title name="NUM">10</title>\n          </block>\n        </value>\n      </block>\n      ');332; if (level < 6) {; buf.push('        <block type="controls_repeat">\n          <title name="TIMES">4</title>\n        </block>\n      ');335; } else {; buf.push('        <block type="controls_repeat_ext">\n          <value name="TIMES">\n            <block type="math_number">\n              <title name="NUM">10</title>\n            </block>\n          </value>\n        </block>\n      ');342; }; buf.push('    </category>\n  ');343; // Logic
+; buf.push('    <category name="', escape((343,  msg.catLogic() )), '">\n      <block type="controls_if"></block>\n      <block type="logic_compare"></block>\n      <block type="logic_operation"></block>\n      <block type="logic_negate"></block>\n      <block type="logic_boolean"></block>\n      <block type="logic_null"></block>\n      <block type="logic_ternary"></block>\n    </category>\n    ');352; // Math: Just number blocks until final level.
+; buf.push('    <category name="', escape((352,  msg.catMath() )), '">\n      <block type="math_number"></block>\n      <block type="math_arithmetic" inline="true"></block>\n      <block type="math_random_int">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="math_random_float"></block>\n     </category>\n    ');369; // Variables
+; buf.push('    <category name="', escape((369,  msg.catVariables() )), '" custom="VARIABLE">\n    </category>\n  ');371; }; buf.push('</xml>\n'); })();
 } 
 return buf.join('');
 };
@@ -5703,6 +5702,14 @@ exports.dialogCancel = function(d){return "Cancel"};
 
 exports.dialogOK = function(d){return "OK"};
 
+exports.directionNorthLetter = function(d){return "N"};
+
+exports.directionSouthLetter = function(d){return "S"};
+
+exports.directionEastLetter = function(d){return "E"};
+
+exports.directionWestLetter = function(d){return "W"};
+
 exports.emptyBlocksErrorMsg = function(d){return "The \"Repeat\" or \"If\" block needs to have other blocks inside it to work. Make sure the inner block fits properly inside the containing block."};
 
 exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
@@ -5718,6 +5725,8 @@ exports.hashError = function(d){return "Sorry, '%1' doesn't correspond with any 
 exports.help = function(d){return "Help"};
 
 exports.hintTitle = function(d){return "Hint:"};
+
+exports.jump = function(d){return "jump"};
 
 exports.levelIncompleteError = function(d){return "You are using all of the necessary types of blocks but not in the right way."};
 
@@ -5841,6 +5850,8 @@ exports.drawASnowman = function(d){return "Marraztu elurgizona"};
 exports.heightParameter = function(d){return "Altuera"};
 
 exports.hideTurtle = function(d){return "Izkutatu artista"};
+
+exports.jump = function(d){return "jump"};
 
 exports.jumpBackward = function(d){return "Salto egin atzera"};
 

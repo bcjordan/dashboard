@@ -1,3 +1,5 @@
+# Joins a Script to a Level
+# A Script has one or more Levels, and a Level can belong to one or more Scripts
 class ScriptLevel < ActiveRecord::Base
   belongs_to :level
   belongs_to :script

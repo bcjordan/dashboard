@@ -113,13 +113,17 @@ module LevelsHelper
   end
 
   # Code for generating the blockly options hash
-  def blockly_options(local_assigns)
+  def blockly_options(local_assigns={})
     # Use values from properties json when available (use String keys instead of Symbols for consistency)
-    level = @level.properties || {}
+    level = @level.properties.dup || {}
 
     # Set some specific values
     level['puzzle_number'] = @script_level ? @script_level.game_chapter : 1
     level['stage_total'] = @script ? @script.script_levels_from_game(@level.game_id).length : @level.game.levels.count
+    if @level.step_mode
+      level['step'] = @level.step_mode == 1 || @level.step_mode == 2
+      level['stepOnly'] = @level.step_mode == 2
+    end
 
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
@@ -143,6 +147,9 @@ module LevelsHelper
 
     # Blockly requires startDirection as an integer not a string
     level['startDirection'] = level['startDirection'].to_i if level['startDirection'].present?
+
+    # Blockly requires map as an array not a string
+    level['map'] = JSON.parse(level['map']) if level['map'].is_a? String
 
     # Fetch localized strings
     %w(instructions levelIncompleteError other1StarError tooFewBlocksMsg).each do |label|

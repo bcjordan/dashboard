@@ -89,9 +89,12 @@
       cacheBust: '#{blockly_cache_bust}',
       onAttempt: function(report) {
         report.fallbackResponse = #{@fallback_response.to_json};
-        #{("report.level_type = 'artist';") if @artist_builder}
         report.callback = '#{@callback}';
         if (#{@artist_builder.to_json}) {
+          ['program', 'name', 'instructions', 'type'].forEach(function(key) {
+            report['level[' + key + ']'] = report[key];
+          });
+          delete report.level;
           report.onComplete = function(response) {
             window.location.href = nextRedirect;
           };

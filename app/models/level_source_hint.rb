@@ -1,3 +1,4 @@
+# A "hint" text displayed for a specific LevelSource to guide the player to a solution
 class LevelSourceHint < ActiveRecord::Base
   belongs_to :level_source
   has_many :activity_hints

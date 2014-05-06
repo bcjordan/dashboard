@@ -1,4 +1,5 @@
 class Callout < ActiveRecord::Base
+  include Seeded
   belongs_to :script_level
   
   CSV_HEADERS = 
@@ -10,7 +11,7 @@ class Callout < ActiveRecord::Base
       :game_name => 'game_name',
       :qtip_config => 'qtip_config'
   }
-  
+
   # Use the zero byte as the quote character to allow importing double quotes
   #   via http://stackoverflow.com/questions/8073920/importing-csv-quoting-error-is-driving-me-nuts
   CSV_IMPORT_OPTIONS = { col_sep: "\t", headers: true, :quote_char => "\x00" }

@@ -125,6 +125,8 @@
     "rotatable": true,
     "mobile": true
   },
+
+  /* Let's just do one Android browser for now 
   {
     "description": "Nexus 7",
     "browser": "android",
@@ -144,7 +146,7 @@
     "os_version": "4.1",
     "rotatable": true,
     "mobile": true
-  },
+  }, */
   {
     "description": "iPad 3",
     "browser": "iPad",

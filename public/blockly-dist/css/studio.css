@@ -96,11 +96,15 @@ button.share:focus {
   min-width: 102px; }
 
 .studio-speech-bubble {
+  fill: black;
+  font-size: 16px;
+  text-anchor: middle; }
+
+.studio-speech-rect {
   fill: white;
   stroke: black;
-  font-size: x-large;
-  font-weight: bold;
-  stroke-width: 0.5; }
+  stroke-width: 5;
+  opacity: 0.9; }
 
 .studio-score {
   text-anchor: middle;

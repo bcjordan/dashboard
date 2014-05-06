@@ -1,17 +1,32 @@
 %h2 Upload a CSV file of your level
 
 
-- if @type == 'maze'
+- if @type == 'Maze'
   = link_to "Maze Builder Form", "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0AiC6nqpbvNmgdDZJMy1NdkhrQW5jVThreDlKRzYwTXc&usp=drive_web#gid=0"
 - else
   = link_to "Karel Builder Form", "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0Au-CEJJ_kBL3dGpmbmcxQnF6Z0lZZDcxY0p2LWFIaGc&usp=drive_web#gid=0"
 
-= form_for [@game, @level], html: {multipart: true} do |level_form|
+= form_for [@game, @level], method: :post, remote: true, html: {multipart: true} do |level_form|
   = hidden_field_tag :size, 8
-  = hidden_field_tag :level_type, @type
+  = level_form.hidden_field :type, value: @type.capitalize
   = file_field_tag "maze_source"
   = level_form.text_area :instructions, placeholder: "Instructions", rows: 4
   = level_form.text_area :name, placeholder: "Level Name", rows: 4
   = level_form.label 'Start Direction'
   = level_form.select :start_direction, options_for_select([['Up', 0], ['Right', 1], ['Down', 2], ['Left', 3]])
+  = level_form.label 'Step options'
+  = level_form.select :step_mode, options_for_select([['Run Button Only', 0], ['Run and Step', 1], ['Step Button Only', 2]])
   = level_form.submit "Create Level"
+
+:javascript
+  $(document).ready(function() {
+    $('#new_level').on('ajax:beforeSend', function(e, xhr) {
+      var token = $('meta[name="csrf-token"]').attr('content');
+      xhr.setRequestHeader('X-CSRF-TOKEN', token);
+    });
+    $('#new_level').on('ajax:complete', function(e, data) {
+      if (data.status === "200") {  // http://stackoverflow.com/a/16699124/2551908
+        window.location.href = JSON.parse(data.responseText).redirect
+      }
+    });
+  });

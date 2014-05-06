@@ -51,6 +51,9 @@ en:
         'Jigsaw Levels':
           desc: 'Jigsaw (beta)'
           'Jigsaw': 'Stage 1'
+        'Step Levels':
+          desc: 'Maze (beta)'
+          'MazeStep': 'Stage Step'
     game:
       name:
         'Unplug1': 'Introduction to Computer Science'
@@ -77,6 +80,7 @@ en:
         'Bounce': 'Bounce'
         'Flappy': 'Flappy Bird'
         'Jigsaw': 'Jigsaw'
+        'MazeStep': 'Maze Step Mode'
     trophy:
       name:
         'Bronze': 'Bronze'
@@ -232,6 +236,11 @@ en:
         'jigsaw_10': "Arrange the blocks to form the image"
         'jigsaw_11': "Arrange the blocks to form the image"
         'jigsaw_12': "Arrange the blocks to form the image"
+        'mazestep_1': "Maze step description here"
+        'mazestep_2': "Maze step description here"
+        'mazestep_3': "Maze step description here"
+        'mazestep_4': "Maze step description here"
+        'mazestep_5': "Maze step description here"
         'studio_1': "Can you make this dog say \"hello world\"?"
         'studio_2': "Can you write a program to make this dog move to the target?"
         'studio_3': "Can you write a program that makes the dog move to the cat, and have the cat say \"hello\" when the dog reaches him?"
@@ -275,3 +284,5 @@ en:
         show_code_explanation: "Click here to see the code for the program you're making"
         instructions_repeat_explanation: 'The instructions for each puzzle are repeated here'
         category_explanation: "You have all the same blocks but they've now been arranged in categories"
+        set_sprite_image: 'Attach a "set actor to image" block to the "when story starts" block to enable an actor for this story'
+        studio_say_text: "Type what you want your actor to say within these quotes"

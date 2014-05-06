@@ -33,10 +33,12 @@ module Dashboard
 
     # By default, config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
-    config.i18n.available_locales = []
+    config.i18n.enforce_available_locales = true
+    config.i18n.available_locales = ['en']
     config.i18n.fallbacks = {}
-    config.i18n.default_locale = 'en-US'
-    LOCALES = YAML.load_file("#{Rails.root}/config/locales.yml")
+    config.i18n.default_locale = 'en-us'
+    locales = YAML.load_file("#{Rails.root}/config/locales.yml")
+    LOCALES = Hash[locales.map {|k, v| [k.downcase, v.class == String ? v.downcase : v]}]
     LOCALES.each do |locale, data|
       next unless data.is_a? Hash
       data.symbolize_keys!

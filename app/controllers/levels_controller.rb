@@ -70,23 +70,19 @@ class LevelsController < ApplicationController
   # POST /levels.json
   def create
     authorize! :create, :level
+    type_class = level_params[:type].constantize
+
+    # Set some defaults.
+    params[:level].reverse_merge!(skin: type_class.skins.first)
     params.merge!(user: current_user)
 
-    case params[:level_type]
-    when 'maze', 'karel'
-      begin
-        @level = Maze.create_from_level_builder(params, level_params)
-      rescue ArgumentError
-        render status: :not_acceptable, text: "There is a non integer value in the grid." and return
-      end
-
-      redirect_to game_level_url(@level.game, @level)
-    when 'artist'
-      @level = Turtle.create_from_level_builder(params)
-      render json: { redirect: game_level_url(@level.game, @level) }
-    else
-      raise "Unkown level type #{params[:level_type]}"
+    begin
+      @level = type_class.create_from_level_builder(params, level_params)
+    rescue ArgumentError
+      render status: :not_acceptable, text: "There is a non integer value in the grid." and return
     end
+
+    render json: { redirect: game_level_url(@level.game, @level) }
   end
 
   # DELETE /levels/1
@@ -100,9 +96,9 @@ class LevelsController < ApplicationController
     authorize! :create, :level
     @type = params[:type]
     case @type
-    when 'artist'
+    when 'Artist'
       artist_builder
-    when 'maze', 'karel'
+    when 'Maze', 'Karel'
       @game = Game.custom_maze
       @level = Level.new
       render :maze_builder
@@ -139,6 +135,6 @@ class LevelsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def level_params
-      params[:level].permit([:name, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, {concept_ids: []}])
+      params[:level].permit([:name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, {concept_ids: []}])
     end
 end

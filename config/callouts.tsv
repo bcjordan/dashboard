@@ -12,3 +12,5 @@ Show Code HoC	2	2_13	Maze	show_code_explanation	#show-code-header	{"position": {
 Instructions 20	1	2_14	Maze	instructions_repeat_explanation	#prompt	{"position": {"my": "bottom left", "at": "top center"}}
 Instructions HoC	2	2_14	Maze	instructions_repeat_explanation	#prompt	{"position": {"my": "bottom left", "at": "top center"}}
 Category 20	1	2_1	Artist3	category_explanation	.blocklyTreeRoot	{"position": {"my": "center left", "at": "center right"}}
+Set Sprite Image	4	99	Studio	set_sprite_image	.blocklySvg	{"position": {"my": "top left", "at": "top left", "adjust": {"x": 235, "y": 50}}, "style": { "classes": "no-tip" }}
+Studio Say Text	4	1	Studio	studio_say_text	[block-id='2']	{"position": {"my": "top left", "at": "bottom middle"}}

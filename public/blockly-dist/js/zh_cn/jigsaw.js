@@ -54,7 +54,7 @@ module.exports = function(app, levels, options) {
   };
 
   options.skin = options.skinsModule.load(BlocklyApps.assetUrl, options.skinId);
-  blocksCommon.install(Blockly);
+  blocksCommon.install(Blockly, options.skin);
   options.blocksModule.install(Blockly, options.skin);
 
   addReadyListener(function() {
@@ -279,6 +279,7 @@ BlocklyApps.init = function(config) {
     var width = Math.max(minWidth, widthDimension);
     var scale = widthDimension / width;
     var content = ['width=' + width,
+                   'minimal-ui',
                    'initial-scale=' + scale,
                    'maximum-scale=' + scale,
                    'minimum-scale=' + scale,
@@ -905,15 +906,11 @@ exports.createCategory = function(name, blocks, custom) {
  */
 'use strict';
 
-var REPEAT_IMAGE_URL = 'media/sharedBlocks/repeat.png';
-var REPEAT_IMAGE_WIDTH = 53;
-var REPEAT_IMAGE_HEIGHT = 57;
-
 /**
  * Install extensions to Blockly's language and JavaScript generator
  * @param blockly instance of Blockly
  */
-exports.install = function(blockly) {
+exports.install = function(blockly, skin) {
   // Re-uses the repeat block generator from core
   blockly.JavaScript.controls_repeat_simplified = blockly.JavaScript.controls_repeat;
 
@@ -923,8 +920,7 @@ exports.install = function(blockly) {
       this.setHelpUrl(blockly.Msg.CONTROLS_REPEAT_HELPURL);
       this.setHSV(322, 0.90, 0.95);
       this.appendStatementInput('DO')
-        .appendTitle(new blockly.FieldImage(
-          blockly.assetUrl(REPEAT_IMAGE_URL), REPEAT_IMAGE_WIDTH, REPEAT_IMAGE_HEIGHT));
+        .appendTitle(new blockly.FieldImage(skin.repeatImage));
       this.appendDummyInput()
         .appendTitle(blockly.Msg.CONTROLS_REPEAT_TITLE_REPEAT)
         .appendTitle(new Blockly.FieldTextInput('10',
@@ -2514,7 +2510,6 @@ module.exports = {
         // how close to ghost?
         var dx = Math.abs(400 - pos.x);
         var dy = Math.abs(100 - pos.y);
-        console.log(dx + dy);
         return dx + dy < 80;
       }
     },
@@ -2944,15 +2939,17 @@ exports.load = function(assetUrl, id) {
     staticAvatar: skinUrl('static_avatar.png'),
     winAvatar: skinUrl('win_avatar.png'),
     failureAvatar: skinUrl('failure_avatar.png'),
-    leftArrow: skinUrl('left.png'),
-    downArrow: skinUrl('down.png'),
-    upArrow: skinUrl('up.png'),
-    rightArrow: skinUrl('right.png'),
-    leftJumpArrow: skinUrl('left_jump.png'),
-    downJumpArrow: skinUrl('down_jump.png'),
-    upJumpArrow: skinUrl('up_jump.png'),
-    rightJumpArrow: skinUrl('right_jump.png'),
-    offsetLineSlice: skinUrl('offset_line_slice.png'),
+    repeatImage: assetUrl('media/common_images/repeat-arrows.png'),
+    leftArrow: assetUrl('media/common_images/move-west-arrow.png'),
+    downArrow: assetUrl('media/common_images/move-south-arrow.png'),
+    upArrow: assetUrl('media/common_images/move-north-arrow.png'),
+    rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
+    downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
+    upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
+    rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -3515,6 +3512,14 @@ exports.dialogCancel = function(d){return "取消"};
 
 exports.dialogOK = function(d){return "确定"};
 
+exports.directionNorthLetter = function(d){return "N"};
+
+exports.directionSouthLetter = function(d){return "S"};
+
+exports.directionEastLetter = function(d){return "E"};
+
+exports.directionWestLetter = function(d){return "W"};
+
 exports.emptyBlocksErrorMsg = function(d){return "“Repeat”或“If”模块需要其他的模块充填在里面才能工作。请确保在容器模块里填入了合适的模块。"};
 
 exports.extraTopBlocks = function(d){return "你有多余的块没有附加到任何的事件块。"};
@@ -3530,6 +3535,8 @@ exports.hashError = function(d){return "对不起，'%1' 并不对应任何已�
 exports.help = function(d){return "帮助"};
 
 exports.hintTitle = function(d){return "提示："};
+
+exports.jump = function(d){return "jump"};
 
 exports.levelIncompleteError = function(d){return "你虽然把所有必要的模块都用上了，但是使用方法不对。"};
 

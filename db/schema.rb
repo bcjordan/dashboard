@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140425004033) do
+ActiveRecord::Schema.define(version: 20140505181834) do
 
   create_table "activities", force: true do |t|
     t.integer  "user_id"
@@ -163,6 +163,7 @@ ActiveRecord::Schema.define(version: 20140425004033) do
     t.text     "toolbox_blocks"
     t.text     "properties"
     t.string   "type"
+    t.integer  "step_mode"
   end
 
   add_index "levels", ["game_id"], name: "index_levels_on_game_id", using: :btree
@@ -203,7 +204,7 @@ ActiveRecord::Schema.define(version: 20140425004033) do
   add_index "script_levels", ["stage_id"], name: "index_script_levels_on_stage_id", using: :btree
 
   create_table "scripts", force: true do |t|
-    t.string   "name"
+    t.string   "name",                            null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "wrapup_video_id"
@@ -212,6 +213,7 @@ ActiveRecord::Schema.define(version: 20140425004033) do
     t.integer  "user_id"
   end
 
+  add_index "scripts", ["name"], name: "index_scripts_on_name", unique: true, using: :btree
   add_index "scripts", ["wrapup_video_id"], name: "index_scripts_on_wrapup_video_id", using: :btree
 
   create_table "sections", force: true do |t|

@@ -106,6 +106,7 @@
   native: "Pilipino"
   debug: true
 
+"fr": "fr-FR"
 "fr-FR":
   english: "French"
   native: "français"

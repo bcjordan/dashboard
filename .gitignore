@@ -58,3 +58,4 @@ config/deploy/private.rb
 
 # Ignore dropbox file
 config/scripts/.dropbox
+config/scripts/.seeded
