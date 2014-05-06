@@ -9,29 +9,37 @@
     -answer['index'] = i
   -data['answers'].shuffle!
 
-  %div{:style=>'margin-left:20px'}
-    %div{:style=>'height:40px'}
-      %b Match the questions with the answers
-    %div{:style=>'width: 220px; float:left'}
+  .mainblock
+    .column
       %ul#questions
         -data['questions'].each do |question|
           %li= match_t(question['text'])
-    %div{:style=>'width: 220px; float:left'}
-      %ul#slots{:style=>'cursor:default'}
+    .column
+      %ul#slots.draggablecolumn
         -data['answers'].each do |answer|
           %li.emptyslot
-    %div{:style=>'width: 220px; float:left'}
-      %ul#answers{:style=>'cursor:default'}
+    .column
+      %ul#answers.draggablecolumn
         -data['answers'].each do |answer|
           %li.answer.answerlist{originalIndex: answer['index']}= match_t(answer['text'])
-    %div{:style=>'clear:both'}
+    .clear
     %br/
     %div
       .buttons
         %a.btn.btn-primary.next-stage.submitButton
           Submit
 
-  %div{:style=>'clear:both'}
+  .clear
+
+  %div{:style=>'display:none'}
+    #dialogcontent.modal-content
+      %p.dialog-title
+        =t("match.wrong_title")
+      %p
+        =t("match.wrong_body")
+      .farSide
+        %button#ok-button.secondary
+          =t("dialog.ok")
 
 :javascript
 
@@ -45,6 +53,30 @@
     t.parentNode.removeChild(t); 
     return this; 
   };
+
+  function showDialog()
+  {
+    var dialog = new Dialog({ body: "" });
+
+    // use our prefabricated dialog content
+    $(".modal-body").append($("#dialogcontent").clone(true));
+
+    // Standard css hack to center a div within the viewport
+    var full_dialog = $(".dash_modal");
+    full_dialog.css({
+      top: '50%',
+      left: '50%',
+      marginTop: (full_dialog.height() / -2) + 'px',
+      marginLeft: (full_dialog.width() / -2) + 'px'
+    });
+
+    // clicking the okay button in the dialog box dismisses it
+    $(".modal-body #ok-button").click(function() {
+      dialog.hide();
+    });
+
+    dialog.show();
+  }
 
   var solution = "none";    // "none", "wrong", "right"
   var clickedNext = false;  // avoid multiple simultaneous submissions
@@ -138,7 +170,7 @@
       }
       else if (solution == "wrong") 
       {
-        alert("incorrect");
+        showDialog();
         clickedNext = false;
       }
       

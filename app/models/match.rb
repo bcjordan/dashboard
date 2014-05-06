@@ -8,9 +8,7 @@ class Match < Level
   end
 
   def self.setup(data)
-    transaction do
-      Match.create({name: data[:name], game_id: Game.find_by(name:"Match").id, properties: data[:properties]})
-    end
+    Match.create({name: data[:name], game_id: Game.find_by(name:"Match").id, properties: data[:properties]})
   end
 
 end

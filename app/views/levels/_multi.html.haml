@@ -5,13 +5,13 @@
   %h2= multi_t(data['title'])
   %p= multi_t(data['description'])
 
-  %div{:style=>'margin-left:20px'}
+  .mainblock
     %b= data['questions'][0]['text']
     %form#voteform{onsubmit: "return doVote()"}
       -data['answers'].each_with_index do |answer, i|
         -correct = answer["correct"]
         %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
-          %label{style: "display:inline", for: "choice_#{i}"}= multi_t(answer['text'])
+          %label{for: "choice_#{i}"}= multi_t(answer['text'])
         %br
       %br
       %br
@@ -22,7 +22,17 @@
   %br/
   %br/
 
-  %div{:style=>'clear:both'}
+  .clear
+
+  %div{:style=>'display:none'}
+    #dialogcontent.modal-content
+      %p.dialog-title
+        =t("multi.wrong_title")
+      %p
+        =t("multi.wrong_body")
+      .farSide
+        %button#ok-button.secondary
+          =t("dialog.ok")
 
 :javascript
 
@@ -40,6 +50,30 @@
     $('.submitButton').css({ opacity: 0.5 });
   });
 
+  function showDialog()
+  {
+    var dialog = new Dialog({ body: "" });
+
+    // use our prefabricated dialog content
+    $(".modal-body").append($("#dialogcontent").clone(true));
+
+    // Standard css hack to center a div within the viewport
+    var full_dialog = $(".dash_modal");
+    full_dialog.css({
+      top: '50%',
+      left: '50%',
+      marginTop: (full_dialog.height() / -2) + 'px',
+      marginLeft: (full_dialog.width() / -2) + 'px'
+    });
+
+    // clicking the okay button in the dialog box dismisses it
+    $(".modal-body #ok-button").click(function() {
+      dialog.hide();
+    });
+
+    dialog.show();
+  }
+
   $('.submitButton').click(function() 
   {
     if (!clickedNext) 
@@ -48,18 +82,18 @@
 
       if (selection == "wrong") 
       {
-        alert("incorrect");
+        showDialog();
       }
 
-      if (solution != "none")
+      if (selection != "none")
       {
         sendReport({
           fallbackResponse: '#{@fallback_response.to_json}',
           callback: '#{@callback}',
           app: 'multi',
           level: '#{@level.level_num}',
-          result: solution == "right",
-          testResult: solution == "right" ? 100 : 0,
+          result: selection == "right",
+          testResult: selection == "right" ? 100 : 0,
           onComplete: function() 
           {
             // reenable button
