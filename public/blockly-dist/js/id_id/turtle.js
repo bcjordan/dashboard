@@ -3282,14 +3282,14 @@ exports.install = function(blockly, skin) {
     SHORT_MOVE_LENGTH: 25,
     LONG_MOVE_LENGTH: 100,
     DIRECTION_CONFIGS: {
-      left: { letter: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, image_width: 42, image_height: 42 },
-      right: { letter: commonMsg.directionEastLetter(), moveFunction: 'moveRight', image: skin.rightArrow, image_width: 42, image_height: 42 },
-      up: { letter: commonMsg.directionNorthLetter(), moveFunction: 'moveUp', image: skin.upArrow, image_width: 42, image_height: 42 },
-      down: { letter: commonMsg.directionSouthLetter(), moveFunction: 'moveDown', image: skin.downArrow, image_width: 42, image_height: 42 },
-      jump_left: { letter: commonMsg.directionWestLetter(), moveFunction: 'jumpLeft', image: skin.leftJumpArrow, image_width: 42, image_height: 42 },
-      jump_right: { letter: commonMsg.directionEastLetter(), moveFunction: 'jumpRight', image: skin.rightJumpArrow, image_width: 42, image_height: 42 },
-      jump_up: { letter: commonMsg.directionNorthLetter(), moveFunction: 'jumpUp', image: skin.upJumpArrow, image_width: 42, image_height: 42 },
-      jump_down: { letter: commonMsg.directionSouthLetter(), moveFunction: 'jumpDown', image: skin.downJumpArrow, image_width: 42, image_height: 42 },
+      left: { title: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
+      right: { title: commonMsg.directionEastLetter(), moveFunction: 'moveRight', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
+      up: { title: commonMsg.directionNorthLetter(), moveFunction: 'moveUp', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
+      down: { title: commonMsg.directionSouthLetter(), moveFunction: 'moveDown', image: skin.downArrow, tooltip: msg.moveSouthTooltip() },
+      jump_left: { title: commonMsg.jump() + " " + commonMsg.directionWestLetter(), moveFunction: 'jumpLeft', image: skin.leftJumpArrow, tooltip: msg.jumpWestTooltip() },
+      jump_right: { title: commonMsg.jump() + " " + commonMsg.directionEastLetter(), moveFunction: 'jumpRight', image: skin.rightJumpArrow, tooltip: msg.jumpEastTooltip() },
+      jump_up: { title: commonMsg.jump() + " " + commonMsg.directionNorthLetter(), moveFunction: 'jumpUp', image: skin.upJumpArrow, tooltip: msg.jumpNorthTooltip() },
+      jump_down: { title: commonMsg.jump() + " "  + commonMsg.directionSouthLetter(), moveFunction: 'jumpDown', image: skin.downJumpArrow, tooltip: msg.jumpSouthTooltip() }
     },
     LENGTHS: [
       [skin.shortLineDraw, "SHORT_MOVE_LENGTH"],
@@ -3307,7 +3307,7 @@ exports.install = function(blockly, skin) {
       generator["simple_move_" + direction + "_length"] = SimpleMove.generateCodeGenerator(direction, true);
       blockly.Blocks['simple_move_' + direction + '_length'] = SimpleMove.generateMoveBlock(direction, true);
       blockly.Blocks['simple_move_' + direction] = SimpleMove.generateMoveBlock(direction);
-      blockly.Blocks['simple_jump_' + direction] = SimpleMove.generateJumpBlock('jump_' + direction);
+      blockly.Blocks['simple_jump_' + direction] = SimpleMove.generateMoveBlock('jump_' + direction);
     },
     generateMoveBlock: function(direction, hasLengthInput) {
       var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
@@ -3315,28 +3315,16 @@ exports.install = function(blockly, skin) {
         helpUrl: '',
         init: function () {
           this.setHSV(184, 1.00, 0.74);
-          var input = this.appendDummyInput().appendTitle(directionConfig.letter)
+          var input = this.appendDummyInput().appendTitle(directionConfig.title)
             .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
+          this.setTooltip(directionConfig.tooltip);
           if (hasLengthInput) {
             var dropdown = new blockly.FieldImageDropdown(SimpleMove.LENGTHS);
             dropdown.setValue(SimpleMove.LENGTHS[0][1]);
             input.appendTitle(dropdown, 'length');
           }
-        }
-      };
-    },
-    generateJumpBlock: function(direction) {
-      var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
-      return {
-        helpUrl: '',
-        init: function () {
-          this.setHSV(184, 1.00, 0.74);
-          this.appendDummyInput().appendTitle(commonMsg.jump() + " " + directionConfig.letter);
-          this.appendDummyInput().appendTitle(new blockly.FieldImage(directionConfig.image));
-          this.setPreviousStatement(true);
-          this.setNextStatement(true);
         }
       };
     },
@@ -5873,15 +5861,31 @@ exports.jumpForward = function(d){return "lompat maju "};
 
 exports.jumpTooltip = function(d){return "Mengerakan artis tanpa meninggalkan bekas apapun."};
 
+exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
+
+exports.jumpNorthTooltip = function(d){return "Moves the artist north without leaving any marks."};
+
+exports.jumpSouthTooltip = function(d){return "Moves the artist south without leaving any marks."};
+
+exports.jumpWestTooltip = function(d){return "Moves the artist west without leaving any marks."};
+
 exports.lengthParameter = function(d){return "panjang"};
 
 exports.loopVariable = function(d){return "konter"};
 
 exports.moveBackward = function(d){return "gerak mundur"};
 
+exports.moveEastTooltip = function(d){return "Moves the artist east."};
+
 exports.moveForward = function(d){return "Gerak maju "};
 
 exports.moveForwardTooltip = function(d){return "Artis bergerak maju."};
+
+exports.moveNorthTooltip = function(d){return "Moves the artist north."};
+
+exports.moveSouthTooltip = function(d){return "Moves the artist south."};
+
+exports.moveWestTooltip = function(d){return "Moves the artist west."};
 
 exports.moveTooltip = function(d){return "Menggerak artis maju atau mundur oleh jumlah yang ditentukan."};
 
