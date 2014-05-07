@@ -1,7 +1,7 @@
 "sv":
   devise:
     confirmations:
-      confirmed: Ditt konto är bekräftat. Du är nu inloggad.
+      confirmed: Din e-postadress har bekräftats.
       send_instructions: Du kommer få ett mail med instruktioner om hur du bekräftar
         ditt konto inom några minuter.
       send_paranoid_instructions: Om din e-postadress finns i vår databas kommer får
@@ -18,7 +18,7 @@
       unconfirmed: Du måste bekräfta ditt konto innan du fortsätter.
     mailer:
       confirmation_instructions:
-        subject: Bekräftelse instruktioner
+        subject: Instruktioner för bekräftelse av e-postadress
       reset_password_instructions:
         subject: Instruktioner för att återställa lösenord
       unlock_instructions:

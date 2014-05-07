@@ -12,7 +12,7 @@
         gender: جنسیت
         edit_header: ویرایش اطلاعات کاربری
         error:
-          future: can't be in the future
+          future: نمیتوان در آینده بود
   hello: سلام دنیا
   welcome_back: '%{name}، خوش آمدید'
   add_teacher_form:
@@ -58,8 +58,6 @@
     no_signup_message: شما می‌توانید <a target="_blank" href="http://learn.code.org">
       فهرست مراحل و پازل‌های مختلف را بررسی کنید</a>. باید ثبت نام کنید تا بتوانید
       پیشرفت‌های خود را ذخیره کنید.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
       select a variety of prizes including free Dropbox space, Skype credits, and
       downloadable games from Electronic Arts.
@@ -71,8 +69,6 @@
       آمریکا که حداقل 15 دانش اموز را در این دوره هدایت کنند ارائه خواهد داد. برای
       اطلاعات بیشتر به <a href="http://code.org/educate/20hr">راهنمای معلم (educator
       guide)  مرا جعه کنید.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
     teacher_pitch: آموزش معرفی K-8 درعلوم کامپیوتر در کلاس درس خودتان
     teacher_title: ثبت نام معلم
     student_pitch: 'فراتر از ساعت 1: معرفی K-8 درعلوم کامپیوترما را امتحان کنید'
@@ -291,6 +287,7 @@
   user_stats:
     recent_activity: فعالیت اخیر
     show_more: نمایش بیشتر
+    classroom_activity: Unplugged Activity
   home:
     signin_message: یا اگر قبلا ثبت نام کرده اید، %{link}
     student_reg_link: دانش آموز
@@ -305,7 +302,6 @@
     teacher_print_certificates: Print certificates for students who finish this course
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: کلاس درس شما
     student_progress: میزان پیشرفت یادگیری شما
     student_stats: شما %{trophy_count} گنج از مجموع %{trophy_max} گنج مرتبط با «تسلط
@@ -394,3 +390,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

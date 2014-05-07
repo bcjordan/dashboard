@@ -42,10 +42,14 @@
         Jigsaw Levels:
           desc: Jigsaw (beta)
           Jigsaw: Stage 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: Introduction to Computer Science
         Maze: The Maze
+        Multi: Multiple Choice Stuffs
         Unplug2: Computational Thinking
         Unplug3: Graph Paper Programming
         Artist: Umelec
@@ -68,6 +72,7 @@
         Bounce: Bounce
         Flappy: Flappy Bird
         Jigsaw: Jigsaw
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: Bronzová
@@ -383,6 +388,24 @@
         jigsaw_9: Arrange the blocks to form the image
         jigsaw_10: Arrange the blocks to form the image
         jigsaw_11: Arrange the blocks to form the image
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 'To solve this, find the pattern that repeats. Use a "repeat" block
           with these 3 blocks inside it: move, move, turn right.'
@@ -420,3 +443,6 @@
           here
         category_explanation: You have all the same blocks but they've now been arranged
           in categories
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

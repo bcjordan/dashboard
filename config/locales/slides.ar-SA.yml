@@ -102,35 +102,34 @@
           النقر على الماوس، تشغيل صوت" '
       4:
         image: الملاحظات/flappy04.jpg
-        text: Have you ever heard of the game FlappyBird? By using Event handlers,
-          we're going to learn to program our own custom version of FlappyBird!
+        text: هل سمعت من أي وقت مضى من فلابيبيرد اللعبة؟ باستخدام معالجات الأحداث،
+          نحن ذاهبون للتعرف إلى البرنامج الخاص بنا إصدار مخصص من فلابيبيرد!
       5:
         image: الملاحظات/flappy05.jpg
-        text: The code you'll write involves dragging and dropping blocks that represent
-          commands for the computer. Under the hood, each of these blocks is represented
-          by real code.
+        text: التعليمات البرمجية التي سوف تكتب ينطوي على سحب وإسقاط القطع التي تمثل
+          أوامر لجهاز الكمبيوتر. تحت غطاء محرك السيارة، يمثل كل من هذه الكتل البرمجية
+          الحقيقية.
       6:
         image: الملاحظات/flappy06.jpg
-        text: 'If you take a look at the workspace, there are some green blocks that
-          are filled in for you - these are "event handlers" '
+        text: 'إذا كنت نلقي نظرة على مساحة العمل، وهناك بعض الكتل الخضراء التي تمتلئ
+          لك--هذه "معالجات الأحداث" '
       7:
         image: الملاحظات/flappy07.jpg
-        text: If you want the bird to FLAP when you CLICK the mouse, you can do that
-          by attaching the "FLAP" block to the appropriate event handler, and now
-          in your game whenever you click the mouse, the bird will flap.
+        text: إذا كنت تريد الطيور إلى رفرف عند النقر بالماوس، يمكنك القيام بذلك عن
+          طريق ربط كتلة "رفرف" إلى معالج الحدث المناسب، والآن في اللعبة الخاصة بك
+          كلما قمت بالنقر فوق الماوس، الطيور سوف رفرف.
       8:
         image: الملاحظات/flappy08.jpg
-        text: In each puzzle of this activity we'll introduce new types of events
-          as green blocks on the workspace, and you can decide the appropriate blocks
-          to add in response to those events.
+        text: في كل لغز هذا النشاط سوف نقدم أنواع جديدة من الأحداث ككتل خضراء على
+          مساحة العمل، ويمكنك أن تقرر القطع المناسبة لإضافة ردا على تلك الأحداث.
       9:
         image: الملاحظات/flappy09.jpg
-        text: When you see a drop down arrow like this, that means you can change
-          the settings - like what sound to play when flappy hits the ground.
+        text: عند ظهور القائمة المنسدلة السهم بمثل هذا، وهذا يعني يمكنك تغيير الإعدادات--مثل
+          ما الصوت للعب عندما يضرب flappy الأرض.
       10:
         image: الملاحظات/flappy10.jpg
-        text: In the final puzzle you'll be able to create your own game and share
-          it with your friends. Have fun!
+        text: عليك أن تكون قادراً على إنشاء اللعبة الخاصة بك ومشاركتها مع أصدقائك
+          في اللغز النهائي. استمتع!
     loop_times:
       1:
         image: notes/hoc2_1.jpg

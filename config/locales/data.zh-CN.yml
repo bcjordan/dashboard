@@ -28,24 +28,29 @@
           desc: 一小时编程
           Maze: 第一阶段
         Edit Code:
-          desc: 编辑代码
+          desc: |
+            编辑代码 (测试版)
           MazeEC: 第一阶段
         2014 Levels:
-          desc: 2014 谜题 （测试版）
-          Bounce: Stage 1
+          desc: 反弹 (测试版)
+          Bounce: 第一阶段
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: 创建用户的谜题 （测试版）
+          Custom: 第一阶段
         Flappy Levels:
           desc: Flappy Bird
-          Flappy: Stage 1
+          Flappy: 第一阶段
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: 拼图 (测试版)
+          Jigsaw: 第一阶段
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: 计算机科学导论
         Maze: 迷宫
+        Multi: Multiple Choice Stuffs
         Unplug2: 计算性思维
         Unplug3: 方格纸编程
         Artist: 艺术家
@@ -67,7 +72,8 @@
         MazeEC: 迷宫
         Bounce: 跳
         Flappy: Flappy Bird
-        Jigsaw: Jigsaw
+        Jigsaw: 拼图
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: 铜色
@@ -94,7 +100,8 @@
         maze_2_5: 有一种方法可以只用两个块就抓到这只笨猪。你能想出来它是什么么？
         maze_2_6: 只用3个块，帮我抓住那只绿色的人侵者！
         maze_2_7: 用尽量少得快帮我驱逐这只坏猪。试试看使用“重复多次”块。
-        maze_2_8: 要解决这一问题，请尝试在"重复"块中包括这3块： 移动、 移动、 打开。
+        maze_2_8: 当块是灰色的时这意味着您不能将其删除或更改它。请尝试并解决这一难题使用的"重复"的块的重复 3 次。试着把这些在灰色的"重复"块中的
+          3 块： 移动、 移动、 打开。
         maze_2_9: 好的，试试看新的“重复直到”块，它会一直重复直到我抓到那只讨人厌的猪。
         maze_2_10: 好了，最后一次的联系 —— 你可以只用 4 块块来解决这个问题吗？
         maze_2_11: 亲爱的人类。我是一只僵尸。我饿了。我必须......得到向日葵......你可以用5块块让我到达那里吗？
@@ -117,7 +124,7 @@
         turtle_1_9: 如果要画一个圆，你知道应该在画问号的地方填上什么数字么？
         turtle_1_10: 你成功了 ！现在，画你想要画的吧。一些有趣的想法： 棒图、 雪花、 或螺旋线。记得试试看新的"设置宽度"块。玩得愉快！
         turtle_4_1: 你能只用三个块来画一个三角形么（每边100像素）？提示：使用“重复”块。
-        turtle_4_2: 试试看加一个块来解决这个谜题。提示： 我们提供了块来话2个相同的三角形，你需要把"转向"块放在他们之间，并决定转多少度。
+        turtle_4_2: 绘制这些三角形的工作区中添加某个地方在该程序已经出"正确的 90 度转向"块。
         turtle_4_3: 好的，这里是你写的画一个三角形的代码。你可以加一个"重复"和"转向"块来一朵漂亮的花吗？
         turtle_4_4: 这个是之前谜题的代码，但每画一个三角形只旋转36度。我们需要重复这段代码多少次呢?（提示： 画一个圆需要转360度)
         turtle_4_5: 这个是之前谜题的代码，但是重复了36度。我们每次需要转多少度呢?（提示： 画一个圆需要转360度)
@@ -199,10 +206,8 @@
         bounce_6: 现在完成的目标是在顶上。您需要将块附加到两个"当球命中"块以解决这一难题。
         bounce_7: 将块附加到每个"当"块。跳起球，直到它击中完成目标。
         bounce_10: 现在有一个目标在顶部。附加上"得分点"和"分数对手点"块"当球在目标中"和"当球未命中桨"块去做一场游戏。看看你可以获得多少分，在你对手得分两次之前。
-        bounce_11: 您现在可以往"游戏启动时"块上附加块。尝试更改球拍和球的速度，看看你可以获得多少分，在你对手得分两次之前。
-        bounce_12: Create your own Bounce game. You can change all the visuals and
-          the rules. When you're done, click Share to let friends try your game on
-          their phones.
+        bounce_11: 您现在可以到"游戏启动时"块附加块。您必须附加在多个位置中的新的"启动新球"块。此外，试着改变现场或球拍和球的速度和看看多少分，你就可以得分前您对手的成绩两次。
+        bounce_12: 创建您自己的弹跳游戏。您可以更改所有的视觉效果和规则。当你完成，单击共享，让朋友试试你在手机上的游戏。
         Custom_builder: 将块从工具箱中拖动到工作区中绘制您想要创建的水平。当您准备好时，按下"运行程序"。
         flappy_1: 将一个块附加到"单击时"块中，然后按下"运行程序"。单击或点击屏幕移动 Flappy到目标。
         flappy_2: 现在我们已经添加了一些地面。将一个块附加到"撞到地面时"块。Flappy 撞了时，您的代码需要 ' 结束游戏 '。
@@ -215,17 +220,35 @@
         flappy_8: 不只是在游戏开始时，您可以随时设置的视觉效果。请尝试在其他事件发生时设置一个随机场景，例如，在通过障碍时。
         flappy_9: 去搀混它们，当击中障碍或者掉到地上，不只是结束游戏，尝试设置分数为0。
         flappy_11: 创建您自己Flappy游戏。您可以更改所有的视觉效果和所有的规则，甚至重力。当你完成，单击共享，让朋友在手机上试试你的游戏吧。
-        jigsaw_1: Click the block
-        jigsaw_2: Drag the block to the target
-        jigsaw_3: Arrange the blocks to form the image
-        jigsaw_4: Arrange the blocks to form the image
-        jigsaw_5: Arrange the blocks to form the image
-        jigsaw_6: Arrange the blocks to form the image
-        jigsaw_7: Arrange the blocks to form the image
-        jigsaw_8: Arrange the blocks to form the image
-        jigsaw_9: Arrange the blocks to form the image
-        jigsaw_10: Arrange the blocks to form the image
-        jigsaw_11: Arrange the blocks to form the image
+        jigsaw_1: 单击块
+        jigsaw_2: 将块拖到目标
+        jigsaw_3: 排列块以形成图像
+        jigsaw_4: 排列块以形成图像
+        jigsaw_5: 排列块以形成图像
+        jigsaw_6: 排列块以形成图像
+        jigsaw_7: 排列块以形成图像
+        jigsaw_8: 排列块以形成图像
+        jigsaw_9: 排列块以形成图像
+        jigsaw_10: 排列块以形成图像
+        jigsaw_11: 排列块以形成图像
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 要解决这个谜题，试试找找其中重复的部分。用一个”重复“块，并在里面里面放上三个块：向前，向前，右转。
       other1StarError:
@@ -250,13 +273,13 @@
         20_wrapup: 20小时教程总结
     callout:
       text:
-        drag_blocks: Drag a "move" block and snap it below the other block
-        run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        drag_blocks: 拖动一个"移动"的块和捕捉低于它的其他块
+        run: 点击"运行"以尝试您的程序
+        watch_again: 单击此处可再次观看视频
+        gray_block_explanation: 在灰色的块不能移动或删除。你能解决这个难题吗？
+        show_code_explanation: 单击此处查看你的程序的代码
+        instructions_repeat_explanation: 在这里重复每个谜题的说明
+        category_explanation: 你有同样的块，但他们现在已经安排在类别
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

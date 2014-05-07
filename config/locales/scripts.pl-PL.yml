@@ -4,6 +4,21 @@
       name:
         sample_level_builder:
           desc: A custom script
-          Introduction to Computer Science: Introduction to Computer Science
+          The Maze: Labirynt
+          The Coffee: Kawa
+        k_1:
+          desc: Custom script k_1
           The Maze: The Maze
           The Coffee: The Coffee
+          Learn how to drag and drop: Learn how to drag and drop
+          The Jigsaw: The Jigsaw
+        45:
+          desc: Custom script 4_5
+          The Maze: The Maze
+          The Coffee: The Coffee
+        23:
+          desc: Custom script 2_3
+          The Maze: The Maze
+          The Coffee: The Coffee
+        Maze Step Levels:
+          desc: Custom script Maze Step Levels

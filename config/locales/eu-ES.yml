@@ -2,76 +2,73 @@
   activerecord:
     attributes:
       user:
-        name: Name
-        email: Email
-        username: Username
-        password: Password
-        password_confirmation: Password confirmation
-        current_password: Current password
-        locale: Language
-        gender: Gender
-        edit_header: Edit Account Details
+        name: Izena
+        email: E-posta
+        username: Erabiltzaile-izena
+        password: Pasahitza
+        password_confirmation: Pasahitza errepikatu
+        current_password: Uneko pasahitza
+        locale: Hizkuntza
+        gender: Generoa
+        edit_header: Aldatu kontuaren xehetasunak
         error:
-          future: can't be in the future
-  hello: Hello world
-  welcome_back: Welcome back, %{name}
+          future: Ezin du izan etorkizuenean
+  hello: Kaixo mundua
+  welcome_back: Ongi etorria berriro, %{name}
   add_teacher_form:
     code_or_email:
-      label: 'Add a teacher by code or email address:'
-      placeholder: Code (ABCDEF) or email (teacher@school.edu)
-    submit: Add teacher
+      label: 'Gehitu irakaslea kode edo posta helbide bidez:'
+      placeholder: (ABCD) kodea edo e-posta (irakaslea@eskola.edu)
+    submit: Gehitu irakaslea
   add_hint_form:
-    placeholder: Please enter your hint here
-    submit: Add hint
+    placeholder: Mesedez sartu hemen zure pista
+    submit: Gehitu pista
   appname: Code.org
-  stage: Stage
-  puzzle: Puzzle
-  trophies: Trophies
-  courses: Courses
-  of: of
-  more: MORE
-  less: LESS
-  try_hoc: 'Try the Hour of Code, click here >> '
-  try_k8intro: Or, try our K-8 Intro to Computer Science Course (15-25 hours)
-  k8intro: K-8 Intro to Computer Science Course (15-25 hours)
-  already_started: 'Already started? Resume here >> '
-  demos: 'Admin: All Demos'
-  continue: Continue
+  stage: Maila
+  puzzle: Puzlea
+  trophies: garaikurrak
+  courses: Mailak
+  of: -tik
+  more: GEHIAGO
+  less: GUTXIAGO
+  try_hoc: 'Probatu kode ordu bat. Klikatu hemen >> '
+  try_k8intro: Probatu gure Konputazio zientzietarako K-8 Sarrera kurtsoa (15-25 ordu)
+  k8intro: Konputazio zientzietarako K-8 Sarrera kurtsoa (15-25 ordu)
+  already_started: 'Jadanik hasia? Jarraitu hemen >> '
+  demos: 'Kudeatzailea: erakustaldi guztiak'
+  continue: Jarraitu
   prize: prize
-  more_info: More info
+  more_info: Informazio gehiago
   auth:
     sign_in_with: Sign in with %{provider}
-    signed_in: Signed in!
-    already_signedup: Already signed up?
-    notyet_signedup: Haven't joined yet?
+    signed_in: Barruan zaude!
+    already_signedup: Dagoeneko izena eman duzu?
+    notyet_signedup: Ez zara batu oraindik?
     google_oauth2: Google+
     twitter: Twitter
     facebook: Facebook
     windowslive: Windows Live
-    forgot_password: Forgot your password?
-    need_confirmation: Didn't receive confirmation instructions?
-    need_unlock: Didn't receive unlock instructions?
+    forgot_password: Zure pasahitza ahaztu duzu?
+    need_confirmation: Ez dituzu konfirmazio argibideak jaso?
+    need_unlock: Ez dituzu lokatze argibideak jaso?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
-    no_signup_message: You can <a target="_blank" href="http://learn.code.org">browse
-      the various stages and puzzles</a>, but you will need to sign up to save your
-      progress.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
-    prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
-      select a variety of prizes including free Dropbox space, Skype credits, and
-      downloadable games from Electronic Arts.
-    teacher_educator_guide: See educator guide
-    teacher_prize_header: Win $1,000 in <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
-      rewards
+    overview_student: Izena eman zure aurrerapenak jarraitzeko kontu batean.
+    overview_teacher: Irakatsi konputazio zientziak zure ikasgelan iznea emanez. <p/>
+      Zure ikasleen aurrerapena jarraitzekoo aukera edukiko duzu eta sariak jasoko
+      dituzu.
+    no_signup_message: <a target="_blank" href="http://learn.code.org">en eszenatoki
+      eta puzleak bilatu ditzakezu</a>, baina izen eman beharko duzu zure aurrerapenak
+      gordetzeko.
+    prizes_message: '%{num_trophies} kontzeptu garaikur guztiak irabazten dituzten
+      ikasle estatubatuarrek sari ezberdinak aukeratu ditzakete, hala nola, Dropbox
+      tokia, Skype kredituak, eta Electronic Artsen deskargatzeko jokoak.'
+    teacher_educator_guide: Ikusi hezitzailearen gida
+    teacher_prize_header: Irabazi 1000$  <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>en
+      (2014ko Ekainaren 15ean zehar, sariak agortu arte)
     teacher_prize_message: 'In partnership with <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>,
       Code.org will offer up to $1,000 in classroom funding to U.S. public school
       teachers who lead at least 15 students through this course. <a href="http://code.org/educate/20hr">See
       educator guide for more info.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
     teacher_pitch: Teach the K-8 Intro to Computer Science in your classroom
     teacher_title: Teacher sign up
     student_pitch: 'Beyond 1 hour: try our K-8 Intro to Computer Science'
@@ -291,6 +288,7 @@
   user_stats:
     recent_activity: Recent activity
     show_more: Show more
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Or if you're already registered, %{link}
     student_reg_link: Student
@@ -305,7 +303,6 @@
     teacher_print_certificates: Print certificates for students who finish this course
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: Your classroom
     student_progress: Your learning progress
     student_stats: You've earned %{trophy_count} out of %{trophy_max} "Concept Mastery"
@@ -394,3 +391,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

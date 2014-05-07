@@ -28,24 +28,28 @@
           desc: L'Ora di Codice
           Maze: Lezione 1
         Edit Code:
-          desc: Modifica il codice
+          desc: Modifica il codice (versione provvisoria)
           MazeEC: Lezione 1
         2014 Levels:
-          desc: Puzzle del 2014 (versione beta)
-          Bounce: Stage 1
+          desc: Rimbalzo (versione provvisoria)
+          Bounce: Lezione 1
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: Esercizi creati dall'utente (versione provvisoria)
+          Custom: Lezione 1
         Flappy Levels:
           desc: Flappy Bird
-          Flappy: Stage 1
+          Flappy: Lezione 1
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: Puzzle (versione provvisoria)
+          Jigsaw: Lezione 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: Introduzione all'informatica
         Maze: Il labirinto
+        Multi: Multiple Choice Stuffs
         Unplug2: Pensiero computazionale
         Unplug3: Programmazione su carta a quadretti
         Artist: L'artista
@@ -67,7 +71,8 @@
         MazeEC: Il labirinto
         Bounce: Rimbalzo
         Flappy: Flappy Bird
-        Jigsaw: Jigsaw
+        Jigsaw: Puzzle
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: Bronzo
@@ -81,7 +86,7 @@
         loop_times: Blocco "ripeti ... volte"
         loop_until: Blocco "ripeti fino a che"
         loop_while: Blocco "mentre"
-        loop_for: Blocco "ripeti con"
+        loop_for: Blocco "ripeti con contatore"
         function: Funzioni
         parameters: Funzioni con parametri
     level:
@@ -101,36 +106,38 @@
         maze_2_6: Prova a farmi arrivare all'intruso verde utilizzando solo tre blocchi.
         maze_2_7: Aiutami a catturare questo maialaccio utilizzando il minor numero
           possibile di blocchi. Prova a utilizzare più di un blocco "ripeti ... volte".
-        maze_2_8: 'Per risolvere questo puzzle, prova un blocco "ripeti ... volte"
-          con questi 3 blocchi al suo interno: "vai avanti", "vai avanti",  "gira".'
+        maze_2_8: 'Quando un blocco è grigio, vuol dire che non puoi cancellarlo o
+          modificarlo. Prova a risolvere questo esercizio usando il blocco grigio
+          "ripeti 3 volte" e mettendo questi 3 blocchi al suo interno: "vai avanti",
+          "vai avanti", "gira a destra".'
         maze_2_9: Ok, prova ad usare il nuovo blocco "ripeti fino a che". Esso mi
           farà "ripetere" le azioni "fino a che" ho raggiunto quel fastidioso maiale.
-        maze_2_10: 'Ok, un''ultima volta per fare esercizio: riesci a risolvere questo
-          puzzle utilizzando solo 4 blocchi?'
+        maze_2_10: 'Ok, un''ultima volta per fare pratica: riesci a risolvere questo
+          esercizio utilizzando solo 4 blocchi?'
         maze_2_11: Caro umano. Io zombie. Io affamato. Devo ... arrivare ... al girasole.
           Riesci a farmi arrivare là con solo 5 blocchi?
-        maze_2_12: Ok, questo puzzle è simile, ma leggermente diverso. Riesci a farlo
-          con solo 5 blocchi?
+        maze_2_12: Ok, questo esercizio è simile, ma leggermente diverso. Riesci a
+          farlo con solo 5 blocchi?
         maze_2_13: 'Usa il nuovo blocco "se" per farmi decidere quando girare. Suggerimento:
           hai bisogno solo di 1 blocco in più, ma capisci bene come si fa in modo
           che puoi farlo da solo la prossima volta.'
-        maze_2_14: Ok, questo è proprio come il precedente puzzle, ma devi ricordarti
+        maze_2_14: Ok, questo è proprio come l'esercizio precedente, ma devi ricordarti
           come hai usato insieme i blocchi "se" e "ripeti".
         maze_2_15: Io volere girasole! Usa un blocco "se" per farmi arrivare là con
           il minor numero possibile di blocchi.
-        maze_2_16: 'Ok, esercitiamoci di nuovo per far pratica: questo puzzle non
+        maze_2_16: 'Ok, esercitiamoci di nuovo per far pratica: questo esercizio non
           è molto diverso, ma stai attento alle piante carnivore!'
         maze_2_17: 'Il blocco "se-altrimenti" controlla una condizione: se è vera
           fa una cosa ALTRIMENTI ne fa un''altra. Prova ad usare questo nuovo blocco
           per farmi arrivare al girasole.'
-        maze_2_18: 'Ancora un esercizio con il blocco "se-altrimenti": riesci a risolvere
-          correttamente questo puzzle al primo tentativo?'
+        maze_2_18: 'Ancora un esercizio con il blocco "se-altrimenti": riesci a risolverlo
+          correttamente al primo tentativo?'
         maze_2_19: Riesci ad aggiungere solo 3 blocchi per farmi uscire da un labirinto
           più complesso? Se lo fai correttamente, riuscirò a camminare lungo un percorso
           tortuoso di qualsiasi lunghezza.
         turtle_1_1: Ciao, io sono un artista. Puoi scrivere del codice per farmi disegnare
-          quasi qualunque cosa. Usa alcuni blocchi per farmi disegnare lungo le linee
-          grigie dell'immagine.
+          quasi qualunque cosa. Usa i blocchi per farmi disegnare lungo le linee grigie
+          dell'immagine.
         turtle_1_2: 'Ora, disegna un quadrato. Suggerimento: usa il tuo colore preferito
           scegliendolo col nuovo blocco "imposta colore".'
         turtle_1_3: 'Disegna un quadrato usando solo 3 blocchi. Nota: puoi farmi andare
@@ -160,31 +167,29 @@
         turtle_4_1: 'Riesci a disegnare un triangolo (con lati di 100 pixel) usando
           solo 3 blocchi? Suggerimento: usa il blocco "ripeti". Ricorda che puoi usare
           il cursore qua sopra per variare la velocità di disegno.'
-        turtle_4_2: 'Prova ad aggiungere un blocco per completare questo puzzle. Suggerimento:
-          ti abbiamo già fornito i blocchi per disegnare 2 triangoli identici, ora
-          tu devi mettere un blocco "gira" in mezzo ad essi e decidere di quanto devi
-          girare.'
+        turtle_4_2: Per disegnare questi triangoli aggiungi un blocco "gira a destra
+          di 90 gradi" in qualche punto del programma già presente nell'area di lavoro.
         turtle_4_3: Ok, ecco il codice che serve per disegnare un singolo triangolo.
           Riesci ad aggiungere i blocchi "ripeti" e "gira" per disegnare un bel fiore?
-        turtle_4_4: 'Ecco lo stesso codice del puzzle precedente, ma girando solo
-          di 36 gradi dopo aver disegnato ogni triangolo. Quante volte lo devi ripetere?
-          Suggerimento: dopo 360 gradi di rotazione il disegno diventerà un cerchio
-          completo.'
-        turtle_4_5: 'Ecco lo stesso codice del puzzle precedente, ma ripetendo i giri
-          36 volte. Di quanti gradi dovrebbe essere ogni giro? Suggerimento: dopo
-          360 gradi di rotazione il disegno diventerà un cerchio completo.'
+        turtle_4_4: 'Ecco lo stesso codice dell''esercizio precedente, ma girando
+          solo di 36 gradi dopo aver disegnato ogni triangolo. Quante volte lo devi
+          ripetere? Suggerimento: dopo 360 gradi di rotazione il disegno diventerà
+          un cerchio completo.'
+        turtle_4_5: 'Ecco lo stesso codice dell''esercizio precedente, ma ripetendo
+          i giri 36 volte. Di quanti gradi dovrebbe essere ogni giro? Suggerimento:
+          dopo 360 gradi di rotazione il disegno diventerà un cerchio completo.'
         turtle_4_6: Usando solo 3 blocchi, riesci a disegnare un quadratino con i
           lati lunghi 20 pixel?
-        turtle_4_7: 'Ecco il codice del puzzle precedente per disegnare il quadratino
+        turtle_4_7: 'Ecco il codice dell''esercizio precedente per disegnare il quadratino
           da 20 pixel. Come puoi "ripeterlo" per disegnare 10 quadratini vicini che
           formano una scaletta? Suggerimento: hai bisogno solo di altri 2 blocchi.'
-        turtle_4_8: Questa era la soluzione del puzzle precedente. Riesci ad aggiungere
+        turtle_4_8: Questa era la soluzione dell'esercizio precedente. Riesci ad aggiungere
           solo 2 blocchi in più per completare il disegno?
-        turtle_4_9: Questa era la soluzione del puzzle precedente. Di quanti gradi
+        turtle_4_9: Questa era la soluzione dell'esercizio precedente. Di quanti gradi
           devi girare adesso dopo aver disegnato una scaletta per completare il disegno?
           (Probabilmente devi provare ad indovinare un paio di volte)
-        turtle_4_10: Questa era la soluzione del puzzle precedente. Inserisci il numero
-          giusto di ripetizioni per eseguire tutto il disegno.
+        turtle_4_10: Questa era la soluzione dell'esercizio precedente. Inserisci
+          il numero giusto di ripetizioni per eseguire tutto il disegno.
         turtle_4_11: Prova a cambiare i numeri nei blocchi "gira" e "ripeti" per disegnare
           forme diverse. Oppure, prova a cambiare il resto del codice per disegnare
           tutto ciò che vuoi.
@@ -235,27 +240,27 @@
           che puoi spostare il cursore verso la lepre per farmi andare più veloce.
         turtle_2_5: Disegna dei quadrati con lati di 50, 60, 70, 80 e 90 pixel.  Dovrai
           usare 5 volte la funzione "disegna un quadrato".
-        turtle_2_6: 'Ok, questo programma userà un blocco "ripeti con" per disegnare
+        turtle_2_6: 'Questo programma userà un blocco "ripeti con contatore" per disegnare
           gli stessi quadrati come nel disegno precedente. Il quadrato deve avere
           la stessa dimensione del contatore, quindi usa il blocco "contatore". Suggerimento:
           è nella categoria "Variabili".'
         turtle_2_7: Ecco un programma per disegnare una spirale, ma i blocchi sono
           disabilitati quindi non vengono eseguiti. Costruisci un nuovo programma
           per disegnare la stessa spirale usando il blocco di ripetizione "ripeti
-          con" (nella categoria "Ripetizioni") e il blocco "contatore" (nella categoria
-          "Variabili").
+          con contatore" (nella categoria "Ripetizioni") e il blocco "contatore" (nella
+          categoria "Variabili").
         turtle_2_7_5: C'è una nuova funzione "disegna un pupazzo di neve" (nella categoria
           "Funzioni"). Disegna 2 pupazzi di neve, di altezza 250 e 100 pixel.
         turtle_2_8: Questo è un po' complicato. Usa la funzione "disegna un pupazzo
           di neve" e il nuovo blocco "salta in avanti" (nella categoria "Azioni").
           Disegna 3 pupazzi di neve in differenti colori, distanti tra loro 100 pixel.
-        turtle_2_9: 'Usa il blocco "ripeti con" per disegnare una famiglia di pupazzi
-          di neve con altezze di 110, 100, 90, 80, 70 pixel. I pupazzi di neve dovranno
-          essere distanti tra loro 60 pixel. Suggerimento: si può contare anche con
-          numeri negativi.'
+        turtle_2_9: 'Usa il blocco "ripeti con contatore" per disegnare una famiglia
+          di pupazzi di neve con altezze di 110, 100, 90, 80, 70 pixel. I pupazzi
+          di neve dovranno essere distanti tra loro 60 pixel. Suggerimento: si può
+          contare anche con numeri negativi.'
         turtle_2_10: Ecco del codice per sperimentare con il disegno di diverse spirali.  Cosa
-          succede se modifichi quanto gira? O se imposti la scelta di un colore casuale
-          all'interno del blocco di ripetizione?  Disegna qualcosa che ti piace.
+          succede se modifichi quanto gira? O se imposti la scelta di un colore a
+          caso all'interno del blocco di ripetizione?  Disegna qualcosa che ti piace.
         maze_karel_2_1: 'Prova ad usare dei blocchi per rimuovere tutti i mucchi e
           riempire tutte le buche del terreno. Prova ad usare dei blocchi di ripetizione
           invece di usare molti blocchi. Suggerimento: si può mettere un blocco di
@@ -281,10 +286,10 @@
           in modo da rimuovere tutti i mucchi di terra usando pochi blocchi.
         maze_karel_2_10: Spostami attraverso il campo e usa queste due funzioni per
           rimuovere tutti i mucchi e riempire tutte le buche.
-        turtle_3_1: Questo puzzle ti mostra come definire le funzioni "disegna un
-          quadrato" e "disegna un cerchio".  Definire una funzione non vuol dire eseguire
-          i suoi blocchi. Per disegnare effettivamente un quadrato devi prendere il
-          blocco "disegna un quadrato" e spostarlo nell'area di lavoro.
+        turtle_3_1: Questo esercizio ti mostra come definire le funzioni "disegna
+          un quadrato" e "disegna un cerchio".  Definire una funzione non vuol dire
+          eseguire i suoi blocchi. Per disegnare effettivamente un quadrato devi prendere
+          il blocco "disegna un quadrato" e spostarlo nell'area di lavoro.
         turtle_3_2: Usando la funzione "disegna un quadrato" come esempio, crea una
           funzione "disegna un triangolo" e usala per disegnare un triangolo.
         turtle_3_3: 'Disegna delle recinzioni triangolari intorno ai gatti e un recinto
@@ -303,9 +308,10 @@
         turtle_3_7: Aggiungi un parametro chiamato "lunghezza" alla funzione "disegna
           una casa" e costruisci una casa grande per l'elefante (con lati lunghi 150
           pixel)
-        turtle_3_8: Qui ci sono tutti i blocchi del puzzle precedente.  Modifica "disegna
-          una casa" in modo che finisca all'angolo inferiore destro dopo aver disegnato
-          una nuova casa. Utilizza la funzione così modificata per disegnare tre case.
+        turtle_3_8: Qui ci sono tutti i blocchi dell'esercizio precedente.  Modifica
+          "disegna una casa" in modo che finisca all'angolo inferiore destro dopo
+          aver disegnato una nuova casa. Utilizza la funzione così modificata per
+          disegnare tre case.
         turtle_3_9: Riesci a ricreare la funzione "disegna una casa" senza aiuto?
           Provaci e poi disegna una fila di case.
         turtle_3_10: Hai imparato molto! Ora utilizza ciò che hai imparato per disegnare
@@ -363,12 +369,12 @@
         bounce_3: Ora prova qualcosa di simile con il blocco "quando la freccia in
           alto". Sposta la racchetta verso il bersaglio finale in alto.
         bounce_4: Questa volta devi aggiungere quattro blocchi. Sposta la racchetta
-          verso tutti e quattro i bersagli finali per completare questo puzzle.
+          verso tutti e quattro i bersagli finali per completare questo esercizio.
         bounce_5: Faremo volare una palla verso il basso incontro alla racchetta.
           Attacca un blocco al blocco "quando la palla colpisce la racchetta" per
           far sì che la palla raggiunga il bersaglio finale.
-        bounce_6: Ora il bersaglio finale è in alto. Per risolvere questo puzzle è
-          necessario attaccare dei blocchi ad entrambi i blocchi "quando la palla
+        bounce_6: Ora il bersaglio finale è in alto. Per risolvere questo esercizio
+          è necessario attaccare dei blocchi ad entrambi i blocchi "quando la palla
           colpisce".
         bounce_7: Attacca dei blocchi a ciascuno dei blocchi "quando". Fai rimbalzare
           la palla fino a quando colpisce il bersaglio finale.
@@ -376,12 +382,14 @@
           il blocco "segna punto per l'avversario" al blocco "quando palla in gol"
           e al blocco "quando palla manca racchetta" per fare una partita. Vedi quanti
           punti puoi segnare prima che il tuo avversario faccia punto per due volte.
-        bounce_11: Ora puoi aggiungere al blocco il blocco "quando il gioco inizia".
-          Prova a cambiare la velocità della pagaia e della palla e guarda quanti
-          punti puoi segnare prima che il tuo avversario faccia punto due volte.
-        bounce_12: Create your own Bounce game. You can change all the visuals and
-          the rules. When you're done, click Share to let friends try your game on
-          their phones.
+        bounce_11: Adesso puoi attaccare dei blocchi al blocco "quando inizia il gioco".
+          Devi attaccare il nuovo blocco "lancia una nuova palla" in più di un punto.
+          Inoltre, prova a cambiare la scena o la velocità della racchetta e della
+          palla e vedi quanti punti riesci a fare prima che il tuo avversario faccia
+          2 punti.
+        bounce_12: Crea la tua versione del gioco Rimbalzo. È possibile modificare
+          tutte le immagini e tutte le regole. Quando hai finito, clicca su Condividi
+          per far provare agli amici il gioco sui loro smartphone.
         Custom_builder: Sposta i blocchi dalla cassetta degli attrezzi all'area di
           lavoro per disegnare il livello che vuoi creare. Premi "Esegui il programma"
           quando hai fatto.
@@ -416,26 +424,44 @@
           le immagini e tutte le regole, anche la gravità e lo spazio tra gli ostacoli.
           Quando hai finito, clicca su Condividi per far provare agli amici il gioco
           sui loro smartphone.
-        jigsaw_1: Click the block
-        jigsaw_2: Drag the block to the target
-        jigsaw_3: Arrange the blocks to form the image
-        jigsaw_4: Arrange the blocks to form the image
-        jigsaw_5: Arrange the blocks to form the image
-        jigsaw_6: Arrange the blocks to form the image
-        jigsaw_7: Arrange the blocks to form the image
-        jigsaw_8: Arrange the blocks to form the image
-        jigsaw_9: Arrange the blocks to form the image
-        jigsaw_10: Arrange the blocks to form the image
-        jigsaw_11: Arrange the blocks to form the image
+        jigsaw_1: Clicca sul blocco
+        jigsaw_2: Sposta il blocco verso la destinazione
+        jigsaw_3: Sistema i blocchi per formare l'immagine
+        jigsaw_4: Sistema i blocchi per formare l'immagine
+        jigsaw_5: Sistema i blocchi per formare l'immagine
+        jigsaw_6: Sistema i blocchi per formare l'immagine
+        jigsaw_7: Sistema i blocchi per formare l'immagine
+        jigsaw_8: Sistema i blocchi per formare l'immagine
+        jigsaw_9: Sistema i blocchi per formare l'immagine
+        jigsaw_10: Sistema i blocchi per formare l'immagine
+        jigsaw_11: Sistema i blocchi per formare l'immagine
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
-        maze_2_8: 'Per risolvere questo puzzle, trova il comportamento da ripetere.
+        maze_2_8: 'Per risolvere questo esercizio, trova il comportamento da ripetere.
           Usa un blocco "ripeti ... volte" con questi 3 blocchi all''interno di esso:
           "vai avanti", "vai avanti", "gira a destra".'
       other1StarError:
         maze_2_14: Hai bisogno di un blocco "se" all'interno di un blocco "ripeti".
           Se hai problemi, prova di nuovo il livello precedente per vedere come funzionava.
       tooFewBlocksMsg:
-        maze_2_8: 'Per risolvere questo puzzle, trova il comportamento da ripetere.
+        maze_2_8: 'Per risolvere questo esercizio, trova il comportamento da ripetere.
           Usa un blocco "ripeti ... volte" con questi 3 blocchi all''interno di esso:
           "vai avanti", "vai avanti", "gira a destra".'
     video:
@@ -450,19 +476,23 @@
         if_else: Blocco "se-altrimenti"
         function: Funzioni
         loop_while: Blocco "mentre"
-        loop_for: Blocco "ripeti con"
+        loop_for: Blocco "ripeti con contatore"
         parameters: Funzioni con parametri
         hoc_wrapup: Conclusione dell'Ora di Codice
         20_wrapup: Conclusione del corso in 20 lezioni
     callout:
       text:
-        drag_blocks: Drag a "move" block and snap it below the other block
-        run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        drag_blocks: Sposta il blocco "vai avanti" ed attaccalo sotto l'altro blocco
+        run: Clicca su "Esegui il programma" per provare il tuo programma
+        watch_again: Clicca qui per guardare di nuovo il video
+        gray_block_explanation: I blocchi che sono in grigio non possono essere spostati
+          o cancellati. Riesci a risolvere comunque l'esercizio?
+        show_code_explanation: Clicca qui per vedere il codice del programma che stai
+          scrivendo
+        instructions_repeat_explanation: Le istruzioni di ogni esercizio sono ripetute
+          qua
+        category_explanation: Ci sono tutti i blocchi di prima, ma adesso sono organizzati
+          in categorie
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

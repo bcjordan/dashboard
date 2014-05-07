@@ -58,8 +58,6 @@
     no_signup_message: Du kannst <a target="_blank" href="http://learn.code.org">die
       verschiedenen Level und Puzzle</a> durchsuchen, aber um Deinen Fortschritt zu
       speichern musst Du dich anmelden.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: US-Studenten, die alle %{num_trophies} Konzept-Trophäen gesammelt
       haben, können eine Vielzahl von Preisen einschließlich Dropbox-Speicherplatz,
       Skype-Guthaben und herunterladbare Spiele von Electronic Arts und Valve gewinnen.
@@ -70,8 +68,6 @@
       bieten Code.org bis zu $1.000 für die Klassenkasse, für Lehrer einer öffentlichen
       Schule in der USA, die mindestens 15 Schüler durch diesen Kurs führen. <a href="http://code.org/educate/20hr">Siehe
       Erzieher Leitfaden für mehr Information.</a> '
-    teacher_prize_limits: '(Limit: $1.000 pro Lehrer. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Siehe FAQ für weitere Limits</a>)'
     teacher_pitch: Unterrichten Sie die Einführung in die Informatik für Sechstklässler
       in ihrem Klassenraum
     teacher_title: Lehrer Anmeldung
@@ -302,6 +298,7 @@
   user_stats:
     recent_activity: Letzte Aktivität
     show_more: Erweiterte Ansicht
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Schon registriert? %{link}
     student_reg_link: Studenten Login
@@ -317,7 +314,6 @@
       bestanden haben
     teacher_read_blog: Lese Nachrichten und Neuigkeiten zu unseren Materialien in
       unserem Lehrer-Blog
-    teacher_survey: Tell us what you think about this course
     classroom: Ihr Klassenzimmer
     student_progress: Ihr Lernfortschritt
     student_stats: Sie haben %{trophy_count} von %{trophy_max} "Concept Mastery" Trophäen.
@@ -407,3 +403,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

@@ -12,7 +12,7 @@
         gender: Sesso
         edit_header: Modifica i dettagli dell'account
         error:
-          future: can't be in the future
+          future: non può essere in futuro
   hello: Ciao Mondo
   welcome_back: Bentornato, %{name}
   add_teacher_form:
@@ -25,7 +25,7 @@
     submit: Aggiungi un suggerimento
   appname: Code.org
   stage: Lezione
-  puzzle: Puzzle
+  puzzle: Esercizio
   trophies: Trofei
   courses: Corsi
   of: di
@@ -54,30 +54,25 @@
     need_confirmation: Non hai ricevuto le istruzioni di conferma?
     need_unlock: Non hai ricevuto le istruzioni di sblocco?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
+    overview_student: Iscriviti con un account per tener traccia dei tuoi progressi.
+    overview_teacher: 'Insegna l''informatica nella tua classe. Iscriviti con un account:
+      <p/> Potrai tener traccia dei progressi dei tuoi studenti ed ottenere dei premi.'
     no_signup_message: Puoi <a target="_blank" href="http://learn.code.org">sfogliare
-      le varie lezioni e i puzzle</a>, ma devi iscriverti per salvare i tuoi progressi.
-    prizes_header: I primi studenti che completano il corso vincono premi! (Solo per
-      gli studenti degli Stati Uniti)
+      le varie lezioni e gli esercizi</a>, ma devi iscriverti per salvare i tuoi progressi.
     prizes_message: 'Gli studenti degli Stati Uniti che guadagnano tutti i %{num_trophies}
       trofei possono selezionare una varietà di premi tra cui: spazio gratuito su
       Dropbox, crediti Skype e giochi scaricabili da Electronic Arts.'
     teacher_educator_guide: Vedi la guida per l'insegnante
-    teacher_prize_header: Vinci $1.000 in premi di <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
+    teacher_prize_header: Vinci $1,000 in buoni di <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
+      (entro il 15 Giugno 2014, fino a esaurimento scorte)
     teacher_prize_message: 'In collaborazione con <a target="_blank" href="http://DonorsChoose.org">
       DonorsChoose.org</a>, Code.org offrirà fino a $1.000 di buoni per le classi  degli
       insegnanti della scuola pubblica degli Stati Uniti che faranno completare il
       corso ad almeno 15 studenti. <a href="http://code.org/educate/20hr">Per ulteriori
       informazioni, controlla la guida per insegnanti.</a> '
-    teacher_prize_limits: '(Limite: 1.000 $ ad insegnante. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Vedere le FAQ per ulteriori limitazioni</a>)'
-    teacher_pitch: Insegna nella tua classe l'Introduzione all'informatica per scuole
-      elementari e medie inferiori
+    teacher_pitch: Iscrizione dell'insegnante a Code.org
     teacher_title: Iscrizione dell'insegnante
-    student_pitch: 'Dopo la prima ora: prova il nostro corso di introduzione all''informatica
-      per scuole elementari e medie inferiori'
+    student_pitch: Iscrizione dello studente a Code.org
     student_title: Iscrizione dello studente
     school_name: Nome della scuola (facoltativo)
     school_address: Indirizzo della scuola (facoltativo)
@@ -98,13 +93,13 @@
       Code.org.
     teacher_terms: Accetto di essere vincolato dai termini di servizio di Code.org.
   signin_form:
-    title: Hai già un account? Accedi
+    title: Sei già iscritto con un account? Accedi
     login: E-mail o nome utente
     password: Password
     remember: Ricorda le mie credenziali di accesso
     submit: Accedi
   signin:
-    try_heading: Want to try coding without signing up?
+    try_heading: Vuoi provare a programmare senza iscriverti?
     try_hoc: Prova subito l'Ora di Codice
     try_20hours: Prova il corso di introduzione all'Informatica in 20 lezioni
   password:
@@ -152,8 +147,8 @@
     provider: 'Fornitore:'
     code: 'Codice:'
     redeem_header: 'Per richiedere i premi:'
-    donorschoose_register: Register as a teacher on DonorsChoose.org
-    donorschoose_project: Post a project
+    donorschoose_register: Iscriviti come insegnante a DonorsChoose.org
+    donorschoose_project: Pubblica un progetto
     donorschoose_how_to: Come usare il tuo codice
     success: Il tuo premio è stato richiesto correttamente, vedi il codice riportato
       di seguito.
@@ -172,7 +167,7 @@
       'yes': Sì
       msg: Sei sicuro di voler richiedere il premio %{prize_name}?
       msg_student: 'Attenzione: Puoi scegliere solo un tipo di premio.'
-      msg_publicschool: Per favore conferma di essere un insegnante della scuola pubblica
+      msg_publicschool: Per favore conferma di essere un insegnante di scuola pubblica
         degli Stati Uniti.
       msg_visit_website: Visita il sito
     providers:
@@ -303,13 +298,13 @@
   user_stats:
     recent_activity: Attività recenti
     show_more: Mostra di più
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Già iscritto? %{link}
     student_reg_link: Iscrizione studenti
     teacher_reg_link: Iscrizione insegnanti
-    signin_directions: Iscriviti per tener traccia dei tuoi progressi e (solo per
-      studenti degli Stati Uniti) ottenere premi. <br/> Insegnante, iscriviti per
-      seguire l'andamento di tutta la tua classe.
+    signin_directions: Usa un account per tener traccia dei tuoi progressi. <br/>
+      Insegnanti, tenete traccia dei progressi di tutta la vostra classe.
     teacher_dashboard: Vedi il cruscotto di avanzamento
     teacher_student_count_one: Hai %{count} studenti.
     teacher_student_count: Hai %{count} studenti.
@@ -319,7 +314,6 @@
       questo corso
     teacher_read_blog: Leggi notizie e aggiornamenti relativi al nostro materiale
       didattico sul nostro "Educator Blog"
-    teacher_survey: Tell us what you think about this course
     classroom: La tua classe
     student_progress: I tuoi progressi di apprendimento
     student_stats: Hai guadagnato %{trophy_count} trofei su %{trophy_max} in "Padronanza
@@ -332,15 +326,16 @@
     local_school: scuola locale
     online: in linea
     see_details: Vedi i dettagli
-    prize_info: 'Premi per i partecipanti (solo per gli Stati Uniti): buoni regalo
-      da $10 per gli studenti che completano il corso e buoni regalo per l''intera
-      classe fino a $1,000 per gli insegnanti della scuola pubblica.'
+    prize_info: 'Premi per la partecipazione (solo per insegnanti di scuola pubblica
+      degli Stati Uniti): Fino a $1.000 in premi per la classe.'
     tryfirst: 'Oppure, puoi prima provarlo e successivamente iscriverti:'
     trynow: Prova adesso
-    add_hint_help: Please help us to add smart hints to Code.org tutorials
-    20hour_overview: This 20-hour course introduces core computer science and programming
-      concepts. The course is designed for use in classrooms for grades K-8, but it
-      is fun to learn at all ages.
+    add_hint_help: Per favore aiutaci ad aggiungere suggerimenti intelligenti ai corsi
+      di Code.org
+    20hour_overview: Questo corso in 20 lezioni introduce i concetti fondamentali
+      dell'informatica e della programmazione. Il corso è progettato per l'uso nelle
+      scuole elementari e medie inferiori, ma è divertente per imparare a qualunque
+      età.
   gender:
     male: Maschile
     female: Femminile
@@ -370,8 +365,8 @@
     subtitle: Guarda questi video e suggerimenti
     teacher: Vedi la soluzione
     auth_error: Non sei autorizzato a vedere la soluzione.
-    submit: Update Artist Location
-    direction: Start Direction
+    submit: Aggiorna la posizione dell'Artista
+    direction: Avvia la direzione
   video:
     tab: Video.
     notes: Mostra le spiegazioni.
@@ -382,17 +377,17 @@
     upgrade: Per favore aggiorna il tuo browser.
   slow_loading: Questa operazione sta prendendo più tempo del solito...
   try_reloading: Prova a ricaricare la pagina
-  next_stage: Finito! Continua con la lezione successiva
+  next_stage: Finito! Prosegui con la lezione successiva
   download_pdf: Apri il piano di lavoro di questa lezione
   share_code:
     title: Clicca su 'Esegui il programma' per vedere il tuo programma in azione
-    bounce_og_title: Check out my Bounce Game
+    bounce_og_title: Prova la mia versione del gioco Rimbalzo
     flappy_og_title: Prova la mia versione del gioco Flappy
-    og_description: Ho scritto il codice io stesso con Code.org
+    og_description: Ho scritto il codice per conto mio con Code.org
   builder:
     created: Hai creato un nuovo script.
     destroyed: Hai cancellato uno script.
-    manage: Gestisci gli script
+    manage: Costruisci i livelli
     view: Mostra
     back: Ritorna agli script
     level:
@@ -401,12 +396,29 @@
       unused: LIvelli non usati
   upsell:
     hoc:
-      title: The Hour of Code
-      body: Try the basics of computer science. Millions have given it a shot.
+      title: L'Ora di Codice
+      body: Prova le basi dell'informatica. Milioni di persone l'hanno già fatto.
     flappy:
-      title: Flappy Code
-      body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
-        tutorial!
+      title: Codice del gioco Flappy
+      body: Vuoi creare la tua versione del gioco in meno di 10 minuti? Prova il nostro
+        corso sul Codice del gioco Flappy!
     20hour:
-      title: Intro Course
-      body: Try our 20-hour Intro to Computer Science course.
+      title: Corso Introduttivo
+      body: Prova il nostro corso introduttivo di informatica in 20 lezioni.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

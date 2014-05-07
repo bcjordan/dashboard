@@ -57,7 +57,6 @@
       account.<p/> You'll be able to track your students' progress and get rewards.
     no_signup_message: 여러 개의 단계로 이루어진 퍼즐들을 살펴보세요. <a target="_blank" href="http://learn.code.org">browse
       the various stages and puzzles</a> 해결한 퍼즐을 저장하려면 가입해야 합니다.
-    prizes_header: 기초개념학습 과정을 완료하는 첫번째 학생은 상품을 받게됩니다.(미국 학생만 해당)
     prizes_message: 모든 기초개념학습 트로피(총 %{num_trophies} 개)를 모은 미국 학생들은 드롭박스 저장공간, 스카이프
       크레딧, EA 와 Valve의 게임 등의 다양한 상품을 얻을 수 있습니다.
     teacher_educator_guide: 교육자 가이드
@@ -66,8 +65,6 @@
       와의 제휴를 통해 Code.org 는, 15명 이상의 학생들에게 이 과정을 수행시키는 미국 공립 학교 선생님들에게 최대 $1,000 크레딧을
       제공합니다. 자세한 내용은 <a href="http://code.org/educate/20hr">See educator guide for
       more info.</a>를 살펴보세요.
-    teacher_prize_limits: '(교사당 최대: $1,000 <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      자세한 사항은 FAQ를 참조하세요.</a>)'
     teacher_pitch: 컴퓨터과학(Computer Science, 정보과학)의 내용을, 유치원~중2(K-8) 학생들과 함께 하세요
     teacher_title: 선생님으로 등록하기
     student_pitch: 'Beyond 1 hour:  컴퓨터과학(Computer Science, 정보과학) 기초개념학습 코스 더 해보기'
@@ -271,6 +268,7 @@
   user_stats:
     recent_activity: 최근 활동
     show_more: 자세히
+    classroom_activity: Unplugged Activity
   home:
     signin_message: 이미 등록되어있나요? %{link}
     student_reg_link: 학생 가입하기
@@ -284,7 +282,6 @@
       개.
     teacher_print_certificates: 이 코스를 완료한 학생들을 위해 인증서 출력하기
     teacher_read_blog: 교육 블로그를 통해 관련 뉴스와 최신정보 확인하기
-    teacher_survey: Tell us what you think about this course
     classroom: 내 학급
     student_progress: 나의 학습 진도
     student_stats: '%{trophy_count} 개의 "기초개념학습 트로피"를 획득했습니다. 총 %{trophy_max} 개.'
@@ -372,3 +369,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

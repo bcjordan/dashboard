@@ -12,7 +12,7 @@
         gender: Geslacht
         edit_header: Accountdetails bewerken
         error:
-          future: can't be in the future
+          future: kan niet in de toekomst
   hello: Hallo wereld
   welcome_back: Welkom terug, %{name}
   add_teacher_form:
@@ -21,8 +21,8 @@
       placeholder: code (ABCDEF) of email (teacher@school.edu)
     submit: voeg leraar toe
   add_hint_form:
-    placeholder: Please enter your hint here
-    submit: Add hint
+    placeholder: Voer hier uw hint
+    submit: Hint toevoegen
   appname: Code.org
   stage: niveau
   puzzle: puzzel
@@ -32,8 +32,9 @@
   more: MEER
   less: MINDER
   try_hoc: 'Probeer the Hour of Code, klik hier >> '
-  try_k8intro: of probeer onze K-8 intro voor Computer Science les (15-25 uur)
-  k8intro: K-8 Intro to Computer Science Course (15-25 hours)
+  try_k8intro: Probeer onze informatica-introductiecursus voor basisschoolleerlingen
+    (15-25 uur)
+  k8intro: Informatica-introductiecursus voor basisschoolleerlingen (15-25 uur)
   already_started: 'al begonnen? ga hier verder >> '
   demos: 'Admin: alle demo''s'
   continue: verder gaan
@@ -52,31 +53,28 @@
     need_confirmation: Geen bevestigingsinstructies ontvangen?
     need_unlock: Nog niet uw ontgrendel instructies ontvangen?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
+    overview_student: Registreren voor een account voor het bijhouden van uw vooruitgang.
+    overview_teacher: Verzorg informaticalessen in je eigen klaslokaal nadat je je
+      hebt aangemeld voor een account.<p/>Je kunt dan ook de vorderingen van je leerlingen
+      volgen.
     no_signup_message: Je kunt <a target="_blank" href="http://learn.code.org">de
       verschillende niveaus en levels bekijken</a>, maar om je voortgang te bewaren
       moet je je aanmelden.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
-    prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
-      select a variety of prizes including free Dropbox space, Skype credits, and
-      downloadable games from Electronic Arts.
+    prizes_message: Leerlingen uit de Verenigde Staten die elk %{num_trophies} concept-bekers
+      hebben verdient, kunnen kiezen uit een aantal prijzen zoals gratis ruimte in
+      hun Dropbox, Skype credits, en te downloaded spellen van Electronic Arts.
     teacher_educator_guide: Kijk in de lerarengids
-    teacher_prize_header: Win $1,000 in <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>-prijzen
+    teacher_prize_header: Win USD 1000.00 aan <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
+      prijzengeld voor een Amerikaans goed doel (geldig tot en met 15 juni 2014, zolang
+      de voorraad strekt)
     teacher_prize_message: 'In partnership with <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>,
       Code.org will offer up to $1,000 in classroom funding to U.S. public school
       teachers who lead at least 15 students through this course. <a href="http://code.org/educate/20hr">See
       educator guide for more info.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
-    teacher_pitch: Gebruik de Introductie in de Informatica op basisschoolniveau in
-      jouw klas
-    teacher_title: Inschijven voor leraren
-    student_pitch: 'Verder dan 1 uur: probeer onze Introductie in de Informatie op
-      basisschoolniveau'
-    student_title: Inschrijven
+    teacher_pitch: Registreer als leraar voor Code.org
+    teacher_title: Inschrijven voor leraren
+    student_pitch: Registreren als leerling voor Code.org
+    student_title: Registreren als leerling
     school_name: School naam (optioneel)
     school_address: Schooladres (optioneel)
     address_placeholder: adres, stad, staat, zip
@@ -96,15 +94,15 @@
       van Code.org.
     teacher_terms: Ik ga akkoord met de algemene voorwaarden van Code.org.
   signin_form:
-    title: Aanmelden
+    title: Heb je al een account? Log in
     login: Email of gebruikersnaam
     password: Wachtwoord
     remember: Onthoud me
     submit: Log in
   signin:
-    try_heading: Want to try coding without signing up?
-    try_hoc: Try one Hour of Code first
-    try_20hours: Try our 20 hour Intro to Computer Science
+    try_heading: Wil je proberen te programmeren zonder te registreren?
+    try_hoc: Probeer eerst een Hour of Code
+    try_20hours: Probeer onze 20-urige introductie tot de informatica
   password:
     reset_form:
       title: Wachtwoord vergeten?
@@ -135,16 +133,16 @@
       username_in_use: '%{username} wordt al gebruikt, kies een andere'
       no_teacher: Er is niemand ingelogd met '%{teacher_email_or_code}'. Vraag ze
         hier aan te melden en probeer ze dan nog eens toe te voegen
-      blank_code: Please enter a code or your teacher's email address
+      blank_code: Voer een code of het emailadres van je leraar in
     mail:
       invite_student:
         subject: Doe mee met een klas met %{teacher_name} op Code.org!
       student_disassociated:
-        subject: 'Code.org notification: %{student_name} is no longer associated as
-          your student.'
+        subject: 'Code.org melding: %{student_name} is niet langer ale student aan
+          je gekoppeld.'
       teacher_disassociated:
-        subject: 'Code.org notification: %{teacher_name} is no longer associated as
-          your teacher.'
+        subject: 'Code.org melding: %{teacher_name} is niet langer als leraar aan
+          je gekoppeld.'
   reports:
     error:
       access_denied: Je hebt geen toegang tot de statistieken van deze persoon
@@ -153,9 +151,9 @@
     provider: 'Aanbieder:'
     code: 'Code:'
     redeem_header: 'To redeem:'
-    donorschoose_register: Register as a teacher on DonorsChoose.org
-    donorschoose_project: Post a project
-    donorschoose_how_to: How to use your code
+    donorschoose_register: Registreer je als leraar op DonorsChoose.org
+    donorschoose_project: Een project posten
+    donorschoose_how_to: Hoe gebruiken u uw code
     success: Je prijs is vrijgegeven, gebruik de code hieronder.
     error: Je prijs kon niet worden vrijgegeven, probeer het opnieuw.
     error_us_only: Prijzen zijn alleen geldig voor gebruikers in de Verenigde Staten.
@@ -176,7 +174,7 @@
       apple_itunes: $10 iTunes Gift Card
       donors_choose: DonorsChoose.org $750 credit
       donors_choose_bonus: DonorsChoose.org $250 credit
-      dropbox: 10GB of Dropbox Space
+      dropbox: 10GB Dropbox ruimte
       valve: Portal 2 (PC or Mac game download)
       ea_bejeweled: Bejeweled 3 (PC game download)
       ea_fifa: FIFA Soccer 13 (PC game download)
@@ -190,10 +188,11 @@
         Staten)
       not_earned_title: Voltooi de opdracht en verdien prijzen (alleen voor leerlingen
         in de Verenigde Staten)
-      not_earned: 'Learn all the computer science concepts, collect all %{num_trophies}
-        trophies, and earn real-world prizes. You can choose between 10GB of free
-        Dropbox space, $10 in Skype credits, and free game downloads. NOTE: offer
-        only valid to U.S. students, and only as long as supplies last.'
+      not_earned: 'Leer alle informatica-concepten, verzamel alle %{num_trophies}
+        bekers, en win echte prijzen. Je kunt kiezen tussen een iTunes-waardebon van
+        $10, 10GB gratis Dropbox-opslagruimte, $10 aan Skype-credits of download gratis
+        spelletjes. LET OP: dit aanbod geldt alleen voor leerlingen in de Verenigde
+        Staten, en zolang de voorraad strekt.'
       teacher:
         earned: Minstens 10 leerlingen hebben alle %{num_trophies} bekers verzameld.
           Je hebt een lerarenprijs van $750 gewonnen! (alleen voor leraren in de Verenigde
@@ -236,8 +235,8 @@
     confirm: Weet je het zeker?
     created: '%{model} aangemaakt.'
     updated: '%{model} bijgewerkt.'
-    destroyed: '%{model} was successfully deleted.'
-    access_denied: You do not have access to this %{model}.
+    destroyed: '%{model} is succesvol verwijderd.'
+    access_denied: Je hebt geen toegang tot dit %{model}.
   nav:
     header:
       finished_hoc: Ik heb mijn Uur Code afgemaakt
@@ -263,29 +262,29 @@
       prizes_link: meer info
   teacher:
     title:
-      one: Je leraar is %{name}
+      one: 'Je leraar:'
       other: 'Je leraren:'
-    remove: (remove teacher)
+    remove: (verwijder leraar)
     confirm:
-      remove: Are you sure you want to remove this teacher?
+      remove: Weet je zeker dat je deze leraar wilt verwijderen?
     tools: Hulpmiddelen voor Leraren
     students:
-      manage: Beheer student
+      manage: Beheer leerling
       add: voeg leerling toe
     sections:
-      manage: Manage sections
+      manage: beheer onderdelen
     rollup: Overzicht vooruitgang
     activity: Recente klasactiviteiten
-    user_not_found: The teacher or student could not be found
-    cant_remove_student_no_email: '%{student_name} cannot be removed as your student
-      because %{student_name} has not registered an e-mail address'
-    cant_remove_teacher_no_email: '%{teacher_name} cannot be removed as your teacher
-      because you have not registered an e-mail address'
-    student_teacher_disassociated: '%{teacher_name} has been removed as a teacher
-      for %{student_name}'
+    user_not_found: De leraar of leerling kan niet worden gevonden
+    cant_remove_student_no_email: '%{student_name} kan niet worden verwijderd als
+      je leerling omdat %{student_name} geen emailadres heeft opgegeven'
+    cant_remove_teacher_no_email: '%{teacher_name} kan niet worden verwijderd als
+      je leraar omdat je geen emailadres hebt opgegeven'
+    student_teacher_disassociated: '%{teacher_name} is verwijderd als een leraar voor
+      %{student_name}'
   user:
-    email_confirm_needed: 'Email address has not been confirmed:'
-    email_resend_confirm: Resend confirmation instructions
+    email_confirm_needed: 'Emailadres is niet bevestigd:'
+    email_resend_confirm: Verstuur de bevestigingsinstructie nog een keer
     new_password_hint: (laat leeg als je het niet wilt veranderen)
     current_password_hint: (we hebben je huidige wachtwoord nodig om je veranderingen
       te bevestigen)
@@ -299,41 +298,42 @@
   user_stats:
     recent_activity: Recente activiteiten
     show_more: Toon meer
+    classroom_activity: Unplugged Activity
   home:
-    signin_message: Of als je al ingeschreven bent, %{link}
-    student_reg_link: Leerling
-    teacher_reg_link: Leraar
-    signin_directions: Use an account to track progress and get rewards.<br/> Teachers,
-      track your entire class.
+    signin_message: Al geregistreerd? %{link}
+    student_reg_link: Registreer als leerling
+    teacher_reg_link: Registreer als leraar
+    signin_directions: Gebruik een account gebruiken om je voortgang bij te houden.<br/>
+      Leraren, houd je hele klas bij.
     teacher_dashboard: Ga naar voorgangsoverzicht
     teacher_student_count_one: Je hebt %{count} leerling.
     teacher_student_count: Je hebt %{count} studenten.
     teacher_averages: Gemiddeld hebben je studenten %{trophy_average} van de %{trophy_max}
       "Concept Mastery" trofeeën.
-    teacher_print_certificates: Print certificates for students who finish this course
-    teacher_read_blog: Read about news and updates to our materials at our Educator
-      Blog
-    teacher_survey: Tell us what you think about this course
+    teacher_print_certificates: Print certificaten voor leerlingen die deze cursus
+      afronden
+    teacher_read_blog: Lees over nieuws en updates voor onze materialen op onze Leerkracht-Blog
     classroom: Je klas
     student_progress: Je voortgang
     student_stats: Je hebt %{trophy_count} van de %{trophy_max} "Concept Mastery"
       trofeeën.
     student_left_off: 'Waar je geëindigd bent:'
-    student_finished_prize: You've completed all tutorials, claim your %{prize_link}
-      and pick another class %{online_link} or at a %{local_school_link}
-    student_finished: You've completed all tutorials, pick another class %{online_link}
-      or at a %{local_school_link}
+    student_finished_prize: Je hebt alle opdrachten voltooid, claim je prijs %{prize_link}
+      en zoek een andere les %{online_link} of bij een %{local_school_link}
+    student_finished: Je hebt alle opdrachten gedaan, kies een andere les %{online_link}
+      of kijk bij %{local_school_link}
     local_school: lokale school
     online: online
     see_details: Bekijk details
-    prize_info: 'Prizes for participation (U.S. only): $10 gift cards for student
-      completion and up to $1,000 in classroom rewards for public school teachers'
-    tryfirst: 'Or, you can try it first, and sign up later:'
-    trynow: Try now
-    add_hint_help: Please help us to add smart hints to Code.org tutorials
-    20hour_overview: This 20-hour course introduces core computer science and programming
-      concepts. The course is designed for use in classrooms for grades K-8, but it
-      is fun to learn at all ages.
+    prize_info: 'Prijzen voor deelname (alleen voor leerkrachten van Amerikaanse openbare
+      scholen): tot $1.000 aan prijzengeld voor je klas.'
+    tryfirst: 'Of, je kunt het eerst proberen, en later registreren:'
+    trynow: Probeer nu
+    add_hint_help: Help ons alsjeblieft om slimme tips aan de Code.org-opdrachten
+      toe te voegen
+    20hour_overview: Deze cursus van 20 uur introduceert basisbegrippen uit de informatica
+      en programmeren. De cursus is bedoeld voor basisschoolklassen, maar het is voor
+      alle leeftijden leuk om te leren.
   gender:
     male: Man
     female: Vrouw
@@ -361,10 +361,10 @@
   reference_area:
     title: Hulp nodig?
     subtitle: Bekijk deze video's en hints
-    teacher: See the solution
-    auth_error: You are not authorized to see the solution.
-    submit: Update Artist Location
-    direction: Start Direction
+    teacher: Zie de oplossing
+    auth_error: U bent niet gemachtigd om de oplossing te zien.
+    submit: Werk de locatie van de Kunstenaar bij
+    direction: Start richting
   video:
     tab: Video.
     notes: Geen video? Laat notities zien.
@@ -378,28 +378,45 @@
   next_stage: Klaar! Verder naar het volgende niveau
   download_pdf: Open lesplan
   share_code:
-    title: Click 'Run program' to see my program in action
-    bounce_og_title: Check out my Bounce Game
-    flappy_og_title: Check out my Flappy Game
-    og_description: I wrote the code myself with Code.org
+    title: Klik op 'Programma uitvoeren' om mijn programma in actie te zien
+    bounce_og_title: Bekijk mijn Stuiterspel
+    flappy_og_title: Check mijn Flappy Game
+    og_description: Ik heb met Code.org het programma zelf geschreven
   builder:
-    created: You created a new script.
-    destroyed: You destroyed a script.
-    manage: Manage Scripts
-    view: View
-    back: Back to scripts
+    created: Je hebt een nieuw script gemaakt.
+    destroyed: Je hebt een script vernietigd.
+    manage: Bouw Niveaus
+    view: Overzicht
+    back: Terug naar scripts
     level:
-      create: Create new level
-      current: Current Levels
-      unused: Unused Levels
+      create: Nieuw niveau maken
+      current: Huidige niveaus
+      unused: Ongebruikte niveaus
   upsell:
     hoc:
-      title: The Hour of Code
-      body: Try the basics of computer science. Millions have given it a shot.
+      title: Het Hour of Code
+      body: Probeer de beginselen van de informatica. Miljoenen gingen je voor!
     flappy:
       title: Flappy Code
-      body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
-        tutorial!
+      body: Wil je ook binnen 10 minuten je eigen spel schrijven? Probeer onze Flappy
+        Code opdracht!
     20hour:
-      title: Intro Course
-      body: Try our 20-hour Intro to Computer Science course.
+      title: Introductiecursus
+      body: Probeer onze cursus Introductie Informatica van 20 uur.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK
