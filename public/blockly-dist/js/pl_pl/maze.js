@@ -360,6 +360,11 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
+  // Allow empty blocks if editing required blocks.
+  if (config.level.edit_required_blocks) {
+    BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
+  }
+
   var div = document.getElementById('blockly');
   var options = {
     toolbox: config.level.toolbox
@@ -1156,6 +1161,9 @@ exports.displayFeedback = function(options) {
   }
   if (showCode) {
     feedback.appendChild(showCode);
+  }
+  if (options.level.is_k1) {
+    feedback.className += " k1";
   }
 
   feedback.appendChild(getFeedbackButtons(
@@ -2197,10 +2205,10 @@ exports.install = function(blockly, skin) {
 
   var SimpleMove = {
     DIRECTION_CONFIGS: {
-      West: { letter: 'W' },
-      East: { letter: 'E' },
-      North: { letter: 'N' },
-      South: { letter: 'S' },
+      West: { letter: 'W', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
+      East: { letter: 'E', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
+      North: { letter: 'N', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
+      South: { letter: 'S', image: skin.downArrow, tooltip: msg.moveSouthTooltip() }
     },
     generateBlocksForAllDirections: function() {
       SimpleMove.generateBlocksForDirection("North");
@@ -2219,10 +2227,11 @@ exports.install = function(blockly, skin) {
         init: function () {
           this.setHSV(184, 1.00, 0.74);
           this.appendDummyInput()
-            .appendTitle(directionConfig.letter);
+            .appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
-          this.setTooltip(msg.moveForwardTooltip());
+          this.setTooltip(directionConfig.tooltip);
         }
       };
     },
@@ -5283,7 +5292,6 @@ Maze.resetButtonClick = function () {
   var stepButton = document.getElementById('stepButton');
   stepButton.style.display = level.step ? 'inline' : 'none';
 
-  Blockly.mainWorkspace.setEnableToolbox(true);
   if (Maze.cachedBlockStates) {
     // restore moveable/deletable/editable state from before we started stepping
     Maze.cachedBlockStates.forEach(function (cached) {
@@ -5314,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5350,14 +5356,6 @@ Maze.execute = function(stepMode) {
   Maze.waitingForReport = false;
   Maze.animating_ = false;
   Maze.response = null;
-
-  // Check for empty top level blocks to warn user about bugs,
-  // especially ones that lead to infinite loops.
-  if (feedback.hasEmptyTopLevelBlocks()) {
-    Maze.testResults = BlocklyApps.TestResults.EMPTY_BLOCK_FAIL;
-    displayFeedback();
-    return;
-  }
 
   if (level.editCode) {
     var codeTextbox = document.getElementById('codeTextbox');
@@ -5450,11 +5448,13 @@ Maze.execute = function(stepMode) {
   BlocklyApps.reset(false);
   Maze.animating_ = true;
 
+  // Disable toolbox while running
+  Blockly.mainWorkspace.setEnableToolbox(false);
+
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
       throw new Error('Unexpected cachedBlockStates');
     }
-    Blockly.mainWorkspace.setEnableToolbox(false);
     // Disable all blocks, caching their state first
     Blockly.mainWorkspace.getAllBlocks().forEach(function (block) {
       Maze.cachedBlockStates.push({
@@ -5490,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5501,6 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5508,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7194,9 +7196,17 @@ exports.ifTooltip = function(d){return "Jeśli jest ścieżka w określonym kier
 
 exports.ifelseTooltip = function(d){return "Jeśli jest ścieżka w określonym kierunku, to wykonaj pierwszy blok działań. W przeciwnym razie, wykonaj drugi blok działań."};
 
+exports.moveEastTooltip = function(d){return "Move me east one space."};
+
 exports.moveForward = function(d){return "idź do przodu"};
 
 exports.moveForwardTooltip = function(d){return "Przenieś mnie do przodu o jedno miejsce."};
+
+exports.moveNorthTooltip = function(d){return "Move me north one space."};
+
+exports.moveSouthTooltip = function(d){return "Move me south one space."};
+
+exports.moveWestTooltip = function(d){return "Move me west one space."};
 
 exports.nextLevel = function(d){return "Gratulacje! Ukończyłeś tę łamigłówkę."};
 

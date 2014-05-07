@@ -1,5 +1,8 @@
 require "csv"
 
+require "#{Rails.root}/config/process_multi.rb"
+require "#{Rails.root}/config/process_match.rb"
+
 namespace :seed do
   task videos: :environment do
     Video.transaction do
@@ -28,9 +31,53 @@ namespace :seed do
     touch t.name
   end
 
-  task scripts: [:environment, :games, :custom_levels] do
+  task scripts: [:environment, :games, :custom_levels, :multis, :matches] do
     Script.setup(Dir.glob("config/scripts/default/*.yml"), Dir.glob('config/scripts/**/*.script').flatten)
     Script.update_script_locales
+  end
+
+  # cronjob that detects changes to .multi files
+  MULTIS_GLOB = Dir.glob('config/scripts/**/*.multi').flatten
+  file 'config/scripts/.multis_seeded' => MULTIS_GLOB do |t|
+    Rake::Task['seed:multis'].invoke
+    touch t.name
+  end
+
+  # explicit execution of "seed:multis"
+  task multis: :environment do
+    Multi.transaction do
+      Multi.reset_db
+      multi_strings = {}
+      # Parse each .multi file and setup its model.
+      Dir.glob('config/scripts/**/*.multi').flatten.each do |script|
+        process_multi = ProcessMulti.new
+        Multi.setup process_multi.parse(script)
+        multi_strings.deep_merge! process_multi.get_strings
+      end
+      File.write("config/locales/multi.en.yml", multi_strings.to_yaml)
+    end
+  end
+
+  # cronjob that detects changes to .match files
+  MATCHES_GLOB = Dir.glob('config/scripts/**/*.match').flatten
+  file 'config/scripts/.matches_seeded' => MATCHES_GLOB do |t|
+    Rake::Task['seed:matches'].invoke
+    touch t.name
+  end  
+
+ # explicit execution of "seed:matches"
+  task matches: :environment do
+    Match.transaction do
+      Match.reset_db
+      match_strings = {}
+      # Parse each .match file and setup its model.
+      Dir.glob('config/scripts/**/*.match').flatten.each do |script|
+        process_match = ProcessMatch.new
+        Match.setup process_match.parse(script)
+        match_strings.deep_merge! process_match.get_strings
+      end
+      File.write("config/locales/match.en.yml", match_strings.to_yaml)
+    end
   end
 
   # Generate the database entry from the custom levels json file

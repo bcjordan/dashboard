@@ -28,6 +28,11 @@ class LevelsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "should get new maze" do
+    get :new, game_id: @level.game, type: "Maze"
+    assert_response :success
+  end
+
   test "should get new karel" do
     get :new, type: 'Karel'
 
@@ -36,12 +41,17 @@ class LevelsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-# this test is not working because Level::BUILDER is nil in tests
-#  test "should get builder" do
-#    get :builder, game_id: @level.game
-#
-#    assert_response :success
-#  end
+  test "should alphanumeric order custom levels on new" do
+    level_1 = create(:level, user: @user, name: "BBBB")
+    level_2 = create(:level, user: @user, name: "AAAA")
+    level_3 = create(:level, user: @user, name: "Z1")
+    level_4 = create(:level, user: @user, name: "Z10")
+    level_5 = create(:level, user: @user, name: "Z2")
+
+    get :new, game_id: @level.game, type: "Maze"
+
+    assert_equal [level_2, level_1, level_3, level_5, level_4], assigns(:levels)
+  end
 
   test "should not get builder if not admin" do
     sign_in @not_admin
@@ -72,6 +82,30 @@ class LevelsControllerTest < ActionController::TestCase
 
     assert assigns(:level)
     assert assigns(:level).step_mode
+  end
+
+  test "should create maze levels with k1 on" do
+    maze = fixture_file_upload("maze_level.csv", "r")
+    game = Game.find_by_name("CustomMaze")
+
+    assert_difference('Level.count') do
+      post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :step_mode => 1, :type => 'Maze', :is_k1 => true}, :game_id => game.id, :program => @program, :maze_source => maze, :size => 8
+    end
+
+    assert assigns(:level)
+    assert assigns(:level).is_k1
+  end
+
+  test "should create maze levels with k1 off" do
+    maze = fixture_file_upload("maze_level.csv", "r")
+    game = Game.find_by_name("CustomMaze")
+
+    assert_difference('Level.count') do
+      post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :step_mode => 1, :type => 'Maze', :is_k1 => false}, :game_id => game.id, :program => @program, :maze_source => maze, :size => 8
+    end
+
+    assert assigns(:level)
+    assert !assigns(:level).is_k1
   end
 
   test "should not create invalid maze level" do
@@ -191,6 +225,12 @@ class LevelsControllerTest < ActionController::TestCase
     patch :update, id: @level, game_id: @level.game, level: {  }
     level = assigns(:level)
     assert_redirected_to game_level_path(level.game, level)
+  end
+
+  test "should update artist with integer start direction" do
+    artist = create(:artist)
+    patch :update, :level => {:start_direction => "180"}, id: artist, game_id: artist.game
+    assert_equal 180, assigns(:level).start_direction
   end
 
   test "should destroy level" do

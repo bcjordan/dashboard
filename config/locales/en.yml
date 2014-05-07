@@ -365,4 +365,12 @@ en:
     more: "More &rarr;"
   landing:
     prerelease: "This page is still under development."
+  multi:
+    wrong_title: "Incorrect answer"
+    wrong_body: "The answer you've entered is not correct.  Please try again!"
+  match:
+    wrong_title: "Incorrect solution"
+    wrong_body: "The solution you've entered is not correct.  Please try again!"
+  dialog:
+    ok: "OK"
 

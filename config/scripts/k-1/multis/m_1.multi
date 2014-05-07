@@ -1,0 +1,9 @@
+name 'test-brendan'
+title 'Presidents'
+description 'This multiple choice is all about the presidents of the United States.'
+
+question 'Who was the first president of the USA?'
+wrong 'Fred Flintstone'
+wrong 'Martha Washington'
+right 'George Washington'
+wrong 'George Jetson'
