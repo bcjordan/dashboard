@@ -3544,13 +3544,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Blok powtórz lub blok jeśli musi zawierać inne bloki w środku, by poprawnie działać. Upewnij się, czy wewnętrzny blok pasuje do zewnętrznego."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Pozostały Ci jeszcze bloki, które nie zostały połączone z blokiem zdarzenia."};
 
 exports.finalStage = function(d){return "Gratulacje! Ukończyłeś ostatni etap."};
 
 exports.finalStageTrophies = function(d){return "Gratulacje! Ukończyłeś ostatni etap i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Bloki Twojego programu mogą być również przedstawione w języku JavaScript, najbardziej rozpowszechnionym języku programowania:"};
+exports.generatedCodeInfo = function(d){return "Nawet najlepsze uczelnie uczą kodowania opartego o bloki (np. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Ale bloki które zostały użyte, można również zobaczyć w JavaScript, jednym z najbardziej powszechnie stosowanym języku programowania na świecie:"};
 
 exports.hashError = function(d){return "Przepraszamy, '%1' nie odpowiada żadnemu zapisanemu programowi."};
 
@@ -3572,9 +3572,9 @@ exports.nextLevel = function(d){return "Gratulacje! Rozwiązałeś Łamigłówk�
 
 exports.nextLevelTrophies = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.nextStage = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Gratulacje! Ukonczyłeś etap "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
+exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"pl",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+". (Jednakże, mogłeś użyć jedynie "+p(d,"numBlocks",0,"pl",{"one":"1 blok","other":n(d,"numBlocks")+" bloków"})+")"};
 
@@ -3614,7 +3614,7 @@ exports.tryAgain = function(d){return "Spróbuj ponownie"};
 
 exports.backToPreviousLevel = function(d){return "Wróć do poprzedniego poziomu"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Zapisz do swojej galerii"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -3640,7 +3640,7 @@ exports.tryHOC = function(d){return "Weź udział w Godzinie kodowania (the Hour
 
 exports.signup = function(d){return "Zapisz się na kurs wprowadzający"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Oto wskazówka:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
@@ -3661,19 +3661,19 @@ var MessageFormat = require("messageformat");MessageFormat.locale.pl = function 
 };
 exports.continue = function(d){return "Kontynuuj"};
 
-exports.nextLevel = function(d){return "Gratulacje! Ukończyłeś tę zagadkę."};
+exports.nextLevel = function(d){return "Gratulacje! Ukończyłeś tę łamigłówkę."};
 
 exports.no = function(d){return "Nie"};
 
-exports.numBlocksNeeded = function(d){return "Ta zagadka może być rozwiązana z użyciem %1 bloków."};
+exports.numBlocksNeeded = function(d){return "Ta łamigłówka może być rozwiązana z użyciem %1 bloków."};
 
-exports.oneTopBlock = function(d){return "W tej łamigłówce musisz połączyć ze sobą wszystkie bloki w białym obszarze pracy."};
+exports.oneTopBlock = function(d){return "W tej łamigłówce musisz połączyć ze sobą wszystkie bloki w białym obszarze roboczym."};
 
 exports.reinfFeedbackMsg = function(d){return "Możesz nacisnąć przycisk \"Spróbuj ponownie\", aby powrócić do swojej gry."};
 
 exports.share = function(d){return "Udostępnij"};
 
-exports.shareGame = function(d){return "Podziel się swoją grą:"};
+exports.shareGame = function(d){return "Udostępnij swoją grę:"};
 
 exports.yes = function(d){return "Tak"};
 

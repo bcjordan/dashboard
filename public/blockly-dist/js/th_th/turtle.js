@@ -5810,7 +5810,7 @@ exports.tryHOC = function(d){return "ลองใช้ Hour of Code สิ"};
 
 exports.signup = function(d){return "ลงทะเบียนเพื่อทดลองเรียน"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "นี่คือเคล็ดลับ:"};
 
 
 },{"messageformat":49}],37:[function(require,module,exports){

@@ -5720,7 +5720,7 @@ exports.finalStage = function(d){return "Horee! Anda berhasil menyelesaikan taha
 
 exports.finalStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan tahap akhir dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":"piala "+n(d,"numTrophies")})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blok-blok yang digunakan untuk program Anda dapat juga dibuat dengan Javascript, bahasa yang paling populer dalam dunia pemrograman:"};
+exports.generatedCodeInfo = function(d){return "Bahkan Universitas mengajar blok berbasis pengkodean (misalnya, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tetapi di bawah tenda, blok Anda telah berkumpul dapat juga ditunjukkan dalam JavaScript, dunia yang paling banyak digunakan pengkodean bahasa:"};
 
 exports.hashError = function(d){return "Maaf, '%1' tidak sesuai dengan program yang disimpan."};
 
@@ -5742,7 +5742,7 @@ exports.nextLevel = function(d){return "Horee! Anda berhasil menyelesaikan teka-
 
 exports.nextLevelTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke  "+v(d,"puzzleNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"satu":"a trophy","other":"trophies "+n(d,"numTrophies")})+"."};
 
-exports.nextStage = function(d){return "Horee! Anda berhasil menyelesaikan tahap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Selamat! Anda telah menyelesaikan "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke "+v(d,"stageNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":n(d,"numTrophies")+" piala"})+"."};
 
@@ -5784,7 +5784,7 @@ exports.tryAgain = function(d){return "Ayo coba lagi!"};
 
 exports.backToPreviousLevel = function(d){return "Kembali ke teka-teki sebelumnya"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Simpan ke galeri Anda"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5810,7 +5810,7 @@ exports.tryHOC = function(d){return "Cobalah \"Hour of Code\""};
 
 exports.signup = function(d){return "Daftarlah untuk mengikuti kursus introduksi"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Berikut adalah tip:"};
 
 
 },{"messageformat":49}],37:[function(require,module,exports){

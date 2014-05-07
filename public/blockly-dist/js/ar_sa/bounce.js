@@ -5274,11 +5274,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "إطلاق كرة جديدة"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "إطلاق كرة في اللعب."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "جعل الخاصة بك"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5350,7 +5350,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "ضع البرج في الاسفل"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "يمكنك الضغط على زر \"حاول مرة أخرى\" للعودة للعب مرة أخرى."};
 
 exports.removeSquare = function(d){return "ازل المربع"};
 
@@ -5398,7 +5398,7 @@ exports.setPaddleHardcourt = function(d){return "تعيين مضرب صعب"};
 
 exports.setPaddleRetro = function(d){return "تعيين مضرب خلفي"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "تعيين أداة المجداف"};
 
 exports.setPaddleSpeedRandom = function(d){return "تعيين سرعة المضرب عشوائي"};
 
@@ -5414,11 +5414,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "تعيين سرعة سري�
 
 exports.setPaddleSpeedTooltip = function(d){return "تعيين سرعة المضرب"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "مشاركة"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "تحقق من لعبة الارتداد الذي قمت بها. لقد كتبتها بنفسي باستخدام @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "شارك لعبتك:"};
 
 exports.turnLeft = function(d){return "اتجه إلى اليسار"};
 
@@ -5532,7 +5532,7 @@ exports.finalStage = function(d){return "تهانينا! لقد اتممت ال�
 
 exports.finalStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة النهائية وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.generatedCodeInfo = function(d){return "القطع في برنامجك تستطيع كذلك بأعادة تمثيلها في الـ Java Script , بحيث تعتبر اللغة البرمجية واسعة التكيف عالميا :"};
+exports.generatedCodeInfo = function(d){return "حتى أفضل الجامعات تعلم الترميز القائم على الكتلة (على سبيل المثال، "+v(d,"berkeleyLink")+"، "+v(d,"harvardLink")+"). ولكن تحت غطاء محرك السيارة،يمكن للكتل التي كنت قد جمعتها أيضا أن تظهر في جافا سكريبت، الأكثر استخداما على نطاق واسع كلغة ترميز في العالم:"};
 
 exports.hashError = function(d){return "عذرا , %1 لايتوافق مع اي البرامج المحفوظة ."};
 
@@ -5554,7 +5554,7 @@ exports.nextLevel = function(d){return "تهانينا ! أنت اكملت ال�
 
 exports.nextLevelTrophies = function(d){return "تهانينا! لقد أكملت اللغز "+v(d,"puzzleNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.nextStage = function(d){return "تهانينا! أنت اكملت المرحلة "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "تهانينا! يمكنك إكمال "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة "+v(d,"stageNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
@@ -5596,7 +5596,7 @@ exports.tryAgain = function(d){return "حاول مرة أخرى"};
 
 exports.backToPreviousLevel = function(d){return "الرجوع إلى المستوى السابق"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5622,7 +5622,7 @@ exports.tryHOC = function(d){return "جرب \"Hour of Code\""};
 
 exports.signup = function(d){return "سجل لمشاهدة مقدمة الدورة"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "وإليك نصيحة:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

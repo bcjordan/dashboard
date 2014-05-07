@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "নতুন বল সচল করুন"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "বল খেলার মধ্যে প্রবর্তন করান."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "আপনার নিজের বাউন্স গেম তৈরি করুন"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "put down tower"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "আপনি  পুনঃরাই আপনার খেলা প্লে করতে গিয়ে \"Try again\" বোতাম টিপতে পারেন."};
 
 exports.removeSquare = function(d){return "remove square"};
 
@@ -5345,63 +5345,63 @@ exports.repeatUntilFinish = function(d){return "শেষ পর্যন্ত 
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "এলোমেলো দৃশ্য সেট করুন"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "সেট হার্ডকোর্ট দৃশ্য"};
 
-exports.setBackgroundRetro = function(d){return "set retro scene"};
+exports.setBackgroundRetro = function(d){return "বিপরীতমুখী দৃশ্য-বিন্যাস করুন"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "ব্যাকগ্রাউন্ড ইমেজ সেট করে"};
 
-exports.setBallRandom = function(d){return "set random ball"};
+exports.setBallRandom = function(d){return "এলোমেলো বল সেট করুন"};
 
-exports.setBallHardcourt = function(d){return "set hardcourt ball"};
+exports.setBallHardcourt = function(d){return "সেট হার্ডকোর্ট বল"};
 
-exports.setBallRetro = function(d){return "set retro ball"};
+exports.setBallRetro = function(d){return "বিপরীতমুখী বল সেট করুন"};
 
-exports.setBallTooltip = function(d){return "Sets the ball image"};
+exports.setBallTooltip = function(d){return "বল এর ছবি সেট করে"};
 
-exports.setBallSpeedRandom = function(d){return "set random ball speed"};
+exports.setBallSpeedRandom = function(d){return "এলোমেলো বল গতির বিন্যাস করুন"};
 
-exports.setBallSpeedVerySlow = function(d){return "set very slow ball speed"};
+exports.setBallSpeedVerySlow = function(d){return "অতি মন্থর গতির বল সেট করুন"};
 
-exports.setBallSpeedSlow = function(d){return "set slow ball speed"};
+exports.setBallSpeedSlow = function(d){return "মন্থর গতির বল সেট করুন"};
 
-exports.setBallSpeedNormal = function(d){return "set normal ball speed"};
+exports.setBallSpeedNormal = function(d){return "স্বাভাবিক গতির বল সেট করুন"};
 
-exports.setBallSpeedFast = function(d){return "set fast ball speed"};
+exports.setBallSpeedFast = function(d){return "দ্রুত গতির বল  বিন্যাস করুন"};
 
-exports.setBallSpeedVeryFast = function(d){return "set very fast ball speed"};
+exports.setBallSpeedVeryFast = function(d){return "খুব দ্রুত গতির বল  বিন্যাস করুন"};
 
-exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
+exports.setBallSpeedTooltip = function(d){return "বল এর গতি সেট করে"};
 
-exports.setPaddleRandom = function(d){return "set random paddle"};
+exports.setPaddleRandom = function(d){return "সেট এলোমেলো প্যাডেল"};
 
-exports.setPaddleHardcourt = function(d){return "set hardcourt paddle"};
+exports.setPaddleHardcourt = function(d){return "সেট হার্ডকোর্ট প্যাডেল"};
 
-exports.setPaddleRetro = function(d){return "set retro paddle"};
+exports.setPaddleRetro = function(d){return "সেট বিপরীতমুখী প্যাডেল"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "প্যাডেল এর ছবি সেট করে"};
 
-exports.setPaddleSpeedRandom = function(d){return "set random paddle speed"};
+exports.setPaddleSpeedRandom = function(d){return "সেট এলোমেলো প্যাডেল এর গতি"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "set very slow paddle speed"};
+exports.setPaddleSpeedVerySlow = function(d){return "অতি মন্থর গতির প্যাডেল বিন্যাস করুন"};
 
-exports.setPaddleSpeedSlow = function(d){return "set slow paddle speed"};
+exports.setPaddleSpeedSlow = function(d){return "ধীর গতির প্যাডেল বিন্যাস করুন"};
 
-exports.setPaddleSpeedNormal = function(d){return "set normal paddle speed"};
+exports.setPaddleSpeedNormal = function(d){return "সাধারণ গতির প্যাডেল বিন্যাস করুন"};
 
-exports.setPaddleSpeedFast = function(d){return "set fast paddle speed"};
+exports.setPaddleSpeedFast = function(d){return "দ্রুত গতির প্যাডেল বিন্যাস করুন"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"};
+exports.setPaddleSpeedVeryFast = function(d){return "খুব দ্রুত গতির প্যাডেল বিন্যাস করুন"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
+exports.setPaddleSpeedTooltip = function(d){return "প্যাডেল এর গতি সেট করে"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "শেয়ার"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "চেক আউট বাউন্স গেম |মেড. |নিজেই লিখেছিলেন @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "আপনার খেলা শেয়ার করুন:"};
 
 exports.turnLeft = function(d){return "বামে যান"};
 
@@ -5421,9 +5421,9 @@ exports.whenDown = function(d){return "when Down arrow"};
 
 exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "যখন খেলা শুরু"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "যখন খেলা শুরু করে নিচে কর্ম সম্পাদন করে."};
 
 exports.whenLeft = function(d){return "when Left arrow"};
 

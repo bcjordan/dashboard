@@ -5614,7 +5614,7 @@ exports.incrementScoreTooltip = function(d){return "Add one to the player or opp
 
 exports.incrementPlayerScore = function(d){return "increment player score"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "داستان خودتو بساز"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5626,15 +5626,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "۲۰ پیکسل"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "۵۰ پیکسل"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "۱۰۰ پیکسل"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "۲۰۰ پیکسل"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "۴۰۰ پیکسل"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5674,7 +5674,7 @@ exports.moveTooltip = function(d){return "Move a character."};
 
 exports.nextLevel = function(d){return "تبریک! شما این مرحله را انجام دادید."};
 
-exports.no = function(d){return "نه"};
+exports.no = function(d){return "خیر"};
 
 exports.numBlocksNeeded = function(d){return "این پازل می تواند با 1% از بلوکها حل شود."};
 
@@ -5704,7 +5704,7 @@ exports.playSoundWinPoint = function(d){return "play win point sound"};
 
 exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "پخش کردن صدای چوب"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5726,7 +5726,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "شما می توانید دکمه \"دوباره امتحان کنید\" را بفشارید تا به بازیتان برگردید."};
 
 exports.repeatForever = function(d){return "repeat forever"};
 

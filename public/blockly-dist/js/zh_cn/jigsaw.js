@@ -3530,13 +3530,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "“Repeat”或“If”模块需要其他的模块充填在里面才能工作。请确保在容器模块里填入了合适的模块。"};
 
-exports.extraTopBlocks = function(d){return "你有多余的块没有附加到任何的事件块。"};
+exports.extraTopBlocks = function(d){return "你有多余的块，这些块没有附加到任何的事件块。"};
 
-exports.finalStage = function(d){return "祝贺你 ！您已完成最终章。"};
+exports.finalStage = function(d){return "祝贺你 ！您已完成最后一章。"};
 
 exports.finalStageTrophies = function(d){return "祝贺你 ！已完成最终章并赢得了 "+p(d,"numTrophies",0,"zh",{"one":"1个奖杯","other":n(d,"numTrophies")+" 奖杯"})+"。"};
 
-exports.generatedCodeInfo = function(d){return "你的程序里所用到的各种模块也可以使用 Javascript来书写展示，一种世界上最广泛被采用的程序语言:"};
+exports.generatedCodeInfo = function(d){return "即使是顶级的大学教授基于块的编码(如。"+v(d,"berkeleyLink")+","+v(d,"harvardLink")+")。但是,你组装的模块也可以显示在JavaScript中,世界上最广泛使用的编程语言:\n"};
 
 exports.hashError = function(d){return "对不起，'%1' 并不对应任何已保存的程序。"};
 
@@ -3558,21 +3558,21 @@ exports.nextLevel = function(d){return "祝贺你 ！完成了谜题 "+v(d,"puzz
 
 exports.nextLevelTrophies = function(d){return "祝贺你 ！完成了谜题 "+v(d,"puzzleNumber")+"，并且赢得了"+p(d,"numTrophies",0,"zh",{"one":"1个奖杯","other":n(d,"numTrophies")+" 奖杯"})+"."};
 
-exports.nextStage = function(d){return "祝贺你 ！完成了第 "+v(d,"stageNumber")+"章。"};
+exports.nextStage = function(d){return "祝贺你 ！您完成了 "+v(d,"stageName")+"。"};
 
-exports.nextStageTrophies = function(d){return "祝贺你 ！完成了第 "+v(d,"stageNumber")+"章，并赢得 "+p(d,"numTrophies",0,"zh",{"one":"1个奖杯","other":n(d,"numTrophies")+" 奖杯"})+"。"};
+exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"zh",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "祝贺你 ！完成了谜题 "+v(d,"puzzleNumber")+"。(然而，你其实可以只使用"+p(d,"numBlocks",0,"zh",{"one":"1个模块","other":n(d,"numBlocks")+" 模块"})+"。)"};
 
 exports.numLinesOfCodeWritten = function(d){return "你刚刚写了"+p(d,"numLines",0,"zh",{"one":"1行","other":n(d,"numLines")+" 行"})+" 的代码 ！"};
 
-exports.puzzleTitle = function(d){return "第"+v(d,"stage_total")+"章之谜题 "+v(d,"puzzle_number")+" "};
+exports.puzzleTitle = function(d){return "第"+v(d,"stage_total")+"章的谜题 "+v(d,"puzzle_number")+" "};
 
 exports.resetProgram = function(d){return "重置"};
 
-exports.runProgram = function(d){return "启动程序"};
+exports.runProgram = function(d){return "运行"};
 
-exports.runTooltip = function(d){return "运行你在工作区里由各种模块组装定义出的程序。"};
+exports.runTooltip = function(d){return "运行你在工作区里由各种模块组装出的程序。"};
 
 exports.showCodeHeader = function(d){return "显示代码"};
 
@@ -3586,7 +3586,7 @@ exports.tooFewBlocksMsg = function(d){return "您正在使用所有必要类型�
 
 exports.tooManyBlocksMsg = function(d){return "可以使用 < x id = 'START_SPAN' / > < x id = 'END_SPAN' / > 模块来解决这个谜题。"};
 
-exports.tooMuchWork = function(d){return "你让我多做了很多工作 ！你可以尝试少重复几次吗？"};
+exports.tooMuchWork = function(d){return "你让我多做很多工作 ！你可以尝试少重复几次吗？"};
 
 exports.flappySpecificFail = function(d){return "您的代码看起来不错-每次点击它将飞动一下。但你需要点击多次使它飞到目标。"};
 
@@ -3600,7 +3600,7 @@ exports.tryAgain = function(d){return "再次尝试"};
 
 exports.backToPreviousLevel = function(d){return "返回到上一级"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "保存到您的画廊"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -3622,24 +3622,24 @@ exports.wantToLearn = function(d){return "想要学习如何写代码吗？"};
 
 exports.watchVideo = function(d){return "观看视频"};
 
-exports.tryHOC = function(d){return "来试试编程训练"};
+exports.tryHOC = function(d){return "来试试”编程一小时“项目！"};
 
 exports.signup = function(d){return "注册账号后参加简介课程"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "这里有一个提示："};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.zh=function(n){return "other"}
 exports.continue = function(d){return "继续"};
 
-exports.nextLevel = function(d){return "恭喜你！你解决了这个谜题。"};
+exports.nextLevel = function(d){return "恭喜！您已完成了这个难题。"};
 
 exports.no = function(d){return "不"};
 
-exports.numBlocksNeeded = function(d){return "这个谜题可以用%1个语句块解决。"};
+exports.numBlocksNeeded = function(d){return "这个难题可以用%1个块解决。"};
 
-exports.oneTopBlock = function(d){return "要解开这个谜题，你需要把白色工作区中所有的语句块连在一起。"};
+exports.oneTopBlock = function(d){return "对于这个难题，需要合并所有堆叠在白色的工作区中的块。"};
 
 exports.reinfFeedbackMsg = function(d){return "你可以按“重试”按钮来返回你的游戏"};
 

@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "lanceer nieuwe bal"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Lanceer een bal het spel in."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Maak je eigen Bounce-spel"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "zet een toren neer"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Klik 'Probeer opnieuw' om terug te gaan naar je spel."};
 
 exports.removeSquare = function(d){return "verwijder vierkant"};
 
@@ -5345,23 +5345,23 @@ exports.repeatUntilFinish = function(d){return "herhaal tot je klaar bent"};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "Kies willekeurige scène"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "kies hardcourt scène"};
 
-exports.setBackgroundRetro = function(d){return "set retro scene"};
+exports.setBackgroundRetro = function(d){return "kies retro scène"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Stelt de achtergrondafbeelding in"};
 
-exports.setBallRandom = function(d){return "set random ball"};
+exports.setBallRandom = function(d){return "kies willekeurige bal"};
 
-exports.setBallHardcourt = function(d){return "set hardcourt ball"};
+exports.setBallHardcourt = function(d){return "kies hardcourtbal"};
 
-exports.setBallRetro = function(d){return "set retro ball"};
+exports.setBallRetro = function(d){return "kies retrobal"};
 
-exports.setBallTooltip = function(d){return "Sets the ball image"};
+exports.setBallTooltip = function(d){return "Stelt de balafbeelding in"};
 
-exports.setBallSpeedRandom = function(d){return "set random ball speed"};
+exports.setBallSpeedRandom = function(d){return "kies willekeurige balsnelheid"};
 
 exports.setBallSpeedVerySlow = function(d){return "zeer langzame bal snelheid instellen"};
 
@@ -5369,39 +5369,39 @@ exports.setBallSpeedSlow = function(d){return "langzame bal snelheid instellen"}
 
 exports.setBallSpeedNormal = function(d){return "normale bal snelheid instellen"};
 
-exports.setBallSpeedFast = function(d){return "set fast ball speed"};
+exports.setBallSpeedFast = function(d){return "kies snelle balsnelheid"};
 
-exports.setBallSpeedVeryFast = function(d){return "set very fast ball speed"};
+exports.setBallSpeedVeryFast = function(d){return "kies zeer snelle balsnelheid"};
 
-exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
+exports.setBallSpeedTooltip = function(d){return "Stelt de balsnelheid"};
 
-exports.setPaddleRandom = function(d){return "set random paddle"};
+exports.setPaddleRandom = function(d){return "kies willekeurige peddel"};
 
-exports.setPaddleHardcourt = function(d){return "set hardcourt paddle"};
+exports.setPaddleHardcourt = function(d){return "kies hardcourtpeddel"};
 
-exports.setPaddleRetro = function(d){return "set retro paddle"};
+exports.setPaddleRetro = function(d){return "kies retropeddel"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Stelt de peddel in"};
 
-exports.setPaddleSpeedRandom = function(d){return "set random paddle speed"};
+exports.setPaddleSpeedRandom = function(d){return "kies willekeurige peddelsnelheid"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "set very slow paddle speed"};
+exports.setPaddleSpeedVerySlow = function(d){return "kies erg langzame peddelsnelheid"};
 
-exports.setPaddleSpeedSlow = function(d){return "set slow paddle speed"};
+exports.setPaddleSpeedSlow = function(d){return "kies langzame peddelsnelheid"};
 
-exports.setPaddleSpeedNormal = function(d){return "set normal paddle speed"};
+exports.setPaddleSpeedNormal = function(d){return "kies normale peddelsnelheid"};
 
-exports.setPaddleSpeedFast = function(d){return "set fast paddle speed"};
+exports.setPaddleSpeedFast = function(d){return "kies snelle peddelsnelheid"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"};
+exports.setPaddleSpeedVeryFast = function(d){return "kies zeer snelle peddelsnelheid"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
+exports.setPaddleSpeedTooltip = function(d){return "Stelt de snelheid van de peddel in"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Delen"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Speel hier het Bounce-spel dat ik zelf heb gemaakt. Ik maakte het met @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Deel je spel met anderen:"};
 
 exports.turnLeft = function(d){return "Sla linksaf"};
 
@@ -5492,13 +5492,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "De \"herhaal\" of \"als\" blokken hebben andere blokken in hun nodig om te werken. Zorg ervoor dat de binnenste blok correct past in de bevattende blok."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Je hebt blokken over die niet aan een gebeurtenisblok geplakt zijn."};
 
 exports.finalStage = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid."};
 
 exports.finalStageTrophies = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.generatedCodeInfo = function(d){return "De blokken voor je programma kunnen ook worden weergegeven in JavaScript, de meest gebruikte programmeertaal in de wereld:"};
+exports.generatedCodeInfo = function(d){return "Zelf op topuniversiteiten wordt les gegevens met programmeertalen die op blokken zijn gebaseerd (bijv. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Maar onder de motorkop kunnen de blokken waarmee je een programma hebt gemaakt ook getoond worden in JavaScript, de programmeertaal die wereldwijd het meest wordt gebruikt:"};
 
 exports.hashError = function(d){return "Sorry, '%1' komt niet overeen met een opgeslagen programma."};
 
@@ -5512,7 +5512,7 @@ exports.levelIncompleteError = function(d){return "U gebruikt al de nodige typen
 
 exports.listVariable = function(d){return "lijst"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Maak je eigen 'Flappy'-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Probeer een of meer van de blokken onderaan om deze puzzel op te lossen."};
 
@@ -5520,9 +5520,9 @@ exports.nextLevel = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,
 
 exports.nextLevelTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"puzzleNumber")+" op en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.nextStage = function(d){return "Gefeliciteerd! U hebt fase "+v(d,"stageNumber")+" opgelost."};
+exports.nextStage = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af."};
 
-exports.nextStageTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"stageNumber")+" en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
+exports.nextStageTrophies = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af en je hebt "+p(d,"numTrophies",0,"nl",{"one":"een medaille","other":n(d,"numTrophies")+" medailles"})+" gewonnen."};
 
 exports.numBlocksNeeded = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,"puzzleNumber")+". (Nochtans, u  kon alleen "+p(d,"numBlocks",0,"nl",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)  gebruiken"};
 
@@ -5550,7 +5550,7 @@ exports.tooManyBlocksMsg = function(d){return "Deze puzzel kan worden opgelost m
 
 exports.tooMuchWork = function(d){return "Je laat me veel werk doen! Kun je proberen minder te herhalen?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Je programma ziet er goed uit - bij elke klik zal hij flapperen. Maak je moet nu heel vaak klikken om naar het doel te flapperen."};
 
 exports.toolboxHeader = function(d){return "Blokken"};
 
@@ -5562,7 +5562,7 @@ exports.tryAgain = function(d){return "Probeer opnieuw"};
 
 exports.backToPreviousLevel = function(d){return "Terug naar het vorige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Sla op in je galerij"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5588,7 +5588,7 @@ exports.tryHOC = function(d){return "Probeer \"Hour of Code\""};
 
 exports.signup = function(d){return "Neem deel aan de introductie cursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Een tip:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

@@ -5714,13 +5714,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "De \"herhaal\" of \"als\" blokken hebben andere blokken in hun nodig om te werken. Zorg ervoor dat de binnenste blok correct past in de bevattende blok."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Je hebt blokken over die niet aan een gebeurtenisblok geplakt zijn."};
 
 exports.finalStage = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid."};
 
 exports.finalStageTrophies = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.generatedCodeInfo = function(d){return "De blokken voor je programma kunnen ook worden weergegeven in JavaScript, de meest gebruikte programmeertaal in de wereld:"};
+exports.generatedCodeInfo = function(d){return "Zelf op topuniversiteiten wordt les gegevens met programmeertalen die op blokken zijn gebaseerd (bijv. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Maar onder de motorkop kunnen de blokken waarmee je een programma hebt gemaakt ook getoond worden in JavaScript, de programmeertaal die wereldwijd het meest wordt gebruikt:"};
 
 exports.hashError = function(d){return "Sorry, '%1' komt niet overeen met een opgeslagen programma."};
 
@@ -5734,7 +5734,7 @@ exports.levelIncompleteError = function(d){return "U gebruikt al de nodige typen
 
 exports.listVariable = function(d){return "lijst"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Maak je eigen 'Flappy'-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Probeer een of meer van de blokken onderaan om deze puzzel op te lossen."};
 
@@ -5742,9 +5742,9 @@ exports.nextLevel = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,
 
 exports.nextLevelTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"puzzleNumber")+" op en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.nextStage = function(d){return "Gefeliciteerd! U hebt fase "+v(d,"stageNumber")+" opgelost."};
+exports.nextStage = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af."};
 
-exports.nextStageTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"stageNumber")+" en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
+exports.nextStageTrophies = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af en je hebt "+p(d,"numTrophies",0,"nl",{"one":"een medaille","other":n(d,"numTrophies")+" medailles"})+" gewonnen."};
 
 exports.numBlocksNeeded = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,"puzzleNumber")+". (Nochtans, u  kon alleen "+p(d,"numBlocks",0,"nl",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)  gebruiken"};
 
@@ -5772,7 +5772,7 @@ exports.tooManyBlocksMsg = function(d){return "Deze puzzel kan worden opgelost m
 
 exports.tooMuchWork = function(d){return "Je laat me veel werk doen! Kun je proberen minder te herhalen?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Je programma ziet er goed uit - bij elke klik zal hij flapperen. Maak je moet nu heel vaak klikken om naar het doel te flapperen."};
 
 exports.toolboxHeader = function(d){return "Blokken"};
 
@@ -5784,7 +5784,7 @@ exports.tryAgain = function(d){return "Probeer opnieuw"};
 
 exports.backToPreviousLevel = function(d){return "Terug naar het vorige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Sla op in je galerij"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5810,7 +5810,7 @@ exports.tryHOC = function(d){return "Probeer \"Hour of Code\""};
 
 exports.signup = function(d){return "Neem deel aan de introductie cursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Een tip:"};
 
 
 },{"messageformat":49}],37:[function(require,module,exports){
@@ -5859,7 +5859,7 @@ exports.jumpBackward = function(d){return "spring achteruit met"};
 
 exports.jumpForward = function(d){return "spring vooruit met"};
 
-exports.jumpTooltip = function(d){return "Verplaatst de artiest zonder sporen na te laten."};
+exports.jumpTooltip = function(d){return "Verplaatst de kunstenaar zonder sporen na te laten."};
 
 exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
 
@@ -5899,17 +5899,17 @@ exports.penTooltip = function(d){return "Optillen of laten zakken van het potloo
 
 exports.penUp = function(d){return "potlood optillen"};
 
-exports.reinfFeedbackMsg = function(d){return "Does this look like what you want? You can press the \"Try again\" button to see your drawing."};
+exports.reinfFeedbackMsg = function(d){return "Ziet dit eruit zoals je wilt? Je kunt op de 'Opnieuw' knop drukken om jouw tekening te zien."};
 
 exports.setColour = function(d){return "kleur instellen"};
 
 exports.setWidth = function(d){return "dikte instellen"};
 
-exports.shareDrawing = function(d){return "Share your drawing:"};
+exports.shareDrawing = function(d){return "Deel je tekening:"};
 
 exports.showMe = function(d){return "Laat zien"};
 
-exports.showTurtle = function(d){return "laat artiest zien"};
+exports.showTurtle = function(d){return "laat kunstenaar zien"};
 
 exports.tooFewColours = function(d){return "Je moet in ieder geval %1 verschillende kleuren gebruiken voor deze puzzel. Je hebt er %2 gebruikt."};
 
@@ -5917,11 +5917,11 @@ exports.turnLeft = function(d){return "draai links met"};
 
 exports.turnRight = function(d){return "draai rechts met"};
 
-exports.turnRightTooltip = function(d){return "Draait de artiest rechts met de opgegeven hoek."};
+exports.turnRightTooltip = function(d){return "Draait de kunstenaar rechts met de opgegeven hoek."};
 
-exports.turnTooltip = function(d){return "Draait de artiest links of rechts met het opgegeven aantal graden."};
+exports.turnTooltip = function(d){return "Draait de kunstenaar links of rechts met het opgegeven aantal graden."};
 
-exports.turtleVisibilityTooltip = function(d){return "Maakt de artiest zichtbaar of onzichtbaar."};
+exports.turtleVisibilityTooltip = function(d){return "Maakt de kunstenaar zichtbaar of onzichtbaar."};
 
 exports.widthTooltip = function(d){return "Verandert de dikte van het potlood."};
 

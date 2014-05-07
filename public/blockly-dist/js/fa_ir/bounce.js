@@ -5257,7 +5257,7 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "پرتاب توپ جدید"};
 
 exports.launchBallTooltip = function(d){return "Launch a ball into play."};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "برج را پایین بکشید"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "شما می توانید دکمه \"دوباره امتحان کن\" را بفشارید تا به بازیتان برگردید."};
 
 exports.removeSquare = function(d){return "مربع را حزف کن"};
 
@@ -5397,11 +5397,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "تنظیم سرعت سری�
 
 exports.setPaddleSpeedTooltip = function(d){return "تنظیم سرعت راکت ها"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "به اشتراک گذاری"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "بازی Bounce که من ساخته ام را نگاه کن. من خودم با @codeorg آن را نوشته ام"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "بازی تان را به اشتراک بگذارید  :"};
 
 exports.turnLeft = function(d){return "بپیچ به چپ"};
 
@@ -5423,7 +5423,7 @@ exports.whenDownTooltip = function(d){return "Execute the actions below when the
 
 exports.whenGameStarts = function(d){return "وقتی که بازی شروع می شود"};
 
-exports.whenGameStartsTooltip = function(d){return "اجرای اقدامات زیر وقتی که بازی شروع شد."};
+exports.whenGameStartsTooltip = function(d){return "وقتی بازی شروع شد، اقدامات زیر را انحام دهید."};
 
 exports.whenLeft = function(d){return "when Left arrow"};
 

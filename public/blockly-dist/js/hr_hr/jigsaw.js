@@ -3667,11 +3667,11 @@ exports.numBlocksNeeded = function(d){return "Ovaj zadatak se može riješiti s 
 
 exports.oneTopBlock = function(d){return "Za ovaj zadatak trebaš složiti zajedno sve blokove na bijelom radnom prostoru."};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Pritisni tipku \"Pokušaj ponovno\" da se vratiš na igru."};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Podijeli"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Podijeli svoju igru:"};
 
 exports.yes = function(d){return "Da"};
 

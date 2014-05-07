@@ -3536,7 +3536,7 @@ exports.finalStage = function(d){return "Horee! Anda berhasil menyelesaikan taha
 
 exports.finalStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan tahap akhir dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":"piala "+n(d,"numTrophies")})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blok-blok yang digunakan untuk program Anda dapat juga dibuat dengan Javascript, bahasa yang paling populer dalam dunia pemrograman:"};
+exports.generatedCodeInfo = function(d){return "Bahkan Universitas mengajar blok berbasis pengkodean (misalnya, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tetapi di bawah tenda, blok Anda telah berkumpul dapat juga ditunjukkan dalam JavaScript, dunia yang paling banyak digunakan pengkodean bahasa:"};
 
 exports.hashError = function(d){return "Maaf, '%1' tidak sesuai dengan program yang disimpan."};
 
@@ -3558,7 +3558,7 @@ exports.nextLevel = function(d){return "Horee! Anda berhasil menyelesaikan teka-
 
 exports.nextLevelTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke  "+v(d,"puzzleNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"satu":"a trophy","other":"trophies "+n(d,"numTrophies")})+"."};
 
-exports.nextStage = function(d){return "Horee! Anda berhasil menyelesaikan tahap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Selamat! Anda telah menyelesaikan "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke "+v(d,"stageNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":n(d,"numTrophies")+" piala"})+"."};
 
@@ -3600,7 +3600,7 @@ exports.tryAgain = function(d){return "Ayo coba lagi!"};
 
 exports.backToPreviousLevel = function(d){return "Kembali ke teka-teki sebelumnya"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Simpan ke galeri Anda"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -3626,26 +3626,26 @@ exports.tryHOC = function(d){return "Cobalah \"Hour of Code\""};
 
 exports.signup = function(d){return "Daftarlah untuk mengikuti kursus introduksi"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Berikut adalah tip:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.id=function(n){return "other"}
-exports.continue = function(d){return "lanjutkan"};
+exports.continue = function(d){return "Lanjutkan"};
 
-exports.nextLevel = function(d){return "Selamat! Kamu telah menyelesaikan teka-teki ini."};
+exports.nextLevel = function(d){return "Horee! Anda telah menyelesaikan teka-teki ini."};
 
 exports.no = function(d){return "Tidak"};
 
 exports.numBlocksNeeded = function(d){return "Teka-teki ini dapat diselesaikan dengan %1 blok."};
 
-exports.oneTopBlock = function(d){return "untuk teka-teki ini, kamu perlu menyusun semua blok-blok di dalam lembar kerja putih."};
+exports.oneTopBlock = function(d){return "Teka-teki ini, Anda perlu mengumpulkan semua blok dari ruang kerja putih."};
 
 exports.reinfFeedbackMsg = function(d){return "Anda dapat menekan tombol \"Coba lagi\" untuk kembali bermain."};
 
 exports.share = function(d){return "Bagikan"};
 
-exports.shareGame = function(d){return "Bagi permainanmu:"};
+exports.shareGame = function(d){return "Bagikan permainanmu:"};
 
 exports.yes = function(d){return "Ya"};
 

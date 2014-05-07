@@ -5487,13 +5487,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "De \"herhaal\" of \"als\" blokken hebben andere blokken in hun nodig om te werken. Zorg ervoor dat de binnenste blok correct past in de bevattende blok."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Je hebt blokken over die niet aan een gebeurtenisblok geplakt zijn."};
 
 exports.finalStage = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid."};
 
 exports.finalStageTrophies = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.generatedCodeInfo = function(d){return "De blokken voor je programma kunnen ook worden weergegeven in JavaScript, de meest gebruikte programmeertaal in de wereld:"};
+exports.generatedCodeInfo = function(d){return "Zelf op topuniversiteiten wordt les gegevens met programmeertalen die op blokken zijn gebaseerd (bijv. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Maar onder de motorkop kunnen de blokken waarmee je een programma hebt gemaakt ook getoond worden in JavaScript, de programmeertaal die wereldwijd het meest wordt gebruikt:"};
 
 exports.hashError = function(d){return "Sorry, '%1' komt niet overeen met een opgeslagen programma."};
 
@@ -5507,7 +5507,7 @@ exports.levelIncompleteError = function(d){return "U gebruikt al de nodige typen
 
 exports.listVariable = function(d){return "lijst"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Maak je eigen 'Flappy'-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Probeer een of meer van de blokken onderaan om deze puzzel op te lossen."};
 
@@ -5515,9 +5515,9 @@ exports.nextLevel = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,
 
 exports.nextLevelTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"puzzleNumber")+" op en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.nextStage = function(d){return "Gefeliciteerd! U hebt fase "+v(d,"stageNumber")+" opgelost."};
+exports.nextStage = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af."};
 
-exports.nextStageTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"stageNumber")+" en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
+exports.nextStageTrophies = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af en je hebt "+p(d,"numTrophies",0,"nl",{"one":"een medaille","other":n(d,"numTrophies")+" medailles"})+" gewonnen."};
 
 exports.numBlocksNeeded = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,"puzzleNumber")+". (Nochtans, u  kon alleen "+p(d,"numBlocks",0,"nl",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)  gebruiken"};
 
@@ -5545,7 +5545,7 @@ exports.tooManyBlocksMsg = function(d){return "Deze puzzel kan worden opgelost m
 
 exports.tooMuchWork = function(d){return "Je laat me veel werk doen! Kun je proberen minder te herhalen?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Je programma ziet er goed uit - bij elke klik zal hij flapperen. Maak je moet nu heel vaak klikken om naar het doel te flapperen."};
 
 exports.toolboxHeader = function(d){return "Blokken"};
 
@@ -5557,7 +5557,7 @@ exports.tryAgain = function(d){return "Probeer opnieuw"};
 
 exports.backToPreviousLevel = function(d){return "Terug naar het vorige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Sla op in je galerij"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5583,7 +5583,7 @@ exports.tryHOC = function(d){return "Probeer \"Hour of Code\""};
 
 exports.signup = function(d){return "Neem deel aan de introductie cursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Een tip:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5614,7 +5614,7 @@ exports.incrementScoreTooltip = function(d){return "Add one to the player or opp
 
 exports.incrementPlayerScore = function(d){return "increment player score"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Maak je eigen verhaal"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5654,39 +5654,39 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "omlaag"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "naar links"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "naar rechts"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "omhoog"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
 exports.moveTooltip = function(d){return "Move a character."};
 
-exports.nextLevel = function(d){return "Gefeliciteerd! U heeft de puzzel voltooid."};
+exports.nextLevel = function(d){return "Gefeliciteerd! Je hebt de puzzel voltooid."};
 
-exports.no = function(d){return "nee"};
+exports.no = function(d){return "Nee"};
 
-exports.numBlocksNeeded = function(d){return "deze puzzel kan opgelost worden met %1 blokken."};
+exports.numBlocksNeeded = function(d){return "Deze puzzel kan worden opgelost met %1 blokken."};
 
-exports.oneTopBlock = function(d){return "voor deze puzzel moet je de blokken in de witte werkruimte opstapelen."};
+exports.oneTopBlock = function(d){return "Voor deze puzzel moet je alle blokken in de witte werkruimte opstapelen."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "krakend geluid afspelen"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "doel 1 geluid afspelen"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "doel 2 geluid afspelen"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "raak-geluid afspelen"};
 
 exports.playSoundLosePoint = function(d){return "play lose point sound"};
 

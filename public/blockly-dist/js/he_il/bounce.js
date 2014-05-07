@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "האם זה קיר?"};
 
 exports.isWallTooltip = function(d){return "מחזיר נכון אם יש כאן קיר"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "תזרוק /  תמסור כדור חדש"};
 
 exports.launchBallTooltip = function(d){return "Launch a ball into play."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "תיצור משחק קופצני משלך"};
 
 exports.moveDown = function(d){return "הזז למטה"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "תוריד מגדל למטה"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "אתה יכול ללחוץ על הכפתור \"נסה שוב\" כדי לחזור לשחק את המשחק שלך"};
 
 exports.removeSquare = function(d){return "הסר ריבוע"};
 
@@ -5359,9 +5359,9 @@ exports.setBallHardcourt = function(d){return "set hardcourt ball"};
 
 exports.setBallRetro = function(d){return "set retro ball"};
 
-exports.setBallTooltip = function(d){return "Sets the ball image"};
+exports.setBallTooltip = function(d){return "תסדר את התמונה של הכדור"};
 
-exports.setBallSpeedRandom = function(d){return "set random ball speed"};
+exports.setBallSpeedRandom = function(d){return "תסדר את המהירות של הכדור האקראי"};
 
 exports.setBallSpeedVerySlow = function(d){return "set very slow ball speed"};
 
@@ -5401,7 +5401,7 @@ exports.share = function(d){return "Share"};
 
 exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "שתף את המשחק שלך:"};
 
 exports.turnLeft = function(d){return "פנה שמאלה"};
 
@@ -5421,9 +5421,9 @@ exports.whenDown = function(d){return "כאשר חץ למטה"};
 
 exports.whenDownTooltip = function(d){return "בצע את הפעולות להלן כאשר נלחץ על המקש חץ למטה."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "כאשר המשחק מתחיל"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "בצע את הפעולות להלן כאשר המשחק מתחיל."};
 
 exports.whenLeft = function(d){return "כאשר חץ שמאלה"};
 
@@ -5492,7 +5492,7 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "בלוקי ה\"חזור שוב\" או \"אם\" צריכים להיות בעלי בלוקים פנימיים כדי לעבוד. וודא כי הבלוק הפנימי מתאים בבלוק המכיל."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "יש לך קוביות מיותרות שלא מחוברת לקוביית הארוע."};
 
 exports.finalStage = function(d){return "כל הכבוד! השלמת את השלב הסופי."};
 
@@ -5512,7 +5512,7 @@ exports.levelIncompleteError = function(d){return "הנך משתמש בכל סו
 
 exports.listVariable = function(d){return "רשימה"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "תיצור משחק פלפי משלך"};
 
 exports.missingBlocksErrorMsg = function(d){return "השתמש באחד או יותר מהבלוקים להלן כדי לפתור את החידה."};
 
@@ -5520,7 +5520,7 @@ exports.nextLevel = function(d){return "כל הכבוד! השלמת את חיד�
 
 exports.nextLevelTrophies = function(d){return "כל הכבוד! השלמת את חידה "+v(d,"puzzleNumber")+" וזכית ב"+p(d,"numTrophies",0,"he",{"one":"פרס","other":n(d,"numTrophies")+" פרסים"})+"."};
 
-exports.nextStage = function(d){return "כל הכבוד! השלמת את שלב "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "מזל טוב! השלמת "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "כל הכבוד! השלמת את שלב "+v(d,"stageNumber")+" וזכית ב"+p(d,"numTrophies",0,"he",{"one":"פרס","other":n(d,"numTrophies")+" פרסים"})+"."};
 
@@ -5550,7 +5550,7 @@ exports.tooManyBlocksMsg = function(d){return "ניתן לפתור את החיד
 
 exports.tooMuchWork = function(d){return "גרמת לי להרבה עבודה! האם אתה יכול לנסות לחזור פחות פעמים?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "הקוד שלך נראה טוב -. זה יעוף עם כל לחיצה. אבל אתה צריך ללחוץ הרבה פעמים כדי לנופף אל המטרה."};
 
 exports.toolboxHeader = function(d){return "בלוקים"};
 
@@ -5562,7 +5562,7 @@ exports.tryAgain = function(d){return "נסה שוב"};
 
 exports.backToPreviousLevel = function(d){return "חזרה לשלב הקודם"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "לשמור את הגלריה שלך"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5588,7 +5588,7 @@ exports.tryHOC = function(d){return "נסה את \"שעת הקוד\" (Hour of Co
 
 exports.signup = function(d){return "הירשם לקורס המבוא"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "הנה עצה:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

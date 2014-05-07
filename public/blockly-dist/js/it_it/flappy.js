@@ -4734,7 +4734,7 @@ exports.finalStage = function(d){return "Complimenti! Hai completato l'ultima le
 
 exports.finalStageTrophies = function(d){return "Complimenti! Hai completato l'ultima lezione e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
 
-exports.generatedCodeInfo = function(d){return "I blocchi per il tuo programma possono essere rappresentati anche in JavaScript, uno dei linguaggi di programmazione più usati al mondo:"};
+exports.generatedCodeInfo = function(d){return "Anche le migliori università (p.es., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+") insegnano la programmazione visuale con i blocchi. Ma i blocchi che metti insieme possono essere rappresentati anche in JavaScript, uno dei linguaggi di programmazione più usati al mondo:"};
 
 exports.hashError = function(d){return "Siamo spiacenti, '%1' non corrisponde ad alcun programma salvato."};
 
@@ -4748,23 +4748,23 @@ exports.levelIncompleteError = function(d){return "Stai usando tutti i tipi di b
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Costruisci il tuo gioco Flappy"};
+exports.makeYourOwnFlappy = function(d){return "Costruisci la tua versione del gioco Flappy"};
 
-exports.missingBlocksErrorMsg = function(d){return "Prova uno o più dei blocchi che trovi qui sotto per risolvere questo puzzle."};
+exports.missingBlocksErrorMsg = function(d){return "Prova uno o più dei blocchi che trovi qui sotto per risolvere questo esercizio."};
 
-exports.nextLevel = function(d){return "Complimenti! Hai completato il puzzle "+v(d,"puzzleNumber")+"."};
+exports.nextLevel = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+"."};
 
-exports.nextLevelTrophies = function(d){return "Complimenti! Hai completato il Puzzle "+v(d,"puzzleNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
+exports.nextLevelTrophies = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.nextStage = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
+exports.nextStageTrophies = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageName")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Complimenti! Hai completato il Puzzle "+v(d,"puzzleNumber")+". (Avresti però potuto usare solo "+p(d,"numBlocks",0,"it",{"one":"1 blocco","other":n(d,"numBlocks")+" blocchi"})+".)"};
+exports.numBlocksNeeded = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+". (Avresti però potuto usare solo "+p(d,"numBlocks",0,"it",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
 
 exports.numLinesOfCodeWritten = function(d){return "Hai appena scritto "+p(d,"numLines",0,"it",{"one":"1 linea","other":n(d,"numLines")+" linee"})+" di codice!"};
 
-exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" di "+v(d,"stage_total")};
+exports.puzzleTitle = function(d){return "Esercizio "+v(d,"puzzle_number")+" di "+v(d,"stage_total")};
 
 exports.resetProgram = function(d){return "Ricomincia"};
 
@@ -4782,7 +4782,7 @@ exports.textVariable = function(d){return "testo"};
 
 exports.tooFewBlocksMsg = function(d){return "Stai usando tutti i tipi di blocchi necessari, ma prova usando più blocchi o usandoli diversamente."};
 
-exports.tooManyBlocksMsg = function(d){return "Questo puzzle può essere risolto con < x id= 'START_SPAN'/><x id='END_SPAN'/> blocchi."};
+exports.tooManyBlocksMsg = function(d){return "Questo esercizio può essere risolto con <x id='START_SPAN'/><x id='END_SPAN'/> blocchi."};
 
 exports.tooMuchWork = function(d){return "Mi hai fatto fare un sacco di lavoro!  Puoi provare a farmi fare meno ripetizioni?"};
 
@@ -4798,7 +4798,7 @@ exports.tryAgain = function(d){return "Riprova"};
 
 exports.backToPreviousLevel = function(d){return "Torna al livello precedente"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Salva nella tua galleria"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -4824,12 +4824,12 @@ exports.tryHOC = function(d){return "Prova l'Ora di Codice"};
 
 exports.signup = function(d){return "Iscriviti al corso introduttivo"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ecco un suggerimento:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.it=function(n){return n===1?"one":"other"}
-exports.continue = function(d){return "Continua"};
+exports.continue = function(d){return "Prosegui"};
 
 exports.doCode = function(d){return "esegui"};
 
@@ -4839,7 +4839,7 @@ exports.endGame = function(d){return "fine del gioco"};
 
 exports.endGameTooltip = function(d){return "Termina il gioco."};
 
-exports.finalLevel = function(d){return "Complimenti! Hai risolto il puzzle finale."};
+exports.finalLevel = function(d){return "Complimenti! Hai risolto l'esercizio finale."};
 
 exports.flap = function(d){return "sbatti le ali"};
 
@@ -4861,13 +4861,13 @@ exports.incrementPlayerScore = function(d){return "aggiungi un punto"};
 
 exports.incrementPlayerScoreTooltip = function(d){return "Aggiunge uno al punteggio attuale del giocatore."};
 
-exports.nextLevel = function(d){return "Complimenti! Hai completato questo puzzle."};
+exports.nextLevel = function(d){return "Complimenti! Hai completato questo esercizio."};
 
 exports.no = function(d){return "No"};
 
-exports.numBlocksNeeded = function(d){return "Questo puzzle può essere risolto con %1 blocchi."};
+exports.numBlocksNeeded = function(d){return "Questo esercizio può essere risolto con %1 blocchi."};
 
-exports.oneTopBlock = function(d){return "Per questo puzzle, devi sovrapporre verticalmente tutti i blocchi nell'area di lavoro bianca."};
+exports.oneTopBlock = function(d){return "Per questo esercizio, devi sovrapporre verticalmente tutti i blocchi nell'area di lavoro bianca."};
 
 exports.playSoundRandom = function(d){return "riproduci un suono scelto a caso"};
 
@@ -4917,7 +4917,7 @@ exports.setBackgroundSanta = function(d){return "imposta la scena Natale"};
 
 exports.setBackgroundTooltip = function(d){return "Imposta l'immagine di sfondo"};
 
-exports.setGapRandom = function(d){return "imposta una distanza casuale"};
+exports.setGapRandom = function(d){return "imposta una distanza scelta a caso"};
 
 exports.setGapVerySmall = function(d){return "imposta una distanza molto piccola"};
 
@@ -5019,7 +5019,7 @@ exports.setSpeedTooltip = function(d){return "Imposta la velocità con cui Flapp
 
 exports.share = function(d){return "Condividi"};
 
-exports.shareFlappyTwitter = function(d){return "Guarda il gioco Flappy che ho creato io. L'ho fatto da solo @codeorg"};
+exports.shareFlappyTwitter = function(d){return "Guarda il gioco Flappy che ho creato io. L'ho fatto per conto mio @codeorg"};
 
 exports.shareGame = function(d){return "Condividi il tuo gioco:"};
 

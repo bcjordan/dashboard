@@ -7119,7 +7119,7 @@ exports.tryHOC = function(d){return "ลองใช้ Hour of Code สิ"};
 
 exports.signup = function(d){return "ลงทะเบียนเพื่อทดลองเรียน"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "นี่คือเคล็ดลับ:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

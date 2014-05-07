@@ -7029,7 +7029,7 @@ exports.finalStage = function(d){return "Tillykke! Du har fuldført det sidste t
 
 exports.finalStageTrophies = function(d){return "Tillykke! Du har afsluttet det sidste trin og vundet "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blokkene til dit program kan også være repræsenteret i Javascript, verdens mest udbredt programmeringssprog:"};
+exports.generatedCodeInfo = function(d){return "Selv top-universiteter underviser i blok-baseret programmering (f.eks. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Men under kølerhjelmen, kan de blokke du har samlet også vises i JavaScript, verdens mest udbredte programmeringssprog:"};
 
 exports.hashError = function(d){return "Beklager, '%1' svarer ikke til noget gemt program."};
 
@@ -7051,9 +7051,9 @@ exports.nextLevel = function(d){return "Tillykke! Du fuldførte puslespillet "+v
 
 exports.nextLevelTrophies = function(d){return "Tillykke! Du fuldførte puslespillet "+v(d,"puzzleNumber")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
 
-exports.nextStage = function(d){return "Tillykke! Du fuldførte trin "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Tillykke! Du gennemførte "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Tillykke! Du fuldførte trin "+v(d,"stageNumber")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
+exports.nextStageTrophies = function(d){return "Tillykke! Du gennemførte "+v(d,"stageName")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Tillykke! Du fuldførte puslespillet "+v(d,"puzzleNumber")+". (Men du kunne have brugt kun "+p(d,"numBlocks",0,"da",{"one":"1 blok","other":n(d,"numBlocks")+" blokke"})+".)"};
 
@@ -7093,7 +7093,7 @@ exports.tryAgain = function(d){return "Prøv igen"};
 
 exports.backToPreviousLevel = function(d){return "Tilbage til forrige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Gem til dit galleri"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7119,7 +7119,7 @@ exports.tryHOC = function(d){return "Prøv en time af kodeing"};
 
 exports.signup = function(d){return "Tilmeld til Introduktion kursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Her er et tip:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

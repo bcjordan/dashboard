@@ -5640,7 +5640,7 @@ exports.incrementScoreTooltip = function(d){return "Add one to the player or opp
 
 exports.incrementPlayerScore = function(d){return "increment player score"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Izmisli vlastitu priču"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5652,15 +5652,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 piksela"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 piksela"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 piksela"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 piksela"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 piksela"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5680,25 +5680,25 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "pomakni dolje"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "pomakni lijevo"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "pomakni desno"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "pomakni gore"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
 exports.moveTooltip = function(d){return "Move a character."};
 
-exports.nextLevel = function(d){return "Čestitamo! Ovaj zadatak je riješen."};
+exports.nextLevel = function(d){return "Čestitamo! Riješili ste zadatak."};
 
 exports.no = function(d){return "Ne"};
 
@@ -5706,31 +5706,31 @@ exports.numBlocksNeeded = function(d){return "Ovaj zadatak se može riješiti s 
 
 exports.oneTopBlock = function(d){return "Za ovaj zadatak trebaš složiti zajedno sve blokove na bijelom radnom prostoru."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "pokreni zvuk krckanja"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "pokreni zvuk cilj 1"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "pokreni zvuk cilj 2"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "pokreni zvuk udara"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "pokreni zvuk gubitak boda"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "pokreni zvuk izgubljen bod 2"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "pokreni retro zvuk"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "pokreni zvuk gume"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "pokreni zvuk pljeska"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Pokreni odabrani zvuk."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "pokreni zvuk dobiveni bod"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "pokreni zvuk dobiven bod 2"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "pokreni zvuk drvo"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5752,7 +5752,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "Pritisni tipku \"Pokušaj ponovno\" da se vratiš na igru."};
 
 exports.repeatForever = function(d){return "repeat forever"};
 
@@ -5778,21 +5778,21 @@ exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the a
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "postavi nasumičnu pozadinu"};
 
 exports.setBackgroundBlack = function(d){return "set black background"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "postavi pozadinu špilja"};
 
 exports.setBackgroundCloudy = function(d){return "set cloudy background"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "postavi pozadinu beton"};
 
 exports.setBackgroundNight = function(d){return "set night background"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "postavi pozadinu pod vodom"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Postavi sliku za pozadinu"};
 
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
@@ -5806,17 +5806,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "za zelenu sliku"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "za skrivenu sliku"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "za narančastu sliku"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpritePink = function(d){return "za ružičastu sliku"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpritePurple = function(d){return "za ljubičastu sliku"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpriteRandom = function(d){return "za nasumičnu sliku"};
 
 exports.setSpriteWitch = function(d){return "to a witch image"};
 
@@ -5824,25 +5824,25 @@ exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor 
 
 exports.setSpriteTooltip = function(d){return "Sets the character image"};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteSpeedRandom = function(d){return "za nasumičnu brzinu"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "za jako sporu brzinu"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedSlow = function(d){return "za sporu brzinu"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedNormal = function(d){return "za normalnu brzinu"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedFast = function(d){return "za brzu brzinu"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedVeryFast = function(d){return "za jako brzu brzinu"};
 
 exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Podijeli"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "Pogledaj priču koju sam smislio/la. Napisao/la sam je sam/a s @codeorg"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "Podijeli svoju priču:"};
 
 exports.setSprite = function(d){return "set"};
 
@@ -5874,21 +5874,21 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
-exports.whenDown = function(d){return "when Down arrow"};
+exports.whenDown = function(d){return "kad strelica dolje"};
 
-exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
+exports.whenDownTooltip = function(d){return "Izvrši sljedeće akcije kad se pritisne tipka dolje."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "kad priča započne"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Izvrši sljedeće akcije kad priča započne."};
 
-exports.whenLeft = function(d){return "when Left arrow"};
+exports.whenLeft = function(d){return "kad lijeva strelica"};
 
-exports.whenLeftTooltip = function(d){return "Execute the actions below when the Left arrow button is pressed."};
+exports.whenLeftTooltip = function(d){return "Izvrši sljedeće akcije kad se pritisne lijeva strelica."};
 
-exports.whenRight = function(d){return "when Right arrow"};
+exports.whenRight = function(d){return "kad desna strelica"};
 
-exports.whenRightTooltip = function(d){return "Execute the actions below when the Right arrow button is pressed."};
+exports.whenRightTooltip = function(d){return "Izvrši sljedeće akcije kad se pritisne desna strelica."};
 
 exports.whenSpriteClicked = function(d){return "when actor clicked"};
 
@@ -5932,9 +5932,9 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
-exports.whenUp = function(d){return "when Up arrow"};
+exports.whenUp = function(d){return "kad strelica gore"};
 
-exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
+exports.whenUpTooltip = function(d){return "Izvrši sljedeće akcije kad se pritisne strelica gore."};
 
 exports.yes = function(d){return "Da"};
 

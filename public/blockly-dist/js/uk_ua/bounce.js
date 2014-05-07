@@ -5270,11 +5270,11 @@ exports.isWall = function(d){return "це стіна"};
 
 exports.isWallTooltip = function(d){return "Повертає true, якщо тут стіна"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "запустити новий м'яч"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Запустити м'яч у гру."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Створити свою власну гру Арканоід"};
 
 exports.moveDown = function(d){return "рухатися вниз"};
 
@@ -5346,7 +5346,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "зруйнувати башту"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Можна натиснути кнопку \"Спробувати знову\", щоб повернутися і пограти у свою гру."};
 
 exports.removeSquare = function(d){return "видалити квадрат"};
 
@@ -5394,7 +5394,7 @@ exports.setPaddleHardcourt = function(d){return "встановити платф
 
 exports.setPaddleRetro = function(d){return "встановити платформу ретро"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Встановлює зображення платформи"};
 
 exports.setPaddleSpeedRandom = function(d){return "встановити випадкову швидкість платформи"};
 
@@ -5410,11 +5410,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "встановити дуж
 
 exports.setPaddleSpeedTooltip = function(d){return "Встановлює швидкість платформи"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Поділитися"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Подивіться на гру Арканоід, яку я зробив! Я написав її сам разом з @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Поділитись своєю грою:"};
 
 exports.turnLeft = function(d){return "повернути ліворуч"};
 
@@ -5524,7 +5524,7 @@ exports.finalStage = function(d){return "Вітання! Завершено ос
 
 exports.finalStageTrophies = function(d){return "Вітання! Ви завершили останній етап і виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоки програми можна представити мовою JavaScript, яка є найпоширенішою мовою програмування у світі:"};
+exports.generatedCodeInfo = function(d){return "Навіть кращі університети навчають програмуванню на основі блоків (наприклад, "+v(d,"berkeleyLink")+" "+v(d,"harvardLink")+"). Але всередині ці блоки, які ви зібрали, можуть показуватись у JavaScript, найбільш широко використовуваній мові програмування:"};
 
 exports.hashError = function(d){return "Шкода, але  '%1' не відповідає жодній збереженій програмі."};
 
@@ -5546,9 +5546,9 @@ exports.nextLevel = function(d){return "Вітання! Завершено за�
 
 exports.nextLevelTrophies = function(d){return "Вітання! Ви завершили завдання "+v(d,"puzzleNumber")+" та виграли  "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеїв"})+"."};
 
-exports.nextStage = function(d){return "Вітаємо! Завершено етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Вітаємо! Ви завершили "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап  "+v(d,"stageNumber")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеї"})+"."};
+exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап "+v(d,"stageName")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Вітаємо! Ви завершили завдання  "+v(d,"puzzleNumber")+". (Проте, його можна було вирішити, використавши лише "+p(d,"numBlocks",0,"uk",{"one":"1 блок","other":n(d,"numBlocks")+" блоки"})+".)"};
 
@@ -5588,7 +5588,7 @@ exports.tryAgain = function(d){return "Спробуй знову"};
 
 exports.backToPreviousLevel = function(d){return "Повернутися до попереднього рівня"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Зберегти до вашої колекції"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5614,7 +5614,7 @@ exports.tryHOC = function(d){return "Спробуйте годину коду"};
 
 exports.signup = function(d){return "Підпишіться на вступний курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Підказка:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

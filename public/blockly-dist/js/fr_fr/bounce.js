@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "est-ce un mur"};
 
 exports.isWallTooltip = function(d){return "Retourne vrai s'il y a un mur ici"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "lance une nouvelle balle"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Mets une balle en jeu."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Crée ton propre jeu Bounce Ball"};
 
 exports.moveDown = function(d){return "déplacer vers le bas"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "poser la tour"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Vous pouvez appuyer sur le bouton \"Essayez encore\" pour revenir à votre partie."};
 
 exports.removeSquare = function(d){return "retirer le carré"};
 
@@ -5345,13 +5345,13 @@ exports.repeatUntilFinish = function(d){return "répéter jusqu'à la fin"};
 
 exports.scoreText = function(d){return "Pointage: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "choisir une scène aléatoire"};
 
 exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
 
 exports.setBackgroundRetro = function(d){return "set retro scene"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Définit l'image d'arrière plan"};
 
 exports.setBallRandom = function(d){return "set random ball"};
 
@@ -5359,21 +5359,21 @@ exports.setBallHardcourt = function(d){return "set hardcourt ball"};
 
 exports.setBallRetro = function(d){return "set retro ball"};
 
-exports.setBallTooltip = function(d){return "Sets the ball image"};
+exports.setBallTooltip = function(d){return "Définit l'image de la balle"};
 
-exports.setBallSpeedRandom = function(d){return "set random ball speed"};
+exports.setBallSpeedRandom = function(d){return "règle la vitesse de la balle sur \"aléatoire\""};
 
-exports.setBallSpeedVerySlow = function(d){return "set very slow ball speed"};
+exports.setBallSpeedVerySlow = function(d){return "règle la vitesse de la balle sur \"très lent\""};
 
-exports.setBallSpeedSlow = function(d){return "set slow ball speed"};
+exports.setBallSpeedSlow = function(d){return "règle la vitesse de la balle sur \"lent\""};
 
-exports.setBallSpeedNormal = function(d){return "set normal ball speed"};
+exports.setBallSpeedNormal = function(d){return "règle la vitesse de la balle sur \"normal\""};
 
-exports.setBallSpeedFast = function(d){return "set fast ball speed"};
+exports.setBallSpeedFast = function(d){return "règle la vitesse de la balle sur \"rapide\""};
 
-exports.setBallSpeedVeryFast = function(d){return "set very fast ball speed"};
+exports.setBallSpeedVeryFast = function(d){return "règle la vitesse de la balle sur \"très rapide\""};
 
-exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
+exports.setBallSpeedTooltip = function(d){return "Réglages de la vitesse de la balle"};
 
 exports.setPaddleRandom = function(d){return "set random paddle"};
 
@@ -5397,11 +5397,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"
 
 exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Partage"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Regarde le jeu Flappy que j'ai fait. Je l'ai écrit moi-même avec @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Partage ton jeu:"};
 
 exports.turnLeft = function(d){return "tourner à gauche"};
 
@@ -5421,9 +5421,9 @@ exports.whenDown = function(d){return "quand flèche en bas"};
 
 exports.whenDownTooltip = function(d){return "Exécute les actions ci-dessous quand on presse la touche 'flèche en bas'."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "Quand le jeu commence"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Exécuter les actions ci-dessous lorsque le jeu démarre."};
 
 exports.whenLeft = function(d){return "quand flèche à gauche"};
 
