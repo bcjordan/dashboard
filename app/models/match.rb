@@ -8,7 +8,7 @@ class Match < Level
   end
 
   def self.setup(data)
-    Match.create({name: data[:name], game_id: Game.find_by(name:"Match").id, properties: data[:properties]})
+    Match.create name: data[:name], game_id: Game.find_by(name:"Match").id, properties: data[:properties]
   end
 
 end

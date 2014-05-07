@@ -1,26 +1,26 @@
 .unplugged.match
 
-  -data = @level.properties
+  - data = @level.properties
 
   %h2= match_t(data['title'])
   %p= match_t(data['description'])
 
-  -data['answers'].each_with_index do |answer, i|
-    -answer['index'] = i
-  -data['answers'].shuffle!
+  - data['answers'].each_with_index do |answer, i|
+    - answer['index'] = i
+  - data['answers'].shuffle!
 
   .mainblock
     .column
       %ul#questions
-        -data['questions'].each do |question|
+        - data['questions'].each do |question|
           %li= match_t(question['text'])
     .column
       %ul#slots.draggablecolumn
-        -data['answers'].each do |answer|
+        - data['answers'].each do |answer|
           %li.emptyslot
     .column
       %ul#answers.draggablecolumn
-        -data['answers'].each do |answer|
+        - data['answers'].each do |answer|
           %li.answer.answerlist{originalIndex: answer['index']}= match_t(answer['text'])
     .clear
     %br/
@@ -129,10 +129,21 @@
             drop: function(event, ui)
             {
               // remove offset coordinates from the dragged item
-              ui.draggable.css({'top': 'auto','left': 'auto'});
+              ui.draggable.css({'top': '0px','left': '0px'});
+
+              // determine y difference between old location and new location of item that will be swapped out
+              var origY = $(event.target).offset().top;
+              var destY = $(ui.draggable).offset().top;
+              var diffY = destY - origY;
 
               // swap this answer with the answer dropped onto it
               ui.draggable.swap(event.target);
+
+              // move the target object back to its old location for a moment
+              $(event.target).css({'top': -diffY + 'px'})
+
+              // and animate back to its new location
+              $(event.target).animate({'top': '0px'});
             }
           });
         }

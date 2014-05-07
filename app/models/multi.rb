@@ -8,7 +8,7 @@ class Multi < Level
   end
 
   def self.setup(data)
-    Multi.create({name: data[:name], game_id: Game.find_by(name:"Multi").id, properties: data[:properties]})
+    Multi.create name: data[:name], game_id: Game.find_by(name:"Multi").id, properties: data[:properties]
   end
 
 end
