@@ -38,11 +38,11 @@
       } catch(err) {
         errors = {message: "Generic error ("+error+"). Please reload the page and try again"};
       }
-      errorText = "Couldn't create level: \n<ul>";
-      for ( error in errors ) {
-        errorText += "<li>" + error + ': ' + errors[error] + "</li> ";
-      }
-      errorText += "</ul>";
-      $('#validation-error').html(errorText);
+    $('#validation-error')
+      .html("<p>Couldn't create level:</p>")
+      .append($("<ul/>")
+        .append(Object.keys(errors).map(function (v) {
+            return $("<li/>").text(errors[v]);
+        })));
     });
   });
