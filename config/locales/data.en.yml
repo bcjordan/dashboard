@@ -58,6 +58,7 @@ en:
       name:
         'Unplug1': 'Introduction to Computer Science'
         'Maze': 'The Maze'
+        'Multi': 'Multiple Choice Stuffs'
         'Unplug2': 'Computational Thinking'
         'Unplug3': 'Graph Paper Programming'
         'Artist': 'The Artist'

@@ -1046,6 +1046,45 @@ a.download-video {
   }
 }
 
+.match {
+  li {
+    height: 20px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    background-color: lightgrey;
+    padding-left: 10px;
+    width: 200px;
+    margin-top:2px;
+    margin-bottom:2px;  
+  } 
+  #questions {
+    list-style-type: none;
+    margin-left:0px;
+    li {
+      background-color: lightgrey;
+    }
+  }
+  #slots {
+    list-style-type: none;
+    margin-left:0px;
+    .emptyslot {
+      background-color: #eee;
+    }
+    .active {
+      background-color: lightyellow;
+    }    
+  }
+  .answer {
+    background-color: lightblue;
+    .active {
+      background-color: green;
+    }
+  }
+  #answers {
+    list-style-type: none;
+    margin-left:0px;
+  }
+}
 
 #current-script-levels, #all-levels {
   min-height: 50px;
@@ -1116,5 +1155,180 @@ div.gallery_activity {
   padding-right: 10px;
   font-weight: normal;
   padding: 10px;
+}
+
+/* multiple choice */
+
+.multi {
+  .mainblock {
+    margin-left: 20px;
+  }
+  label {
+    display: inline;
+  }
+}
+
+/* matching choice */
+
+.match {
+  .mainblock {
+    margin-left: 20px; 
+  }
+  .column {
+    width: 220px; 
+    float: left;
+  }
+  .draggablecolumn {
+    cursor: default;
+  }
+}
+
+/* moved over from blockly */
+
+$modal-image-width: 100px;
+$modal-image-margin-gap: 10px;
+
+.modal-content {
+  margin-left: $modal-image-width + $modal-image-margin-gap;
+  p, pre {
+    line-height: 27px;
+    font-size: 24px;
+    color: $purple;
+  }
+  .congrats {
+    font-size: 27px;
+    line-height: 30px;
+    margin-bottom: 15px;
+  }
+
+  .instruction-image {
+    width: 40%;
+    height: auto;
+    float: left;
+  }
+
+  .instruction-with-image {
+    padding-left: 42%
+  }
+
+  .feedback-image {
+    width: 40%;
+    height: auto;
+    margin: 15px;
+    float: left;
+    border: lightgrey;
+    border-style: solid
+  }
+
+  .feedback-links {
+    margin-top: 15px;
+  }
+}
+
+.dialog-title {
+  font-weight: bold;
+}
+
+#ok-button {
+  background-color: $orange;
+  color: white;
+  min-width: 100px;
+}
+
+#again-button {
+  background-color: $green;
+  color: white;
+  margin-left: 0px;
+  margin-right: 10px;
+}
+
+#continue-button {
+  background-color: $orange;
+  color: white;
+  margin-left: 0px;
+  margin-right: 10px;
+}
+
+.modal-image {
+  width: $modal-image-width;
+  height: auto;
+  margin-top: -60px;
+  float: left;
+}
+.modal-header {
+  border: none;
+  height: 20px;
+}
+.modal-body {
+  height: 100%;
+  overflow: visible;
+}
+#feedbackBlocks {
+  margin-left: 50px;
+  height: 100px;
+  border: none;
+}
+
+/* also moved over from blockly */
+
+.farSide {
+  text-align: right;
+}
+
+/* Buttons from blockly */
+
+button {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: large;
+  background-color: #eee;
+  color: #000;
+}
+button.launch {
+  border: 1px solid #FFA000;
+  background-color: #FFA000;
+  color: #fff;
+  font-size: large;
+  min-width: 96px;
+  margin-left: 0px;
+  margin-right: 10px;
+  /* Can't use "text-align: start" due to IE. */
+  text-align: left;
+}
+html[dir="RTL"] button.launch {
+  text-align: right;
+}
+button.launch>img {
+  opacity: 1;
+  vertical-align: text-bottom;
+}
+button>img {
+  opacity: 0.6;
+  vertical-align: text-bottom;
+}
+button:hover>img {
+  opacity: 1;
+}
+button:active {
+  border: 1px solid #888 !important;
+}
+button:hover {
+  box-shadow: 2px 2px 5px #888;
+}
+button.disabled, button[disabled=disabled] {
+  border: 1px solid #C7C7C7;
+  background-color: #C7C7C7;
+  box-shadow: none;
+}
+button.disabled:hover>img {
+  opacity: 0.6;
+}
+button.disabled {
+  display: none;
+}
+button.notext {
+  font-size: 10%;
 }
 

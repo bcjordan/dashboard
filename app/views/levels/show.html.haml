@@ -17,6 +17,10 @@
 
 - if @game.app == 'unplug'
   = render partial: "levels/unplug", locals: { app: @game.app }
+- elsif @game.app == 'multi'
+  = render partial: "levels/multi", locals: { app: @game.app }
+- elsif @game.app == 'match'
+  = render partial: "levels/match", locals: { app: @game.app }  
 - else
   -# Solution and start blocks may be nil if they don't exist for this level.
   - @solution_blocks = '' if ! defined? @solution_blocks
