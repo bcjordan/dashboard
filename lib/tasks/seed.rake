@@ -60,7 +60,7 @@ namespace :seed do
 
   # cronjob that detects changes to .match files
   MATCHES_GLOB = Dir.glob('config/scripts/**/*.match').flatten
-  file 'config/scripts/.matches_seeded' => MULTIS_GLOB do |t|
+  file 'config/scripts/.matches_seeded' => MATCHES_GLOB do |t|
     Rake::Task['seed:matches'].invoke
     touch t.name
   end  
