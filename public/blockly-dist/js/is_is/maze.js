@@ -2205,10 +2205,10 @@ exports.install = function(blockly, skin) {
 
   var SimpleMove = {
     DIRECTION_CONFIGS: {
-      West: { letter: 'W' },
-      East: { letter: 'E' },
-      North: { letter: 'N' },
-      South: { letter: 'S' },
+      West: { letter: 'W', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
+      East: { letter: 'E', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
+      North: { letter: 'N', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
+      South: { letter: 'S', image: skin.downArrow, tooltip: msg.moveSouthTooltip() }
     },
     generateBlocksForAllDirections: function() {
       SimpleMove.generateBlocksForDirection("North");
@@ -2227,10 +2227,11 @@ exports.install = function(blockly, skin) {
         init: function () {
           this.setHSV(184, 1.00, 0.74);
           this.appendDummyInput()
-            .appendTitle(directionConfig.letter);
+            .appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
-          this.setTooltip(msg.moveForwardTooltip());
+          this.setTooltip(directionConfig.tooltip);
         }
       };
     },
@@ -7168,9 +7169,17 @@ exports.ifTooltip = function(d){return "Ef það er slóð í tiltekna stefnu þ
 
 exports.ifelseTooltip = function(d){return "Ef það er slóð í tiltekna stefnu, þá að gera fyrri kubbastæðuna. Annars á að gera seinni kubbastæðuna."};
 
+exports.moveEastTooltip = function(d){return "Move me east one space."};
+
 exports.moveForward = function(d){return "færa áfram"};
 
 exports.moveForwardTooltip = function(d){return "Færa mig áfram um einn reit."};
+
+exports.moveNorthTooltip = function(d){return "Move me north one space."};
+
+exports.moveSouthTooltip = function(d){return "Move me south one space."};
+
+exports.moveWestTooltip = function(d){return "Move me west one space."};
 
 exports.nextLevel = function(d){return "Til hamingju! Þú hefur klárað þessa þraut."};
 
