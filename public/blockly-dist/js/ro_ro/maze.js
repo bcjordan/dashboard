@@ -2205,10 +2205,10 @@ exports.install = function(blockly, skin) {
 
   var SimpleMove = {
     DIRECTION_CONFIGS: {
-      West: { letter: 'W' },
-      East: { letter: 'E' },
-      North: { letter: 'N' },
-      South: { letter: 'S' },
+      West: { letter: 'W', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
+      East: { letter: 'E', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
+      North: { letter: 'N', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
+      South: { letter: 'S', image: skin.downArrow, tooltip: msg.moveSouthTooltip() }
     },
     generateBlocksForAllDirections: function() {
       SimpleMove.generateBlocksForDirection("North");
@@ -2227,10 +2227,11 @@ exports.install = function(blockly, skin) {
         init: function () {
           this.setHSV(184, 1.00, 0.74);
           this.appendDummyInput()
-            .appendTitle(directionConfig.letter);
+            .appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
-          this.setTooltip(msg.moveForwardTooltip());
+          this.setTooltip(directionConfig.tooltip);
         }
       };
     },
@@ -7186,9 +7187,17 @@ exports.ifTooltip = function(d){return "Dacă există o cale de acces în direc�
 
 exports.ifelseTooltip = function(d){return "Dacă există o cale de acces în direcţia specificată, atunci realizează primul bloc de acţiuni. Altfel, fă-l pe al doilea bloc de acţiuni."};
 
+exports.moveEastTooltip = function(d){return "Move me east one space."};
+
 exports.moveForward = function(d){return "mergi înainte"};
 
 exports.moveForwardTooltip = function(d){return "Mută-mă înainte un spațiu."};
+
+exports.moveNorthTooltip = function(d){return "Move me north one space."};
+
+exports.moveSouthTooltip = function(d){return "Move me south one space."};
+
+exports.moveWestTooltip = function(d){return "Move me west one space."};
 
 exports.nextLevel = function(d){return "Felicitări! Ai finalizat acest puzzle."};
 
