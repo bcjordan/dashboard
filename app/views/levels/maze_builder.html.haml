@@ -3,12 +3,14 @@
 
 = link_to "#{@type_class} Builder Form", @type_class::BUILDER_FORM
 
-= form_for [@game, @level], method: :post, remote: true, html: {multipart: true} do |level_form|
+#validation-error
+-#  remotipart options cf. http://stackoverflow.com/a/16726257
+= form_for [@game, @level], method: :post, remote: true, html: {:'data-type' => :html, :multipart => true, :remote => true} do |level_form|
   = hidden_field_tag :size, 8
   = level_form.hidden_field :type, value: @type_class.to_s
   = file_field_tag "maze_source"
   = level_form.text_area :instructions, placeholder: "Instructions", rows: 4
-  = level_form.text_area :name, placeholder: "Level Name", rows: 4
+  = level_form.text_field :name, placeholder: "Level Name"
   = level_form.label 'Start Direction'
   = level_form.select :start_direction, options_for_select(@level.class.start_directions)
   = level_form.label 'Step options'
@@ -27,5 +29,19 @@
       if (data.status === "200") {  // http://stackoverflow.com/a/16699124/2551908
         window.location.href = JSON.parse(data.responseText).redirect
       }
+    });
+    $('#new_level').on("ajax:error", function(evt, xhr, status, error){
+      var errors, errorText;
+      try {
+        errors = $.parseJSON(xhr.responseText);
+      } catch(err) {
+        errors = {message: "Generic error ("+error+"). Please reload the page and try again"};
+      }
+      errorText = "Couldn't create level: \n<ul>";
+      for ( error in errors ) {
+        errorText += "<li>" + error + ': ' + errors[error] + "</li> ";
+      }
+      errorText += "</ul>";
+      $('#validation-error').html(errorText);
     });
   });
