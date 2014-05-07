@@ -40,4 +40,7 @@ Dashboard::Application.configure do
 
   # Whether or not to display pretty blockly.
   config.pretty_blockly = true
+
+  # Load extra translation yml for tests
+  config.i18n.load_path += Dir[Rails.root.join('test', 'en.yml')]
 end
