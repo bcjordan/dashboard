@@ -3,7 +3,6 @@
 
 = link_to "#{@type_class} Builder Form", @type_class::BUILDER_FORM
 
-#validation-error
 -#  remotipart options cf. http://stackoverflow.com/a/16726257
 = form_for [@game, @level], method: :post, remote: true, html: {:'data-type' => :html, :multipart => true, :remote => true} do |level_form|
   = hidden_field_tag :size, 8
@@ -18,10 +17,12 @@
   = level_form.label 'Is K1 level?'
   = level_form.check_box :is_k1
   = level_form.submit "Create Level"
+#validation-error
 
 :javascript
   $(document).ready(function() {
     $('#new_level').on('ajax:beforeSend', function(e, xhr) {
+      $('#validation-error').empty();
       var token = $('meta[name="csrf-token"]').attr('content');
       xhr.setRequestHeader('X-CSRF-TOKEN', token);
     });
