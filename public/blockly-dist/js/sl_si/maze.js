@@ -360,6 +360,11 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
+  // Allow empty blocks if editing required blocks.
+  if (config.level.edit_required_blocks) {
+    BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
+  }
+
   var div = document.getElementById('blockly');
   var options = {
     toolbox: config.level.toolbox
@@ -1156,6 +1161,9 @@ exports.displayFeedback = function(options) {
   }
   if (showCode) {
     feedback.appendChild(showCode);
+  }
+  if (options.level.is_k1) {
+    feedback.className += " k1";
   }
 
   feedback.appendChild(getFeedbackButtons(
@@ -2197,10 +2205,10 @@ exports.install = function(blockly, skin) {
 
   var SimpleMove = {
     DIRECTION_CONFIGS: {
-      West: { letter: 'W' },
-      East: { letter: 'E' },
-      North: { letter: 'N' },
-      South: { letter: 'S' },
+      West: { letter: 'W', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
+      East: { letter: 'E', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
+      North: { letter: 'N', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
+      South: { letter: 'S', image: skin.downArrow, tooltip: msg.moveSouthTooltip() }
     },
     generateBlocksForAllDirections: function() {
       SimpleMove.generateBlocksForDirection("North");
@@ -2219,10 +2227,11 @@ exports.install = function(blockly, skin) {
         init: function () {
           this.setHSV(184, 1.00, 0.74);
           this.appendDummyInput()
-            .appendTitle(directionConfig.letter);
+            .appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
-          this.setTooltip(msg.moveForwardTooltip());
+          this.setTooltip(directionConfig.tooltip);
         }
       };
     },
@@ -5283,7 +5292,6 @@ Maze.resetButtonClick = function () {
   var stepButton = document.getElementById('stepButton');
   stepButton.style.display = level.step ? 'inline' : 'none';
 
-  Blockly.mainWorkspace.setEnableToolbox(true);
   if (Maze.cachedBlockStates) {
     // restore moveable/deletable/editable state from before we started stepping
     Maze.cachedBlockStates.forEach(function (cached) {
@@ -5350,14 +5358,6 @@ Maze.execute = function(stepMode) {
   Maze.waitingForReport = false;
   Maze.animating_ = false;
   Maze.response = null;
-
-  // Check for empty top level blocks to warn user about bugs,
-  // especially ones that lead to infinite loops.
-  if (feedback.hasEmptyTopLevelBlocks()) {
-    Maze.testResults = BlocklyApps.TestResults.EMPTY_BLOCK_FAIL;
-    displayFeedback();
-    return;
-  }
 
   if (level.editCode) {
     var codeTextbox = document.getElementById('codeTextbox');
@@ -5450,11 +5450,13 @@ Maze.execute = function(stepMode) {
   BlocklyApps.reset(false);
   Maze.animating_ = true;
 
+  // Disable toolbox while running
+  Blockly.mainWorkspace.setEnableToolbox(false);
+
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
       throw new Error('Unexpected cachedBlockStates');
     }
-    Blockly.mainWorkspace.setEnableToolbox(false);
     // Disable all blocks, caching their state first
     Blockly.mainWorkspace.getAllBlocks().forEach(function (block) {
       Maze.cachedBlockStates.push({
@@ -5501,6 +5503,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -7188,9 +7191,17 @@ exports.ifTooltip = function(d){return "Če obstaja pot naprej v določeni smeri
 
 exports.ifelseTooltip = function(d){return "Če obstaja pot naprej v določeni smeri, potem naredi prvi blok dejanj. V nasprotnem primeru, naredi drugi blok dejanj."};
 
+exports.moveEastTooltip = function(d){return "Move me east one space."};
+
 exports.moveForward = function(d){return "premakni se naprej"};
 
 exports.moveForwardTooltip = function(d){return "Premakni me naprej za 1 mesto."};
+
+exports.moveNorthTooltip = function(d){return "Move me north one space."};
+
+exports.moveSouthTooltip = function(d){return "Move me south one space."};
+
+exports.moveWestTooltip = function(d){return "Move me west one space."};
 
 exports.nextLevel = function(d){return "Čestitke! Zaključil/a si to uganko."};
 

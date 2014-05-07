@@ -360,6 +360,11 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
+  // Allow empty blocks if editing required blocks.
+  if (config.level.edit_required_blocks) {
+    BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
+  }
+
   var div = document.getElementById('blockly');
   var options = {
     toolbox: config.level.toolbox
@@ -1156,6 +1161,9 @@ exports.displayFeedback = function(options) {
   }
   if (showCode) {
     feedback.appendChild(showCode);
+  }
+  if (options.level.is_k1) {
+    feedback.className += " k1";
   }
 
   feedback.appendChild(getFeedbackButtons(
@@ -3274,14 +3282,14 @@ exports.install = function(blockly, skin) {
     SHORT_MOVE_LENGTH: 25,
     LONG_MOVE_LENGTH: 100,
     DIRECTION_CONFIGS: {
-      left: { letter: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, image_width: 42, image_height: 42 },
-      right: { letter: commonMsg.directionEastLetter(), moveFunction: 'moveRight', image: skin.rightArrow, image_width: 42, image_height: 42 },
-      up: { letter: commonMsg.directionNorthLetter(), moveFunction: 'moveUp', image: skin.upArrow, image_width: 42, image_height: 42 },
-      down: { letter: commonMsg.directionSouthLetter(), moveFunction: 'moveDown', image: skin.downArrow, image_width: 42, image_height: 42 },
-      jump_left: { letter: commonMsg.directionWestLetter(), moveFunction: 'jumpLeft', image: skin.leftJumpArrow, image_width: 42, image_height: 42 },
-      jump_right: { letter: commonMsg.directionEastLetter(), moveFunction: 'jumpRight', image: skin.rightJumpArrow, image_width: 42, image_height: 42 },
-      jump_up: { letter: commonMsg.directionNorthLetter(), moveFunction: 'jumpUp', image: skin.upJumpArrow, image_width: 42, image_height: 42 },
-      jump_down: { letter: commonMsg.directionSouthLetter(), moveFunction: 'jumpDown', image: skin.downJumpArrow, image_width: 42, image_height: 42 },
+      left: { title: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
+      right: { title: commonMsg.directionEastLetter(), moveFunction: 'moveRight', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
+      up: { title: commonMsg.directionNorthLetter(), moveFunction: 'moveUp', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
+      down: { title: commonMsg.directionSouthLetter(), moveFunction: 'moveDown', image: skin.downArrow, tooltip: msg.moveSouthTooltip() },
+      jump_left: { title: commonMsg.jump() + " " + commonMsg.directionWestLetter(), moveFunction: 'jumpLeft', image: skin.leftJumpArrow, tooltip: msg.jumpWestTooltip() },
+      jump_right: { title: commonMsg.jump() + " " + commonMsg.directionEastLetter(), moveFunction: 'jumpRight', image: skin.rightJumpArrow, tooltip: msg.jumpEastTooltip() },
+      jump_up: { title: commonMsg.jump() + " " + commonMsg.directionNorthLetter(), moveFunction: 'jumpUp', image: skin.upJumpArrow, tooltip: msg.jumpNorthTooltip() },
+      jump_down: { title: commonMsg.jump() + " "  + commonMsg.directionSouthLetter(), moveFunction: 'jumpDown', image: skin.downJumpArrow, tooltip: msg.jumpSouthTooltip() }
     },
     LENGTHS: [
       [skin.shortLineDraw, "SHORT_MOVE_LENGTH"],
@@ -3299,7 +3307,7 @@ exports.install = function(blockly, skin) {
       generator["simple_move_" + direction + "_length"] = SimpleMove.generateCodeGenerator(direction, true);
       blockly.Blocks['simple_move_' + direction + '_length'] = SimpleMove.generateMoveBlock(direction, true);
       blockly.Blocks['simple_move_' + direction] = SimpleMove.generateMoveBlock(direction);
-      blockly.Blocks['simple_jump_' + direction] = SimpleMove.generateJumpBlock('jump_' + direction);
+      blockly.Blocks['simple_jump_' + direction] = SimpleMove.generateMoveBlock('jump_' + direction);
     },
     generateMoveBlock: function(direction, hasLengthInput) {
       var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
@@ -3307,28 +3315,16 @@ exports.install = function(blockly, skin) {
         helpUrl: '',
         init: function () {
           this.setHSV(184, 1.00, 0.74);
-          var input = this.appendDummyInput().appendTitle(directionConfig.letter)
+          var input = this.appendDummyInput().appendTitle(directionConfig.title)
             .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
+          this.setTooltip(directionConfig.tooltip);
           if (hasLengthInput) {
             var dropdown = new blockly.FieldImageDropdown(SimpleMove.LENGTHS);
             dropdown.setValue(SimpleMove.LENGTHS[0][1]);
             input.appendTitle(dropdown, 'length');
           }
-        }
-      };
-    },
-    generateJumpBlock: function(direction) {
-      var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
-      return {
-        helpUrl: '',
-        init: function () {
-          this.setHSV(184, 1.00, 0.74);
-          this.appendDummyInput().appendTitle(commonMsg.jump() + " " + directionConfig.letter);
-          this.appendDummyInput().appendTitle(new blockly.FieldImage(directionConfig.image));
-          this.setPreviousStatement(true);
-          this.setNextStatement(true);
         }
       };
     },
@@ -3454,7 +3450,30 @@ exports.install = function(blockly, skin) {
     return 'Turtle.penColour(' + colour + ', \'block_id_' +
         this.id + '\');\n';
   };
-  
+
+  blockly.Blocks.draw_colour_simple = {
+    // Simplified dropdown block for setting the colour.
+    init: function() {
+      var colours = [Colours.RED, Colours.BLACK, Colours.PINK, Colours.ORANGE,
+        Colours.YELLOW, Colours.GREEN, Colours.BLUE, Colours.AQUAMARINE, Colours.PLUM];
+      this.setHSV(42, 0.89, 0.99);
+      var colourField = new Blockly.FieldColourDropdown(colours, 45, 35);
+      this.appendDummyInput()
+          .appendTitle(msg.setColour())
+          .appendTitle(colourField, 'COLOUR');
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.colourTooltip());
+    }
+  };
+
+  generator.draw_colour_simple = function() {
+    // Generate JavaScript for setting the colour.
+    var colour = this.getTitleValue('COLOUR') || '\'#000000\'';
+    return 'Turtle.penColour("' + colour + '", \'block_id_' +
+        this.id + '\');\n';
+  };
+
   blockly.Blocks.up_big = {
     helpUrl: '',
     init: function() {
@@ -4365,7 +4384,8 @@ module.exports = {
         blocks.simpleMoveBlocks() +
         blocks.simpleJumpBlocks() +
         blocks.simpleMoveLengthBlocks() +
-        blockUtils.blockOfType('controls_repeat_simplified')
+        blockUtils.blockOfType('controls_repeat_simplified') +
+        blockUtils.blockOfType('draw_colour_simple')
       ),
     startBlocks: '',
     startDirection: 0,
@@ -4796,14 +4816,14 @@ Level 10 [free play]
 ; buf.push('    ');219; if (page == 2 && level >= 6) {; buf.push('      <category name="', escape((219,  msg.catVariables() )), '">\n        <block type="variables_get_counter"></block>\n      </category>\n    ');222; } else if (page == 3 && level >= 6 && level < 10) {; buf.push('      <category name="', escape((222,  msg.catVariables() )), '">\n        ');223; if (level >= 9) {; buf.push('          <block type="variables_get_counter"></block>\n        ');224; }; buf.push('        ');224; if (level >= 6) {; buf.push('          <block type="variables_get_length"></block>\n        ');225; }; buf.push('      </category>\n    ');226; } else if (page == 3 && level == 10) {; buf.push('      <category name="', escape((226,  msg.catVariables() )), '" custom="VARIABLE">\n      </category>\n    ');228; }; buf.push('  ');228; } else if (page == 4) {; buf.push('    ');228; // Actions: draw_move, draw_turn.
 ; buf.push('    <block type="draw_move_by_constant"></block>\n    <block type="draw_turn_by_constant">\n      <title name="VALUE">90</title>\n    </block>\n    ');232; if (level == 11) {; buf.push('    <block id="draw-width" type="draw_width">\n      <value name="WIDTH">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n    </block>\n    ');239; }; buf.push('    ');239; // Colour: draw_colour with colour_picker and colour_random.
 ; buf.push('    <block id="draw-color" type="draw_colour">\n      <value name="COLOUR">\n        <block type="colour_picker"></block>\n      </value>\n    </block>\n    <block id="draw-color" type="draw_colour">\n      <value name="COLOUR">\n        <block type="colour_random"></block>\n      </value>\n    </block>\n    <block type="controls_repeat">\n      <title name="TIMES">4</title>\n    </block>\n  ');252; } else if (page == 5) {; buf.push('  ');252; // K1 simplified blocks for editor: keep in sync with Dashboard artist.rb
-; buf.push('    ');252; if (level >= 7) {; buf.push('      <category name="K1 Simplified">\n        <block type="controls_repeat_simplified">\n          <title name="TIMES">5</title>\n        </block>\n        <block type="simple_move_up"></block>\n        <block type="simple_move_down"></block>\n        <block type="simple_move_left"></block>\n        <block type="simple_move_right"></block>\n        <block type="simple_move_up_length"></block>\n        <block type="simple_move_down_length"></block>\n        <block type="simple_move_left_length"></block>\n        <block type="simple_move_right_length"></block>\n        <block type="simple_jump_up"></block>\n        <block type="simple_jump_down"></block>\n        <block type="simple_jump_left"></block>\n        <block type="simple_jump_right"></block>\n      </category>\n    ');269; }; buf.push('    ');269; // Actions: draw_move, draw_turn.
-; buf.push('    <category id="actions" name="', escape((269,  msg.catTurtle() )), '">\n      <block type="draw_move">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="jump">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">50</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_turn">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">90</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_pen"></block>\n      <block id="draw-width" type="draw_width">\n        <value name="WIDTH">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n      </block>\n    </category>\n    ');300; // Colour: draw_colour with colour_picker and colour_random.
-; buf.push('    <category name="', escape((300,  msg.catColour() )), '">\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_picker"></block>\n        </value>\n      </block>\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_random"></block>\n        </value>\n      </block>\n    </category>\n    ');312; // Functions
-; buf.push('    <category name="', escape((312,  msg.catProcedures() )), '" custom="PROCEDURE"></category>\n    ');313; // Control: controls_for_counter and repeat.
-; buf.push('    <category name="', escape((313,  msg.catControl() )), '">\n      <block type="controls_for_counter">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n        <value name="BY">\n          <block type="math_number">\n            <title name="NUM">10</title>\n          </block>\n        </value>\n      </block>\n      ');331; if (level < 6) {; buf.push('        <block type="controls_repeat">\n          <title name="TIMES">4</title>\n        </block>\n      ');334; } else {; buf.push('        <block type="controls_repeat_ext">\n          <value name="TIMES">\n            <block type="math_number">\n              <title name="NUM">10</title>\n            </block>\n          </value>\n        </block>\n      ');341; }; buf.push('    </category>\n  ');342; // Logic
-; buf.push('    <category name="', escape((342,  msg.catLogic() )), '">\n      <block type="controls_if"></block>\n      <block type="logic_compare"></block>\n      <block type="logic_operation"></block>\n      <block type="logic_negate"></block>\n      <block type="logic_boolean"></block>\n      <block type="logic_null"></block>\n      <block type="logic_ternary"></block>\n    </category>\n    ');351; // Math: Just number blocks until final level.
-; buf.push('    <category name="', escape((351,  msg.catMath() )), '">\n      <block type="math_number"></block>\n      <block type="math_arithmetic" inline="true"></block>\n      <block type="math_random_int">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="math_random_float"></block>\n     </category>\n    ');368; // Variables
-; buf.push('    <category name="', escape((368,  msg.catVariables() )), '" custom="VARIABLE">\n    </category>\n  ');370; }; buf.push('</xml>\n'); })();
+; buf.push('    ');252; if (level >= 7) {; buf.push('      <category name="K1 Simplified">\n        <block type="controls_repeat_simplified">\n          <title name="TIMES">5</title>\n        </block>\n        <block type="draw_colour_simple"></block>\n        <block type="simple_move_up"></block>\n        <block type="simple_move_down"></block>\n        <block type="simple_move_left"></block>\n        <block type="simple_move_right"></block>\n        <block type="simple_move_up_length"></block>\n        <block type="simple_move_down_length"></block>\n        <block type="simple_move_left_length"></block>\n        <block type="simple_move_right_length"></block>\n        <block type="simple_jump_up"></block>\n        <block type="simple_jump_down"></block>\n        <block type="simple_jump_left"></block>\n        <block type="simple_jump_right"></block>\n      </category>\n    ');270; }; buf.push('    ');270; // Actions: draw_move, draw_turn.
+; buf.push('    <category id="actions" name="', escape((270,  msg.catTurtle() )), '">\n      <block type="draw_move">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="jump">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">50</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_turn">\n        <value name="VALUE">\n          <block type="math_number">\n            <title name="NUM">90</title>\n          </block>\n        </value>\n      </block>\n      <block type="draw_pen"></block>\n      <block id="draw-width" type="draw_width">\n        <value name="WIDTH">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n      </block>\n    </category>\n    ');301; // Colour: draw_colour with colour_picker and colour_random.
+; buf.push('    <category name="', escape((301,  msg.catColour() )), '">\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_picker"></block>\n        </value>\n      </block>\n      <block id="draw-color" type="draw_colour">\n        <value name="COLOUR">\n          <block type="colour_random"></block>\n        </value>\n      </block>\n    </category>\n    ');313; // Functions
+; buf.push('    <category name="', escape((313,  msg.catProcedures() )), '" custom="PROCEDURE"></category>\n    ');314; // Control: controls_for_counter and repeat.
+; buf.push('    <category name="', escape((314,  msg.catControl() )), '">\n      <block type="controls_for_counter">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n        <value name="BY">\n          <block type="math_number">\n            <title name="NUM">10</title>\n          </block>\n        </value>\n      </block>\n      ');332; if (level < 6) {; buf.push('        <block type="controls_repeat">\n          <title name="TIMES">4</title>\n        </block>\n      ');335; } else {; buf.push('        <block type="controls_repeat_ext">\n          <value name="TIMES">\n            <block type="math_number">\n              <title name="NUM">10</title>\n            </block>\n          </value>\n        </block>\n      ');342; }; buf.push('    </category>\n  ');343; // Logic
+; buf.push('    <category name="', escape((343,  msg.catLogic() )), '">\n      <block type="controls_if"></block>\n      <block type="logic_compare"></block>\n      <block type="logic_operation"></block>\n      <block type="logic_negate"></block>\n      <block type="logic_boolean"></block>\n      <block type="logic_null"></block>\n      <block type="logic_ternary"></block>\n    </category>\n    ');352; // Math: Just number blocks until final level.
+; buf.push('    <category name="', escape((352,  msg.catMath() )), '">\n      <block type="math_number"></block>\n      <block type="math_arithmetic" inline="true"></block>\n      <block type="math_random_int">\n        <value name="FROM">\n          <block type="math_number">\n            <title name="NUM">1</title>\n          </block>\n        </value>\n        <value name="TO">\n          <block type="math_number">\n            <title name="NUM">100</title>\n          </block>\n        </value>\n      </block>\n      <block type="math_random_float"></block>\n     </category>\n    ');369; // Variables
+; buf.push('    <category name="', escape((369,  msg.catVariables() )), '" custom="VARIABLE">\n    </category>\n  ');371; }; buf.push('</xml>\n'); })();
 } 
 return buf.join('');
 };
@@ -4916,7 +4936,7 @@ Turtle.init = function(config) {
     // (execute) and the infinite loop detection function.
     //XXX Not sure if this is still right.
     Blockly.JavaScript.addReservedWords('Turtle,code');
- 
+
     // Helper for creating canvas elements.
     var createCanvas = function(id, width, height) {
       var el = document.createElement('canvas');
@@ -4925,19 +4945,19 @@ Turtle.init = function(config) {
       el.height = height;
       return el;
     };
-  
+
     // Create hidden canvases.
     Turtle.ctxAnswer = createCanvas('answer', 400, 400).getContext('2d');
     Turtle.ctxImages = createCanvas('images', 400, 400).getContext('2d');
-    Turtle.ctxScratch = createCanvas('scratch', 400, 400).getContext('2d');    
+    Turtle.ctxScratch = createCanvas('scratch', 400, 400).getContext('2d');
     Turtle.ctxFeedback = createCanvas('feedback', 154, 154).getContext('2d');
-  
+
     // Create display canvas.
     var display = createCanvas('display', 400, 400);
     var visualization = document.getElementById('visualization');
     visualization.appendChild(display);
     Turtle.ctxDisplay = display.getContext('2d');
-    
+
     // Set their initial contents.
     Turtle.loadTurtle();
     Turtle.drawImages();
@@ -5156,6 +5176,9 @@ Turtle.execute = function() {
   BlocklyApps.reset();
   BlocklyApps.playAudio('start', {volume : 0.5, loop : true});
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
+
+  // Disable toolbox while running
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5555,6 +5578,9 @@ Turtle.checkAnswer = function() {
 
   BlocklyApps.report(reportData);
 
+  // reenable toolbox
+  Blockly.mainWorkspace.setEnableToolbox(true);
+
   // The call to displayFeedback() will happen later in onReportComplete()
 };
 
@@ -5857,15 +5883,31 @@ exports.jumpForward = function(d){return "skoči naprej za"};
 
 exports.jumpTooltip = function(d){return "Premakne umetnika brez puščanja kakih sledi."};
 
+exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
+
+exports.jumpNorthTooltip = function(d){return "Moves the artist north without leaving any marks."};
+
+exports.jumpSouthTooltip = function(d){return "Moves the artist south without leaving any marks."};
+
+exports.jumpWestTooltip = function(d){return "Moves the artist west without leaving any marks."};
+
 exports.lengthParameter = function(d){return "dolžina"};
 
 exports.loopVariable = function(d){return "števec"};
 
 exports.moveBackward = function(d){return "premakni se nazaj za"};
 
+exports.moveEastTooltip = function(d){return "Moves the artist east."};
+
 exports.moveForward = function(d){return "premakni se naprej za"};
 
 exports.moveForwardTooltip = function(d){return "Premakni umetnika naprej."};
+
+exports.moveNorthTooltip = function(d){return "Moves the artist north."};
+
+exports.moveSouthTooltip = function(d){return "Moves the artist south."};
+
+exports.moveWestTooltip = function(d){return "Moves the artist west."};
 
 exports.moveTooltip = function(d){return "Premakne umetnika naprej ali nazaj za določeno količino."};
 

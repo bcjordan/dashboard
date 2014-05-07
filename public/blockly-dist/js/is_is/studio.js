@@ -360,6 +360,11 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
+  // Allow empty blocks if editing required blocks.
+  if (config.level.edit_required_blocks) {
+    BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
+  }
+
   var div = document.getElementById('blockly');
   var options = {
     toolbox: config.level.toolbox
@@ -1156,6 +1161,9 @@ exports.displayFeedback = function(options) {
   }
   if (showCode) {
     feedback.appendChild(showCode);
+  }
+  if (options.level.is_k1) {
+    feedback.className += " k1";
   }
 
   feedback.appendChild(getFeedbackButtons(
@@ -2308,20 +2316,25 @@ exports.install = function(blockly, skin) {
 
   generator.studio_whenGameStarts = generator.studio_eventHandlerPrologue;
 
-  blockly.Blocks.studio_whenGameIsRunning = {
+  blockly.Blocks.studio_repeatForever = {
     // Block to handle the repeating tick event while the game is running.
     helpUrl: '',
     init: function () {
-      this.setHSV(140, 1.00, 0.74);
+      this.setHSV(322, 0.90, 0.95);
       this.appendDummyInput()
-        .appendTitle(msg.whenGameIsRunning());
+        .appendTitle(msg.repeatForever());
+      this.appendStatementInput('DO')
+        .appendTitle(msg.repeatDo());
       this.setPreviousStatement(false);
-      this.setNextStatement(true);
-      this.setTooltip(msg.whenGameIsRunningTooltip());
+      this.setNextStatement(false);
+      this.setTooltip(msg.repeatForeverTooltip());
     }
   };
 
-  generator.studio_whenGameIsRunning = generator.studio_eventHandlerPrologue;
+  generator.studio_repeatForever = function () {
+    var branch = Blockly.JavaScript.statementToCode(this, 'DO');
+    return generator.studio_eventHandlerPrologue() + branch;
+  };
 
   blockly.Blocks.studio_whenSpriteClicked = {
     // Block to handle event when sprite is clicked.
@@ -3096,7 +3109,7 @@ module.exports = {
       tb(blockOfType('studio_moveDistance') +
          defaultSayBlock()),
     'startBlocks':
-     '<block type="studio_whenGameIsRunning" deletable="false" x="20" y="20"></block>'
+     '<block type="studio_repeatForever" deletable="false" x="20" y="20"></block>'
   },
   '6': {
     'requiredBlocks': [
@@ -3144,8 +3157,8 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_whenGameIsRunning" deletable="false" x="20" y="340"> \
-        <next><block type="studio_moveDistance"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="340"> \
+        <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
           <next><block type="studio_moveDistance"> \
@@ -3153,8 +3166,8 @@ module.exports = {
                   <title name="DISTANCE">400</title> \
                   <title name="DIR">4</title></block> \
           </next></block> \
-      </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="440"></block>'
+      </statement></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="450"></block>'
   },
   '99': {
     'requiredBlocks': [
@@ -3184,7 +3197,7 @@ module.exports = {
     'toolbox':
       tb(blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
-         blockOfType('studio_whenGameIsRunning') +
+         blockOfType('studio_repeatForever') +
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_stop') +
@@ -3244,7 +3257,7 @@ module.exports = {
          createCategory(msg.catEvents(),
                           blockOfType('studio_whenSpriteClicked') +
                           blockOfType('studio_whenSpriteCollided') +
-                          blockOfType('studio_whenGameIsRunning')) +
+                          blockOfType('studio_repeatForever')) +
          createCategory(msg.catControl(),
                           blockOfType('controls_repeat')) +
          createCategory(msg.catLogic(),
@@ -3485,6 +3498,7 @@ var SPEECH_BUBBLE_PADDING = 5;
 var SPEECH_BUBBLE_LINE_HEIGHT = 20;
 var SPEECH_BUBBLE_MAX_LINES = 2;
 var SPEECH_BUBBLE_V_OFFSET = 5;
+var SPEECH_BUBBLE_H_OFFSET = 50;
 
 var twitterOptions = {
   text: studioMsg.shareStudioTwitter(),
@@ -3590,15 +3604,9 @@ var drawMap = function() {
       spriteSpeechBubble.setAttribute('id', 'speechBubble' + i);
       spriteSpeechBubble.setAttribute('visibility', 'hidden');
       
-      var speechRect = document.createElementNS(Blockly.SVG_NS, 'rect');
-      speechRect.setAttribute('id', 'speechBubbleRect' + i);
-      speechRect.setAttribute('class', 'studio-speech-rect');
-      speechRect.setAttribute('x', 0);
-      speechRect.setAttribute('y', 0);
-      speechRect.setAttribute('rx', SPEECH_BUBBLE_RADIUS);
-      speechRect.setAttribute('ry', SPEECH_BUBBLE_RADIUS);
-      speechRect.setAttribute('width', SPEECH_BUBBLE_WIDTH);
-      speechRect.setAttribute('height', SPEECH_BUBBLE_HEIGHT);
+      var speechRect = document.createElementNS(Blockly.SVG_NS, 'path');
+      speechRect.setAttribute('id', 'speechBubblePath' + i);
+      speechRect.setAttribute('class', 'studio-speech-bubble-path');
 
       var speechText = document.createElementNS(Blockly.SVG_NS, 'text');
       speechText.setAttribute('id', 'speechBubbleText' + i);
@@ -3802,13 +3810,17 @@ var showSpeechBubbles = function() {
       sayQueue.shift();
       var bblText = document.getElementById('speechBubbleText' + sayCmd.index);
       var bblHeight = setSpeechText(bblText, sayCmd.text);
-      var speechBubbleRect =
-          document.getElementById('speechBubbleRect' + sayCmd.index);
-      speechBubbleRect.setAttribute('height', bblHeight);
+      var speechBubblePath =
+          document.getElementById('speechBubblePath' + sayCmd.index);
       var speechBubble = document.getElementById('speechBubble' + sayCmd.index);
+
+      speechBubblePath.setAttribute('height', bblHeight);
+      updateSpeechBubblePath(speechBubblePath);
+      
       // displaySprite will reposition the bubble
       Studio.displaySprite(sayCmd.index);
       speechBubble.setAttribute('visibility', 'visible');
+
       window.clearTimeout(Studio.sprite[sayCmd.index].bubbleTimeout);
       Studio.sprite[sayCmd.index].bubbleTimeout = window.setTimeout(
           delegate(this, Studio.hideSpeechBubble, sayCmd),
@@ -3818,9 +3830,9 @@ var showSpeechBubbles = function() {
 };
 
 //
-// Check to see if all async code executed inside the whenGameIsRunning event
+// Check to see if all async code executed inside the repeatForever block
 // is complete. This means checking for moveDistance blocks or SaySprite blocks
-// that started during a previous whenGameIsRunning event and are still going.
+// that started during a previous repeatForever block and are still going.
 //
 // If this function returns true, it is reasonable to fire the event again...
 //
@@ -3842,11 +3854,11 @@ Studio.onTick = function() {
     try { Studio.whenGameStarts(BlocklyApps, api); } catch (e) { }
   }
 
-  Studio.calledFromWhenGameRunning = true;
+  Studio.calledFromRepeatForever = true;
   if (loopingAsyncCodeComplete()) {
-    try { Studio.whenGameIsRunning(BlocklyApps, api); } catch (e) { }
+    try { Studio.repeatForever(BlocklyApps, api); } catch (e) { }
   }
-  Studio.calledFromWhenGameRunning = false;
+  Studio.calledFromRepeatForever = false;
   
   // Run key event handlers for any keys that are down:
   for (var key in Keycodes) {
@@ -4106,7 +4118,7 @@ Studio.clearEventHandlersKillTickLoop = function() {
   Studio.whenLeft = null;
   Studio.whenRight = null;
   Studio.whenUp = null;
-  Studio.whenGameIsRunning = null;
+  Studio.repeatForever = null;
   Studio.whenGameStarts = null;
   Studio.whenSpriteClicked = [];
   Studio.whenSpriteCollided = [];
@@ -4298,14 +4310,6 @@ Studio.execute = function() {
   Studio.response = null;
   var i;
 
-  // Check for empty top level blocks to warn user about bugs,
-  // especially ones that lead to infinite loops.
-  if (feedback.hasEmptyTopLevelBlocks()) {
-    Studio.testResults = BlocklyApps.TestResults.EMPTY_BLOCK_FAIL;
-    displayFeedback();
-    return;
-  }
-
   if (level.editCode) {
     var codeTextbox = document.getElementById('codeTextbox');
     code = dom.getText(codeTextbox);
@@ -4355,8 +4359,8 @@ Studio.execute = function() {
 
   code = Blockly.Generator.workspaceToCode(
                                     'JavaScript',
-                                    'studio_whenGameIsRunning');
-  var whenGameIsRunningFunc = codegen.functionFromCode(
+                                    'studio_repeatForever');
+  var repeatForeverFunc = codegen.functionFromCode(
                                      code, {
                                       BlocklyApps: BlocklyApps,
                                       Studio: api } );
@@ -4419,7 +4423,7 @@ Studio.execute = function() {
   Studio.whenRight = whenRightFunc;
   Studio.whenUp = whenUpFunc;
   Studio.whenDown = whenDownFunc;
-  Studio.whenGameIsRunning = whenGameIsRunningFunc;
+  Studio.repeatForever = repeatForeverFunc;
   Studio.whenGameStarts = whenGameStartsFunc;
   Studio.whenSpriteClicked = whenSpriteClickedFunc;
   Studio.whenSpriteCollided = whenSpriteCollidedFunc;
@@ -4523,6 +4527,20 @@ var spriteTotalFrames = function (index) {
   return frames;
 };
 
+var updateSpeechBubblePath = function (element) {
+  var height = +element.getAttribute('height');
+  var onTop = 'true' === element.getAttribute('onTop');
+  var onRight = 'true' === element.getAttribute('onRight');
+  element.setAttribute('d',
+                       createSpeechBubblePath(0,
+                                              0,
+                                              SPEECH_BUBBLE_WIDTH,
+                                              height,
+                                              SPEECH_BUBBLE_RADIUS,
+                                              onTop,
+                                              onRight));
+};
+
 Studio.displaySprite = function(i) {
   var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
   var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
@@ -4570,13 +4588,30 @@ Studio.displaySprite = function(i) {
   spriteClipRect.setAttribute('y', yCoord);
 
   var speechBubble = document.getElementById('speechBubble' + i);
-  var speechBubbleRect = document.getElementById('speechBubbleRect' + i);
-  var bblHeight = +speechBubbleRect.getAttribute('height');
+  var speechBubblePath = document.getElementById('speechBubblePath' + i);
+  var bblHeight = +speechBubblePath.getAttribute('height');
+  var wasOnTop = 'true' === speechBubblePath.getAttribute('onTop');
+  var wasOnRight = 'true' === speechBubblePath.getAttribute('onRight');
+  var nowOnTop = true;
+  var nowOnRight = true;
   var ySpeech = yCoord - (bblHeight + SPEECH_BUBBLE_PADDING);
   if (ySpeech < 0) {
     ySpeech = yCoord + Studio.SPRITE_HEIGHT + SPEECH_BUBBLE_PADDING;
+    nowOnTop = false;
   }
-  var xSpeech = Math.min(xCoord, Studio.MAZE_WIDTH - SPEECH_BUBBLE_WIDTH);
+  var xSpeech = xCoord + SPEECH_BUBBLE_H_OFFSET;
+  if (xSpeech > Studio.MAZE_WIDTH - SPEECH_BUBBLE_WIDTH) {
+    xSpeech = xCoord + Studio.SPRITE_WIDTH -
+                (SPEECH_BUBBLE_WIDTH + SPEECH_BUBBLE_H_OFFSET);
+    nowOnRight = false;
+  }
+  speechBubblePath.setAttribute('onTop', nowOnTop);
+  speechBubblePath.setAttribute('onRight', nowOnRight);
+  
+  if (wasOnTop !== nowOnTop || wasOnRight !== nowOnRight) {
+    updateSpeechBubblePath(speechBubblePath);
+  }
+  
   speechBubble.setAttribute('transform',
                             'translate(' + xSpeech + ',' + ySpeech + ')');
 };
@@ -4633,11 +4668,61 @@ Studio.setSprite = function (index, value) {
   }
 };
 
+var p = function (x,y) {
+  return x + " " + y + " ";
+};
+
+var TIP_HEIGHT = 15;
+var TIP_WIDTH = 25;
+var TIP_X_SHIFT = 10;
+
+//
+// createSpeechBubblePath creates a SVG path that looks like a rounded rect
+// plus a 'tip' that points back to the sprite.
+//
+// x, y is the top left position. w, h, r are width/height/radius (for corners)
+// onTop, onRight are booleans that are used to tell this function if the
+//     bubble is appearing on top and on the right of the sprite.
+//
+// Thanks to Remy for the original rounded rect path function
+/*
+http://www.remy-mellet.com/blog/179-draw-rectangle-with-123-or-4-rounded-corner/
+*/
+
+var createSpeechBubblePath = function (x, y, w, h, r, onTop, onRight) {
+  var strPath = "M"+p(x+r,y); //A
+  if (!onTop) {
+    if (onRight) {
+      strPath+="L"+p(x+r-TIP_X_SHIFT,y-TIP_HEIGHT)+"L"+p(x+r+TIP_WIDTH,y);
+    } else {
+      strPath+="L"+p(x+w-r-TIP_WIDTH,y)+"L"+p(x+w-TIP_X_SHIFT,y-TIP_HEIGHT);
+    }
+  }
+  strPath+="L"+p(x+w-r,y);
+  strPath+="Q"+p(x+w,y)+p(x+w,y+r); //B
+  strPath+="L"+p(x+w,y+h-r)+"Q"+p(x+w,y+h)+p(x+w-r,y+h); //C
+  if (onTop) {
+    if (onRight) {
+      strPath+="L"+p(x+r+TIP_WIDTH,y+h)+"L"+p(x+r-TIP_X_SHIFT,y+h+TIP_HEIGHT);
+    } else {
+      strPath+="L"+p(x+w-TIP_X_SHIFT,y+h+TIP_HEIGHT)+"L"+p(x+w-r-TIP_WIDTH,y+h);
+    }
+  }
+  strPath+="L"+p(x+r,y+h);
+  strPath+="Q"+p(x,y+h)+p(x,y+h-r); //D
+  strPath+="L"+p(x,y+r)+"Q"+p(x,y)+p(x+r,y); //A
+  strPath+="Z";
+  return strPath;
+};
+
 Studio.hideSpeechBubble = function (sayCmd) {
   var speechBubble = document.getElementById('speechBubble' + sayCmd.index);
   speechBubble.setAttribute('visibility', 'hidden');
+  speechBubble.removeAttribute('onTop');
+  speechBubble.removeAttribute('onRight');
+  speechBubble.removeAttribute('height');
   Studio.sayComplete++;
-  if (sayCmd.calledFromWhenGameRunning) {
+  if (sayCmd.calledFromRepeatForever) {
     Studio.loopingPendingSayCmds--;
   }
 };
@@ -4664,11 +4749,11 @@ Studio.saySprite = function (executionCtx, index, text) {
   
   var sayCmd = {
       'tickCount': stampNextQueuedSayTick(executionCtx),
-      'calledFromWhenGameRunning': Studio.calledFromWhenGameRunning,
+      'calledFromRepeatForever': Studio.calledFromRepeatForever,
       'index': index,
       'text': text
   };
-  if (Studio.calledFromWhenGameRunning) {
+  if (Studio.calledFromRepeatForever) {
     Studio.loopingPendingSayCmds++;
   }
   Studio.sayQueues[executionCtx].push(sayCmd);
@@ -4783,7 +4868,7 @@ Studio.moveDistance = function (executionCtx, index, dir, distance) {
       }
       break;
   }
-  if (Studio.calledFromWhenGameRunning) {
+  if (Studio.calledFromRepeatForever) {
     Studio.sprite[index].flags |= loopingFlag;
   } else {
     Studio.sprite[index].flags &= ~loopingFlag;
@@ -5643,9 +5728,11 @@ exports.positionRandom = function(d){return "to the random position"};
 
 exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
 
-exports.repeatUntil = function(d){return "endurtaka þar til"};
+exports.repeatForever = function(d){return "repeat forever"};
 
-exports.repeatUntilFinish = function(d){return "endurtaka til loka"};
+exports.repeatDo = function(d){return "do"};
+
+exports.repeatForeverTooltip = function(d){return "Execute the actions in this block repeatedly while the story is running."};
 
 exports.saySprite = function(d){return "say"};
 
@@ -5764,10 +5851,6 @@ exports.stopTooltip = function(d){return "Stops an actor's movement."};
 exports.whenDown = function(d){return "þegar niður ör"};
 
 exports.whenDownTooltip = function(d){return "Gera aðgerðirnar fyrir neðan þegar ýtt er á örvarlykil niður."};
-
-exports.whenGameIsRunning = function(d){return "when story is running"};
-
-exports.whenGameIsRunningTooltip = function(d){return "Execute the actions below repeatedly while the story is running."};
 
 exports.whenGameStarts = function(d){return "when game starts"};
 

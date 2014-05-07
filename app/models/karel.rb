@@ -1,4 +1,6 @@
 class Karel < Maze
+  BUILDER_FORM = "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0Au-CEJJ_kBL3dGpmbmcxQnF6Z0lZZDcxY0p2LWFIaGc&usp=drive_web#gid=0"
+
   # List of possible skins, the first is used as a default.
   def self.skins
     ['farmer', 'farmer_night']

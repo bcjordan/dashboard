@@ -1,6 +1,4 @@
 User-agent: *
-Disallow: /
-Allow: /share/
-Allow: /sh/
-Allow: /assets/
-Allow: /gallery
+Disallow: /admin/
+Disallow: /join/
+Disallow: /sections/

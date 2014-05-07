@@ -1,0 +1,119 @@
+.unplugged.multi
+
+  - data = @level.properties
+
+  %h2= multi_t(data['title'])
+  %p= multi_t(data['description'])
+
+  .mainblock
+    %b= data['questions'][0]['text']
+    %form#voteform{onsubmit: "return doVote()"}
+      - data['answers'].each_with_index do |answer, i|
+        - correct = answer["correct"]
+        %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
+          %label{for: "choice_#{i}"}= multi_t(answer['text'])
+        %br
+      %br
+      %br
+    .buttons
+      %a.btn.btn-primary.next-stage.submitButton
+        Submit
+  %br/
+  %br/
+  %br/
+
+  .clear
+
+  %div{:style=>'display:none'}
+    #dialogcontent.modal-content
+      %p.dialog-title
+        =t("multi.wrong_title")
+      %p
+        =t("multi.wrong_body")
+      .farSide
+        %button#ok-button.secondary
+          =t("dialog.ok")
+
+:javascript
+
+  var selection = "none";   // "none", "wrong", "right"
+  var clickedNext = false;  // avoid multiple simultaneous submissions
+
+  function radioChanged(index) 
+  {
+    $('.submitButton').css({ opacity: 1.0 });
+    selection = $("#choice_" + index).attr("correct") == "true" ? "right" : "wrong";
+  }
+
+  $(function() 
+  {
+    $('.submitButton').css({ opacity: 0.5 });
+  });
+
+  function showDialog()
+  {
+    var dialog = new Dialog({ body: "" });
+
+    // use our prefabricated dialog content
+    $(".modal-body").append($("#dialogcontent").clone(true));
+
+    // Standard css hack to center a div within the viewport
+    var full_dialog = $(".dash_modal");
+    full_dialog.css({
+      top: '50%',
+      left: '50%',
+      marginTop: (full_dialog.height() / -2) + 'px',
+      marginLeft: (full_dialog.width() / -2) + 'px'
+    });
+
+    // clicking the okay button in the dialog box dismisses it
+    $(".modal-body #ok-button").click(function() {
+      dialog.hide();
+    });
+
+    dialog.show();
+  }
+
+  $('.submitButton').click(function() 
+  {
+    if (!clickedNext) 
+    {
+      clickedNext = true;
+
+      if (selection == "wrong") 
+      {
+        showDialog();
+      }
+
+      if (selection != "none")
+      {
+        sendReport({
+          fallbackResponse: '#{@fallback_response.to_json}',
+          callback: '#{@callback}',
+          app: 'multi',
+          level: '#{@level.level_num}',
+          result: selection == "right",
+          testResult: selection == "right" ? 100 : 0,
+          onComplete: function() 
+          {
+            // reenable button
+            clickedNext = false;
+
+            if (videoInfo) 
+            {
+              showVideo(videoInfo);
+            } 
+            else if (nextRedirect) 
+            {
+              window.location.href = nextRedirect;
+            }
+          }
+        });
+      }
+      else
+      {
+        // reenable button
+        clickedNext = false;
+      }
+    }
+  });

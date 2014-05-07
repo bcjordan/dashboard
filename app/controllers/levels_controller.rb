@@ -1,4 +1,5 @@
 require "csv"
+require "naturally"
 
 class LevelsController < ApplicationController
   include LevelsHelper
@@ -59,7 +60,8 @@ class LevelsController < ApplicationController
   end
 
   def update
-    if @level.update(level_params)
+    start_direction = Integer(level_params["start_direction"]) rescue nil
+    if @level.update(level_params.merge!(start_direction: start_direction))
       redirect_to game_level_url(@level.game, @level)
     else
       render json: @level.errors, status: :unprocessable_entity
@@ -94,16 +96,17 @@ class LevelsController < ApplicationController
 
   def new
     authorize! :create, :level
-    @type = params[:type]
-    case @type
-    when 'Artist'
+    @type_class = params[:type].try(:constantize)
+
+    # Can't use case/when because a constantized string does not === the class by that name.
+    if (@type_class == Artist)
       artist_builder
-    when 'Maze', 'Karel'
+    elsif (@type_class == Maze || @type_class == Karel)
       @game = Game.custom_maze
-      @level = Level.new
+      @level = @type_class.new
       render :maze_builder
     end
-    @levels = Level.where(user: current_user)
+    @levels = Naturally.sort_by(Level.where(user: current_user), :name)
   end
 
   def artist_builder
@@ -135,6 +138,6 @@ class LevelsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def level_params
-      params[:level].permit([:name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, {concept_ids: []}])
+      params[:level].permit([:name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, :is_k1, {concept_ids: []}])
     end
 end

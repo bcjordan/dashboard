@@ -119,6 +119,7 @@ module LevelsHelper
 
     # Set some specific values
     level['puzzle_number'] = @script_level ? @script_level.game_chapter : 1
+    level['is_k1'] = @level.is_k1
     level['stage_total'] = @script ? @script.script_levels_from_game(@level.game_id).length : @level.game.levels.count
     if @level.step_mode
       level['step'] = @level.step_mode == 1 || @level.step_mode == 2
@@ -164,4 +165,13 @@ module LevelsHelper
     app_options['levelGameName'] = @level.game.name if @level.game
     [level, app_options]
   end
+
+  def multi_t(text)
+    data_t('multi.' + @level.name, text)
+  end
+
+  def match_t(text)
+    data_t('match.' + @level.name, text)
+  end
+
 end
