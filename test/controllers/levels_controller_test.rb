@@ -41,12 +41,17 @@ class LevelsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-# this test is not working because Level::BUILDER is nil in tests
-#  test "should get builder" do
-#    get :builder, game_id: @level.game
-#
-#    assert_response :success
-#  end
+  test "should alphanumeric order custom levels on new" do
+    level_1 = create(:level, user: @user, name: "BBBB")
+    level_2 = create(:level, user: @user, name: "AAAA")
+    level_3 = create(:level, user: @user, name: "Z1")
+    level_4 = create(:level, user: @user, name: "Z10")
+    level_5 = create(:level, user: @user, name: "Z2")
+
+    get :new, game_id: @level.game, type: "Maze"
+
+    assert_equal [level_2, level_1, level_3, level_5, level_4], assigns(:levels)
+  end
 
   test "should not get builder if not admin" do
     sign_in @not_admin

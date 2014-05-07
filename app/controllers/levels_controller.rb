@@ -1,4 +1,5 @@
 require "csv"
+require "naturally"
 
 class LevelsController < ApplicationController
   include LevelsHelper
@@ -105,7 +106,7 @@ class LevelsController < ApplicationController
       @level = @type_class.new
       render :maze_builder
     end
-    @levels = Level.where(user: current_user)
+    @levels = Naturally.sort_by(Level.where(user: current_user), :name)
   end
 
   def artist_builder
