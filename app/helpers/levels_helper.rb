@@ -165,4 +165,13 @@ module LevelsHelper
     app_options['levelGameName'] = @level.game.name if @level.game
     [level, app_options]
   end
+
+  def multi_t(text)
+    data_t('multi.' + @level.name, text)
+  end
+
+  def match_t(text)
+    data_t('match.' + @level.name, text)
+  end
+
 end

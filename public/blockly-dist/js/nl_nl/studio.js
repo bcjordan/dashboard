@@ -2316,20 +2316,25 @@ exports.install = function(blockly, skin) {
 
   generator.studio_whenGameStarts = generator.studio_eventHandlerPrologue;
 
-  blockly.Blocks.studio_whenGameIsRunning = {
+  blockly.Blocks.studio_repeatForever = {
     // Block to handle the repeating tick event while the game is running.
     helpUrl: '',
     init: function () {
-      this.setHSV(140, 1.00, 0.74);
+      this.setHSV(322, 0.90, 0.95);
       this.appendDummyInput()
-        .appendTitle(msg.whenGameIsRunning());
+        .appendTitle(msg.repeatForever());
+      this.appendStatementInput('DO')
+        .appendTitle(msg.repeatDo());
       this.setPreviousStatement(false);
-      this.setNextStatement(true);
-      this.setTooltip(msg.whenGameIsRunningTooltip());
+      this.setNextStatement(false);
+      this.setTooltip(msg.repeatForeverTooltip());
     }
   };
 
-  generator.studio_whenGameIsRunning = generator.studio_eventHandlerPrologue;
+  generator.studio_repeatForever = function () {
+    var branch = Blockly.JavaScript.statementToCode(this, 'DO');
+    return generator.studio_eventHandlerPrologue() + branch;
+  };
 
   blockly.Blocks.studio_whenSpriteClicked = {
     // Block to handle event when sprite is clicked.
@@ -3104,7 +3109,7 @@ module.exports = {
       tb(blockOfType('studio_moveDistance') +
          defaultSayBlock()),
     'startBlocks':
-     '<block type="studio_whenGameIsRunning" deletable="false" x="20" y="20"></block>'
+     '<block type="studio_repeatForever" deletable="false" x="20" y="20"></block>'
   },
   '6': {
     'requiredBlocks': [
@@ -3152,8 +3157,8 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_whenGameIsRunning" deletable="false" x="20" y="340"> \
-        <next><block type="studio_moveDistance"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="340"> \
+        <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
           <next><block type="studio_moveDistance"> \
@@ -3161,8 +3166,8 @@ module.exports = {
                   <title name="DISTANCE">400</title> \
                   <title name="DIR">4</title></block> \
           </next></block> \
-      </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="440"></block>'
+      </statement></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="450"></block>'
   },
   '99': {
     'requiredBlocks': [
@@ -3192,7 +3197,7 @@ module.exports = {
     'toolbox':
       tb(blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
-         blockOfType('studio_whenGameIsRunning') +
+         blockOfType('studio_repeatForever') +
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_stop') +
@@ -3252,7 +3257,7 @@ module.exports = {
          createCategory(msg.catEvents(),
                           blockOfType('studio_whenSpriteClicked') +
                           blockOfType('studio_whenSpriteCollided') +
-                          blockOfType('studio_whenGameIsRunning')) +
+                          blockOfType('studio_repeatForever')) +
          createCategory(msg.catControl(),
                           blockOfType('controls_repeat')) +
          createCategory(msg.catLogic(),
@@ -3825,9 +3830,9 @@ var showSpeechBubbles = function() {
 };
 
 //
-// Check to see if all async code executed inside the whenGameIsRunning event
+// Check to see if all async code executed inside the repeatForever block
 // is complete. This means checking for moveDistance blocks or SaySprite blocks
-// that started during a previous whenGameIsRunning event and are still going.
+// that started during a previous repeatForever block and are still going.
 //
 // If this function returns true, it is reasonable to fire the event again...
 //
@@ -3849,11 +3854,11 @@ Studio.onTick = function() {
     try { Studio.whenGameStarts(BlocklyApps, api); } catch (e) { }
   }
 
-  Studio.calledFromWhenGameRunning = true;
+  Studio.calledFromRepeatForever = true;
   if (loopingAsyncCodeComplete()) {
-    try { Studio.whenGameIsRunning(BlocklyApps, api); } catch (e) { }
+    try { Studio.repeatForever(BlocklyApps, api); } catch (e) { }
   }
-  Studio.calledFromWhenGameRunning = false;
+  Studio.calledFromRepeatForever = false;
   
   // Run key event handlers for any keys that are down:
   for (var key in Keycodes) {
@@ -4113,7 +4118,7 @@ Studio.clearEventHandlersKillTickLoop = function() {
   Studio.whenLeft = null;
   Studio.whenRight = null;
   Studio.whenUp = null;
-  Studio.whenGameIsRunning = null;
+  Studio.repeatForever = null;
   Studio.whenGameStarts = null;
   Studio.whenSpriteClicked = [];
   Studio.whenSpriteCollided = [];
@@ -4354,8 +4359,8 @@ Studio.execute = function() {
 
   code = Blockly.Generator.workspaceToCode(
                                     'JavaScript',
-                                    'studio_whenGameIsRunning');
-  var whenGameIsRunningFunc = codegen.functionFromCode(
+                                    'studio_repeatForever');
+  var repeatForeverFunc = codegen.functionFromCode(
                                      code, {
                                       BlocklyApps: BlocklyApps,
                                       Studio: api } );
@@ -4418,7 +4423,7 @@ Studio.execute = function() {
   Studio.whenRight = whenRightFunc;
   Studio.whenUp = whenUpFunc;
   Studio.whenDown = whenDownFunc;
-  Studio.whenGameIsRunning = whenGameIsRunningFunc;
+  Studio.repeatForever = repeatForeverFunc;
   Studio.whenGameStarts = whenGameStartsFunc;
   Studio.whenSpriteClicked = whenSpriteClickedFunc;
   Studio.whenSpriteCollided = whenSpriteCollidedFunc;
@@ -4717,7 +4722,7 @@ Studio.hideSpeechBubble = function (sayCmd) {
   speechBubble.removeAttribute('onRight');
   speechBubble.removeAttribute('height');
   Studio.sayComplete++;
-  if (sayCmd.calledFromWhenGameRunning) {
+  if (sayCmd.calledFromRepeatForever) {
     Studio.loopingPendingSayCmds--;
   }
 };
@@ -4744,11 +4749,11 @@ Studio.saySprite = function (executionCtx, index, text) {
   
   var sayCmd = {
       'tickCount': stampNextQueuedSayTick(executionCtx),
-      'calledFromWhenGameRunning': Studio.calledFromWhenGameRunning,
+      'calledFromRepeatForever': Studio.calledFromRepeatForever,
       'index': index,
       'text': text
   };
-  if (Studio.calledFromWhenGameRunning) {
+  if (Studio.calledFromRepeatForever) {
     Studio.loopingPendingSayCmds++;
   }
   Studio.sayQueues[executionCtx].push(sayCmd);
@@ -4863,7 +4868,7 @@ Studio.moveDistance = function (executionCtx, index, dir, distance) {
       }
       break;
   }
-  if (Studio.calledFromWhenGameRunning) {
+  if (Studio.calledFromRepeatForever) {
     Studio.sprite[index].flags |= loopingFlag;
   } else {
     Studio.sprite[index].flags &= ~loopingFlag;
@@ -5723,9 +5728,11 @@ exports.positionRandom = function(d){return "to the random position"};
 
 exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
 
-exports.repeatUntil = function(d){return "herhalen totdat"};
+exports.repeatForever = function(d){return "repeat forever"};
 
-exports.repeatUntilFinish = function(d){return "herhaal tot je klaar bent"};
+exports.repeatDo = function(d){return "do"};
+
+exports.repeatForeverTooltip = function(d){return "Execute the actions in this block repeatedly while the story is running."};
 
 exports.saySprite = function(d){return "say"};
 
@@ -5844,10 +5851,6 @@ exports.stopTooltip = function(d){return "Stops an actor's movement."};
 exports.whenDown = function(d){return "when Down arrow"};
 
 exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
-
-exports.whenGameIsRunning = function(d){return "when story is running"};
-
-exports.whenGameIsRunningTooltip = function(d){return "Execute the actions below repeatedly while the story is running."};
 
 exports.whenGameStarts = function(d){return "when game starts"};
 
