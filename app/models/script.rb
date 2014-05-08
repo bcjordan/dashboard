@@ -27,9 +27,21 @@ class Script < ActiveRecord::Base
 
   def self.get_from_cache(id)
     case id
-      when TWENTY_HOUR_ID then twenty_hour_script
-      when HOC_ID then hoc_script
-      else Script.includes(script_levels: { level: [:game, :concepts] }).find(id)
+    when TWENTY_HOUR_ID then twenty_hour_script
+    when HOC_ID then hoc_script
+    else
+      find_by = (id.to_i.to_s == id.to_s) ? :id : :name
+      Script.includes(script_levels: { level: [:game, :concepts] }).find_by(find_by => id).tap do |s|
+        raise ActiveRecord::RecordNotFound.new("Couldn't find Script with id|name=#{id}") unless s
+      end
+    end
+  end
+
+  def to_param
+    if self.twenty_hour? || self.hoc?
+      super
+    else
+      name
     end
   end
 

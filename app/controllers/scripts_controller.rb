@@ -9,7 +9,8 @@ class ScriptsController < ApplicationController
   end
 
   def show
-    authorize! :read, Script
-    @script = Script.find(params[:id])
+    @script = Script.get_from_cache(params[:id])
+    
+    authorize! :read, @script
   end
 end
