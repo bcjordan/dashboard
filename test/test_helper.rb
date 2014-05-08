@@ -8,7 +8,6 @@ else
 end
 
 ENV["RAILS_ENV"] ||= "test"
-ENV['RAKE_TEST'] ||= '1'
 
 require File.expand_path('../../config/environment', __FILE__)
 I18n.load_path += Dir[Rails.root.join('test', 'en.yml')]
