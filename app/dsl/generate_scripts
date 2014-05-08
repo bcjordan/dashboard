@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+# This script generates the TSV imported into Script objects from the seed:scripts rake task.
+# Input is via ARGF (takes filename or standard input), output is printed to standard output.
+class ScriptDSL
+  @stage = nil
+  @concepts = []
+  @skin = nil
+  @hash = {}
+  @script_name
+  @levels = []
+
+  def stage(name)
+    @stage = name
+    @concepts = []
+    @skin = nil
+  end
+
+  def concepts(*items)
+    @concepts = items
+  end
+
+  def skin(name)
+    @skin = name
+  end
+
+  def level(name)
+    @levels << {
+      :name => name,
+      :stage => @stage,
+      :concepts => @concepts.join(',')
+    }
+  end
+
+end
+
+
+

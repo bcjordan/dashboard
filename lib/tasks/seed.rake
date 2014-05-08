@@ -1,8 +1,5 @@
 require "csv"
 
-require "#{Rails.root}/config/process_multi.rb"
-require "#{Rails.root}/config/process_match.rb"
-
 namespace :seed do
   task videos: :environment do
     Video.transaction do
