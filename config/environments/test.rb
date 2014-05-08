@@ -41,6 +41,7 @@ Dashboard::Application.configure do
   # Whether or not to display pretty blockly.
   config.pretty_blockly = true
 
-  # Load extra translation yml for tests
-  config.i18n.load_path += Dir[Rails.root.join('test', 'en.yml')]
+  # Distinguish between rake-test and test-server through RAKE_TEST environment variable
+  ENV['RAKE_TEST'] = '1' if Rake.application.top_level_tasks.include? 'test'
+  I18n.load_path += Dir[Rails.root.join('test', 'en.yml')] if ENV['RAKE_TEST']
 end
