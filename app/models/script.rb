@@ -30,6 +30,8 @@ class Script < ActiveRecord::Base
     when TWENTY_HOUR_ID then twenty_hour_script
     when HOC_ID then hoc_script
     else
+      # a bit of trickery so we support both ids which are numbers and
+      # names which are strings that may contain numbers (eg. 2-3)
       find_by = (id.to_i.to_s == id.to_s) ? :id : :name
       Script.includes(script_levels: { level: [:game, :concepts] }).find_by(find_by => id).tap do |s|
         raise ActiveRecord::RecordNotFound.new("Couldn't find Script with id|name=#{id}") unless s
