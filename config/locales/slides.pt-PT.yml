@@ -63,8 +63,8 @@
           de forma a torná-lo mais rápido.
       2:
         image: notes/stage5_2.jpg
-        text: Nestes quebra-cabeças, você será um artista que desenha uma linha por
-          trás deles em qualquer lugar que eles forem.
+        text: Nestes puzzles, serás um artista que desenha a linha por detrás deles
+          em qualquer lugar aonde eles forem.
       3:
         image: notes/stage5_3.jpg
         text: Este bloco diz "avançar 100 pixeis." Os pixeis são apenas pequenos pontos
@@ -86,11 +86,11 @@
       2:
         image: notes/stage9_2.jpg
         text: Tu terás que ajudá-la a remover todos os montes de terra e encher os
-          buracos com ela.
+          buracos.
       3:
         image: notes/stage9_3.jpg
-        text: The new blocks remove 1 shovelful of dirt from a pile and fill in 1
-          shovelful of dirt to a hole.
+        text: Os novos blocos removem uma pá cheia de terra de um monte e enchem uma
+          pá cheia de terra para um buraco.
       4:
         image: notes/stage9_4.jpg
         text: Os montes e buracos têm tamanhos diferentes, pelo que terás de dizer
@@ -98,48 +98,49 @@
     flappy_intro:
       1:
         image: notes/flappy01.jpg
-        text: Hi, I'm Katie! One of the most exciting things about computer science
-          is that a computer program can be interactive.
+        text: Olá, sou a Katie! Uma das melhores coisas sobre ciência computacional
+          é que um programa de computador pode ser interativo.
       2:
         image: notes/flappy02.jpg
-        text: Any time somebody clicks or taps or types on a computer or phone, that
-          generates an EVENT, and there's some code that decides what to do when an
-          EVENT occurs.
+        text: Sempre que alguém clica ou toca ou escreve num computador ou telemóvel,
+          é gerado um EVENTO, e existe código que decide o que fazer quando um EVENTO
+          ocorre.
       3:
         image: notes/flappy03.jpg
-        text: 'For example, you could have an EVENT-HANDLER that says "when the mouse
-          is clicked, play a sound" '
+        text: 'Por exemplo, poderias ter um MANIPULADOR DE EVENTOS que diz "quando
+          o rato é clicado, toca um som" '
       4:
         image: notes/flappy04.jpg
-        text: Have you ever heard of the game FlappyBird? By using Event handlers,
-          we're going to learn to program our own custom version of FlappyBird!
+        text: Alguma vez ouviste falar no jogo FlappyBird? Ao usar manipuladores de
+          evento, vamos aprender a programar a nossa própria versão do FlappyBird!
       5:
         image: notes/flappy05.jpg
-        text: The code you'll write involves dragging and dropping blocks that represent
-          commands for the computer. Under the hood, each of these blocks is represented
-          by real code.
+        text: O código que vais escrever involve arrastar e largar blocos que representam
+          comandos para o computador. Na verdade, cada um destes blocos representa
+          um verdadeiro código.
       6:
         image: notes/flappy06.jpg
-        text: 'If you take a look at the workspace, there are some green blocks that
-          are filled in for you - these are "event handlers" '
+        text: 'Se deres uma olhadela à área de trabalho, existem alguns blocos verdes
+          que estão preenchidos por ti - estes são os "manipuladores de evento" '
       7:
         image: notes/flappy07.jpg
-        text: If you want the bird to FLAP when you CLICK the mouse, you can do that
-          by attaching the "FLAP" block to the appropriate event handler, and now
-          in your game whenever you click the mouse, the bird will flap.
+        text: Se queres que o pássaro se AGITE quando CLICAS no rato, podes fazer
+          isso ao ligar o bloco "AGITAR" ao manipulador de evento apropriado, e agora
+          no teu jogo sempre que clicares no rato, o pássaro vai agitar-se.
       8:
         image: notes/flappy08.jpg
-        text: In each puzzle of this activity we'll introduce new types of events
-          as green blocks on the workspace, and you can decide the appropriate blocks
-          to add in response to those events.
+        text: Em cada puzzle desta atividade vamos introduzir novos tipos de eventos
+          como os blocos verdes na área de trabalho, e podes decidir quais os blocos
+          apropriados para adicionar em resposta a esses eventos.
       9:
         image: notes/flappy09.jpg
-        text: When you see a drop down arrow like this, that means you can change
-          the settings - like what sound to play when flappy hits the ground.
+        text: Quando vires uma seta de largar para baixo como esta, significa que
+          podes alterar as definições - como, por exemplo , qual o som para tocar
+          quando o pássaro Flappy cai no chão.
       10:
         image: notes/flappy10.jpg
-        text: In the final puzzle you'll be able to create your own game and share
-          it with your friends. Have fun!
+        text: No último puzzle vais ser capaz de criar o teu próprio jogo e partilhá-lo
+          com os teus amigos. Diverte-te!
     loop_times:
       1:
         image: notes/hoc2_1.jpg
@@ -256,8 +257,9 @@
           bloco de "repetição" e um bloco de "preencher".
       4:
         image: notes/stage13_4.jpg
-        text: The definition sits on the workspace, but our farmer won't run the function
-          until we drag out our "fill 5" function block from functions category.
+        text: A definição fica na área de trabalho, mas a nossa agricultora não irá
+          executar a função até nós arrastarmos o nosso bloco de função "encher 5"
+          da categoria das funções.
       5:
         image: notes/stage13_5.jpg
         text: Let's put the "fun" back in "FUNction!"
@@ -267,65 +269,68 @@
         text: Hi, I'm Makinde! Let's learn about the "while block."
       2:
         image: notes/stage9_6.jpg
-        text: O bloco "while" fará tudo o que você colocar no seu interior, enquanto
-          a instrução na parte superior é TRUE.
+        text: O bloco "enquanto" vai fazer tudo o que puseres dentro dele DESDE QUE
+          a afirmação no topo é VERDADEIRA.
       3:
         image: notes/stage9_7.jpg
-        text: For example, if the farmer is standing on a pile, she will continue
-          to remove 1 shovelful WHILE there is still a pile beneath her.
+        text: Por exemplo, se a agricultora estiver sob um monte, ela irá continuar
+          a remover uma pá cheia ENQUANTO houver um monte por baixo dela.
     loop_for:
       1:
         image: notes/stage11_1.jpg
-        text: Olá, eu me chamo Trina, e trabalho para a Pixar. Já trabalhei em um
-          punhado de filmes, incluindo o Shrek.
+        text: Olá, eu sou a Trina, e trabalho na Pixar. Já trabalhei em vários filmes,
+          incluindo Shrek.
       2:
         image: notes/stage11_2.jpg
-        text: This is our new "counter" loop. It will perform actions over and over
-          again and you can make the actions change slightly each time.
+        text: Este é o nosso novo "contador" de ciclos. Este irá executar as ações
+          repetidamente e podes fazer com que as ações se alterem ligeiramente de
+          cada vez.
       3:
         image: notes/stage11_3.jpg
-        text: In this example, our "counter" loop says "count with counter from 50
-          to 90 by 10" and inside it, we have our "draw a square" block. Drag the
-          "counter" block from the "Variables" section into the "length" spot.
+        text: Neste exemplo, o nosso "contador" de ciclos diz "conta com o contador
+          de 50 a 90 por 10" e dentro dele, vamos ter o nosso bloco de "desenhar um
+          quadrado". Arrasta o bloco "contador" da secção das "variáveis" até ao lugar
+          do "comprimento".
       4:
         image: notes/stage11_4.jpg
-        text: This means our artist is going to draw a square that has 50 pixel length
-          sides, then it will add 10 to that and draw a square with 60 pixel length
-          sides. Then it will keep adding 10 and drawing squares until it reaches
-          90. So we'll have squares of 50, 60, 70, 80, and 90.
+        text: Isto significa que o nosso artista vai desenhar um quadrado que tem
+          50 pixels de comprimento nos lados, depois disso vai adicionar 10 a esse
+          comprimento e desenhar um quadrado com 60 pixels de comprimento nos lados.
+          A seguir vai continuar a adicionar 10 e a desenhar quadrados até chegar
+          a 90. Então teremos quadrados de 50, 60, 70, 80, e 90.
     parameters:
       1:
         image: notes/stage15_1.jpg
-        text: Hi, I'm Janete, and I'm an engineer at Zynga.
+        text: Olá, sou a Janete, e sou uma engenheira na Zynga.
       2:
         image: notes/stage15_2.jpg
-        text: What if we want to draw a bunch of triangles and have their lengths
-          be different sizes?
+        text: E se quisermos desenhar alguns triângulos e quisermos que estes tenham
+          comprimentos diferentes?
       3:
         image: notes/stage15_3.jpg
-        text: We could write all that code out by hand or we can use a function with
-          parameters.
+        text: Podíamos escrever esse código todo à mão ou podemos usar uma função
+          com parâmetros.
       4:
         image: notes/stage15_4.jpg
-        text: To do this, click the blue star on the "draw a triangle" function definition.
-          Then drag "input name" into the "input" block.
+        text: Para fazer isto, clica na estrela azul na definição da função "desenha
+          um triângulo". Depois arrasta o "nome de entrada" para o bloco de "entrada".
       5:
         image: notes/stage15_5.jpg
-        text: Then if you write "length" in the spot where it says "x" and press "Enter"
-          you'll create a length input for your function.
+        text: Depois se escreveres "comprimento" no lugar onde diz "x" e pressionares
+          "enter" vais criar o comprimento de entrada para a tua função.
       6:
         image: notes/stage15_6.jpg
-        text: Then click on the star. Now, you want to click on the variables category
-          and drag the "length" block into the "move forward" block of your function
-          definition. And drag away the old number block.
+        text: De seguida, clica na estrela. Agora, clica na categoria das variáveis
+          e arrasta o bloco de "comprimento" para o bloco de "mover para a frente"
+          da definição da tua função. E arrasta para fora o bloco do número antigo.
       7:
         image: notes/stage15_7.jpg
-        text: To use your function with parameters, click on the functions category
-          and drag out your "draw a triangle with length" function.
+        text: Para usar a tua função com parâmetros, clica na categoria das funções
+          e arrasta para fora a tua função de "desenha um triângulo com comprimento".
       8:
         image: notes/stage15_8.jpg
-        text: Agora você pode usar o bloco de matemática para inserir numerais diferentes
-          para desenhar triângulos de tamanhos diferentes.
+        text: Agora podes usar o bloco de matemática para inserir diferentes números  para
+          desenhar triângulos de tamanhos diferentes.
     hoc_wrapup:
       1:
         image: notes/hoc6_1.jpg

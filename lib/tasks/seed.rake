@@ -46,7 +46,6 @@ namespace :seed do
   # explicit execution of "seed:multis"
   task multis: :environment do
     Multi.transaction do
-      Multi.reset_db
       multi_strings = {}
       # Parse each .multi file and setup its model.
       Dir.glob('config/scripts/**/*.multi').flatten.each do |script|
@@ -68,7 +67,6 @@ namespace :seed do
  # explicit execution of "seed:matches"
   task matches: :environment do
     Match.transaction do
-      Match.reset_db
       match_strings = {}
       # Parse each .match file and setup its model.
       Dir.glob('config/scripts/**/*.match').flatten.each do |script|

@@ -5493,7 +5493,7 @@ exports.finalStage = function(d){return "Tillykke! Du har fuldført det sidste t
 
 exports.finalStageTrophies = function(d){return "Tillykke! Du har afsluttet det sidste trin og vundet "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blokkene til dit program kan også være repræsenteret i Javascript, verdens mest udbredt programmeringssprog:"};
+exports.generatedCodeInfo = function(d){return "Selv top-universiteter underviser i blok-baseret programmering (f.eks. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Men under kølerhjelmen, kan de blokke du har samlet også vises i JavaScript, verdens mest udbredte programmeringssprog:"};
 
 exports.hashError = function(d){return "Beklager, '%1' svarer ikke til noget gemt program."};
 
@@ -5515,9 +5515,9 @@ exports.nextLevel = function(d){return "Tillykke! Du fuldførte puslespillet "+v
 
 exports.nextLevelTrophies = function(d){return "Tillykke! Du fuldførte puslespillet "+v(d,"puzzleNumber")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
 
-exports.nextStage = function(d){return "Tillykke! Du fuldførte trin "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Tillykke! Du gennemførte "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Tillykke! Du fuldførte trin "+v(d,"stageNumber")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
+exports.nextStageTrophies = function(d){return "Tillykke! Du gennemførte "+v(d,"stageName")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Tillykke! Du fuldførte puslespillet "+v(d,"puzzleNumber")+". (Men du kunne have brugt kun "+p(d,"numBlocks",0,"da",{"one":"1 blok","other":n(d,"numBlocks")+" blokke"})+".)"};
 
@@ -5557,7 +5557,7 @@ exports.tryAgain = function(d){return "Prøv igen"};
 
 exports.backToPreviousLevel = function(d){return "Tilbage til forrige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Gem til dit galleri"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5583,7 +5583,7 @@ exports.tryHOC = function(d){return "Prøv en time af kodeing"};
 
 exports.signup = function(d){return "Tilmeld til Introduktion kursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Her er et tip:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5608,13 +5608,13 @@ exports.defaultSayText = function(d){return "type here"};
 
 exports.finalLevel = function(d){return "Tillykke! Du har løst det sidste puslespil."};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
+exports.incrementOpponentScore = function(d){return "modstanderen point"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Tilføj en til spilleren eller modstanderens score."};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "spiller point"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Gør det til egen historie"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5626,7 +5626,7 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 pixel"};
 
 exports.moveDistance50 = function(d){return "50 pixels"};
 
@@ -5654,19 +5654,19 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "Flyt ned"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "Flyt til venstre"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "Flyt til højre"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "Flyt op"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
@@ -5680,31 +5680,31 @@ exports.numBlocksNeeded = function(d){return "Dette puslespil kan løses med %1 
 
 exports.oneTopBlock = function(d){return "Til dette puslespil, du skal stable alle blokkene sammen i det hvide arbejdsområde."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "afspil knaselyd"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "afspil lyd for mål 1"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "afspil lyd for mål 2"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "spil en lyd"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "afspil en miste point lyd"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "afspil en miste point 2 lyd"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "afspil en retro lyd"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "Afspil gummi lyd"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "afspil en slam lyd"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Afspil den valgte lyd."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "Afspil vinde point lyd"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "Afspil vinde point 2 lyd"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "afspil en træ lyd"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5726,7 +5726,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "Du kan trykke på knappen \"Prøv igen\", for at gå tilbage til dit spil."};
 
 exports.repeatForever = function(d){return "repeat forever"};
 
@@ -5750,23 +5750,23 @@ exports.saySprite6 = function(d){return "character 6 say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
-exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+exports.scoreText = function(d){return "Point: "+v(d,"playerScore")+": "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "sæt tilfældig baggrund"};
 
 exports.setBackgroundBlack = function(d){return "set black background"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "sæt hule baggrund"};
 
 exports.setBackgroundCloudy = function(d){return "set cloudy background"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "sæt tennis baggrund"};
 
 exports.setBackgroundNight = function(d){return "set night background"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "indstille undervands baggrund"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Indstiller baggrundsbilledet"};
 
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
@@ -5780,17 +5780,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "til et grønt billede"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "til et skjult billede"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "til et orange billede"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpritePink = function(d){return "til en lyserød billede"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpritePurple = function(d){return "til en lilla billede"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpriteRandom = function(d){return "til et tilfældigt billede"};
 
 exports.setSpriteWitch = function(d){return "to a witch image"};
 
@@ -5798,25 +5798,25 @@ exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor 
 
 exports.setSpriteTooltip = function(d){return "Sets the character image"};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteSpeedRandom = function(d){return "til en tilfældig hastighed"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "til en meget langsom hastighed"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedSlow = function(d){return "til en langsom hastighed"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedNormal = function(d){return "til en normal hastighed"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedFast = function(d){return "til en hurtig hastighed"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedVeryFast = function(d){return "til en meget hurtig hastighed"};
 
 exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Del"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "Tjek historien jeg lavede. Jeg skrev det selv med @codeorg"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "Del din historie:"};
 
 exports.setSprite = function(d){return "set"};
 
@@ -5848,21 +5848,21 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
-exports.whenDown = function(d){return "when Down arrow"};
+exports.whenDown = function(d){return "Når pil ned"};
 
-exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
+exports.whenDownTooltip = function(d){return "Udfører handlingen herunder når der trykkes pil ned."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "Når historien starter"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Udfører handlingen nedenfor når historien begynder."};
 
-exports.whenLeft = function(d){return "when Left arrow"};
+exports.whenLeft = function(d){return "Når venstre pil"};
 
-exports.whenLeftTooltip = function(d){return "Execute the actions below when the Left arrow button is pressed."};
+exports.whenLeftTooltip = function(d){return "Udfører handlingen herunder når der trykkes venstre pil."};
 
-exports.whenRight = function(d){return "when Right arrow"};
+exports.whenRight = function(d){return "Når højre pil"};
 
-exports.whenRightTooltip = function(d){return "Execute the actions below when the Right arrow button is pressed."};
+exports.whenRightTooltip = function(d){return "Udfører handlingen herunder når der trykkes højre pil."};
 
 exports.whenSpriteClicked = function(d){return "when actor clicked"};
 
@@ -5906,9 +5906,9 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
-exports.whenUp = function(d){return "when Up arrow"};
+exports.whenUp = function(d){return "Når pil op"};
 
-exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
+exports.whenUpTooltip = function(d){return "Udfører handlingen herunder når der trykkes pil op."};
 
 exports.yes = function(d){return "Ja"};
 

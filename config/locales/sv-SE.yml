@@ -59,8 +59,6 @@
     no_signup_message: Du kan <a target="_blank" href="http://learn.code.org"> Bläddra
       bland de olika stadierna och pusslen</a>, men du måste registrera dig för att
       spara dina framsteg.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
       select a variety of prizes including free Dropbox space, Skype credits, and
       downloadable games from Electronic Arts.
@@ -72,8 +70,6 @@
       finansiering till amerikanska offentliga skolors lärare som leder minst 15 studenter
       genom kursen. <a href="http://code.org/educate/20hr"> se pedagog guide för mer
       info.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
     teacher_pitch: Undervisa i Datakunskap, 6 - 15 år, i ditt klassrum
     teacher_title: Läraranmälnming
     student_pitch: 'Efter 1 timme: prova vår introduktion till datakunskap för 6-15
@@ -292,6 +288,7 @@
   user_stats:
     recent_activity: Senaste händelserna
     show_more: Visa mer
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Eller, om du redan har registrerat dig, %{link}
     student_reg_link: Student
@@ -306,7 +303,6 @@
     teacher_print_certificates: Print certificates for students who finish this course
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: Ditt klassrum
     student_progress: Dina framsteg
     student_stats: Du har samlat %{trophy_count} av %{trophy_max} "Koncept-bemästring"
@@ -368,7 +364,7 @@
     upgrade: Du måste uppgradera din webbläsare.
   slow_loading: Det här tar längre tid  än vanligt...
   try_reloading: Försök ladda sidan igen
-  next_stage: Klar! Fortsätta till nästa steg
+  next_stage: Klar! Fortsätt till nästa nivå
   download_pdf: Öppen kursplan
   share_code:
     title: Klicka "Kör program" för att se vad mitt program gör
@@ -396,3 +392,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

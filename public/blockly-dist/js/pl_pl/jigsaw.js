@@ -2020,7 +2020,7 @@ exports.install = function(blockly, skin) {
     var level = levels[key];
     generateJigsawBlocksForLevel(blockly, skin, {
       image: skin[level.image.name],
-      HSV: HSV,
+      HSV: level.backgroundHSV || HSV,
       width: level.image.width,
       height: level.image.height,
       numBlocks: level.numBlocks,
@@ -2210,6 +2210,8 @@ var loadLevel = function() {
 
   Jigsaw.MAZE_WIDTH = 0;
   Jigsaw.MAZE_HEIGHT = 0;
+
+  Jigsaw.block1Clicked = false;
 };
 
 var drawMap = function() {
@@ -2304,8 +2306,7 @@ Jigsaw.init = function(config) {
   var block1 = document.querySelectorAll("[block-id='1']")[0];
   if (block1) {
     dom.addMouseDownTouchEvent(block1, function () {
-      Jigsaw.BLOCK1_CLICKED = true;
-      Blockly.runButtonClick();
+      Jigsaw.block1Clicked = true;
     });
   }
 };
@@ -2475,19 +2476,20 @@ var validateSimplePuzzle = function (types, options) {
 
 module.exports = {
   '1': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'apple',
     image: {
-      name: 'smiley',
+      name: 'apple',
       width: 200,
       height: 200
     },
+    backgroundHSV: [41, 1.00, 0.969],
     numBlocks: 1,
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
     goal: {
       successCondition: function () {
-        return Jigsaw.BLOCK1_CLICKED;
+        return Jigsaw.block1Clicked;
       }
     },
     startBlocks:
@@ -2500,6 +2502,7 @@ module.exports = {
       width: 200,
       height: 200
     },
+    backgroundHSV: [184, 1.00, 0.733],
     ghost: {
       x: 400,
       y: 100
@@ -2525,12 +2528,13 @@ module.exports = {
       jigsawBlock('jigsaw_2A', 20, 20)
   },
   '3': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'snail',
     image: {
-      name: 'smiley',
+      name: 'snail',
       width: 200,
       height: 200
     },
+    backgroundHSV: [36, 1.00, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2550,12 +2554,13 @@ module.exports = {
   },
 
   '4': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'elephant',
     image: {
-      name: 'smiley',
+      name: 'elephant',
       width: 200,
       height: 200
     },
+    backgroundHSV: [320, 0.60, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2575,12 +2580,13 @@ module.exports = {
   },
 
   '5': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'fish',
     image: {
-      name: 'smiley',
+      name: 'fish',
       width: 200,
       height: 200
     },
+    backgroundHSV: [209, 0.57, 0.600],
     ghost: {
       x: 400,
       y: 100
@@ -2601,12 +2607,13 @@ module.exports = {
   },
 
   '6': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'doggie',
     image: {
-      name: 'smiley',
+      name: 'doggie',
       width: 200,
       height: 200
     },
+    backgroundHSV: [25, 0.57, 0.960],
     ghost: {
       x: 400,
       y: 100
@@ -2627,12 +2634,13 @@ module.exports = {
   },
 
   '7': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'tree',
     image: {
-      name: 'artist',
+      name: 'tree',
       width: 200,
       height: 200
     },
+    backgroundHSV: [238, 0.51, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2653,12 +2661,13 @@ module.exports = {
   },
 
   '8': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'flower',
     image: {
-      name: 'artist',
+      name: 'flower',
       width: 200,
       height: 200
     },
+    backgroundHSV: [75, 0.80, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2679,12 +2688,13 @@ module.exports = {
   },
 
   '9': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'house',
     image: {
-      name: 'artist',
+      name: 'house',
       width: 200,
       height: 200
     },
+    backgroundHSV: [110, 0.56, 0.60],
     ghost: {
       x: 400,
       y: 100
@@ -2704,12 +2714,13 @@ module.exports = {
   },
 
   '10': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'computer',
     image: {
-      name: 'artist',
+      name: 'computer',
       width: 200,
       height: 200
     },
+    backgroundHSV: [300, 0.25, 0.80],
     ghost: {
       x: 400,
       y: 100
@@ -2911,9 +2922,20 @@ exports.load = function(assetUrl, id) {
   var skin = skinsBase.load(assetUrl, id);
   var config = CONFIGS[skin.id];
 
-  skin.smiley = skin.assetUrl('smiley.png');
+
   skin.artist = skin.assetUrl('artist.png');
   skin.blocks = skin.assetUrl('blocks.png');
+
+  skin.apple = skin.assetUrl('apple.png');
+  skin.smiley = skin.assetUrl('smiley.png');
+  skin.snail = skin.assetUrl('snail.png');
+  skin.elephant = skin.assetUrl('elephant.png');
+  skin.fish = skin.assetUrl('fish.png');
+  skin.doggie = skin.assetUrl('doggie.png');
+  skin.tree = skin.assetUrl('tree.png');
+  skin.flower = skin.assetUrl('flower.png');
+  skin.house = skin.assetUrl('house.png');
+  skin.computer = skin.assetUrl('computer.png');
 
   skin.blank = skin.assetUrl('blank.png');
 
@@ -3544,13 +3566,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Blok powtórz lub blok jeśli musi zawierać inne bloki w środku, by poprawnie działać. Upewnij się, czy wewnętrzny blok pasuje do zewnętrznego."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Pozostały Ci jeszcze bloki, które nie zostały połączone z blokiem zdarzenia."};
 
 exports.finalStage = function(d){return "Gratulacje! Ukończyłeś ostatni etap."};
 
 exports.finalStageTrophies = function(d){return "Gratulacje! Ukończyłeś ostatni etap i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Bloki Twojego programu mogą być również przedstawione w języku JavaScript, najbardziej rozpowszechnionym języku programowania:"};
+exports.generatedCodeInfo = function(d){return "Nawet najlepsze uczelnie uczą kodowania opartego o bloki (np. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Ale bloki które zostały użyte, można również zobaczyć w JavaScript, jednym z najbardziej powszechnie stosowanym języku programowania na świecie:"};
 
 exports.hashError = function(d){return "Przepraszamy, '%1' nie odpowiada żadnemu zapisanemu programowi."};
 
@@ -3572,9 +3594,9 @@ exports.nextLevel = function(d){return "Gratulacje! Rozwiązałeś Łamigłówk�
 
 exports.nextLevelTrophies = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.nextStage = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Gratulacje! Ukonczyłeś etap "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
+exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"pl",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+". (Jednakże, mogłeś użyć jedynie "+p(d,"numBlocks",0,"pl",{"one":"1 blok","other":n(d,"numBlocks")+" bloków"})+")"};
 
@@ -3614,7 +3636,7 @@ exports.tryAgain = function(d){return "Spróbuj ponownie"};
 
 exports.backToPreviousLevel = function(d){return "Wróć do poprzedniego poziomu"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Zapisz do swojej galerii"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -3640,7 +3662,7 @@ exports.tryHOC = function(d){return "Weź udział w Godzinie kodowania (the Hour
 
 exports.signup = function(d){return "Zapisz się na kurs wprowadzający"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Oto wskazówka:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
@@ -3661,19 +3683,19 @@ var MessageFormat = require("messageformat");MessageFormat.locale.pl = function 
 };
 exports.continue = function(d){return "Kontynuuj"};
 
-exports.nextLevel = function(d){return "Gratulacje! Ukończyłeś tę zagadkę."};
+exports.nextLevel = function(d){return "Gratulacje! Ukończyłeś tę łamigłówkę."};
 
 exports.no = function(d){return "Nie"};
 
-exports.numBlocksNeeded = function(d){return "Ta zagadka może być rozwiązana z użyciem %1 bloków."};
+exports.numBlocksNeeded = function(d){return "Ta łamigłówka może być rozwiązana z użyciem %1 bloków."};
 
-exports.oneTopBlock = function(d){return "W tej łamigłówce musisz połączyć ze sobą wszystkie bloki w białym obszarze pracy."};
+exports.oneTopBlock = function(d){return "W tej łamigłówce musisz połączyć ze sobą wszystkie bloki w białym obszarze roboczym."};
 
 exports.reinfFeedbackMsg = function(d){return "Możesz nacisnąć przycisk \"Spróbuj ponownie\", aby powrócić do swojej gry."};
 
 exports.share = function(d){return "Udostępnij"};
 
-exports.shareGame = function(d){return "Podziel się swoją grą:"};
+exports.shareGame = function(d){return "Udostępnij swoją grę:"};
 
 exports.yes = function(d){return "Tak"};
 

@@ -13,9 +13,9 @@
           Artist2: Steg 7
           Unplug5: Steg 8
           Farmer: Steg 9
-          Unplug6: Etapp 10
+          Unplug6: Steg 10
           Artist3: Steg 11
-          Unplug7: Etapp 12
+          Unplug7: Steg 12
           Farmer2: Steg 13
           Unplug8: Steg 14
           Artist4: Steg 15
@@ -28,24 +28,28 @@
           desc: Timme med Kod
           Maze: Steg 1
         Edit Code:
-          desc: Redigera kod
+          desc: Redigera Kod (beta)
           MazeEC: Steg 1
         2014 Levels:
-          desc: 2014 Puzzles (beta)
-          Bounce: Stage 1
+          desc: Studsa (beta)
+          Bounce: Steg 1
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: Uppgifter skapade av användare (beta)
+          Custom: Steg 1
         Flappy Levels:
           desc: Flappy Bird
-          Flappy: Stage 1
+          Flappy: Steg 1
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: Pussel (beta)
+          Jigsaw: Steg 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: Introduktion till datavetenskap
         Maze: Labyrinten
+        Multi: Multiple Choice Stuffs
         Unplug2: Uträkningstänkande
         Unplug3: Kalkyleringsprogrammering
         Artist: Konstnären
@@ -65,9 +69,10 @@
         Artist5: Konstnären 5
         Unplug11: Gör klart
         MazeEC: Labyrinten
-        Bounce: Bounce
+        Bounce: Studsa
         Flappy: Flappy Bird
-        Jigsaw: Jigsaw
+        Jigsaw: Pussel
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: Brons
@@ -128,7 +133,7 @@
           labyrint? Om du gör det rätt, kommer jag kunna gå vilken väg som helst oberoende
           av längden.
         turtle_1_1: Hej, jag är en konstnär. Du kan skriva kod för att få mig att
-          rita nästan vad som helst. Använda några block för att få mig att rita över
+          rita nästan vad som helst. Använd några block för att få mig att rita över
           de grå linjerna i bilden.
         turtle_1_2: 'Nu, rita en fyrkant. OBS: Använd din favorit färg genom att välja
           det i de nya "sätta färg"-blocket.'
@@ -393,6 +398,24 @@
         jigsaw_9: Arrange the blocks to form the image
         jigsaw_10: Arrange the blocks to form the image
         jigsaw_11: Arrange the blocks to form the image
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 'För att lösa detta måste du hitta det mönster som upprepas. Använd
           ett "Upprepa"-block med dessa 3 block inuti: gå, gå, sväng höger.'
@@ -422,11 +445,13 @@
       text:
         drag_blocks: Drag a "move" block and snap it below the other block
         run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        watch_again: Klicka här för att titta på videon igen
+        gray_block_explanation: Block som är grå kan inte flyttas eller tas bort.
+          Kan du lösa uppgiften ändå?
+        show_code_explanation: Klicka här för att se koden till programmet du gör
+        instructions_repeat_explanation: Instruktionerna för varje uppgift upprepas
+          här
+        category_explanation: Du har kvar alla block men de har nu ordnats i kategorier
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

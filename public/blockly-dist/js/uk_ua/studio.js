@@ -5506,7 +5506,7 @@ exports.finalStage = function(d){return "Вітання! Завершено ос
 
 exports.finalStageTrophies = function(d){return "Вітання! Ви завершили останній етап і виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоки програми можна представити мовою JavaScript, яка є найпоширенішою мовою програмування у світі:"};
+exports.generatedCodeInfo = function(d){return "Навіть кращі університети навчають програмуванню на основі блоків (наприклад, "+v(d,"berkeleyLink")+" "+v(d,"harvardLink")+"). Але всередині ці блоки, які ви зібрали, можуть показуватись у JavaScript, найбільш широко використовуваній мові програмування:"};
 
 exports.hashError = function(d){return "Шкода, але  '%1' не відповідає жодній збереженій програмі."};
 
@@ -5528,9 +5528,9 @@ exports.nextLevel = function(d){return "Вітання! Завершено за�
 
 exports.nextLevelTrophies = function(d){return "Вітання! Ви завершили завдання "+v(d,"puzzleNumber")+" та виграли  "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеїв"})+"."};
 
-exports.nextStage = function(d){return "Вітаємо! Завершено етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Вітаємо! Ви завершили "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап  "+v(d,"stageNumber")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеї"})+"."};
+exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап "+v(d,"stageName")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Вітаємо! Ви завершили завдання  "+v(d,"puzzleNumber")+". (Проте, його можна було вирішити, використавши лише "+p(d,"numBlocks",0,"uk",{"one":"1 блок","other":n(d,"numBlocks")+" блоки"})+".)"};
 
@@ -5570,7 +5570,7 @@ exports.tryAgain = function(d){return "Спробуй знову"};
 
 exports.backToPreviousLevel = function(d){return "Повернутися до попереднього рівня"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Зберегти до вашої колекції"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5596,7 +5596,7 @@ exports.tryHOC = function(d){return "Спробуйте годину коду"};
 
 exports.signup = function(d){return "Підпишіться на вступний курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Підказка:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5634,13 +5634,13 @@ exports.defaultSayText = function(d){return "type here"};
 
 exports.finalLevel = function(d){return "Вітання! Ви розв'язали останнє завдання."};
 
-exports.incrementOpponentScore = function(d){return "збільшити бал супротивника"};
+exports.incrementOpponentScore = function(d){return "бал для супротивника"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Додати бал до рахунку гравця або супротивника."};
 
-exports.incrementPlayerScore = function(d){return "збільшити бал гравця"};
+exports.incrementPlayerScore = function(d){return "бал для гравця"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Створити власну історію"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5652,15 +5652,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 пікселів"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 пікселів"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 пікселів"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 пікселів"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 пікселів"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5680,7 +5680,7 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "рухатися вниз"};
+exports.moveDown = function(d){return "рухатись вниз"};
 
 exports.moveDownTooltip = function(d){return "Перемістити платформу вниз."};
 
@@ -5698,7 +5698,7 @@ exports.moveUpTooltip = function(d){return "Перемістити платфо�
 
 exports.moveTooltip = function(d){return "Move a character."};
 
-exports.nextLevel = function(d){return "Вітання! Ви розв'язали останнє завдання."};
+exports.nextLevel = function(d){return "Вітання! Ви розв'язали це завдання."};
 
 exports.no = function(d){return "Ні"};
 
@@ -5706,31 +5706,31 @@ exports.numBlocksNeeded = function(d){return "Це завдання можна �
 
 exports.oneTopBlock = function(d){return "Для цього завдання потрібно розмістити всі блоки у білій робочій області."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "грати звук хрускоту"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "грати звук цілі 1"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "грати звук цілі 2"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "грати звук влучання"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "грати звук втрати балу"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "грати звук втрати балу 2"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "грати звук ретро"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "грати звук гумки"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "грати звук ляпаса"};
 
-exports.playSoundTooltip = function(d){return "Відтворити звук."};
+exports.playSoundTooltip = function(d){return "Відтворити обраний звук."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "грати звук переможного балу"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "грати звук переможного балу 2"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "грати звук деревини"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5752,7 +5752,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "Можна натиснути кнопку \"Спробувати знову\", щоб повернутися і пограти у свою гру."};
 
 exports.repeatForever = function(d){return "repeat forever"};
 
@@ -5778,21 +5778,21 @@ exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the a
 
 exports.scoreText = function(d){return "Рахунок: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "встановити випадкове тло"};
 
 exports.setBackgroundBlack = function(d){return "set black background"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "встановити тло печери"};
 
 exports.setBackgroundCloudy = function(d){return "set cloudy background"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "встановити тло корту"};
 
 exports.setBackgroundNight = function(d){return "set night background"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "встановити тло підводне"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Встановлює фонове зображення"};
 
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
@@ -5806,17 +5806,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "до зеленого зображення"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "до прихованого зображення"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "до оранжевого зображення"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpritePink = function(d){return "до рожевого зображення"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpritePurple = function(d){return "до фіолетового зображення"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpriteRandom = function(d){return "до випадкового зображення"};
 
 exports.setSpriteWitch = function(d){return "to a witch image"};
 
@@ -5824,25 +5824,25 @@ exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor 
 
 exports.setSpriteTooltip = function(d){return "Sets the character image"};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteSpeedRandom = function(d){return "до випадкової швидкості"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "до дуже повільної швидкості"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedSlow = function(d){return "до повільної швидкості"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedNormal = function(d){return "до нормальної швидкості"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedFast = function(d){return "до високої швидкості"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedVeryFast = function(d){return "до дуже високої швидкості"};
 
 exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Поділитися"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "Подивіться на гру, яку я зробив! Я написав її сам разом з @codeorg"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "Поділися своєю історією:"};
 
 exports.setSprite = function(d){return "set"};
 
@@ -5874,19 +5874,19 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
-exports.whenDown = function(d){return "Коли стрілка вниз"};
+exports.whenDown = function(d){return "коли стрілка вниз"};
 
 exports.whenDownTooltip = function(d){return "Виконати дії, подані нижче, при натисненні клавіші стрілка вниз."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "коли історія починається"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Виконання дій, поданих нижче, коли історія починається."};
 
-exports.whenLeft = function(d){return "коли стрілка Вліво"};
+exports.whenLeft = function(d){return "коли стрілка вліво"};
 
 exports.whenLeftTooltip = function(d){return "Виконати дії, подані нижче, при натисненні клавіші стрілка вліво."};
 
-exports.whenRight = function(d){return "коли стрілка Вправо"};
+exports.whenRight = function(d){return "коли стрілка вправо"};
 
 exports.whenRightTooltip = function(d){return "Виконати дії, подані нижче, при натисненні клавіші стрілка вправо."};
 
@@ -5932,7 +5932,7 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
-exports.whenUp = function(d){return "коли стрілка Вгору"};
+exports.whenUp = function(d){return "коли стрілка вгору"};
 
 exports.whenUpTooltip = function(d){return "Виконати дії, подані нижче, при натисненні клавіші стрілка вгору."};
 

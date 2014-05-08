@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "Lança uma bola nova"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Lança uma bola em jogo."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Cria o teu Jogo de Lançamento"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "coloca a torre em baixo"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Podes seleccionar a opção de \"Tentar de novo\" para voltar para o teu jogo."};
 
 exports.removeSquare = function(d){return "remove o quadrado"};
 
@@ -5345,7 +5345,7 @@ exports.repeatUntilFinish = function(d){return "repete até terminar"};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "define uma cena aleatória"};
 
 exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
 
@@ -5363,17 +5363,17 @@ exports.setBallTooltip = function(d){return "Sets the ball image"};
 
 exports.setBallSpeedRandom = function(d){return "set random ball speed"};
 
-exports.setBallSpeedVerySlow = function(d){return "set very slow ball speed"};
+exports.setBallSpeedVerySlow = function(d){return "define velocidade da bola muito lenta"};
 
-exports.setBallSpeedSlow = function(d){return "set slow ball speed"};
+exports.setBallSpeedSlow = function(d){return "define velocidade da bola lenta"};
 
-exports.setBallSpeedNormal = function(d){return "set normal ball speed"};
+exports.setBallSpeedNormal = function(d){return "define velocidade da bola normal"};
 
-exports.setBallSpeedFast = function(d){return "set fast ball speed"};
+exports.setBallSpeedFast = function(d){return "define velocidade da bola rápida"};
 
-exports.setBallSpeedVeryFast = function(d){return "set very fast ball speed"};
+exports.setBallSpeedVeryFast = function(d){return "define velocidade da bola muito rápida"};
 
-exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
+exports.setBallSpeedTooltip = function(d){return "Define a velocidade da bola"};
 
 exports.setPaddleRandom = function(d){return "set random paddle"};
 
@@ -5383,25 +5383,25 @@ exports.setPaddleRetro = function(d){return "set retro paddle"};
 
 exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
 
-exports.setPaddleSpeedRandom = function(d){return "set random paddle speed"};
+exports.setPaddleSpeedRandom = function(d){return "define velocidade aleatória de remagem"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "set very slow paddle speed"};
+exports.setPaddleSpeedVerySlow = function(d){return "define velocidade muito lenta de remagem"};
 
-exports.setPaddleSpeedSlow = function(d){return "set slow paddle speed"};
+exports.setPaddleSpeedSlow = function(d){return "define velocidade lenta de remagem"};
 
-exports.setPaddleSpeedNormal = function(d){return "set normal paddle speed"};
+exports.setPaddleSpeedNormal = function(d){return "define velocidade normal de remagem"};
 
-exports.setPaddleSpeedFast = function(d){return "set fast paddle speed"};
+exports.setPaddleSpeedFast = function(d){return "define velocidade rápida de remagem"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"};
+exports.setPaddleSpeedVeryFast = function(d){return "define velocidade muito rápida de remagem"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
+exports.setPaddleSpeedTooltip = function(d){return "Define a velocidade da remagem"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Partilha"};
 
 exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Partilha o teu jogo:"};
 
 exports.turnLeft = function(d){return "vira à esquerda"};
 
@@ -5421,9 +5421,9 @@ exports.whenDown = function(d){return "when Down arrow"};
 
 exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "quando o jogo começar"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Executa as ações abaixo quando o jogo começar."};
 
 exports.whenLeft = function(d){return "when Left arrow"};
 
@@ -5492,13 +5492,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Os blocos \"Repetir\" ou \"Se\" precisam de incluir blocos dentro para funcionar. Garante que o bloco interno encaixa correctamente dentro do bloco que o contém."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Tens blocos extras que não estão ligados a um bloco de evento."};
 
 exports.finalStage = function(d){return "Parabéns! Completaste a etapa final."};
 
 exports.finalStageTrophies = function(d){return "Parabéns! Completaste a etapa final e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "As peças de puzzle do teu programa podem ser representadas em Javascript, a linguagem de programação mais amplamente adoptada no mundo:"};
+exports.generatedCodeInfo = function(d){return "Mesmo as melhores universidades ensinam código em blocos (por exemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Mas na verdade, os blocos que juntaste podem ser vistos em JavaScript, a linguagem de código mais usada em todo o mundo:"};
 
 exports.hashError = function(d){return "Desculpa, '%1' não corresponde a qualquer programa gravado."};
 
@@ -5512,7 +5512,7 @@ exports.levelIncompleteError = function(d){return "Estás a usar todos os tipos 
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Cria o teu próprio jogo Flappy"};
 
 exports.missingBlocksErrorMsg = function(d){return "Tenta um ou mais blocos dos seguintes para resolver o puzzle."};
 
@@ -5520,9 +5520,9 @@ exports.nextLevel = function(d){return "Parabéns! Completaste o puzzle "+v(d,"p
 
 exports.nextLevelTrophies = function(d){return "Parabéns! Completaste o puzzle "+v(d,"puzzleNumber")+" e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.nextStage = function(d){return "Parabéns! Completaste a fase "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Parabéns! Completaste "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Parabéns! Completaste a fase "+v(d,"stageNumber")+" e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"troféu","other":n(d,"numTrophies")+" troféus"})+"."};
+exports.nextStageTrophies = function(d){return "Parabéns! Completaste "+v(d,"stageName")+" e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Parabéns! Completaste o puzzle "+v(d,"puzzleNumber")+". (Apesar disso, poderias ter usado somente "+p(d,"numBlocks",0,"pt",{"one":"1 bloco","other":n(d,"numBlocks")+" blocos"})+".)"};
 
@@ -5550,7 +5550,7 @@ exports.tooManyBlocksMsg = function(d){return "Este puzzle pode ser resolvido co
 
 exports.tooMuchWork = function(d){return "Fizeste-me ter muito trabalho! Podes tentar repetir menos vezes?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "O teu código parece bem - vai agitar-se com cada clique. Mas precisas de clicar várias vezes para agitar-se até ao alvo."};
 
 exports.toolboxHeader = function(d){return "Blocos"};
 
@@ -5562,7 +5562,7 @@ exports.tryAgain = function(d){return "Tentar novamente"};
 
 exports.backToPreviousLevel = function(d){return "Voltar ao nível anterior"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Guarda na tua galeria de imagens"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5580,15 +5580,15 @@ exports.rotateText = function(d){return "Roda o teu dispositivo."};
 
 exports.orientationLock = function(d){return "Desativa o bloqueio de orientação em configurações do dispositivo."};
 
-exports.wantToLearn = function(d){return "Want to learn to code?"};
+exports.wantToLearn = function(d){return "Queres aprender a programar com código?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Vê o vídeo"};
 
-exports.tryHOC = function(d){return "Try the Hour of Code"};
+exports.tryHOC = function(d){return "Exprimenta a Hora do Código"};
 
-exports.signup = function(d){return "Sign up for the intro course"};
+exports.signup = function(d){return "Inscreve-te para o curso de introdução"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aqui vai uma dica:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

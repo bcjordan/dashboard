@@ -29,24 +29,28 @@
           desc: Jam kode
           Maze: Tahap 1
         Edit Code:
-          desc: Edit kode
+          desc: Edit kode (beta)
           MazeEC: Tahap 1
         2014 Levels:
-          desc: Teka-teki 2014 (beta)
-          Bounce: Stage 1
+          desc: Memantul (beta)
+          Bounce: Tahap 1
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: Teka-teki dari pengguna (beta)
+          Custom: Tahap 1
         Flappy Levels:
           desc: Burung Flappy
-          Flappy: Stage 1
+          Flappy: Tahap 1
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: Teka-teki (beta)
+          Jigsaw: Tahap 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: Perkenalan ilmu komputer
         Maze: Labirin
+        Multi: Multiple Choice Stuffs
         Unplug2: Berpikir secara komputasi
         Unplug3: Pemrograman grafis diatas kertas
         Artist: Artis
@@ -68,7 +72,8 @@
         MazeEC: Labirin
         Bounce: Terpental
         Flappy: Burung Flappy
-        Jigsaw: Jigsaw
+        Jigsaw: Teka-teki
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: Perunggu
@@ -101,8 +106,10 @@
           tiga blok.
         maze_2_7: Bantu saya menangkap si babi nakal ini dengan menggunakan blok sesedikit
           mungkin. Cobalah gunakan lebih dari satu blok "Ulangi".
-        maze_2_8: 'Untuk menyelesaikan problem ini, coba blok "ulangi" (repeat) dengan
-          3 blok didalamnya: gerak, gerak, belok.'
+        maze_2_8: 'Ketika sebuah blok berwarna abu-abu, itu berarti Anda tidak bisa
+          menghapus atau mengubahnya. Coba dan selesaikan teka-teki ini menggunakan
+          blok "ulangi" yang mengulang 3 kali. Coba tempatkan 3 blok itu didalam blok
+          "ulangi" abu-abu: gerak, gerak, belok.'
         maze_2_9: OK, cobalah blok "Ulangi sampai" - blok ini akan mengulangi sampai
           saya mencapai si babi yang menjengkelkan itu.
         maze_2_10: Ayo coba lagi! Apakah anda dapat menyelesaikan yang satu ini dengan
@@ -130,8 +137,8 @@
           labirin yang lebih kompleks? Jika Anda melakukannya dengan benar, saya bisa
           berjalan melewati jalur berbelok manapun tidak perduli berapa panjangnya.
         turtle_1_1: Hi, saya seorang artis. Anda dapat menulis kode untuk membuat
-          saya menggambar  apa pun. Gunakan beberapa blok untuk membuat saya mengambil
-          garis abu-abu dalam gambar.
+          saya menggambar  apa pun. Gunakan beberapa blok untuk membuat saya menarik
+          garis-garis abu-abu dalam gambar.
         turtle_1_2: 'Sekarang, gambarlah persegi empat. Catatan: Gunakan warna favorit
           Anda dengan memilih di blok baru "atur warna".'
         turtle_1_3: Buatlah persegi empat dengan hanya 3 blok.
@@ -157,10 +164,8 @@
           Cobalah gunakan blok baru "atur lebar". Selamat bersenang-senang!'
         turtle_4_1: 'Dapatkan Anda menggambar segitiga (panjang 100 piksel) dengan
           menggunakan hanya 3 blok? Tips: Gunakanlah blok "Ulangi" (repeat).'
-        turtle_4_2: 'Coba tambahkan satu blok untuk menyelesaikan teka-teki ini. Tips:
-          kami telah menyediakan blok untuk menggambar 2 segitiga yang identik, Anda
-          perlu untuk menempatkan "belok" (turn) diantara keduanya, dan memutuskan
-          jauh apa untuk membelok.'
+        turtle_4_2: Tambahkan blok "belok kanan 90 derajat" di suatu tempat di tengah
+          program sudah keluar pada ruang kerja untuk menggambar segitiga ini.
         turtle_4_3: OK, di sini adalah kode yang anda tulis untuk menggambar sebuah
           segitiga. Dapatkah Anda menambahkan blok "Ulangi" (repeat) dan blok "Belok"
           (turn) untuk membuat sebuah bunga yang cantik?
@@ -369,12 +374,14 @@
           "Skor poin lawan" ke blok "Jika bola di target" dan blok "Jika bola meleset
           dari dayung" untuk membuat permainan. Lihat berapa banyak poin yang Anda
           bisa dapat, sebelum lawan Anda mendapat dua kali lebih banyak.
-        bounce_11: You can now attach blocks to the "when game starts" block. Try
-          changing the speed of the paddle and the ball and see how many points you
-          can score before your opponent scores twice.
-        bounce_12: Create your own Bounce game. You can change all the visuals and
-          the rules. When you're done, click Share to let friends try your game on
-          their phones.
+        bounce_11: Anda sekarang dapat menempelkan blok-blok kepada blok "ketika permainan
+          dimulai". Anda harus menempelkan blok "luncuran bola baru" di lebih dari
+          satu tempat. Lalu cobalah mengubah adegan atau kecepatan dayung dan bola
+          dan untuk melihat berapa banyak poin yang Anda dapat sebelum lawan Anda
+          mendapat dua kali lebih banyak.
+        bounce_12: Buat permainan bouncing Anda sendiri. Anda dapat mengubah semua
+          visual dan aturan. Setelah selesai, klik bagikan untuk membiarkan teman-teman
+          mencoba permainan Anda pada ponsel mereka.
         Custom_builder: Tarik blok dari toolbox ke ruang kerja untuk menggambar tingkat
           yang Anda ingin buat. Tekan "Jalankan Program" ketika Anda selesai.
         flappy_1: Tempelkan satu blok kepada blok "Ketika klik", kemudian tekan "Jalankan
@@ -404,17 +411,35 @@
         flappy_11: Buatlah permainan Flappy-mu sendiri. Anda dapat mengubah semua
           visual dan semua aturan, bahkan gravitasi. Setelah selesai, klik bagikan
           untuk membiarkan teman-teman mencoba permainanmu dari ponsel mereka.
-        jigsaw_1: Click the block
-        jigsaw_2: Drag the block to the target
-        jigsaw_3: Arrange the blocks to form the image
-        jigsaw_4: Arrange the blocks to form the image
-        jigsaw_5: Arrange the blocks to form the image
-        jigsaw_6: Arrange the blocks to form the image
-        jigsaw_7: Arrange the blocks to form the image
-        jigsaw_8: Arrange the blocks to form the image
-        jigsaw_9: Arrange the blocks to form the image
-        jigsaw_10: Arrange the blocks to form the image
-        jigsaw_11: Arrange the blocks to form the image
+        jigsaw_1: Klik blok
+        jigsaw_2: Tarik blok ke target
+        jigsaw_3: Atur blok untuk membentuk gambar
+        jigsaw_4: Atur blok untuk membentuk gambar
+        jigsaw_5: Atur blok untuk membentuk gambar
+        jigsaw_6: Atur blok untuk membentuk gambar
+        jigsaw_7: Atur blok untuk membentuk gambar
+        jigsaw_8: Atur blok untuk membentuk gambar
+        jigsaw_9: Atur blok untuk membentuk gambar
+        jigsaw_10: Atur blok untuk membentuk gambar
+        jigsaw_11: Atur blok untuk membentuk gambar
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 'Untuk memecahkan masalah ini, temukan pola yang berulang. Gunakan
           blok "ulangi" (repeat) dengan 3 blok didalamnya: gerak, gerak, belok kanan.'
@@ -444,13 +469,17 @@
         20_wrapup: 'Penutupan 20 Jam '
     callout:
       text:
-        drag_blocks: Drag a "move" block and snap it below the other block
-        run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        drag_blocks: Tarik blok "gerak" dan letakkan di bawah blok lain
+        run: Klik "Jalankan program" untuk mencoba program Anda
+        watch_again: Klik di sini untuk menonton video lagi
+        gray_block_explanation: Blok yang abu-abu tidak dapat dipindahkan atau dihapus.
+          Bisakah Anda memecahkan teka-teki ini?
+        show_code_explanation: Klik di sini untuk melihat kode untuk program yang
+          Anda buat
+        instructions_repeat_explanation: Petunjuk untuk setiap teka-teki dapat diulang
+          di sini
+        category_explanation: Anda memiliki semua sama blok tetapi mereka sekarang
+          diatur dalam kategori
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

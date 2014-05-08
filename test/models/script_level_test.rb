@@ -31,4 +31,18 @@ class ScriptLevelTest < ActiveSupport::TestCase
     @script_level.update(position: 2)
     assert_equal 1, @script_level.stage_or_game_position
   end
+
+  test "should destroy when related level is destroyed" do
+    @script_level = create(:script_level)
+    @script_level.level.destroy
+    assert_not ScriptLevel.exists?(@script_level)
+  end
+
+  test "destroying should not destroy related level" do
+    @script_level = create(:script_level)
+    level = @script_level.level
+    @script_level.destroy
+
+    assert Level.exists?(level)
+  end
 end

@@ -2020,7 +2020,7 @@ exports.install = function(blockly, skin) {
     var level = levels[key];
     generateJigsawBlocksForLevel(blockly, skin, {
       image: skin[level.image.name],
-      HSV: HSV,
+      HSV: level.backgroundHSV || HSV,
       width: level.image.width,
       height: level.image.height,
       numBlocks: level.numBlocks,
@@ -2210,6 +2210,8 @@ var loadLevel = function() {
 
   Jigsaw.MAZE_WIDTH = 0;
   Jigsaw.MAZE_HEIGHT = 0;
+
+  Jigsaw.block1Clicked = false;
 };
 
 var drawMap = function() {
@@ -2304,8 +2306,7 @@ Jigsaw.init = function(config) {
   var block1 = document.querySelectorAll("[block-id='1']")[0];
   if (block1) {
     dom.addMouseDownTouchEvent(block1, function () {
-      Jigsaw.BLOCK1_CLICKED = true;
-      Blockly.runButtonClick();
+      Jigsaw.block1Clicked = true;
     });
   }
 };
@@ -2475,19 +2476,20 @@ var validateSimplePuzzle = function (types, options) {
 
 module.exports = {
   '1': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'apple',
     image: {
-      name: 'smiley',
+      name: 'apple',
       width: 200,
       height: 200
     },
+    backgroundHSV: [41, 1.00, 0.969],
     numBlocks: 1,
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
     goal: {
       successCondition: function () {
-        return Jigsaw.BLOCK1_CLICKED;
+        return Jigsaw.block1Clicked;
       }
     },
     startBlocks:
@@ -2500,6 +2502,7 @@ module.exports = {
       width: 200,
       height: 200
     },
+    backgroundHSV: [184, 1.00, 0.733],
     ghost: {
       x: 400,
       y: 100
@@ -2525,12 +2528,13 @@ module.exports = {
       jigsawBlock('jigsaw_2A', 20, 20)
   },
   '3': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'snail',
     image: {
-      name: 'smiley',
+      name: 'snail',
       width: 200,
       height: 200
     },
+    backgroundHSV: [36, 1.00, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2550,12 +2554,13 @@ module.exports = {
   },
 
   '4': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'elephant',
     image: {
-      name: 'smiley',
+      name: 'elephant',
       width: 200,
       height: 200
     },
+    backgroundHSV: [320, 0.60, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2575,12 +2580,13 @@ module.exports = {
   },
 
   '5': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'fish',
     image: {
-      name: 'smiley',
+      name: 'fish',
       width: 200,
       height: 200
     },
+    backgroundHSV: [209, 0.57, 0.600],
     ghost: {
       x: 400,
       y: 100
@@ -2601,12 +2607,13 @@ module.exports = {
   },
 
   '6': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'doggie',
     image: {
-      name: 'smiley',
+      name: 'doggie',
       width: 200,
       height: 200
     },
+    backgroundHSV: [25, 0.57, 0.960],
     ghost: {
       x: 400,
       y: 100
@@ -2627,12 +2634,13 @@ module.exports = {
   },
 
   '7': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'tree',
     image: {
-      name: 'artist',
+      name: 'tree',
       width: 200,
       height: 200
     },
+    backgroundHSV: [238, 0.51, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2653,12 +2661,13 @@ module.exports = {
   },
 
   '8': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'flower',
     image: {
-      name: 'artist',
+      name: 'flower',
       width: 200,
       height: 200
     },
+    backgroundHSV: [75, 0.80, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2679,12 +2688,13 @@ module.exports = {
   },
 
   '9': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'house',
     image: {
-      name: 'artist',
+      name: 'house',
       width: 200,
       height: 200
     },
+    backgroundHSV: [110, 0.56, 0.60],
     ghost: {
       x: 400,
       y: 100
@@ -2704,12 +2714,13 @@ module.exports = {
   },
 
   '10': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'computer',
     image: {
-      name: 'artist',
+      name: 'computer',
       width: 200,
       height: 200
     },
+    backgroundHSV: [300, 0.25, 0.80],
     ghost: {
       x: 400,
       y: 100
@@ -2911,9 +2922,20 @@ exports.load = function(assetUrl, id) {
   var skin = skinsBase.load(assetUrl, id);
   var config = CONFIGS[skin.id];
 
-  skin.smiley = skin.assetUrl('smiley.png');
+
   skin.artist = skin.assetUrl('artist.png');
   skin.blocks = skin.assetUrl('blocks.png');
+
+  skin.apple = skin.assetUrl('apple.png');
+  skin.smiley = skin.assetUrl('smiley.png');
+  skin.snail = skin.assetUrl('snail.png');
+  skin.elephant = skin.assetUrl('elephant.png');
+  skin.fish = skin.assetUrl('fish.png');
+  skin.doggie = skin.assetUrl('doggie.png');
+  skin.tree = skin.assetUrl('tree.png');
+  skin.flower = skin.assetUrl('flower.png');
+  skin.house = skin.assetUrl('house.png');
+  skin.computer = skin.assetUrl('computer.png');
 
   skin.blank = skin.assetUrl('blank.png');
 
@@ -3553,7 +3575,7 @@ exports.finalStage = function(d){return "تهانينا! لقد اتممت ال�
 
 exports.finalStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة النهائية وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.generatedCodeInfo = function(d){return "القطع في برنامجك تستطيع كذلك بأعادة تمثيلها في الـ Java Script , بحيث تعتبر اللغة البرمجية واسعة التكيف عالميا :"};
+exports.generatedCodeInfo = function(d){return "حتى أفضل الجامعات تعلم الترميز القائم على الكتلة (على سبيل المثال، "+v(d,"berkeleyLink")+"، "+v(d,"harvardLink")+"). ولكن تحت غطاء محرك السيارة،يمكن للكتل التي كنت قد جمعتها أيضا أن تظهر في جافا سكريبت، الأكثر استخداما على نطاق واسع كلغة ترميز في العالم:"};
 
 exports.hashError = function(d){return "عذرا , %1 لايتوافق مع اي البرامج المحفوظة ."};
 
@@ -3575,7 +3597,7 @@ exports.nextLevel = function(d){return "تهانينا ! أنت اكملت ال�
 
 exports.nextLevelTrophies = function(d){return "تهانينا! لقد أكملت اللغز "+v(d,"puzzleNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.nextStage = function(d){return "تهانينا! أنت اكملت المرحلة "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "تهانينا! يمكنك إكمال "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة "+v(d,"stageNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
@@ -3617,7 +3639,7 @@ exports.tryAgain = function(d){return "حاول مرة أخرى"};
 
 exports.backToPreviousLevel = function(d){return "الرجوع إلى المستوى السابق"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -3643,7 +3665,7 @@ exports.tryHOC = function(d){return "جرب \"Hour of Code\""};
 
 exports.signup = function(d){return "سجل لمشاهدة مقدمة الدورة"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "وإليك نصيحة:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
@@ -3665,19 +3687,19 @@ var MessageFormat = require("messageformat");MessageFormat.locale.ar = function(
   }
   return 'other';
 };
-exports.continue = function(d){return "أستمر"};
+exports.continue = function(d){return "استمرار"};
 
 exports.nextLevel = function(d){return "تهانينا! لقد قمت بإكمال هذا اللغز."};
 
 exports.no = function(d){return "لا"};
 
-exports.numBlocksNeeded = function(d){return "يمكن حل هذا الغز ب  %1 قطع."};
+exports.numBlocksNeeded = function(d){return "يمكن حل هذا اللغز مع  % 1 من الكتل."};
 
-exports.oneTopBlock = function(d){return "لهذا اللغز , أنت بحاجة الى تجميع كل القطع في المساحة البيضاء."};
+exports.oneTopBlock = function(d){return "لهذا اللغز , أنت بحاجة الى تجميع كل الكتل في المساحة البيضاء."};
 
-exports.reinfFeedbackMsg = function(d){return "يمكنك الضغط على زر \"حاول مرة أخرى\" للعودة للعب اللعبة الخاصة بك."};
+exports.reinfFeedbackMsg = function(d){return "يمكنك الضغط على زر \"حاول مرة أخرى\" للعودة للعبة الخاصة بك."};
 
-exports.share = function(d){return "مشاركة الآخرين"};
+exports.share = function(d){return "مشاركة"};
 
 exports.shareGame = function(d){return "شارك لعبتك:"};
 

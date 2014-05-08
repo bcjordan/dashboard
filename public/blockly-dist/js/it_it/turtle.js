@@ -5720,7 +5720,7 @@ exports.finalStage = function(d){return "Complimenti! Hai completato l'ultima le
 
 exports.finalStageTrophies = function(d){return "Complimenti! Hai completato l'ultima lezione e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
 
-exports.generatedCodeInfo = function(d){return "I blocchi per il tuo programma possono essere rappresentati anche in JavaScript, uno dei linguaggi di programmazione più usati al mondo:"};
+exports.generatedCodeInfo = function(d){return "Anche le migliori università (p.es., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+") insegnano la programmazione visuale con i blocchi. Ma i blocchi che metti insieme possono essere rappresentati anche in JavaScript, uno dei linguaggi di programmazione più usati al mondo:"};
 
 exports.hashError = function(d){return "Siamo spiacenti, '%1' non corrisponde ad alcun programma salvato."};
 
@@ -5734,23 +5734,23 @@ exports.levelIncompleteError = function(d){return "Stai usando tutti i tipi di b
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Costruisci il tuo gioco Flappy"};
+exports.makeYourOwnFlappy = function(d){return "Costruisci la tua versione del gioco Flappy"};
 
-exports.missingBlocksErrorMsg = function(d){return "Prova uno o più dei blocchi che trovi qui sotto per risolvere questo puzzle."};
+exports.missingBlocksErrorMsg = function(d){return "Prova uno o più dei blocchi che trovi qui sotto per risolvere questo esercizio."};
 
-exports.nextLevel = function(d){return "Complimenti! Hai completato il puzzle "+v(d,"puzzleNumber")+"."};
+exports.nextLevel = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+"."};
 
-exports.nextLevelTrophies = function(d){return "Complimenti! Hai completato il Puzzle "+v(d,"puzzleNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
+exports.nextLevelTrophies = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.nextStage = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
+exports.nextStageTrophies = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageName")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Complimenti! Hai completato il Puzzle "+v(d,"puzzleNumber")+". (Avresti però potuto usare solo "+p(d,"numBlocks",0,"it",{"one":"1 blocco","other":n(d,"numBlocks")+" blocchi"})+".)"};
+exports.numBlocksNeeded = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+". (Avresti però potuto usare solo "+p(d,"numBlocks",0,"it",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
 
 exports.numLinesOfCodeWritten = function(d){return "Hai appena scritto "+p(d,"numLines",0,"it",{"one":"1 linea","other":n(d,"numLines")+" linee"})+" di codice!"};
 
-exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" di "+v(d,"stage_total")};
+exports.puzzleTitle = function(d){return "Esercizio "+v(d,"puzzle_number")+" di "+v(d,"stage_total")};
 
 exports.resetProgram = function(d){return "Ricomincia"};
 
@@ -5768,7 +5768,7 @@ exports.textVariable = function(d){return "testo"};
 
 exports.tooFewBlocksMsg = function(d){return "Stai usando tutti i tipi di blocchi necessari, ma prova usando più blocchi o usandoli diversamente."};
 
-exports.tooManyBlocksMsg = function(d){return "Questo puzzle può essere risolto con < x id= 'START_SPAN'/><x id='END_SPAN'/> blocchi."};
+exports.tooManyBlocksMsg = function(d){return "Questo esercizio può essere risolto con <x id='START_SPAN'/><x id='END_SPAN'/> blocchi."};
 
 exports.tooMuchWork = function(d){return "Mi hai fatto fare un sacco di lavoro!  Puoi provare a farmi fare meno ripetizioni?"};
 
@@ -5784,7 +5784,7 @@ exports.tryAgain = function(d){return "Riprova"};
 
 exports.backToPreviousLevel = function(d){return "Torna al livello precedente"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Salva nella tua galleria"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5810,7 +5810,7 @@ exports.tryHOC = function(d){return "Prova l'Ora di Codice"};
 
 exports.signup = function(d){return "Iscriviti al corso introduttivo"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ecco un suggerimento:"};
 
 
 },{"messageformat":49}],37:[function(require,module,exports){
@@ -5889,9 +5889,9 @@ exports.moveWestTooltip = function(d){return "Moves the artist west."};
 
 exports.moveTooltip = function(d){return "Sposta l'artista in avanti o all'indietro della quantita di pixel specificata."};
 
-exports.notBlackColour = function(d){return "Devi impostare un colore diverso dal nero per questo puzzle."};
+exports.notBlackColour = function(d){return "Devi impostare un colore diverso dal nero per questo esercizio."};
 
-exports.numBlocksNeeded = function(d){return "Questo puzzle può essere risolto con %1 blocchi.  Tu ne hai usati %2."};
+exports.numBlocksNeeded = function(d){return "Questo esercizio può essere risolto con %1 blocchi.  Tu ne hai usati %2."};
 
 exports.penDown = function(d){return "Abbassa la matita"};
 
@@ -5911,7 +5911,7 @@ exports.showMe = function(d){return "Mostrami"};
 
 exports.showTurtle = function(d){return "Mostra l'artista"};
 
-exports.tooFewColours = function(d){return "Devi utilizzare almeno %1 diversi colori per questo puzzle.  Tu ne hai usati solo %2."};
+exports.tooFewColours = function(d){return "Devi utilizzare almeno %1 diversi colori per questo esercizio.  Tu ne hai usati solo %2."};
 
 exports.turnLeft = function(d){return "gira a sinistra di"};
 
@@ -5925,7 +5925,7 @@ exports.turtleVisibilityTooltip = function(d){return "Rende l'artista visibile o
 
 exports.widthTooltip = function(d){return "Cambia la larghezza della matita."};
 
-exports.wrongColour = function(d){return "Il tuo disegno usa un colore sbagliato. Per questo puzzle, deve essere %1."};
+exports.wrongColour = function(d){return "Il tuo disegno usa un colore sbagliato. Per questo esercizio, deve essere %1."};
 
 
 },{"messageformat":49}],38:[function(require,module,exports){

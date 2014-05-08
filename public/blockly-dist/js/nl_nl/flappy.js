@@ -4728,13 +4728,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "De \"herhaal\" of \"als\" blokken hebben andere blokken in hun nodig om te werken. Zorg ervoor dat de binnenste blok correct past in de bevattende blok."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Je hebt blokken over die niet aan een gebeurtenisblok geplakt zijn."};
 
 exports.finalStage = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid."};
 
 exports.finalStageTrophies = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.generatedCodeInfo = function(d){return "De blokken voor je programma kunnen ook worden weergegeven in JavaScript, de meest gebruikte programmeertaal in de wereld:"};
+exports.generatedCodeInfo = function(d){return "Zelf op topuniversiteiten wordt les gegevens met programmeertalen die op blokken zijn gebaseerd (bijv. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Maar onder de motorkop kunnen de blokken waarmee je een programma hebt gemaakt ook getoond worden in JavaScript, de programmeertaal die wereldwijd het meest wordt gebruikt:"};
 
 exports.hashError = function(d){return "Sorry, '%1' komt niet overeen met een opgeslagen programma."};
 
@@ -4748,7 +4748,7 @@ exports.levelIncompleteError = function(d){return "U gebruikt al de nodige typen
 
 exports.listVariable = function(d){return "lijst"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Maak je eigen 'Flappy'-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Probeer een of meer van de blokken onderaan om deze puzzel op te lossen."};
 
@@ -4756,9 +4756,9 @@ exports.nextLevel = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,
 
 exports.nextLevelTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"puzzleNumber")+" op en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.nextStage = function(d){return "Gefeliciteerd! U hebt fase "+v(d,"stageNumber")+" opgelost."};
+exports.nextStage = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af."};
 
-exports.nextStageTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"stageNumber")+" en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
+exports.nextStageTrophies = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af en je hebt "+p(d,"numTrophies",0,"nl",{"one":"een medaille","other":n(d,"numTrophies")+" medailles"})+" gewonnen."};
 
 exports.numBlocksNeeded = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,"puzzleNumber")+". (Nochtans, u  kon alleen "+p(d,"numBlocks",0,"nl",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)  gebruiken"};
 
@@ -4786,7 +4786,7 @@ exports.tooManyBlocksMsg = function(d){return "Deze puzzel kan worden opgelost m
 
 exports.tooMuchWork = function(d){return "Je laat me veel werk doen! Kun je proberen minder te herhalen?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Je programma ziet er goed uit - bij elke klik zal hij flapperen. Maak je moet nu heel vaak klikken om naar het doel te flapperen."};
 
 exports.toolboxHeader = function(d){return "Blokken"};
 
@@ -4798,7 +4798,7 @@ exports.tryAgain = function(d){return "Probeer opnieuw"};
 
 exports.backToPreviousLevel = function(d){return "Terug naar het vorige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Sla op in je galerij"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -4824,7 +4824,7 @@ exports.tryHOC = function(d){return "Probeer \"Hour of Code\""};
 
 exports.signup = function(d){return "Neem deel aan de introductie cursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Een tip:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){

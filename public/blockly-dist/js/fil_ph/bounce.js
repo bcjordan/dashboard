@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "gumamit ng bagong bola"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Gumamit ng bola sa paglalaro."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Gumawa ng sarili mong Bounce Game"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "put down tower"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Maaarin mo pindutin ang \"Subukan muli\" na button upang bumalik sa paglalaro."};
 
 exports.removeSquare = function(d){return "remove square"};
 
@@ -5345,63 +5345,63 @@ exports.repeatUntilFinish = function(d){return "repeat until finish"};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "ilagay ang random na scene"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "ilagay ang hardcourt na scene"};
 
-exports.setBackgroundRetro = function(d){return "set retro scene"};
+exports.setBackgroundRetro = function(d){return "ilagay ang retro na scene"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Nilalagay ang larawan sa background"};
 
-exports.setBallRandom = function(d){return "set random ball"};
+exports.setBallRandom = function(d){return "ilagay ang random na bola"};
 
-exports.setBallHardcourt = function(d){return "set hardcourt ball"};
+exports.setBallHardcourt = function(d){return "ilagay ang hardcourt na bola"};
 
-exports.setBallRetro = function(d){return "set retro ball"};
+exports.setBallRetro = function(d){return "ilagay ang retro na bola"};
 
-exports.setBallTooltip = function(d){return "Sets the ball image"};
+exports.setBallTooltip = function(d){return "Nilalagay ang larawan ng bola"};
 
-exports.setBallSpeedRandom = function(d){return "set random ball speed"};
+exports.setBallSpeedRandom = function(d){return "ilagay ang random na bilis ng bola"};
 
-exports.setBallSpeedVerySlow = function(d){return "set very slow ball speed"};
+exports.setBallSpeedVerySlow = function(d){return "ilagay sa napakabagal na bilis ang bola"};
 
-exports.setBallSpeedSlow = function(d){return "set slow ball speed"};
+exports.setBallSpeedSlow = function(d){return "ilagay sa mabagal na bilis ang bola"};
 
-exports.setBallSpeedNormal = function(d){return "set normal ball speed"};
+exports.setBallSpeedNormal = function(d){return "ilagay sa normal na bilis ang bola"};
 
-exports.setBallSpeedFast = function(d){return "set fast ball speed"};
+exports.setBallSpeedFast = function(d){return "ilagay sa mabilis na bilis ang bola"};
 
-exports.setBallSpeedVeryFast = function(d){return "set very fast ball speed"};
+exports.setBallSpeedVeryFast = function(d){return "ilagay  sa pinakamabilis ang bilis ng bola"};
 
-exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
+exports.setBallSpeedTooltip = function(d){return "Nilalagay ang bilis ng bola"};
 
-exports.setPaddleRandom = function(d){return "set random paddle"};
+exports.setPaddleRandom = function(d){return "ilagay ang random na pamalo"};
 
-exports.setPaddleHardcourt = function(d){return "set hardcourt paddle"};
+exports.setPaddleHardcourt = function(d){return "ilagay ang hardcourt na pamalo"};
 
-exports.setPaddleRetro = function(d){return "set retro paddle"};
+exports.setPaddleRetro = function(d){return "ilagay ang retro na pamalo"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Nilalagay ang larawan ng pamalo"};
 
-exports.setPaddleSpeedRandom = function(d){return "set random paddle speed"};
+exports.setPaddleSpeedRandom = function(d){return "ilagay ang random na bilis ng pamalo"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "set very slow paddle speed"};
+exports.setPaddleSpeedVerySlow = function(d){return "ilagay sa napakabagal na bilis ang pamalo"};
 
-exports.setPaddleSpeedSlow = function(d){return "set slow paddle speed"};
+exports.setPaddleSpeedSlow = function(d){return "ilagay sa mabagal na bilis ang pamalo"};
 
-exports.setPaddleSpeedNormal = function(d){return "set normal paddle speed"};
+exports.setPaddleSpeedNormal = function(d){return "ilagay sa normal na bilis ang pamalo"};
 
-exports.setPaddleSpeedFast = function(d){return "set fast paddle speed"};
+exports.setPaddleSpeedFast = function(d){return "ilagay ang mabilis na bilis ang pamalo"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"};
+exports.setPaddleSpeedVeryFast = function(d){return "ilagay ang pinakamabilis na bilis ng pamalo"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
+exports.setPaddleSpeedTooltip = function(d){return "Nilalagay ang bilis ng pamalo"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Ibahagi"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Tingnan ang larong Bounce na ginawa ko. Ako mismo ang nagsulat nito sa @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Ibahagi ang iyong laro:"};
 
 exports.turnLeft = function(d){return "turn left"};
 
@@ -5421,9 +5421,9 @@ exports.whenDown = function(d){return "when Down arrow"};
 
 exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "kapag nagsimula ang laro"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag nagsisimula ang laro."};
 
 exports.whenLeft = function(d){return "when Left arrow"};
 
@@ -5456,29 +5456,29 @@ exports.yes = function(d){return "Yes"};
 var MessageFormat = require("messageformat");MessageFormat.locale.fil=function(n){return n===0||n==1?"one":"other"}
 exports.blocklyMessage = function(d){return "Blockly"};
 
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Mga aksyon"};
 
-exports.catColour = function(d){return "Colour"};
+exports.catColour = function(d){return "Kulay"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Lohika"};
 
-exports.catLists = function(d){return "Lists"};
+exports.catLists = function(d){return "Mga listahan"};
 
-exports.catLoops = function(d){return "Loops"};
+exports.catLoops = function(d){return "Mga loop"};
 
 exports.catMath = function(d){return "Math"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Mga function"};
 
 exports.catText = function(d){return "Text"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "Mga variable"};
 
-exports.codeTooltip = function(d){return "See generated JavaScript code."};
+exports.codeTooltip = function(d){return "Tingnan ang nabuo na JavaScripy code."};
 
-exports.continue = function(d){return "Continue"};
+exports.continue = function(d){return "Magpatuloy"};
 
-exports.dialogCancel = function(d){return "Cancel"};
+exports.dialogCancel = function(d){return "Kanselahin"};
 
 exports.dialogOK = function(d){return "OK"};
 
@@ -5490,21 +5490,21 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
-exports.emptyBlocksErrorMsg = function(d){return "The \"Repeat\" or \"If\" block needs to have other blocks inside it to work. Make sure the inner block fits properly inside the containing block."};
+exports.emptyBlocksErrorMsg = function(d){return "Ang \"Repeat\" o \"if\" block ay kailangan ng iba pang mga block sa loob nito upang gumana. Siguraduhin na ang block na asa loob ay nakasukat ng maayos sa loob ng naglalaman na block."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Meron kang extra na mga block na hindi nakasama sa event block."};
 
-exports.finalStage = function(d){return "Congratulations! You have completed the final stage."};
+exports.finalStage = function(d){return "Maligayang pagbati! Natapos mo na ang pinakahuling stage."};
 
-exports.finalStageTrophies = function(d){return "Congratulations! You have completed the final stage and won "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.finalStageTrophies = function(d){return "Maligayang pagbati! Nakumpleto mo na ang pinakahuling stage at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.generatedCodeInfo = function(d){return "The blocks for your program can also be represented in JavaScript, the world's most widely adopted programming language:"};
 
 exports.hashError = function(d){return "Sorry, '%1' doesn't correspond with any saved program."};
 
-exports.help = function(d){return "Help"};
+exports.help = function(d){return "Tulong"};
 
-exports.hintTitle = function(d){return "Hint:"};
+exports.hintTitle = function(d){return "Pahiwatig:"};
 
 exports.jump = function(d){return "jump"};
 
@@ -5512,7 +5512,7 @@ exports.levelIncompleteError = function(d){return "You are using all of the nece
 
 exports.listVariable = function(d){return "list"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Gumawa Ng Sarili Mong Flappy Game"};
 
 exports.missingBlocksErrorMsg = function(d){return "Try one or more of the blocks below to solve this puzzle."};
 
@@ -5530,17 +5530,17 @@ exports.numLinesOfCodeWritten = function(d){return "You just wrote "+p(d,"numLin
 
 exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" of "+v(d,"stage_total")};
 
-exports.resetProgram = function(d){return "Reset"};
+exports.resetProgram = function(d){return "Ulitin"};
 
 exports.runProgram = function(d){return "Run Program"};
 
 exports.runTooltip = function(d){return "Run the program defined by the blocks in the workspace."};
 
-exports.showCodeHeader = function(d){return "Show Code"};
+exports.showCodeHeader = function(d){return "Ipakita ang Code"};
 
-exports.showGeneratedCode = function(d){return "Show code"};
+exports.showGeneratedCode = function(d){return "Ipakita ang Code"};
 
-exports.subtitle = function(d){return "a visual programming environment"};
+exports.subtitle = function(d){return "isang visual programming na environment"};
 
 exports.textVariable = function(d){return "text"};
 
@@ -5552,9 +5552,9 @@ exports.tooMuchWork = function(d){return "You made me do a lot of work!  Could y
 
 exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
 
-exports.toolboxHeader = function(d){return "Blocks"};
+exports.toolboxHeader = function(d){return "Mga block"};
 
-exports.openWorkspace = function(d){return "How It Works"};
+exports.openWorkspace = function(d){return "Kung Paano Ito Gumagana"};
 
 exports.totalNumLinesOfCodeWritten = function(d){return "All-time total: "+p(d,"numLines",0,"fil",{"one":"1 line","other":n(d,"numLines")+" lines"})+" of code."};
 
@@ -5562,11 +5562,11 @@ exports.tryAgain = function(d){return "Try again"};
 
 exports.backToPreviousLevel = function(d){return "Back to previous level"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "I-save sa iyong gallery"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
-exports.typeCode = function(d){return "Type your JavaScript code below these instructions."};
+exports.typeCode = function(d){return "I-type ang iyong JavaScript code pagkatapos nitong mga instruction."};
 
 exports.typeFuncs = function(d){return "Available functions:%1"};
 
@@ -5574,17 +5574,17 @@ exports.typeHint = function(d){return "Note that the parentheses and semicolons 
 
 exports.workspaceHeader = function(d){return "Assemble your blocks here: "};
 
-exports.infinity = function(d){return "Infinity"};
+exports.infinity = function(d){return "Walang katapusan"};
 
-exports.rotateText = function(d){return "Rotate your device."};
+exports.rotateText = function(d){return "Paikutin ang iyong device."};
 
 exports.orientationLock = function(d){return "Turn off orientation lock in device settings."};
 
 exports.wantToLearn = function(d){return "Want to learn to code?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Panoorin ang Video"};
 
-exports.tryHOC = function(d){return "Try the Hour of Code"};
+exports.tryHOC = function(d){return "Subukan ang Hour of Code"};
 
 exports.signup = function(d){return "Sign up for the intro course"};
 

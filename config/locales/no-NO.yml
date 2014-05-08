@@ -58,8 +58,6 @@
     no_signup_message: Du kan <a target="_blank" href="http://learn.code.org">bla
       gjennom de forskjellige nivåene og oppgavene</a>, men du må registrere deg for
       å lagre hvor langt du har nådd.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Amerikanske elever som får alle %{num_trophies} konsept-pokaler
       kan velge mellom flere premier som gratis Dropbox-lagringsplass, Skype-kreditt,
       og nedlastbare spill fra Electronic Arts.
@@ -70,8 +68,6 @@
       DonorsChoose.org</a> tilbyr Code.org opp til $1000 til USAs offentlig ansatte
       skolelærere som leder minst 15 elever gjennom dette kurset. <a href="http://code.org/educate/20hr">
       se pedagog guide for mer info.</a> '
-    teacher_prize_limits: '(Grense: $1000 per lærer. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Se FAQ-en for flere begrensninger</a>)'
     teacher_pitch: Lær bort ungdomsskolepensum i informatikk i klassen
     teacher_title: Påmelding for lærere
     student_pitch: 'Utover 1 time: Prøv vårt ungdomsskole-introduksjon til informatikk'
@@ -291,6 +287,7 @@
   user_stats:
     recent_activity: Nylig aktivitet
     show_more: Vis mer
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Eller hvis du allerede er registrert, %{link}
     student_reg_link: Elev
@@ -305,7 +302,6 @@
     teacher_print_certificates: Print certificates for students who finish this course
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: Ditt klasserom
     student_progress: Din læringskurve
     student_stats: Du har fått %{trophy_count} av maks %{trophy_max} pokaler for Konseptmestring.
@@ -394,3 +390,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

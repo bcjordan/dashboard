@@ -58,8 +58,6 @@
     no_signup_message: Lahko  <a target="_blank" href="http://learn.code.org"> brskaš
       po različnih stopnjah in ugankah</a>, a se boš moral vpisati, da shraniš svoj
       napredek.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Ameriški študenti, ki bojo osvojili vse  %{num_trophies} konceptualne
       trofeje, lahko izbirajo med raznimi nagradami, med drugim zastonj Dropbox prostor,
       Skype krediti in Electronic Arts, ki si jih lahko prenesejo na računalnik.
@@ -70,8 +68,6 @@
       bo Code.org učiteljem ameriških javnih šol, ki bojo izvedli ta tečaj z vsaj
       15 učenci, ponudil do 1000 dolarjev za opremo učilnic. <a href="http://code.org/educate/20hr">Poglej
       vodič za učitelje za več informacij.</a> '
-    teacher_prize_limits: '(Meja: 1000 dolarjev na učitelja <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">Poglej
-      FAQ za več informacij o raznih mejah.</a>)'
     teacher_pitch: Poučuj K-8 Uvod v računalništvo v tvoji učilnici
     teacher_title: Učitelji - prijava
     student_pitch: 'Nad 1 uro: preizkusi naš K-8 Uvod v računalništvo'
@@ -290,6 +286,7 @@
   user_stats:
     recent_activity: Nedavna dejavnost
     show_more: Prikaži več
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Ali če ste že registrirani, %{link}
     student_reg_link: Vpis študenta
@@ -304,7 +301,6 @@
     teacher_print_certificates: Tiskanje potrdila za študente ki so opravili tečaj
     teacher_read_blog: Preberi o novicah in posodobitvah našega gradiva na našem blogu
       Izobraževalcev
-    teacher_survey: Tell us what you think about this course
     classroom: Vaša učilnica
     student_progress: Vaš napredek učenja
     student_stats: You've earned %{trophy_count} out of %{trophy_max} "Concept Mastery"
@@ -393,3 +389,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

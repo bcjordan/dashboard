@@ -58,8 +58,6 @@
       account.<p/> You'll be able to track your students' progress and get rewards.
     no_signup_message: אתה יכול <a target="_blank" href="http://learn.code.org">לדפדף
       בחידות והשלבים השונים</a>, אבל אתה צריך להירשם על-מנת לשמור את התקדמותך.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: תלמידים מארה"ב שזוכים בכל %{num_trophies} גביעי המושגים יכולים
       לבחור מסוגי פרסים רבים כגון מקום דרופבוקס בחינם, אשראי Skype, ומשחקים להורדה
       מבית Electronic Arts.
@@ -68,8 +66,6 @@
     teacher_prize_message: |
       בשותפות עם <a target="_blank" href="http://DonorsChoose.org"> DonorsChoose.org </a>
       Code.org מציע לך מימון של עד 1000 דולר למימון כיתת למידה בארצות הברית למורים שמלמדים לפחות 15 תלמידים בקורס <a href="http://code.org/educate/20hr"> הסתכל מדריך למורה לעוד מידע </a>
-    teacher_prize_limits: '(הגבלה: $1,000 לכל מורה. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      עוד הגבלות  בFAQ</a>)'
     teacher_pitch: למד את כיתות גן עד ח׳ הקדמה למדעי המחשב בכיתה שלך
     teacher_title: הרשמת מורה
     student_pitch: 'מעבר לשעה: נסה את ההקדמה שלנו למדעי המחשב לכיתות גן עד ח׳'
@@ -286,6 +282,7 @@
   user_stats:
     recent_activity: פעילות אחרונה
     show_more: הצג יותר
+    classroom_activity: Unplugged Activity
   home:
     signin_message: או אם אתה כבר רשום, %{link}
     student_reg_link: הירשמות תלמיד
@@ -299,7 +296,6 @@
       אפשריים.
     teacher_print_certificates: הדפס תעודות לתלמידים שגמרו את הקורס הזה
     teacher_read_blog: קרא על חדשות ועדכונים לחומרים שלנו ב"בלוג מחנכים"
-    teacher_survey: Tell us what you think about this course
     classroom: הכיתה שלך
     student_progress: התקדמות הלמידה שלך
     student_stats: הרווחת %{trophy_count} פרסים מתוך %{trophy_max} אפשריים.
@@ -386,3 +382,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

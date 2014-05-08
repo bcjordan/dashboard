@@ -57,8 +57,6 @@
       account.<p/> You'll be able to track your students' progress and get rewards.
     no_signup_message: Možeš <a target="_blank" href="http://learn.code.org">pregledati
       razne nivoe i zadatke</a>, ali da bi tvoj napredak bio spremljen trebaš se prijaviti.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
       select a variety of prizes including free Dropbox space, Skype credits, and
       downloadable games from Electronic Arts.
@@ -69,8 +67,6 @@
       Code.org will offer up to $1,000 in classroom funding to U.S. public school
       teachers who lead at least 15 students through this course. <a href="http://code.org/educate/20hr">See
       educator guide for more info.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
     teacher_pitch: Teach the K-8 Intro to Computer Science in your classroom
     teacher_title: Prijava učitelja
     student_pitch: 'Beyond 1 hour: try our K-8 Intro to Computer Science'
@@ -290,6 +286,7 @@
   user_stats:
     recent_activity: Recent activity
     show_more: Show more
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Or if you're already registered, %{link}
     student_reg_link: Student
@@ -304,7 +301,6 @@
     teacher_print_certificates: Print certificates for students who finish this course
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: Your classroom
     student_progress: Your learning progress
     student_stats: You've earned %{trophy_count} out of %{trophy_max} "Concept Mastery"
@@ -393,3 +389,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

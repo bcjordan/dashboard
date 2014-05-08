@@ -2020,7 +2020,7 @@ exports.install = function(blockly, skin) {
     var level = levels[key];
     generateJigsawBlocksForLevel(blockly, skin, {
       image: skin[level.image.name],
-      HSV: HSV,
+      HSV: level.backgroundHSV || HSV,
       width: level.image.width,
       height: level.image.height,
       numBlocks: level.numBlocks,
@@ -2210,6 +2210,8 @@ var loadLevel = function() {
 
   Jigsaw.MAZE_WIDTH = 0;
   Jigsaw.MAZE_HEIGHT = 0;
+
+  Jigsaw.block1Clicked = false;
 };
 
 var drawMap = function() {
@@ -2304,8 +2306,7 @@ Jigsaw.init = function(config) {
   var block1 = document.querySelectorAll("[block-id='1']")[0];
   if (block1) {
     dom.addMouseDownTouchEvent(block1, function () {
-      Jigsaw.BLOCK1_CLICKED = true;
-      Blockly.runButtonClick();
+      Jigsaw.block1Clicked = true;
     });
   }
 };
@@ -2475,19 +2476,20 @@ var validateSimplePuzzle = function (types, options) {
 
 module.exports = {
   '1': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'apple',
     image: {
-      name: 'smiley',
+      name: 'apple',
       width: 200,
       height: 200
     },
+    backgroundHSV: [41, 1.00, 0.969],
     numBlocks: 1,
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
     goal: {
       successCondition: function () {
-        return Jigsaw.BLOCK1_CLICKED;
+        return Jigsaw.block1Clicked;
       }
     },
     startBlocks:
@@ -2500,6 +2502,7 @@ module.exports = {
       width: 200,
       height: 200
     },
+    backgroundHSV: [184, 1.00, 0.733],
     ghost: {
       x: 400,
       y: 100
@@ -2525,12 +2528,13 @@ module.exports = {
       jigsawBlock('jigsaw_2A', 20, 20)
   },
   '3': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'snail',
     image: {
-      name: 'smiley',
+      name: 'snail',
       width: 200,
       height: 200
     },
+    backgroundHSV: [36, 1.00, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2550,12 +2554,13 @@ module.exports = {
   },
 
   '4': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'elephant',
     image: {
-      name: 'smiley',
+      name: 'elephant',
       width: 200,
       height: 200
     },
+    backgroundHSV: [320, 0.60, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2575,12 +2580,13 @@ module.exports = {
   },
 
   '5': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'fish',
     image: {
-      name: 'smiley',
+      name: 'fish',
       width: 200,
       height: 200
     },
+    backgroundHSV: [209, 0.57, 0.600],
     ghost: {
       x: 400,
       y: 100
@@ -2601,12 +2607,13 @@ module.exports = {
   },
 
   '6': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'doggie',
     image: {
-      name: 'smiley',
+      name: 'doggie',
       width: 200,
       height: 200
     },
+    backgroundHSV: [25, 0.57, 0.960],
     ghost: {
       x: 400,
       y: 100
@@ -2627,12 +2634,13 @@ module.exports = {
   },
 
   '7': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'tree',
     image: {
-      name: 'artist',
+      name: 'tree',
       width: 200,
       height: 200
     },
+    backgroundHSV: [238, 0.51, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2653,12 +2661,13 @@ module.exports = {
   },
 
   '8': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'flower',
     image: {
-      name: 'artist',
+      name: 'flower',
       width: 200,
       height: 200
     },
+    backgroundHSV: [75, 0.80, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2679,12 +2688,13 @@ module.exports = {
   },
 
   '9': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'house',
     image: {
-      name: 'artist',
+      name: 'house',
       width: 200,
       height: 200
     },
+    backgroundHSV: [110, 0.56, 0.60],
     ghost: {
       x: 400,
       y: 100
@@ -2704,12 +2714,13 @@ module.exports = {
   },
 
   '10': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'computer',
     image: {
-      name: 'artist',
+      name: 'computer',
       width: 200,
       height: 200
     },
+    backgroundHSV: [300, 0.25, 0.80],
     ghost: {
       x: 400,
       y: 100
@@ -2911,9 +2922,20 @@ exports.load = function(assetUrl, id) {
   var skin = skinsBase.load(assetUrl, id);
   var config = CONFIGS[skin.id];
 
-  skin.smiley = skin.assetUrl('smiley.png');
+
   skin.artist = skin.assetUrl('artist.png');
   skin.blocks = skin.assetUrl('blocks.png');
+
+  skin.apple = skin.assetUrl('apple.png');
+  skin.smiley = skin.assetUrl('smiley.png');
+  skin.snail = skin.assetUrl('snail.png');
+  skin.elephant = skin.assetUrl('elephant.png');
+  skin.fish = skin.assetUrl('fish.png');
+  skin.doggie = skin.assetUrl('doggie.png');
+  skin.tree = skin.assetUrl('tree.png');
+  skin.flower = skin.assetUrl('flower.png');
+  skin.house = skin.assetUrl('house.png');
+  skin.computer = skin.assetUrl('computer.png');
 
   skin.blank = skin.assetUrl('blank.png');
 
@@ -3536,7 +3558,7 @@ exports.finalStage = function(d){return "Horee! Anda berhasil menyelesaikan taha
 
 exports.finalStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan tahap akhir dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":"piala "+n(d,"numTrophies")})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blok-blok yang digunakan untuk program Anda dapat juga dibuat dengan Javascript, bahasa yang paling populer dalam dunia pemrograman:"};
+exports.generatedCodeInfo = function(d){return "Bahkan Universitas mengajar blok berbasis pengkodean (misalnya, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tetapi di bawah tenda, blok Anda telah berkumpul dapat juga ditunjukkan dalam JavaScript, dunia yang paling banyak digunakan pengkodean bahasa:"};
 
 exports.hashError = function(d){return "Maaf, '%1' tidak sesuai dengan program yang disimpan."};
 
@@ -3558,7 +3580,7 @@ exports.nextLevel = function(d){return "Horee! Anda berhasil menyelesaikan teka-
 
 exports.nextLevelTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke  "+v(d,"puzzleNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"satu":"a trophy","other":"trophies "+n(d,"numTrophies")})+"."};
 
-exports.nextStage = function(d){return "Horee! Anda berhasil menyelesaikan tahap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Selamat! Anda telah menyelesaikan "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke "+v(d,"stageNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":n(d,"numTrophies")+" piala"})+"."};
 
@@ -3600,7 +3622,7 @@ exports.tryAgain = function(d){return "Ayo coba lagi!"};
 
 exports.backToPreviousLevel = function(d){return "Kembali ke teka-teki sebelumnya"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Simpan ke galeri Anda"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -3626,26 +3648,26 @@ exports.tryHOC = function(d){return "Cobalah \"Hour of Code\""};
 
 exports.signup = function(d){return "Daftarlah untuk mengikuti kursus introduksi"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Berikut adalah tip:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.id=function(n){return "other"}
-exports.continue = function(d){return "lanjutkan"};
+exports.continue = function(d){return "Lanjutkan"};
 
-exports.nextLevel = function(d){return "Selamat! Kamu telah menyelesaikan teka-teki ini."};
+exports.nextLevel = function(d){return "Horee! Anda telah menyelesaikan teka-teki ini."};
 
 exports.no = function(d){return "Tidak"};
 
 exports.numBlocksNeeded = function(d){return "Teka-teki ini dapat diselesaikan dengan %1 blok."};
 
-exports.oneTopBlock = function(d){return "untuk teka-teki ini, kamu perlu menyusun semua blok-blok di dalam lembar kerja putih."};
+exports.oneTopBlock = function(d){return "Teka-teki ini, Anda perlu mengumpulkan semua blok dari ruang kerja putih."};
 
 exports.reinfFeedbackMsg = function(d){return "Anda dapat menekan tombol \"Coba lagi\" untuk kembali bermain."};
 
 exports.share = function(d){return "Bagikan"};
 
-exports.shareGame = function(d){return "Bagi permainanmu:"};
+exports.shareGame = function(d){return "Bagikan permainanmu:"};
 
 exports.yes = function(d){return "Ya"};
 

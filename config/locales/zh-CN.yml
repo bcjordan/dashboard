@@ -12,7 +12,7 @@
         gender: '性别:'
         edit_header: 编辑用户信息
         error:
-          future: can't be in the future
+          future: 不能在未来
   hello: 世界你好
   welcome_back: 欢迎回来，%{name}
   add_teacher_form:
@@ -52,24 +52,21 @@
     need_confirmation: 没有收到确认的说明吗？
     need_unlock: 没收到解锁指令吗？
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
+    overview_student: 注册一个帐户以跟踪您的进度。
+    overview_teacher: |
+      在教室里教计算机科学,注册一个账户。<p/> 你可以跟踪你的学生进步并获得奖励。
     no_signup_message: 您可以 <a target="_blank"href="http://learn.code.org"> 浏览各个阶段和谜题</a>，但您将需要注册以保存您的进度。
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: 成功获得所有 %{num_trophies} 概念奖杯的美国学生可以任选下列奖品之一作为奖励，奖品包括：免费Dropbox空间、Skype积分、美国艺电(EA)
       的数字版游戏。
     teacher_educator_guide: 请参阅教师指南
-    teacher_prize_header: 赢 1,000美元 <a target="_blank"href="http://DonorsChoose.org">
-      DonorsChoose.org</a> 奖励
+    teacher_prize_header: 赢取 $1,000 在 <a target="_blank"href="http://DonorsChoose.org">
+      DonorsChoose.org</a> 奖励 （通过 2014 年 6 月 15 日，直到最后用品)
     teacher_prize_message: 与 <a target="_blank"href="http://DonorsChoose.org"> DonorsChoose.org</a>
       合作，Code.org 将提供向美国公立学校有至少15名学生的教提供 1000 美元的课程基金。<a href="http://code.org/educate/20hr">
       的详细信息请参阅教师指南。</a>
-    teacher_prize_limits: '(限额: 每位老师1000美元. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">查看更多常见问题</a>)'
-    teacher_pitch: 在你的课堂里教授 K-8 计算机基础课程
+    teacher_pitch: Code.org 老师注册
     teacher_title: 老师登记
-    student_pitch: 一小时之后：试试我们的 K-8 计算机基础课程
+    student_pitch: Code.org 学生注册
     student_title: 学生注册
     school_name: 学校名称 （可选）
     school_address: 学校地址 （可选）
@@ -94,7 +91,7 @@
     remember: 记住我
     submit: 登录
   signin:
-    try_heading: Want to try coding without signing up?
+    try_heading: 想不用注册尝试编码吗？
     try_hoc: 先尝试一个 代码一小时
     try_20hours: 请尝试我们 20 小时计算机科学简介课程
   password:
@@ -139,8 +136,8 @@
     provider: 提供者
     code: 代码：
     redeem_header: 'To redeem:'
-    donorschoose_register: Register as a teacher on DonorsChoose.org
-    donorschoose_project: Post a project
+    donorschoose_register: 作为一位老师在 DonorsChoose.org 注册
+    donorschoose_project: 发布项目
     donorschoose_how_to: 如何使用您的代码
     success: 你的奖金已经成功兑现，请参见下面的代码。
     error: 你的奖品无法兑现，请重新尝试。
@@ -243,7 +240,7 @@
       manage: 管理学生
       add: 添加学生
     sections:
-      manage: Manage sections
+      manage: 管理的部分
     rollup: 进度板
     activity: 最近的课程活动
     user_not_found: 无法找到这个老师或学生
@@ -265,18 +262,18 @@
   user_stats:
     recent_activity: 最近的动态
     show_more: 显示更多
+    classroom_activity: Unplugged Activity
   home:
     signin_message: 已经注册了吗？%{link}
     student_reg_link: 学生 注册
     teacher_reg_link: 老师 注册
-    signin_directions: 使用一个帐户来跟踪进度和获取奖励。 <br/>教师，跟踪您的整个班级。
+    signin_directions: 使用一个帐户来跟踪进度。 <br/>教师，跟踪您的整个班级。
     teacher_dashboard: 看进度板
     teacher_student_count_one: 你有 %{count} 个学生。
     teacher_student_count: 你有 %{count} 个学生。
     teacher_averages: 平均下来，您的学生获得了%{trophy_average}/%{trophy_max}个“概念掌握”奖杯。
     teacher_print_certificates: 为完成此课程的学生打印证书
     teacher_read_blog: 阅读有关新闻和我们在教育家博客的材料的更新
-    teacher_survey: Tell us what you think about this course
     classroom: 你的教室
     student_progress: 你的学习进度
     student_stats: 你已经获得了%{trophy_count}/%{trophy_max}个“概念掌握”奖杯。
@@ -286,13 +283,11 @@
     local_school: 本地学校
     online: 在线
     see_details: 查看详细信息
-    prize_info: （仅限于美国） 参与奖： 完成课程学生的10 元礼品卡和最高 1000 美元的公立学校教师的课堂奖励。
+    prize_info: 奖品为参与 （仅限美国公立学校教师）： 最高在课堂奖励 1000 元。
     tryfirst: 或者，你也可以先试一试，晚些再注册：
     trynow: 现在就试试
-    add_hint_help: Please help us to add smart hints to Code.org tutorials
-    20hour_overview: This 20-hour course introduces core computer science and programming
-      concepts. The course is designed for use in classrooms for grades K-8, but it
-      is fun to learn at all ages.
+    add_hint_help: 请帮助我们将智能提示添加到 Code.org 教程
+    20hour_overview: 这个20 小时课程介绍核心计算机科学和编程的概念。课程为 K-8 年级设计，用于室内教学，并且所有年龄段学习起来都很有趣。
   gender:
     male: 男性
     female: 女性
@@ -319,8 +314,8 @@
     subtitle: 看看这些视频和提示
     teacher: 请参阅解决方案
     auth_error: 您无权查看该解决方案。
-    submit: Update Artist Location
-    direction: Start Direction
+    submit: 更新艺术家的位置
+    direction: 开始方向
   video:
     tab: 视频。
     notes: 没有视频吗？请看笔记。
@@ -335,13 +330,13 @@
   download_pdf: 开放课程
   share_code:
     title: 点击运行程序来观看程序的运行情况
-    bounce_og_title: Check out my Bounce Game
+    bounce_og_title: 看看我的弹球游戏
     flappy_og_title: 看看我的Flappy游戏
     og_description: 我用 Code.org自己写的代码
   builder:
     created: 您创建了一个新的脚本。
     destroyed: 你毁了一个脚本。
-    manage: 管理脚本
+    manage: 建立级别
     view: 查看
     back: 回到脚本
     level:
@@ -350,12 +345,28 @@
       unused: 未使用的水平
   upsell:
     hoc:
-      title: The Hour of Code
-      body: Try the basics of computer science. Millions have given it a shot.
+      title: 编程一小时
+      body: 请尝试计算机科学的基本知识。数百万人尝试了它
     flappy:
-      title: Flappy Code
-      body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
-        tutorial!
+      title: 飞扬的代码
+      body: 想要在 10 分钟内写你自己的游戏吗？请尝试我们飞扬的代码教程 ！
     20hour:
-      title: Intro Course
-      body: Try our 20-hour Intro to Computer Science course.
+      title: 课程简介
+      body: 尝试我们 20 小时计算机科学课程简介 。
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

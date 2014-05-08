@@ -2020,7 +2020,7 @@ exports.install = function(blockly, skin) {
     var level = levels[key];
     generateJigsawBlocksForLevel(blockly, skin, {
       image: skin[level.image.name],
-      HSV: HSV,
+      HSV: level.backgroundHSV || HSV,
       width: level.image.width,
       height: level.image.height,
       numBlocks: level.numBlocks,
@@ -2210,6 +2210,8 @@ var loadLevel = function() {
 
   Jigsaw.MAZE_WIDTH = 0;
   Jigsaw.MAZE_HEIGHT = 0;
+
+  Jigsaw.block1Clicked = false;
 };
 
 var drawMap = function() {
@@ -2304,8 +2306,7 @@ Jigsaw.init = function(config) {
   var block1 = document.querySelectorAll("[block-id='1']")[0];
   if (block1) {
     dom.addMouseDownTouchEvent(block1, function () {
-      Jigsaw.BLOCK1_CLICKED = true;
-      Blockly.runButtonClick();
+      Jigsaw.block1Clicked = true;
     });
   }
 };
@@ -2475,19 +2476,20 @@ var validateSimplePuzzle = function (types, options) {
 
 module.exports = {
   '1': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'apple',
     image: {
-      name: 'smiley',
+      name: 'apple',
       width: 200,
       height: 200
     },
+    backgroundHSV: [41, 1.00, 0.969],
     numBlocks: 1,
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
     goal: {
       successCondition: function () {
-        return Jigsaw.BLOCK1_CLICKED;
+        return Jigsaw.block1Clicked;
       }
     },
     startBlocks:
@@ -2500,6 +2502,7 @@ module.exports = {
       width: 200,
       height: 200
     },
+    backgroundHSV: [184, 1.00, 0.733],
     ghost: {
       x: 400,
       y: 100
@@ -2525,12 +2528,13 @@ module.exports = {
       jigsawBlock('jigsaw_2A', 20, 20)
   },
   '3': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'snail',
     image: {
-      name: 'smiley',
+      name: 'snail',
       width: 200,
       height: 200
     },
+    backgroundHSV: [36, 1.00, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2550,12 +2554,13 @@ module.exports = {
   },
 
   '4': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'elephant',
     image: {
-      name: 'smiley',
+      name: 'elephant',
       width: 200,
       height: 200
     },
+    backgroundHSV: [320, 0.60, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2575,12 +2580,13 @@ module.exports = {
   },
 
   '5': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'fish',
     image: {
-      name: 'smiley',
+      name: 'fish',
       width: 200,
       height: 200
     },
+    backgroundHSV: [209, 0.57, 0.600],
     ghost: {
       x: 400,
       y: 100
@@ -2601,12 +2607,13 @@ module.exports = {
   },
 
   '6': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'doggie',
     image: {
-      name: 'smiley',
+      name: 'doggie',
       width: 200,
       height: 200
     },
+    backgroundHSV: [25, 0.57, 0.960],
     ghost: {
       x: 400,
       y: 100
@@ -2627,12 +2634,13 @@ module.exports = {
   },
 
   '7': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'tree',
     image: {
-      name: 'artist',
+      name: 'tree',
       width: 200,
       height: 200
     },
+    backgroundHSV: [238, 0.51, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2653,12 +2661,13 @@ module.exports = {
   },
 
   '8': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'flower',
     image: {
-      name: 'artist',
+      name: 'flower',
       width: 200,
       height: 200
     },
+    backgroundHSV: [75, 0.80, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2679,12 +2688,13 @@ module.exports = {
   },
 
   '9': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'house',
     image: {
-      name: 'artist',
+      name: 'house',
       width: 200,
       height: 200
     },
+    backgroundHSV: [110, 0.56, 0.60],
     ghost: {
       x: 400,
       y: 100
@@ -2704,12 +2714,13 @@ module.exports = {
   },
 
   '10': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'computer',
     image: {
-      name: 'artist',
+      name: 'computer',
       width: 200,
       height: 200
     },
+    backgroundHSV: [300, 0.25, 0.80],
     ghost: {
       x: 400,
       y: 100
@@ -2911,9 +2922,20 @@ exports.load = function(assetUrl, id) {
   var skin = skinsBase.load(assetUrl, id);
   var config = CONFIGS[skin.id];
 
-  skin.smiley = skin.assetUrl('smiley.png');
+
   skin.artist = skin.assetUrl('artist.png');
   skin.blocks = skin.assetUrl('blocks.png');
+
+  skin.apple = skin.assetUrl('apple.png');
+  skin.smiley = skin.assetUrl('smiley.png');
+  skin.snail = skin.assetUrl('snail.png');
+  skin.elephant = skin.assetUrl('elephant.png');
+  skin.fish = skin.assetUrl('fish.png');
+  skin.doggie = skin.assetUrl('doggie.png');
+  skin.tree = skin.assetUrl('tree.png');
+  skin.flower = skin.assetUrl('flower.png');
+  skin.house = skin.assetUrl('house.png');
+  skin.computer = skin.assetUrl('computer.png');
 
   skin.blank = skin.assetUrl('blank.png');
 
@@ -3530,7 +3552,7 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "בלוקי ה\"חזור שוב\" או \"אם\" צריכים להיות בעלי בלוקים פנימיים כדי לעבוד. וודא כי הבלוק הפנימי מתאים בבלוק המכיל."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "יש לך קוביות מיותרות שלא מחוברת לקוביית הארוע."};
 
 exports.finalStage = function(d){return "כל הכבוד! השלמת את השלב הסופי."};
 
@@ -3550,7 +3572,7 @@ exports.levelIncompleteError = function(d){return "הנך משתמש בכל סו
 
 exports.listVariable = function(d){return "רשימה"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "תיצור משחק פלפי משלך"};
 
 exports.missingBlocksErrorMsg = function(d){return "השתמש באחד או יותר מהבלוקים להלן כדי לפתור את החידה."};
 
@@ -3558,7 +3580,7 @@ exports.nextLevel = function(d){return "כל הכבוד! השלמת את חיד�
 
 exports.nextLevelTrophies = function(d){return "כל הכבוד! השלמת את חידה "+v(d,"puzzleNumber")+" וזכית ב"+p(d,"numTrophies",0,"he",{"one":"פרס","other":n(d,"numTrophies")+" פרסים"})+"."};
 
-exports.nextStage = function(d){return "כל הכבוד! השלמת את שלב "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "מזל טוב! השלמת "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "כל הכבוד! השלמת את שלב "+v(d,"stageNumber")+" וזכית ב"+p(d,"numTrophies",0,"he",{"one":"פרס","other":n(d,"numTrophies")+" פרסים"})+"."};
 
@@ -3588,7 +3610,7 @@ exports.tooManyBlocksMsg = function(d){return "ניתן לפתור את החיד
 
 exports.tooMuchWork = function(d){return "גרמת לי להרבה עבודה! האם אתה יכול לנסות לחזור פחות פעמים?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "הקוד שלך נראה טוב -. זה יעוף עם כל לחיצה. אבל אתה צריך ללחוץ הרבה פעמים כדי לנופף אל המטרה."};
 
 exports.toolboxHeader = function(d){return "בלוקים"};
 
@@ -3600,7 +3622,7 @@ exports.tryAgain = function(d){return "נסה שוב"};
 
 exports.backToPreviousLevel = function(d){return "חזרה לשלב הקודם"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "לשמור את הגלריה שלך"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -3626,26 +3648,26 @@ exports.tryHOC = function(d){return "נסה את \"שעת הקוד\" (Hour of Co
 
 exports.signup = function(d){return "הירשם לקורס המבוא"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "הנה עצה:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.he=function(n){return n===1?"one":"other"}
-exports.continue = function(d){return "תמשיך"};
+exports.continue = function(d){return "המשך"};
 
 exports.nextLevel = function(d){return "מזל טוב! השלמת את הפאזל הזה."};
 
 exports.no = function(d){return "לא"};
 
-exports.numBlocksNeeded = function(d){return "ניתן לפתור את הפאזל עם %1 בלוקים."};
+exports.numBlocksNeeded = function(d){return "ניתן לפתור את הפאזל עם %1 בלוק."};
 
-exports.oneTopBlock = function(d){return "לפאזל הזה, אתה צריך לחבר יחד את כל הבלוקים בעמוד העבודה הלבנה."};
+exports.oneTopBlock = function(d){return "לפאזל הזה, אתה צריך לערום יחד את כל הבלוקים בסביבת העבודה הלבנה."};
 
 exports.reinfFeedbackMsg = function(d){return "באפשרותך להקיש על לחצן 'נסה שוב' כדי לחזור ולשחק את המשחק שלך."};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "שתף"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "שתף את המשחק שלך:"};
 
 exports.yes = function(d){return "כן"};
 

@@ -28,24 +28,28 @@
           desc: En Times Kodning
           Maze: Trin 1
         Edit Code:
-          desc: Redigér Kode
+          desc: Rediger program (beta)
           MazeEC: Trin 1
         2014 Levels:
-          desc: 2014 Puzzles (beta)
-          Bounce: Stage 1
+          desc: Hoppe (beta)
+          Bounce: Trin 1
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: Brugeroprettede gåder (beta)
+          Custom: Trin 1
         Flappy Levels:
           desc: Flappy fuglen
-          Flappy: Stage 1
+          Flappy: Trin 1
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: Puslespil (beta)
+          Jigsaw: Trin 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: Introduktion til Computer Videnskab
         Maze: Labyrinten
+        Multi: Multiple Choice Stuffs
         Unplug2: Data-Tænkning
         Unplug3: Programmering på millimeterpapir
         Artist: Kunstneren
@@ -67,7 +71,8 @@
         MazeEC: Labyrinten
         Bounce: Reflekter
         Flappy: Flappy-fuglen
-        Jigsaw: Jigsaw
+        Jigsaw: Puslespil
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: Bronze
@@ -81,7 +86,7 @@
         loop_times: Gentag gange blok
         loop_until: Gentag indtil blok
         loop_while: Imens blok
-        loop_for: Tæller blok
+        loop_for: Tælle-blok
         function: Funktioner
         parameters: Funktioner med parametre
     level:
@@ -100,8 +105,10 @@
           blokke.
         maze_2_7: Hjælp mig med at fjerne denne slemme gris, ved hjælp af færrest
           mulige blokke. Prøv at bruge mere end én "Gentag" blok.
-        maze_2_8: 'For at løse denne opgave, prøv en "gentage" blok med disse 3 blokke
-          indeni det: fremad, fremad, drej.'
+        maze_2_8: 'Når en blok er grå, det betyder du ikke kan slette den eller ændre
+          den. Prøv og løse dette puslespil, ved hjælp af den "gentag" blok, der gentages
+          3 gange. Prøv at sætte disse 3 blokke indeni den grå "gentage" blok: flytte,
+          flytte, dreje.'
         maze_2_9: OK, prøv den nye "Gentag indtil" blok - den vil blive gentaget indtil
           jeg når den grønne gris.
         maze_2_10: Ok, en sidste gang for øvelsens skyld - kan du løse denne opgave
@@ -111,7 +118,7 @@
         maze_2_12: OK, dette ligner meget, men er lidt anderledes. Kan du gøre det
           med kun 5 blokke?
         maze_2_13: 'Brug den nye "Hvis"-blok til at lade mig beslutte, hvornår jeg
-          skal dreje. Tip: du behøver kun en mere blok, men lær hvordan vi gør, så
+          skal dreje. Tip: du behøver kun én mere blok, men lær hvordan vi gør, så
           du kan gøre det selv næste gang.'
         maze_2_14: OK, det her er ligesom det sidste puslespil, men du skal huske
           hvordan du brugte "Hvis" blokken og "Gentagt" blokken sammen.
@@ -119,9 +126,9 @@
           med færrest mulige blokke.
         maze_2_16: OK, lad os gøre at igen for at øve - dette er ikke meget anderledes,
           men pas på de kødædende planter!
-        maze_2_17: '"Hvis-Ellers" blokken kontrollerer en betingelse, og derefter
-          gør den én ting eller en anden. For at få mig til solsikken, så prøv at
-          bruge denne nye blok.'
+        maze_2_17: '"Hvis-Ellers" blokken kontrollerer en betingelse, og gør derefter
+          enten den ene ting eller den anden. Prøv at bruge denne nye blok for at
+          få mig til solsikken.'
         maze_2_18: En mere øvelse med "Hvis-Ellers" blokken, kan du løse den i første
           forsøg?
         maze_2_19: Kan du nøjes med at tilføje 3 blokke til at hjælpe mig med at løse
@@ -155,9 +162,8 @@
           bredde" blok. Hav det sjovt!'
         turtle_4_1: 'Kan du tegne en trekant (med 100 pixels kanter) med kun 3 blokke?
           Tip: Brug en "gentag" blok.'
-        turtle_4_2: 'Prøv at tilføje én blok for at fuldføre denne gåde. Tip: vi har
-          givet 2 blokke til at tegne 2 identiske trekanter - du skal sætte en "drej"
-          i mellem, og beslutte, hvor langt du drejer.'
+        turtle_4_2: Tilføje en "Drej til højre ved 90 grader" blok et sted midt i
+          programmet allerede ud på arbejdsområdet for at trække disse trekanter.
         turtle_4_3: OK, her er den kode du skrev for at tegne en enkelt trekant. Kan
           du tilføje en "gentag" og "drej" blok, for at lave en smuk blomst?
         turtle_4_4: 'Her er den samme kode fra den tidligere gåde, men kun drejende
@@ -216,7 +222,7 @@
           Brug den nye "tegn et kvadrat" blok (som du kan finde i "Funktioner" kategorien)
           til at tegne et lille kvadrat på 50x50 pixels.
         turtle_2_3: Brug "gentag" blokken (i kategorien "Sløjfer") til at tegne 3
-          kvadrater med størrelse 100 og 120 grader imellm. Og gør det i tre forskellige,
+          kvadrater med størrelse 100 og 120 grader imellem. Og gør det i tre forskellige,
           tilfældige farver.
         turtle_2_4: 'Nu skal vi lave noget smart. Ændre koden til at tegne 36 firkanter,
           100 pixel brede og hver 10 grader fra hinanden. Tip: Du kan bruge skyderen
@@ -286,9 +292,9 @@
           til en funktion)'
         turtle_3_7: Tilføj et input kaldet "længde" til "tegne et hus" og byg et stort
           hus til elefanterne (med kanter, der er 150 pixels lange)
-        turtle_3_8: Her er alle blokkene fra den tidligere puslespil.  Ændr "tegne
-          et hus", så jeg ender på nederste højre hjørne efter at have tegnet et nyt
-          hus. Brug denne modificerede funktion til at tegne tre huse.
+        turtle_3_8: Her er alle blokkene fra den tidligere puslespil.  Ændre funktionen
+          "tegne et hus", så du ender på nederste højre hjørne efter at have tegnet
+          et nyt hus. Brug denne modificerede funktion til at tegne tre huse.
         turtle_3_9: Kan du genoprette funktionen "tegne et hus" uden hjælp? Prøv det,
           og derefter tegn en række huse.
         turtle_3_10: Du har lært en masse! Nu brug det til at tegne noget du synes
@@ -354,12 +360,13 @@
           til "når bolden i mål" og "når bolden misser paddel"-blokkene for at gøre
           et spil klar. Se hvor mange point du kan score før din modstander scorer
           to gange.
-        bounce_11: You can now attach blocks to the "when game starts" block. Try
-          changing the speed of the paddle and the ball and see how many points you
-          can score before your opponent scores twice.
-        bounce_12: Create your own Bounce game. You can change all the visuals and
-          the rules. When you're done, click Share to let friends try your game on
-          their phones.
+        bounce_11: Du kan nu vedhæfte blokke til "Hvornår spillet starter" blokken.
+          Du skal vedhæfte den nye "lancere nye bold" blok i mere end ét sted. Også
+          prøve at ændre scenen eller hastigheden af pagajen og bolden og se, hvor
+          mange point du kan score før din modstander scorer to gange.
+        bounce_12: Opret dit eget Hoppe spil. Du kan ændre alle visuelle og reglerne.
+          Når du er færdig, klik på del for at lade venner prøve dit spil på deres
+          telefoner.
         Custom_builder: Træk blokke fra værktøjskassen til arbejdsområdet for at tegne
           det niveau, du ønsker at oprette. Tryk på "Kør Program", når du er klar.
         flappy_1: Vedhæfte en blok til "når klikkes" blokken, derefter tryk på "Kør
@@ -386,17 +393,35 @@
         flappy_11: Opret dit egen Flappy spil. Du kan ændre alle visuelle ting og
           alle regler, selv tyngdekraften. Når du er færdig, klik på del for at lade
           dine venner prøve dit spil på deres mobil-telefoner.
-        jigsaw_1: Click the block
-        jigsaw_2: Drag the block to the target
-        jigsaw_3: Arrange the blocks to form the image
-        jigsaw_4: Arrange the blocks to form the image
-        jigsaw_5: Arrange the blocks to form the image
-        jigsaw_6: Arrange the blocks to form the image
-        jigsaw_7: Arrange the blocks to form the image
-        jigsaw_8: Arrange the blocks to form the image
-        jigsaw_9: Arrange the blocks to form the image
-        jigsaw_10: Arrange the blocks to form the image
-        jigsaw_11: Arrange the blocks to form the image
+        jigsaw_1: Klik på blokken
+        jigsaw_2: Trække blokken til målet
+        jigsaw_3: Arrangere blokke til at danne billedet
+        jigsaw_4: Arrangere blokke til at danne billedet
+        jigsaw_5: Arrangere blokke til at danne billedet
+        jigsaw_6: Arrangere blokke til at danne billedet
+        jigsaw_7: Arrangere blokke til at danne billedet
+        jigsaw_8: Arrangere blokke til at danne billedet
+        jigsaw_9: Arrangere blokke til at danne billedet
+        jigsaw_10: Arrangere blokke til at danne billedet
+        jigsaw_11: Arrangere blokke til at danne billedet
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 'For at løse dette, find det mønster, der gentager sig. Brug en
           "gentag"-blok med disse 3 blokke indeni: flyt, flyt, drej til højre.'
@@ -424,13 +449,16 @@
         20_wrapup: 20 Timers afslutning
     callout:
       text:
-        drag_blocks: Drag a "move" block and snap it below the other block
-        run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        drag_blocks: Træk i en "flyt fremad" blok og fastgør den under den anden blok
+        run: Tryk "Kør program" for at prøve dit program
+        watch_again: Klik her for at se videoen igen
+        gray_block_explanation: Blokke, der er grå kan ikke flyttes eller slettes.
+          Kan du løse gåden alligevel?
+        show_code_explanation: Klik her for at se koden for programmet, du laver
+        instructions_repeat_explanation: Instruktionerne for hver puslespil gentages
+          her
+        category_explanation: Du har alle de samme gader, men de har nu været arrangeret
+          i kategorier
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

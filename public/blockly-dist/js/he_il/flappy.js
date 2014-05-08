@@ -4728,7 +4728,7 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "בלוקי ה\"חזור שוב\" או \"אם\" צריכים להיות בעלי בלוקים פנימיים כדי לעבוד. וודא כי הבלוק הפנימי מתאים בבלוק המכיל."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "יש לך קוביות מיותרות שלא מחוברת לקוביית הארוע."};
 
 exports.finalStage = function(d){return "כל הכבוד! השלמת את השלב הסופי."};
 
@@ -4748,7 +4748,7 @@ exports.levelIncompleteError = function(d){return "הנך משתמש בכל סו
 
 exports.listVariable = function(d){return "רשימה"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "תיצור משחק פלפי משלך"};
 
 exports.missingBlocksErrorMsg = function(d){return "השתמש באחד או יותר מהבלוקים להלן כדי לפתור את החידה."};
 
@@ -4756,7 +4756,7 @@ exports.nextLevel = function(d){return "כל הכבוד! השלמת את חיד�
 
 exports.nextLevelTrophies = function(d){return "כל הכבוד! השלמת את חידה "+v(d,"puzzleNumber")+" וזכית ב"+p(d,"numTrophies",0,"he",{"one":"פרס","other":n(d,"numTrophies")+" פרסים"})+"."};
 
-exports.nextStage = function(d){return "כל הכבוד! השלמת את שלב "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "מזל טוב! השלמת "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "כל הכבוד! השלמת את שלב "+v(d,"stageNumber")+" וזכית ב"+p(d,"numTrophies",0,"he",{"one":"פרס","other":n(d,"numTrophies")+" פרסים"})+"."};
 
@@ -4786,7 +4786,7 @@ exports.tooManyBlocksMsg = function(d){return "ניתן לפתור את החיד
 
 exports.tooMuchWork = function(d){return "גרמת לי להרבה עבודה! האם אתה יכול לנסות לחזור פחות פעמים?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "הקוד שלך נראה טוב -. זה יעוף עם כל לחיצה. אבל אתה צריך ללחוץ הרבה פעמים כדי לנופף אל המטרה."};
 
 exports.toolboxHeader = function(d){return "בלוקים"};
 
@@ -4798,7 +4798,7 @@ exports.tryAgain = function(d){return "נסה שוב"};
 
 exports.backToPreviousLevel = function(d){return "חזרה לשלב הקודם"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "לשמור את הגלריה שלך"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -4824,7 +4824,7 @@ exports.tryHOC = function(d){return "נסה את \"שעת הקוד\" (Hour of Co
 
 exports.signup = function(d){return "הירשם לקורס המבוא"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "הנה עצה:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){

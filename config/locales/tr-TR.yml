@@ -59,8 +59,6 @@
     no_signup_message: <a target="_blank" href="http://learn.code.org">Çeşitli aşamalara
       ve bulmacalara gözatabilirsin</a> ama ilerlemeni kaydetmek için kayıt olman
       gerekmektedir.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Bütün %{num_trophies} kavram kupalarını kazanan ABD öğrencileri
       Dropbox disk alanı, Skype kredisi ve Electronic Arts'dan indirilebilir oyunlar
       da dahil çeşitli ödüller seçebilir.
@@ -71,9 +69,6 @@
       okulu öğretmenleri için Code.org <a target="_blank" href="http://DonorsChoose.org">
       DonorsChoose.org</a> ile ortaklık içinde 1000$''a kadar fon sunacaktır. <a href="http://code.org/educate/20hr">Daha
       fazla bilgi için eğitimci kılavuzuna bakınız.</a> '
-    teacher_prize_limits: '(Limit: öğretmen başına 1000 dolar. <a target="_blank"
-      href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">Bkz:
-      SSS</a>.)'
     teacher_pitch: Bilgisayar Bilimine Giriş K-8'i sınıfında öğret
     teacher_title: Öğretmen Kayıt
     student_pitch: '1 Saat ötesinde: Bilgisayar bilimi K-8 Intromuzu deneyin'
@@ -291,6 +286,7 @@
   user_stats:
     recent_activity: Son etkinlik
     show_more: Daha fazla göster
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Zaten üye misiniz? % {link}
     student_reg_link: Öğrenci Üyelik
@@ -305,7 +301,6 @@
     teacher_print_certificates: Bu dersi bitiren öğrenciler için sertifika bastır
     teacher_read_blog: Ders malzemeleri hakkında haberler ve güncellemeleri eğitimci
       bloğumuzda okuyun
-    teacher_survey: Tell us what you think about this course
     classroom: Sınıfınız
     student_progress: Öğrenme ilerlemeniz
     student_stats: '"Kavram Ustalığı" kupalarından %{trophy_max} kupadan %{trophy_count}
@@ -394,3 +389,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

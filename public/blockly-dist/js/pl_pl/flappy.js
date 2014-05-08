@@ -4742,13 +4742,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Blok powtórz lub blok jeśli musi zawierać inne bloki w środku, by poprawnie działać. Upewnij się, czy wewnętrzny blok pasuje do zewnętrznego."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Pozostały Ci jeszcze bloki, które nie zostały połączone z blokiem zdarzenia."};
 
 exports.finalStage = function(d){return "Gratulacje! Ukończyłeś ostatni etap."};
 
 exports.finalStageTrophies = function(d){return "Gratulacje! Ukończyłeś ostatni etap i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Bloki Twojego programu mogą być również przedstawione w języku JavaScript, najbardziej rozpowszechnionym języku programowania:"};
+exports.generatedCodeInfo = function(d){return "Nawet najlepsze uczelnie uczą kodowania opartego o bloki (np. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Ale bloki które zostały użyte, można również zobaczyć w JavaScript, jednym z najbardziej powszechnie stosowanym języku programowania na świecie:"};
 
 exports.hashError = function(d){return "Przepraszamy, '%1' nie odpowiada żadnemu zapisanemu programowi."};
 
@@ -4770,9 +4770,9 @@ exports.nextLevel = function(d){return "Gratulacje! Rozwiązałeś Łamigłówk�
 
 exports.nextLevelTrophies = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.nextStage = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Gratulacje! Ukonczyłeś etap "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
+exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"pl",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+". (Jednakże, mogłeś użyć jedynie "+p(d,"numBlocks",0,"pl",{"one":"1 blok","other":n(d,"numBlocks")+" bloków"})+")"};
 
@@ -4812,7 +4812,7 @@ exports.tryAgain = function(d){return "Spróbuj ponownie"};
 
 exports.backToPreviousLevel = function(d){return "Wróć do poprzedniego poziomu"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Zapisz do swojej galerii"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -4838,7 +4838,7 @@ exports.tryHOC = function(d){return "Weź udział w Godzinie kodowania (the Hour
 
 exports.signup = function(d){return "Zapisz się na kurs wprowadzający"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Oto wskazówka:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){
@@ -4945,65 +4945,65 @@ exports.setBackgroundSanta = function(d){return "ustaw scene Mikołaj"};
 
 exports.setBackgroundTooltip = function(d){return "Ustawia obraz w tle"};
 
-exports.setGapRandom = function(d){return "set a random gap"};
+exports.setGapRandom = function(d){return "ustaw losową szczeline"};
 
-exports.setGapVerySmall = function(d){return "set a very small gap"};
+exports.setGapVerySmall = function(d){return "ustaw bardzo małą szczelinę"};
 
-exports.setGapSmall = function(d){return "set a small gap"};
+exports.setGapSmall = function(d){return "ustaw małą szczelinę"};
 
-exports.setGapNormal = function(d){return "set a normal gap"};
+exports.setGapNormal = function(d){return "ustaw normalną szczelinę"};
 
-exports.setGapLarge = function(d){return "set a large gap"};
+exports.setGapLarge = function(d){return "ustaw dużą szczelinę"};
 
-exports.setGapVeryLarge = function(d){return "set a very large gap"};
+exports.setGapVeryLarge = function(d){return "ustaw bardzo dużą szczelinę"};
 
-exports.setGapHeightTooltip = function(d){return "Sets the vertical gap in an obstacle"};
+exports.setGapHeightTooltip = function(d){return "Ustawia pionową przerwę w szczelinie"};
 
-exports.setGravityRandom = function(d){return "set gravity random"};
+exports.setGravityRandom = function(d){return "ustaw losową grawitację"};
 
-exports.setGravityVeryLow = function(d){return "set gravity very low"};
+exports.setGravityVeryLow = function(d){return "ustaw bardzo małą grawitację"};
 
-exports.setGravityLow = function(d){return "set gravity low"};
+exports.setGravityLow = function(d){return "ustaw małą grawitację"};
 
-exports.setGravityNormal = function(d){return "set gravity normal"};
+exports.setGravityNormal = function(d){return "ustaw normlaną grawitację"};
 
-exports.setGravityHigh = function(d){return "set gravity high"};
+exports.setGravityHigh = function(d){return "ustaw dużą grawitację"};
 
-exports.setGravityVeryHigh = function(d){return "set gravity very high"};
+exports.setGravityVeryHigh = function(d){return "ustaw bardzo dużą grawitację"};
 
-exports.setGravityTooltip = function(d){return "Sets the level's gravity"};
+exports.setGravityTooltip = function(d){return "Ustawia poziom grawitacji"};
 
-exports.setGroundRandom = function(d){return "set ground Random"};
+exports.setGroundRandom = function(d){return "ustaw losowe podłoże"};
 
-exports.setGroundFlappy = function(d){return "set ground Ground"};
+exports.setGroundFlappy = function(d){return "ustaw podłoże Ziemia"};
 
-exports.setGroundSciFi = function(d){return "set ground Sci-Fi"};
+exports.setGroundSciFi = function(d){return "ustaw podłoże Fantatyka"};
 
-exports.setGroundUnderwater = function(d){return "set ground Underwater"};
+exports.setGroundUnderwater = function(d){return "ustaw podłoże Podwodą"};
 
-exports.setGroundCave = function(d){return "set ground Cave"};
+exports.setGroundCave = function(d){return "ustaw podłoże Jaskinia"};
 
-exports.setGroundSanta = function(d){return "set ground Santa"};
+exports.setGroundSanta = function(d){return "ustaw podłoże Święty Mikołaj"};
 
-exports.setGroundLava = function(d){return "set ground Lava"};
+exports.setGroundLava = function(d){return "ustaw podłoże Lawa"};
 
-exports.setGroundTooltip = function(d){return "Sets the ground image"};
+exports.setGroundTooltip = function(d){return "Ustaw obrazek tła"};
 
-exports.setObstacleRandom = function(d){return "set obstacle Random"};
+exports.setObstacleRandom = function(d){return "ustaw losową przęszkodę"};
 
-exports.setObstacleFlappy = function(d){return "set obstacle Pipe"};
+exports.setObstacleFlappy = function(d){return "ustaw przeszkodę Rura"};
 
-exports.setObstacleSciFi = function(d){return "set obstacle Sci-Fi"};
+exports.setObstacleSciFi = function(d){return "ustaw przeszkodę Fantastyka"};
 
 exports.setObstacleUnderwater = function(d){return "umieść przeszkodę - roślinę"};
 
-exports.setObstacleCave = function(d){return "set obstacle Cave"};
+exports.setObstacleCave = function(d){return "ustaw przeszkodę Jaskina"};
 
-exports.setObstacleSanta = function(d){return "set obstacle Chimney"};
+exports.setObstacleSanta = function(d){return "ustaw przeszkodę Kominek"};
 
 exports.setObstacleLaser = function(d){return "umieść przeszkodą - laser"};
 
-exports.setObstacleTooltip = function(d){return "Sets the obstacle image"};
+exports.setObstacleTooltip = function(d){return "Ustawia obrazek przeszkody"};
 
 exports.setPlayerRandom = function(d){return "umieść losową postać"};
 
@@ -5031,11 +5031,11 @@ exports.setPlayerUnicorn = function(d){return "ustaw gracza Jednorożca"};
 
 exports.setPlayerFairy = function(d){return "ustaw gracza Wróżka"};
 
-exports.setPlayerSuperman = function(d){return "set player Flappyman"};
+exports.setPlayerSuperman = function(d){return "ustaw gracza Flapiego"};
 
 exports.setPlayerTurkey = function(d){return "ustaw gracza Indyka"};
 
-exports.setPlayerTooltip = function(d){return "Sets the player image"};
+exports.setPlayerTooltip = function(d){return "Ustawia obrazek gracza"};
 
 exports.setScore = function(d){return "ustaw wynik"};
 

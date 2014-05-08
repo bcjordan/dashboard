@@ -5237,7 +5237,7 @@ exports.finalLevel = function(d){return "Horee! Anda telah memecahkan teka-teki 
 
 exports.heightParameter = function(d){return "tinggi"};
 
-exports.ifCode = function(d){return "if"};
+exports.ifCode = function(d){return "Jika (if)"};
 
 exports.ifPathAhead = function(d){return "Jika jalan ke depan"};
 
@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "Luncurkan bola baru"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Luncuran bola untuk bermain."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Buat permainan Bouncing anda sendiri"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "letakkan tower"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Anda dapat menekan tombol \"Coba lagi\" untuk kembali bermain."};
 
 exports.removeSquare = function(d){return "hapus persegi empat"};
 
@@ -5381,7 +5381,7 @@ exports.setPaddleHardcourt = function(d){return "tetapkan dayung 'hardcourt' "};
 
 exports.setPaddleRetro = function(d){return "tetapkan dayung retro"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Tetapkan gambar dayung"};
 
 exports.setPaddleSpeedRandom = function(d){return "Tetapkan kecepatan dayung secara acak"};
 
@@ -5397,11 +5397,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "tetapkan dayung dengan kece
 
 exports.setPaddleSpeedTooltip = function(d){return "Tetapkan kecepatan dayung"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Bagikan"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Ayo coba permainan Flappy yang kubuat. Saya menulis sendiri dengan @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Bagikan permainanmu:"};
 
 exports.turnLeft = function(d){return "Belok Kiri"};
 
@@ -5498,7 +5498,7 @@ exports.finalStage = function(d){return "Horee! Anda berhasil menyelesaikan taha
 
 exports.finalStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan tahap akhir dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":"piala "+n(d,"numTrophies")})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blok-blok yang digunakan untuk program Anda dapat juga dibuat dengan Javascript, bahasa yang paling populer dalam dunia pemrograman:"};
+exports.generatedCodeInfo = function(d){return "Bahkan Universitas mengajar blok berbasis pengkodean (misalnya, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tetapi di bawah tenda, blok Anda telah berkumpul dapat juga ditunjukkan dalam JavaScript, dunia yang paling banyak digunakan pengkodean bahasa:"};
 
 exports.hashError = function(d){return "Maaf, '%1' tidak sesuai dengan program yang disimpan."};
 
@@ -5520,7 +5520,7 @@ exports.nextLevel = function(d){return "Horee! Anda berhasil menyelesaikan teka-
 
 exports.nextLevelTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke  "+v(d,"puzzleNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"satu":"a trophy","other":"trophies "+n(d,"numTrophies")})+"."};
 
-exports.nextStage = function(d){return "Horee! Anda berhasil menyelesaikan tahap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Selamat! Anda telah menyelesaikan "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke "+v(d,"stageNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":n(d,"numTrophies")+" piala"})+"."};
 
@@ -5562,7 +5562,7 @@ exports.tryAgain = function(d){return "Ayo coba lagi!"};
 
 exports.backToPreviousLevel = function(d){return "Kembali ke teka-teki sebelumnya"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Simpan ke galeri Anda"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5588,7 +5588,7 @@ exports.tryHOC = function(d){return "Cobalah \"Hour of Code\""};
 
 exports.signup = function(d){return "Daftarlah untuk mengikuti kursus introduksi"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Berikut adalah tip:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

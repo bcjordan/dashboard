@@ -59,8 +59,6 @@
     no_signup_message: Siz <a target="_blank" href="http://learn.code.org">müxtəlif
       mərhələ və tapmacalar</a>ı nəzərdən keçirə bilərsiniz, lakin nəticələrinizi
       yadda saxlamaq üçün qeydiyyatdan keçməyiniz lazım olacaq.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
       select a variety of prizes including free Dropbox space, Skype credits, and
       downloadable games from Electronic Arts.
@@ -71,8 +69,6 @@
       tərəfdaşlıq edərək "Code.org" bu kursu ən azı 15 şagirdə keçən ABŞ-dakı müəllimlərə
       dərs fondu şəklində 1000 dollara qədər maliyyə dəstəyi təklif edəcək. <a href="http://code.org/educate/20hr">Təlimçi
       üçün göstərişlərdə daha geniş məlumat alın.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
     teacher_pitch: Öz sinfinizdə K-8 İnformatikaya Giriş kursunu tədris edin
     teacher_title: Müəllim kimi qeydiyyatdan keçin
     student_pitch: '1 saat bitəndən sonra: K-8 İnformatikaya Giriş kursumuzu sınaqdan
@@ -299,6 +295,7 @@
   user_stats:
     recent_activity: Son fəaliyyət
     show_more: Daha çox göstər
+    classroom_activity: Unplugged Activity
   home:
     signin_message: və ya əgər siz artıq qeydiyyatdan keçmisinizsə, %{link}
     student_reg_link: Şagird
@@ -313,7 +310,6 @@
     teacher_print_certificates: Print certificates for students who finish this course
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: Sizin sinfiniz
     student_progress: Sizin təlim nəticələriniz
     student_stats: Siz %{trophy_max} "Anlayışların mənimsənilməsi" kubokundan %{trophy_count}
@@ -402,3 +398,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

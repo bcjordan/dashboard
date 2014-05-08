@@ -12,7 +12,7 @@
         gender: Lytis
         edit_header: Keisti paskyros duomenis
         error:
-          future: can't be in the future
+          future: negali būti ateitis
   hello: Sveikas, pasauli
   welcome_back: Sveiki sugrįžę, %{name}
   add_teacher_form:
@@ -52,29 +52,25 @@
     need_confirmation: Negavai patvirtinimo instrukcijų?
     need_unlock: Negavai atrakinimo instrukcijų?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
+    overview_student: Užsiregistruok ir stebėk savo pažangą.
+    overview_teacher: Mokykite informatikos savo klasėje ir užsiregistruokite. <p/>
+      Tuomet bus galima sekti savo mokinių pažangą bei jų laimėjimus.
     no_signup_message: Jūs galite <a target="_blank" href="http://learn.code.org">
       peržiūrėti įvairius etapus bei galvosūkius </a>, bet Jums reikės prisiregistruoti,
       kad Jūsų veiksmai išsisaugotų.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
-    prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
-      select a variety of prizes including free Dropbox space, Skype credits, and
-      downloadable games from Electronic Arts.
+    prizes_message: JAV moksleiviai, kurie gauna visus %{num_trophies} laimėjimus,
+      gali išsirinkti įvairius prizus, pavyzdžiui, papildomą vietą Dropbox svetainėje
+      ir t. t.
     teacher_educator_guide: Peržiūrėti pedagogo vadovą
-    teacher_prize_header: Win $1,000 in <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
-      rewards
+    teacher_prize_header: Laimėkite $1,000 <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
+      (Tik JAV mokytojams)
     teacher_prize_message: 'In partnership with <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>,
       Code.org will offer up to $1,000 in classroom funding to U.S. public school
       teachers who lead at least 15 students through this course. <a href="http://code.org/educate/20hr">See
       educator guide for more info.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
-    teacher_pitch: Teach the K-8 Intro to Computer Science in your classroom
+    teacher_pitch: Mokytojų registracija prie Code.org
     teacher_title: Mokytojų registracija
-    student_pitch: 'Beyond 1 hour: try our K-8 Intro to Computer Science'
+    student_pitch: Mokinių registracija prie Code.org
     student_title: Mokinių registracija
     school_name: Mokyklos vardas (nebūtina)
     school_address: Mokyklos adresas (nebūtina)
@@ -100,7 +96,7 @@
     remember: Prisiminti mane
     submit: Prisijungti
   signin:
-    try_heading: Want to try coding without signing up?
+    try_heading: Nori išmėginti programavimą neprisiregistravęs?
     try_hoc: Pirmiausia išmėginkite Vienos Valandos Kodą
     try_20hours: Išmėginkite 20-ties valandų įvadą į informatiką
   password:
@@ -150,8 +146,8 @@
     provider: 'Provider:'
     code: 'Code:'
     redeem_header: 'To redeem:'
-    donorschoose_register: Register as a teacher on DonorsChoose.org
-    donorschoose_project: Post a project
+    donorschoose_register: Užsiregistruokite kaip mokytojas puslapyje DonorsChoose.org
+    donorschoose_project: Rašyti projektą
     donorschoose_how_to: Kaip panaudoti savo kodą
     success: Your prize was succesfully redeemed, see code below.
     error: Your prize could not be redeemed, please try again.
@@ -159,8 +155,8 @@
     error_not_earned: Jūs dar negavote šio prizo.
     error_already_redeemed: Jūsų prizas jau buvo atsiimtas.
     no_prizes_available: Labai atsiprašome, bet šiuo metu neturime prizų.
-    teacher_info_required: 'Teacher prizes require school name and address information:'
-    teacher_email_required: 'Teacher prizes require a confirmed email address:'
+    teacher_info_required: 'Mokytojo prizams reikalingas mokyklos pavadinimas ir adresas:'
+    teacher_email_required: 'Mokytojo prizams reikia pateikti el. pašto adresą:'
     confirm:
       title: Please Confirm
       'no': false
@@ -185,38 +181,30 @@
       choose_teacher: 'Click on the logo below to claim your prize:'
       earned: Laimėjote prizą! (tik JAV mokiniams)
       not_earned_title: Finish the tutorial, earn rewards (U.S. students only)
-      not_earned: 'Learn all the computer science concepts, collect all %{num_trophies}
-        trophies, and earn real-world prizes. You can choose between 10GB of free
-        Dropbox space, $10 in Skype credits, and free game downloads. NOTE: offer
-        only valid to U.S. students, and only as long as supplies last.'
+      not_earned: 'Susipažink su visomis informatikos gudrybėmis, gauk visus %{num_trophies}
+        laimėjimus ir laimėk tikrus prizus. Galima rinktis iš: 10 GB vietos Dropbox
+        svetainėje, 10 Skype kreditų bei kompiuterinių žaidimų. PASTABA: galioja tik
+        JAV moksleiviams.'
       teacher:
-        earned: 10 or more students collected all %{num_trophies} trophies. You have
-          won a teacher prize! (U.S. teachers only)
+        earned: 15 ar daugiau mokinių surinko visus %{num_trophies} laimėjimus. Laimėjote
+          prizą! (tik JAV mokytojams)
         not_earned_title: Teach the class, earn up to $1,000 in <a target="_blank"
           href="http://DonorsChoose.org">DonorsChoose.org</a> credits (U.S. teachers
           only)
-        not_earned: To reward first-time computer science teachers, you can earn up
-          to $1,000 in <a href="http://DonorsChoose.org">DonorsChoose.org</a> credits
-          for guiding a classroom through the K-8 intro course. To qualify, you need
-          to successfully host a classroom of at least 15 students through the entire
-          K-8 intro course, with all 15 students (or more) completing all tutorials
-          and earning all %{num_trophies} trophies. If 7 or more of the students who
-          earn all of the trophies are girls, your reward is $1,000 in <a target="_blank"
-          href="http://DonorsChoose.org">DonorsChoose.org</a> credits. Otherwise,
-          your reward is $750 in <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
-          credits.  <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
-          credits can only be used by teachers in U.S. public schools.
+        not_earned: |
+          Šik tekstas yra skirtas tik JAV mokytojams:
+          To reward first-time computer science teachers, you can earn up to $1,000 in <a href="http://DonorsChoose.org">DonorsChoose.org</a> credits for guiding a classroom through the K-8 intro course. To qualify, you need to successfully host a classroom of at least 15 students through the entire K-8 intro course, with all 15 students (or more) completing all tutorials and earning all %{num_trophies} trophies. If 7 or more of the students who earn all of the trophies are girls, your reward is $1,000 in <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a> credits. Otherwise, your reward is $750 in <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a> credits. <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a> credits can only be used by teachers in U.S. public schools.
         bonus:
           not_earned_title: You can still earn an additional $250 in <a target="_blank"
             href="http://DonorsChoose.org">DonorsChoose.org</a> credits (U.S. teachers
             only)
-          earned: 7 or more of the students who collected all %{num_trophies} trophies
-            are girls. You have won a bonus prize! (U.S. teachers only)
-          not_earned: If at least 7 of your students who earn all %{num_trophies}
-            trophies are girls, your reward is an additional $250 in <a target="_blank"
-            href="http://DonorsChoose.org">DonorsChoose.org</a> credits. <a target="_blank"
-            href="http://DonorsChoose.org">DonorsChoose.org</a> credits can only be
-            used by teachers in U.S. public schools.
+          earned: 7 ar daugiau mokinių, kurie surinko visus %{num_trophies} laimėjimus,
+            yra mergaitės. Laimėjote prizą! (tik JAV mokytojams)
+          not_earned: Jei bent 7 Jūsų mokiniai, kurie gaus visus %{num_trophies} laimėjimus,
+            yra mergaitės, Jūsų prizas yra papildomi 250 dolerių <a target="_blank"
+            href="http://DonorsChoose.org">DonorsChoose.org</a> svetainėje. <a target="_blank"
+            href="http://DonorsChoose.org">DonorsChoose.org</a> Šiuos pinigus gali
+            būti panaudoti tik JAV mokytojai.
   crud:
     new_model: Nauja %{model}
     show: Rodyti
@@ -247,10 +235,10 @@
       progress: Jūsų pažanga
       lines: 'Iš viso kodo eilučių: %{lines}'
       close: UŽDARYTI
-      mastery: Idėjos
+      mastery: Laimėjimai
       puzzle_map: Etapai
-      prizes: Collect all %{total_trophies} trophies and win prizes!
-      prize_earned: All %{total_trophies} trophies collected. Prize won!
+      prizes: Surink visus %{total_trophies} laimėjimus ir laimėk prizus!
+      prize_earned: Visi %{total_trophies} laimėjimai surinkti. Laimėjai prizą!
       prize_us_only: (Tik JAV mokiniams)
       prizes_link: daugiau informacijos
   teacher:
@@ -289,49 +277,48 @@
   user_stats:
     recent_activity: Neseniai atlikta veikla
     show_more: Rodyti daugiau
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Jau užsiregistravote? %{link}
     student_reg_link: Mokinių registracija
     teacher_reg_link: Mokytojų registracija
-    signin_directions: Use an account to track progress and get rewards.<br/> Teachers,
-      track your entire class.
+    signin_directions: Naudokite savo paskyrą, kad stebėtumėte savo pažangą. <br/>
+      Mokytojai gali stebėti visos klasės pažangą.
     teacher_dashboard: Peržiūrėti pažangą
     teacher_student_count_one: Jūs turite %{count} mokinį.
     teacher_student_count: Jūs turite %{count} mokinių.
-    teacher_averages: On average your students have earned %{trophy_average} out of
-      %{trophy_max} "Concept Mastery" trophies.
-    teacher_print_certificates: Print certificates for students who finish this course
-    teacher_read_blog: Read about news and updates to our materials at our Educator
-      Blog
-    teacher_survey: Tell us what you think about this course
+    teacher_averages: Vidutiniškai Jūsų mokiniai gavo %{trophy_average} iš %{trophy_max}
+      "Concept Mastery" laimėjimus.
+    teacher_print_certificates: Išspausdinkite sertifikatus mokiniams, kurie užbaigs
+      šias pamokėles
+    teacher_read_blog: Informaciją apie naujienas rasite Pedagogų Tinklaraštyje
     classroom: Tavo klasė
     student_progress: Tavo mokymosi pažanga
-    student_stats: You've earned %{trophy_count} out of %{trophy_max} "Concept Mastery"
-      trophies.
+    student_stats: Tu gavai %{trophy_count} iš %{trophy_max} "Concept Mastery" laimėjimus(-ų).
     student_left_off: 'Kur baigei paskutinį kartą:'
-    student_finished_prize: You've completed all tutorials, claim your %{prize_link}
-      and pick another class %{online_link} or at a %{local_school_link}
-    student_finished: You've completed all tutorials, pick another class %{online_link}
-      or at a %{local_school_link}
+    student_finished_prize: Jūs baigėte visas pamokėles, gaukite prizą %{prize_link}
+      ir pasirinkite kitas pamokėles %{online_link} arba %{local_school_link}
+    student_finished: Jūs baigėte visas pamokėles, išmėginkite kitas pamokas %{online_link}
+      arba %{local_school_link}
     local_school: vietinė mokykla
     online: prisijungęs
     see_details: Peržiūrėti informaciją
-    prize_info: 'Prizes for participation (U.S. only): $10 gift cards for student
-      completion and up to $1,000 in classroom rewards for public school teachers'
+    prize_info: 'Prizai už dalyvavimą (tik JAV mokytojams): iki 1000 dolerių vienai
+      klasei.'
     tryfirst: 'Arba iš pradžių galite pamėginti, o prisiregistruoti vėliau:'
     trynow: Išmėginkite dabar
-    add_hint_help: Please help us to add smart hints to Code.org tutorials
-    20hour_overview: This 20-hour course introduces core computer science and programming
-      concepts. The course is designed for use in classrooms for grades K-8, but it
-      is fun to learn at all ages.
+    add_hint_help: Padėkite mums sukurti gudrius suflerius Code.org pamokėlėms
+    20hour_overview: Šis 20-ties valandų informatikos kursas supažindina su programavimo
+      pagrindais. Jis yra skirtas naudoti pamokose nuo 5 klasės, bet smagu mokytis
+      esant bet kurioje amžiaus grupėje.
   gender:
     male: Vyras
     female: Moteris
     none: Nenoriu atsakyti
   footer:
-    help_from_html: Engineers from <a href="http://www.google.com">Google</a>, <a
-      href="http://www.microsoft.com">Microsoft</a>, <a href="http://www.facebook.com">Facebook</a>,
-      and <a href="http://www.twitter.com">Twitter</a> helped create this tutorial.
+    help_from_html: Programuotojai iš <a href="http://www.google.com">Google</a>,
+      <a href="http://www.microsoft.com">Microsoft</a>, <a href="http://www.facebook.com">Facebook</a>
+      ir <a href="http://www.twitter.com">Twitter</a> padėjo kurti šias pamokėles.
     art_from_html: Angry Birds&trade; & &copy; 2009 - 2013 <a href="http://www.rovio.com">Rovio
       Entertainment Ltd</a>. Visos teisės saugomos.<br/> Plants vs. Zombies&trade;
       & &copy; 2013 <a href="http://www.ea.com">Electronic Arts Inc.</a>. Visos teisės
@@ -352,8 +339,8 @@
     subtitle: Peržiūrėkite šiuos vaizdo įrašus bei patarimus
     teacher: Peržiūrėti sprendimą
     auth_error: Jums neleidžiama pamatyti sprendimo.
-    submit: Update Artist Location
-    direction: Start Direction
+    submit: Atnaujinti menininko padėtį
+    direction: Pradžios kryptis
   video:
     tab: Vaizdo įrašas.
     notes: Nerodo vaizdo? Rodyti tekstą.
@@ -368,13 +355,13 @@
   download_pdf: Atviros pamokos planas
   share_code:
     title: Paspauskite „Paleisti programą“, kad pamatytumėte, kaip ji veikia
-    bounce_og_title: Check out my Bounce Game
+    bounce_og_title: Peržiūrėk mano Bounce žaidimą
     flappy_og_title: Išmėginkite žaidimą my Flappy Game
     og_description: Aš pats parašiau kodą Code.org svetainėje
   builder:
     created: Jūs sukūrėte naują scenarijų.
     destroyed: Jūs sunaikinote scenarijų.
-    manage: Manage Scripts
+    manage: Sukurti etapus
     view: Žiūrėti
     back: Atgal į scenarijus
     level:
@@ -383,12 +370,29 @@
       unused: Nepanaudoti lygiai
   upsell:
     hoc:
-      title: The Hour of Code
-      body: Try the basics of computer science. Millions have given it a shot.
+      title: Vienos Valandos Kodo kursas
+      body: Išmėginkite informatikos pagrindus. Juos išbandė jau milijonai žmonių.
     flappy:
-      title: Flappy Code
-      body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
-        tutorial!
+      title: Flappy Kodas
+      body: Ar nori parašyti savo žaidimą per mažiau nei 10 minučių? Išmėgink Flappy
+        Code pamokėles!
     20hour:
-      title: Intro Course
-      body: Try our 20-hour Intro to Computer Science course.
+      title: Įvadiniai kursai
+      body: Išmėginkite mūsų 20-ties valandų įvadą į informatiką.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

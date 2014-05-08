@@ -18,6 +18,7 @@ class Maze < Level
   end
 
   def self.create_from_level_builder(params, level_params)
+    raise ArgumentError.new("Maze file not found") unless params[:maze_source]
     contents = CSV.new(params[:maze_source].read)
     game = Game.custom_maze
     size = params[:size].to_i

@@ -7023,13 +7023,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Os blocos \"Repetir\" ou \"Se\" precisam de incluir blocos dentro para funcionar. Garante que o bloco interno encaixa correctamente dentro do bloco que o contém."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Tens blocos extras que não estão ligados a um bloco de evento."};
 
 exports.finalStage = function(d){return "Parabéns! Completaste a etapa final."};
 
 exports.finalStageTrophies = function(d){return "Parabéns! Completaste a etapa final e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "As peças de puzzle do teu programa podem ser representadas em Javascript, a linguagem de programação mais amplamente adoptada no mundo:"};
+exports.generatedCodeInfo = function(d){return "Mesmo as melhores universidades ensinam código em blocos (por exemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Mas na verdade, os blocos que juntaste podem ser vistos em JavaScript, a linguagem de código mais usada em todo o mundo:"};
 
 exports.hashError = function(d){return "Desculpa, '%1' não corresponde a qualquer programa gravado."};
 
@@ -7043,7 +7043,7 @@ exports.levelIncompleteError = function(d){return "Estás a usar todos os tipos 
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Cria o teu próprio jogo Flappy"};
 
 exports.missingBlocksErrorMsg = function(d){return "Tenta um ou mais blocos dos seguintes para resolver o puzzle."};
 
@@ -7051,9 +7051,9 @@ exports.nextLevel = function(d){return "Parabéns! Completaste o puzzle "+v(d,"p
 
 exports.nextLevelTrophies = function(d){return "Parabéns! Completaste o puzzle "+v(d,"puzzleNumber")+" e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.nextStage = function(d){return "Parabéns! Completaste a fase "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Parabéns! Completaste "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Parabéns! Completaste a fase "+v(d,"stageNumber")+" e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"troféu","other":n(d,"numTrophies")+" troféus"})+"."};
+exports.nextStageTrophies = function(d){return "Parabéns! Completaste "+v(d,"stageName")+" e ganhaste "+p(d,"numTrophies",0,"pt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Parabéns! Completaste o puzzle "+v(d,"puzzleNumber")+". (Apesar disso, poderias ter usado somente "+p(d,"numBlocks",0,"pt",{"one":"1 bloco","other":n(d,"numBlocks")+" blocos"})+".)"};
 
@@ -7081,7 +7081,7 @@ exports.tooManyBlocksMsg = function(d){return "Este puzzle pode ser resolvido co
 
 exports.tooMuchWork = function(d){return "Fizeste-me ter muito trabalho! Podes tentar repetir menos vezes?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "O teu código parece bem - vai agitar-se com cada clique. Mas precisas de clicar várias vezes para agitar-se até ao alvo."};
 
 exports.toolboxHeader = function(d){return "Blocos"};
 
@@ -7093,7 +7093,7 @@ exports.tryAgain = function(d){return "Tentar novamente"};
 
 exports.backToPreviousLevel = function(d){return "Voltar ao nível anterior"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Guarda na tua galeria de imagens"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7111,15 +7111,15 @@ exports.rotateText = function(d){return "Roda o teu dispositivo."};
 
 exports.orientationLock = function(d){return "Desativa o bloqueio de orientação em configurações do dispositivo."};
 
-exports.wantToLearn = function(d){return "Want to learn to code?"};
+exports.wantToLearn = function(d){return "Queres aprender a programar com código?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Vê o vídeo"};
 
-exports.tryHOC = function(d){return "Try the Hour of Code"};
+exports.tryHOC = function(d){return "Exprimenta a Hora do Código"};
 
-exports.signup = function(d){return "Sign up for the intro course"};
+exports.signup = function(d){return "Inscreve-te para o curso de introdução"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aqui vai uma dica:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){
@@ -7148,7 +7148,7 @@ exports.fill = function(d){return "Enche 1"};
 
 exports.fillN = function(d){return "preenche "+v(d,"shovelfuls")};
 
-exports.fillStack = function(d){return "fill stack of "+v(d,"shovelfuls")+" holes"};
+exports.fillStack = function(d){return "enche pilha de "+v(d,"shovelfuls")+" buracos"};
 
 exports.fillSquare = function(d){return "Preencha o quadrado"};
 
@@ -7160,7 +7160,7 @@ exports.heightParameter = function(d){return "altura"};
 
 exports.holePresent = function(d){return "Há um buraco sob a letra"};
 
-exports.ifCode = function(d){return "if"};
+exports.ifCode = function(d){return "se"};
 
 exports.ifPathAhead = function(d){return "Se há caminho em frente"};
 

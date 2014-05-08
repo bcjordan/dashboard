@@ -29,7 +29,7 @@
       7:
         image: notes/hoc1_7.jpg
         text: Sul lato sinistro viene visualizzato il labirinto attraverso cui il
-          tuo programma deve guidare l'uccello. Le spiegazioni per ciascun puzzle
+          tuo programma deve guidare l'uccello. Le spiegazioni per ciascun esercizio
           sono scritte al di sotto del labirinto.
       8:
         image: notes/hoc1_8.jpg
@@ -67,8 +67,8 @@
           velocemente.
       2:
         image: notes/stage5_2.jpg
-        text: In questi puzzle, sarai un artista che disegna una linea dietro di sé
-          dovunque va.
+        text: In questi esercizi, sarai un artista che disegna una linea dietro di
+          sé dovunque va.
       3:
         image: notes/stage5_3.jpg
         text: Questo blocco dice "vai avanti di 100 pixel" (move forward by 100 pixels)
@@ -77,17 +77,17 @@
         image: notes/stage5_4.jpg
         text: Questo blocco dice "gira a destra di 90 gradi" (turn right by 90 degrees).
           Questo fa girare il tuo artista della stessa quantità, come fa il blocco
-          "gira" nel puzzle del labirinto.
+          "gira" nell'esercizio del labirinto.
       5:
         image: notes/stage5_5.jpg
-        text: Se in questi blocchi fai clic sui numeri puoi cambiare di quanto l'artista
+        text: Se in questi blocchi clicchi sui numeri puoi cambiare di quanto l'artista
           si sposta in avanti o gira. Fai qualche prova per prendere confidenza con
           questi nuovi blocchi.
     farmer_intro:
       1:
         image: notes/stage9_1.jpg
-        text: Ciao, sono Paola! In questi puzzle devi aiutare una contadina che deve
-          completamente livellare il suo terreno per iniziare a seminarlo.
+        text: Ciao, sono Paola! In questi esercizi devi aiutare una contadina che
+          deve completamente livellare il suo terreno per iniziare a seminarlo.
       2:
         image: notes/stage9_2.jpg
         text: Devi aiutarla a rimuovere tutti i mucchi di terra e a riempire tutte
@@ -136,7 +136,7 @@
           l'uccello sbatterà le ali.
       8:
         image: notes/flappy08.jpg
-        text: In ogni puzzle di questa attività introduciamo nuovi tipi di eventi,
+        text: In ogni esercizio di questa attività introduciamo nuovi tipi di eventi,
           rappresentati come blocchi verdi nell'area di lavoro, e tu puoi decidere
           i blocchi appropriati da aggiungere in risposta a questi eventi.
       9:
@@ -146,7 +146,7 @@
           quando l'uccello precipita a terra.
       10:
         image: notes/flappy10.jpg
-        text: Nel puzzle finale sarai in grado di creare il tuo gioco e condividerlo
+        text: Nell'esercizio finale sarai in grado di creare il tuo gioco e condividerlo
           con i tuoi amici. Buon divertimento!
     loop_times:
       1:
@@ -156,8 +156,8 @@
           volte, migliaia o addirittura miliardi di volte.
       2:
         image: notes/hoc2_2.jpg
-        text: In questo puzzle, vogliamo fare in modo che l'uccello si sposti di 5
-          caselle in avanti per raggiungere il maiale.
+        text: In questo esercizio, vogliamo fare in modo che l'uccello si sposti di
+          5 caselle in avanti per raggiungere il maiale.
       3:
         image: notes/hoc2_3.jpg
         text: Puoi usare il blocco di ripetizione "ripeti ... volte" (repeat ... times)
@@ -324,7 +324,7 @@
         text: Ciao, sono Janete, e sono un'ingegnera di Zynga.
       2:
         image: notes/stage15_2.jpg
-        text: E se vuoi disegnare un po' di triangoli con lati di differenti lunghezze?
+        text: Come fai per disegnare un po' di triangoli con lati di differenti lunghezze?
       3:
         image: notes/stage15_3.jpg
         text: Puoi scrivere esplicitamente tutto il codice o puoi utilizzare una funzione
@@ -346,7 +346,7 @@
           E trascina via il vecchio blocco col numero.
       7:
         image: notes/stage15_7.jpg
-        text: Per usare la tua funzione con parametri, fai clic sulla categoria "Funzioni"
+        text: Per usare la tua funzione con parametri, clicca sulla categoria "Funzioni"
           (Functions) e sposta la tua funzione "disegna un triangolo di lunghezza"
           nell'area di lavoro.
       8:
@@ -356,7 +356,7 @@
     hoc_wrapup:
       1:
         image: notes/hoc6_1.jpg
-        text: Complimenti! Con l'ultimo puzzle che hai risolto, hai appena scritto
+        text: Complimenti! Con l'ultimo esercizio che hai risolto, hai appena scritto
           il codice che dice a QUALUNQUE robot come trovare la sua strada attraverso
           un labirinto senza ramificazioni o attraverso un tunnel di qualsiasi lunghezza,
           sia che si tratti di uno zombie, di un uccello, di un robot che esplora

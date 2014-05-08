@@ -7029,7 +7029,7 @@ exports.finalStage = function(d){return "Parabéns! Você concluiu a etapa final
 
 exports.finalStageTrophies = function(d){return "Parabéns! Você concluiu a fase final e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Os blocos para o seu programa também podem ser representados em JavaScript, a linguagem de programação mais adotada no mundo:"};
+exports.generatedCodeInfo = function(d){return "Mesmo as melhores universidades ensinam codificação em blocos (por exemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Mas na verdade, os blocos que você juntou podem ser vistos em JavaScript, a linguagem de codificação mais usada em todo o mundo:"};
 
 exports.hashError = function(d){return "Desculpe, nenhum programa salvo como '%1'."};
 
@@ -7051,9 +7051,9 @@ exports.nextLevel = function(d){return "Parabéns! Você completou o quebra-cabe
 
 exports.nextLevelTrophies = function(d){return "Parabéns! Você completou o quebra-cabeça "+v(d,"puzzleNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.nextStage = function(d){return "Parabéns! Você completou a fase "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Parabéns! Você completou "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
+exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageName")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Parabéns! Você completou o Quebra-cabeça "+v(d,"puzzleNumber")+". (Mas você poderia ter usado apenas "+p(d,"numBlocks",0,"pt",{"one":"1 bloco","other":n(d,"numBlocks")+" blocos"})+".)"};
 
@@ -7093,7 +7093,7 @@ exports.tryAgain = function(d){return "Tente novamente"};
 
 exports.backToPreviousLevel = function(d){return "Voltar"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Salve na sua galeria"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7119,7 +7119,7 @@ exports.tryHOC = function(d){return "Tente a Hora do Código"};
 
 exports.signup = function(d){return "Cadastre-se para o curso de introdução"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aqui vai uma dica:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

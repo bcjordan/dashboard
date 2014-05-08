@@ -28,24 +28,28 @@
           desc: Час кода
           Maze: Этап 1
         Edit Code:
-          desc: Редактирование кода
+          desc: Редактировать код (beta)
           MazeEC: Этап 1
         2014 Levels:
           desc: 2014 Головоломки (beta)
-          Bounce: Stage 1
+          Bounce: Этап 1
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: Созданные пользователем головоломки (beta)
+          Custom: Этап 1
         Flappy Levels:
           desc: Порхающая птичка
-          Flappy: Stage 1
+          Flappy: Этап 1
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: Головоломки (beta)
+          Jigsaw: Этап 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: Введение в Информатику
         Maze: Лабиринт
+        Multi: Multiple Choice Stuffs
         Unplug2: Вычислительное мышление
         Unplug3: Программирование на бумаге в клеточку
         Artist: Художник
@@ -67,7 +71,8 @@
         MazeEC: Лабиринт
         Bounce: Прыжок
         Flappy: Порхающая птичка
-        Jigsaw: Jigsaw
+        Jigsaw: Головоломки
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: Бронзовый
@@ -99,8 +104,10 @@
           блока.
         maze_2_7: Помоги мне прогнать вредного поросёнка, используя как можно меньше
           блоков. Попробуй использовать блок "повторить" больше одного раза.
-        maze_2_8: 'Чтобы решить эту задачу, попробуй блок "повторить несколько раз"
-          с 3 блоками внутри него: двигаться, двигаться, повернуть.'
+        maze_2_8: 'Когда блок серого цвета, это означает, что его нельзя удалить или
+          изменить. Попробуйте решить эту головоломку, используя блок «повторить»
+          3 раза. Попробуйте положить эти 3 блока внутрь блока «повторить»: двигаться,
+          двигаться, повернуть.'
         maze_2_9: Теперь попробуй новый блок "повторять до" - он будет повторять действия,  пока
           я  не доберусь до надоедливой свиньи.
         maze_2_10: Сейчас последняя попытка - ты можешь это сделать, используя только
@@ -154,9 +161,8 @@
           рисования!'
         turtle_4_1: 'Можешь нарисовать треугольник (со сторонами 100 точек) , используя
           только с 3 блока? Подсказка: Используй блок "повторить".'
-        turtle_4_2: 'Попробуй добавить один блок, чтобы завершить эту головоломку.
-          Подсказка: даны 2 фрагмента, чтобы нарисовать два одинаковых треугольника,
-          тебе нужно соединить их блоком "повернуть", выбрав необходимый угол поворота.'
+        turtle_4_2: Добавьте блок «повернуть вправо на 90 градусов» куда-нибудь в
+          середину программы на рабочей области, чтобы нарисовать эти треугольники.
         turtle_4_3: Здесь у нас код, который ты написал, чтобы нарисовать 1 треугольник.
           Можешь добавить блоки "повторить" и "повернуть", чтобы нарисовать красивый
           цветок?
@@ -356,12 +362,13 @@
           очко сопернику" к блокам "когда шар у цели" и, "когда шар промазал", чтобы
           сделать игру. Посмотрите, сколько очков Вы можете заработать, прежде чем
           Ваш противник забьет в двое больше.
-        bounce_11: You can now attach blocks to the "when game starts" block. Try
-          changing the speed of the paddle and the ball and see how many points you
-          can score before your opponent scores twice.
-        bounce_12: Create your own Bounce game. You can change all the visuals and
-          the rules. When you're done, click Share to let friends try your game on
-          their phones.
+        bounce_11: Теперь вы можете прикреплять блок «когда начинается игра». Вы должны
+          прикрепить новый блок «начать новый мяч» в более чем одном месте. Кроме
+          того попробуйте изменить сцену или скорость ракетки и мяча, чтобы увидеть,
+          сколько очков вы можете забить прежде чем ваш противник забьет дважды.
+        bounce_12: Создайте свою собственную игру Bounce. Вы можете изменить всю графику
+          и правила. Когда вы закончите, нажмите кнопку Поделиться, чтобы друзья поиграли
+          в вашу игру на своих телефонах.
         Custom_builder: Перетащи блоки с панели инструментов на рабочий стол, чтобы
           нарисовать уровень который хочешь создать. Нажми "Запустить программу" когда
           закончишь.
@@ -391,17 +398,35 @@
         flappy_11: Создайте свою собственную игру. Вы можете поменять все визуальные
           эффекты и все правила, даже сложность. Когда вы закончите, нажмите поделиться,
           чтобы ваши друзья могли попробовать игру на своих телефонах.
-        jigsaw_1: Click the block
-        jigsaw_2: Drag the block to the target
-        jigsaw_3: Arrange the blocks to form the image
-        jigsaw_4: Arrange the blocks to form the image
-        jigsaw_5: Arrange the blocks to form the image
-        jigsaw_6: Arrange the blocks to form the image
-        jigsaw_7: Arrange the blocks to form the image
-        jigsaw_8: Arrange the blocks to form the image
-        jigsaw_9: Arrange the blocks to form the image
-        jigsaw_10: Arrange the blocks to form the image
-        jigsaw_11: Arrange the blocks to form the image
+        jigsaw_1: Нажмите на блок
+        jigsaw_2: Перетащите блок к цели
+        jigsaw_3: Расставьте блоки, чтобы создать изображение
+        jigsaw_4: Расставьте блоки, чтобы создать изображение
+        jigsaw_5: Расставьте блоки, чтобы создать изображение
+        jigsaw_6: Расставьте блоки, чтобы создать изображение
+        jigsaw_7: Расставьте блоки, чтобы создать изображение
+        jigsaw_8: Расставьте блоки, чтобы создать изображение
+        jigsaw_9: Расставьте блоки, чтобы создать изображение
+        jigsaw_10: Расставьте блоки, чтобы создать изображение
+        jigsaw_11: Расставьте блоки, чтобы создать изображение
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 'Чтобы решить эту задачу, нужно определить повторяющиеся действия.
           Используйте блок "повторить" с тремя блоками внутри: двигаться, двигаться,
@@ -431,13 +456,16 @@
         20_wrapup: Итоги 20-часового курса
     callout:
       text:
-        drag_blocks: Drag a "move" block and snap it below the other block
-        run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        drag_blocks: Перетащите блок «переместить» и поставьте его ниже другого блока
+        run: Нажмите «Выполнить», чтобы протестировать вашу программу
+        watch_again: Нажмите здесь, чтобы посмотреть видео еще раз
+        gray_block_explanation: Серые блоки не могут быть перемещены или удалены.
+          Сможете решить головоломку?
+        show_code_explanation: Нажмите здесь, чтобы увидеть код программы, которую
+          вы делаете
+        instructions_repeat_explanation: Инструкции для каждой головоломки здесь повторяются
+        category_explanation: У вас есть все те же блоки, но сейчас они разложены
+          по категориям
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

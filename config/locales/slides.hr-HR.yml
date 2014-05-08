@@ -3,12 +3,11 @@
     maze_intro:
       1:
         image: notes/hoc1_1.jpg
-        text: Welcome to your first hour of code! Let's dive right into your first
-          taste of programming.
+        text: Dobrodošli u svoj prvi sat koda! Bacimo se na prve korake programiranja.
       2:
         image: notes/hoc1_2.jpg
-        text: We'll be using Blockly, a visual programming language where you drag
-          and drop blocks to write code.
+        text: Koristit ćemo Blockly, vizualan jezik za programiranje gdje vučete i
+          ispuštate blokove da biste pisali kod.
       3:
         image: notes/hoc1_3.jpg
         text: Uglavnom se kod piše, ali Blockly je vizualan. Svaki blok odgovara jednoj
@@ -22,20 +21,21 @@
         text: Program je niz naredbi koje vaše računalo izvršava.
       6:
         image: notes/hoc1_6.jpg
-        text: The goal of your first program is to get an Angry Bird through a maze
-          to hit a Green Pig.
+        text: Cilj vašeg prvog programa je da Angry Bird prođe kroz labirint i udari
+          Zelenu svinju.
       7:
         image: notes/hoc1_7.jpg
-        text: The left side is the maze where your program is run. The instructions
-          for each puzzle are below the maze.
+        text: Na lijevoj strani labirinta se pokreće vaš program. Upute za svaki zadatak
+          su ispod labirinta.
       8:
         image: notes/hoc1_8.jpg
         text: Alatna traka u sredini sadrži naredbe za igru Angry Bird. Njih ćeš koristiti
           kako bi napisao svoj kod igre.
       9:
         image: notes/hoc1_9.jpg
-        text: On the right is your workspace where you'll drag blocks from the toolbox
-          to build your program. To delete a block, drag it to the trash in the corner.
+        text: Na desnoj strani je vaša radna ploha gdje vučete blokove iz alatnice
+          da biste napisali program. Da biste obrisali blok, odvucite ga do smeća
+          u kutu.
       10:
         image: notes/hoc1_10.jpg
         text: Svaki blok je jedna naredba. Ako povučeš "pomakni naprijed" blok na
@@ -51,73 +51,69 @@
           pritisni "Reset" tipku.
       13:
         image: notes/hoc1_13.jpg
-        text: Let's go get those pigs!
+        text: Idemo srediti ove svinje!
     artist_intro:
       1:
         image: notes/stage5_1.jpg
-        text: Hi, I'm JR! Every race car team need computer scientists to win. They
-          analyze data from the car to make it go faster.
+        text: Bok, ja sam JR! Svakom trkaćem autu je potreban kompjuterski znanstvenik
+          da bi pobijedio. Oni analiziraju podatke iz auta da bi mogao ići brže.
       2:
         image: notes/stage5_2.jpg
-        text: In these puzzles, you'll be an artist that draws a line behind them
-          everywhere they go.
+        text: U ovim zadacima, bit ćete umjetnik koji crta linije gdje god ide.
       3:
         image: notes/stage5_3.jpg
         text: Ovaj naredba kaže "pomakni naprijed" za 100 piksela. Pikseli su jako
           male točkice na tvom zaslonu.
       4:
         image: notes/stage5_4.jpg
-        text: This block says "turn right by 90 degrees." This will turn your artist
-          the same amount as the "turn" blocks in the maze puzzles.
+        text: Ovaj blok kaće "skreni lijevo 90 stupnjeva." Ovo će okrenuti vašeg umjetnika
+          za isti broj kao i broj blokova "okreni" u zadatku s labirintom.
       5:
         image: notes/stage5_5.jpg
-        text: Click on the arrow in either of these blocks to change the amount the
-          artist moves forward or turns. Play around to get familiar with these new
-          blocks.
+        text: Pritisni strelicu u bilo kojem od blokova da promijeniš koliko umjetnik
+          ide naprijed ili se okreće. Igraj se da bi se upoznao/la s ovim novim blokovima.
     farmer_intro:
       1:
         image: notes/stage9_1.jpg
-        text: Hi, I'm Paola! In these puzzles, you're a farmer who has to get her
-          field completely flat to start planting crops.
+        text: Bok, ja sam Paola! U ovim zadacima, bit ćeš farmer koji mora potpuno
+          poravnati svoje polje da bi mogao početi sijati usjeve.
       2:
         image: notes/stage9_2.jpg
-        text: You have to help her remove all the piles of dirt and fill in all the
-          holes.
+        text: Moraš pomoći ukloniti sve hrpe zemlje i popuniti sve rupe.
       3:
         image: notes/stage9_3.jpg
-        text: The new blocks remove 1 shovelful of dirt from a pile and fill in 1
-          shovelful of dirt to a hole.
+        text: Novi blokovi uklanjaju jednu lopatu zemlje iz hrpe i pune jednu lopatu
+          zemlje u rupe.
       4:
         image: notes/stage9_4.jpg
-        text: The piles and holes are different sizes, so you have to tell the farmer
-          how many shovelfuls to use.
+        text: Hrpe i rupe su različite veličine, moraš reći farmerici koliko lopata
+          mora koristiti.
     flappy_intro:
       1:
         image: notes/flappy01.jpg
-        text: Hi, I'm Katie! One of the most exciting things about computer science
-          is that a computer program can be interactive.
+        text: Bok, ja sam Katie! Jedna od najuzbudljivijih stvari u informatici je
+          da kompjuterski program može biti interaktivan.
       2:
         image: notes/flappy02.jpg
-        text: Any time somebody clicks or taps or types on a computer or phone, that
-          generates an EVENT, and there's some code that decides what to do when an
-          EVENT occurs.
+        text: Kad god netko pritisne ili dotakne tipku na kompjuteru ili telefonu,
+          to stvara DOGAĐAJ, i nekakav kod odlučuje što napraviti kad se dogodi DOGAĐAJ.
       3:
         image: notes/flappy03.jpg
-        text: 'For example, you could have an EVENT-HANDLER that says "when the mouse
-          is clicked, play a sound" '
+        text: 'Na primjer, možeš imati RUKOVATELJA-DOGAĐAJEM koji kaže "kad se klikne
+          miš, pokreni zvuk" '
       4:
         image: notes/flappy04.jpg
-        text: Have you ever heard of the game FlappyBird? By using Event handlers,
-          we're going to learn to program our own custom version of FlappyBird!
+        text: Jesi ikad čuo za igricu FlappyBird? Koristeći rukovatelje događajem,
+          naučit ćemo kako programirati našu vlastitu verziju igrice FlappyBird!
       5:
         image: notes/flappy05.jpg
-        text: The code you'll write involves dragging and dropping blocks that represent
-          commands for the computer. Under the hood, each of these blocks is represented
-          by real code.
+        text: Kod koji ćeš napisati uključuje povlačenje i ispuštanje blokova koji
+          predstavljaju zapovijedi za kompjuter. Ispod haube, svaki od ovih blokova
+          predstavlja pravi kod.
       6:
         image: notes/flappy06.jpg
-        text: 'If you take a look at the workspace, there are some green blocks that
-          are filled in for you - these are "event handlers" '
+        text: 'Ako baciš pogled na radnu plohu, vidjet ćeš zelene blokove koji su
+          već popunjeni - oni su "rukovatelji događajem" '
       7:
         image: notes/flappy07.jpg
         text: If you want the bird to FLAP when you CLICK the mouse, you can do that

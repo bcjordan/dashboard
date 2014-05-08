@@ -4771,7 +4771,7 @@ exports.nextLevelTrophies = function(d){return "Поздравляю! Ты за�
 
 exports.nextStage = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+" и выиграл "+p(d,"numTrophies",0,"ru",{"one":"кубок","other":n(d,"numTrophies")+" кубков"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравляем! Вы выполнили "+v(d,"stageName")+" и выиграли "+p(d,"numTrophies",0,"ru",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравляю! Ты завершил головоломку "+v(d,"puzzleNumber")+". (Однако, можно было обойтись всего  "+p(d,"numBlocks",0,"ru",{"one":"1 блоком","other":n(d,"numBlocks")+" блоками"})+".)"};
 
@@ -4811,7 +4811,7 @@ exports.tryAgain = function(d){return "Попытаться ещё раз"};
 
 exports.backToPreviousLevel = function(d){return "Вернуться на предыдущий уровень"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Сохранить в галерею"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
