@@ -50,16 +50,18 @@ class SectionsController < ApplicationController
   end
 
   def update_students
+    filtered_section_params = section_params
+
     # remove blank form rows
-    params[:section][:students_attributes].reject! {|student| student.values.all?(&:blank?)}
+    filtered_section_params[:students_attributes].reject! {|student| student.values.all?(&:blank?)}
 
     # add provider::manual so email is not required
-    params[:section][:students_attributes].each do |student|
+    filtered_section_params[:students_attributes].each do |student|
       student[:provider] = User::PROVIDER_MANUAL
     end
 
     respond_to do |format|
-      if @section.update(section_params)
+      if @section.update(filtered_section_params)
         format.html { redirect_to sections_path, notice: I18n.t('crud.updated', model: Section.model_name.human) }
       else
         format.html { render action: 'edit_students' }
@@ -92,6 +94,6 @@ class SectionsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def section_params
-    params.require(:section).permit(:name, :students_attributes => [:name, :username, :provider])
+    params.require(:section).permit(:name, :students_attributes => [:name, :username, :password, :provider])
   end
 end
