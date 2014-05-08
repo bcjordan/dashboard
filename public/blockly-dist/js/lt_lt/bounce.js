@@ -5266,7 +5266,7 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "paleisk naują kamuolį"};
 
 exports.launchBallTooltip = function(d){return "Launch a ball into play."};
 
@@ -5354,63 +5354,63 @@ exports.repeatUntilFinish = function(d){return "repeat until finish"};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "scena = bet kokia"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "scena = teniso kortai"};
 
-exports.setBackgroundRetro = function(d){return "set retro scene"};
+exports.setBackgroundRetro = function(d){return "scena = retro"};
 
 exports.setBackgroundTooltip = function(d){return "Sets the background image"};
 
-exports.setBallRandom = function(d){return "set random ball"};
+exports.setBallRandom = function(d){return "kamuolys = bet koks"};
 
-exports.setBallHardcourt = function(d){return "set hardcourt ball"};
+exports.setBallHardcourt = function(d){return "kamuolys = teniso"};
 
-exports.setBallRetro = function(d){return "set retro ball"};
+exports.setBallRetro = function(d){return "kamuolys = retro"};
 
 exports.setBallTooltip = function(d){return "Sets the ball image"};
 
-exports.setBallSpeedRandom = function(d){return "set random ball speed"};
+exports.setBallSpeedRandom = function(d){return "kamuolio greitis = bet koks"};
 
-exports.setBallSpeedVerySlow = function(d){return "set very slow ball speed"};
+exports.setBallSpeedVerySlow = function(d){return "kamuolio greitis = labai lėtai"};
 
-exports.setBallSpeedSlow = function(d){return "set slow ball speed"};
+exports.setBallSpeedSlow = function(d){return "kamuolio greitis = lėtai"};
 
-exports.setBallSpeedNormal = function(d){return "set normal ball speed"};
+exports.setBallSpeedNormal = function(d){return "kamuolio greitis = normalus"};
 
-exports.setBallSpeedFast = function(d){return "set fast ball speed"};
+exports.setBallSpeedFast = function(d){return "kamuolio greitis = greitai"};
 
-exports.setBallSpeedVeryFast = function(d){return "set very fast ball speed"};
+exports.setBallSpeedVeryFast = function(d){return "kamuolio greitis = labai greitai"};
 
 exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
 
-exports.setPaddleRandom = function(d){return "set random paddle"};
+exports.setPaddleRandom = function(d){return "raketė = bet kokia"};
 
-exports.setPaddleHardcourt = function(d){return "set hardcourt paddle"};
+exports.setPaddleHardcourt = function(d){return "raketė = teniso"};
 
-exports.setPaddleRetro = function(d){return "set retro paddle"};
+exports.setPaddleRetro = function(d){return "raketė = retro"};
 
 exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
 
-exports.setPaddleSpeedRandom = function(d){return "set random paddle speed"};
+exports.setPaddleSpeedRandom = function(d){return "raketės greitis = bet koks"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "set very slow paddle speed"};
+exports.setPaddleSpeedVerySlow = function(d){return "raketės greitis = labai lėtai"};
 
-exports.setPaddleSpeedSlow = function(d){return "set slow paddle speed"};
+exports.setPaddleSpeedSlow = function(d){return "raketės greitis = lėtai"};
 
-exports.setPaddleSpeedNormal = function(d){return "set normal paddle speed"};
+exports.setPaddleSpeedNormal = function(d){return "raketės greitis = normalus"};
 
-exports.setPaddleSpeedFast = function(d){return "set fast paddle speed"};
+exports.setPaddleSpeedFast = function(d){return "raketės greitis = greitai"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"};
+exports.setPaddleSpeedVeryFast = function(d){return "raketės greitis = labai greitai"};
 
 exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Bendrinti"};
 
 exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Bendrink savo žaidimą:"};
 
 exports.turnLeft = function(d){return "turn left"};
 
@@ -5430,7 +5430,7 @@ exports.whenDown = function(d){return "when Down arrow"};
 
 exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "kai žaidimas prasideda"};
 
 exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
 
@@ -5514,9 +5514,9 @@ exports.extraTopBlocks = function(d){return "Tu panaudojai keletą blokų, kurie
 
 exports.finalStage = function(d){return "Sveikinu! Tu baigei paskutinį etapą."};
 
-exports.finalStageTrophies = function(d){return "Sveikinu! Tu užbaigei paskutinį lygį ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.finalStageTrophies = function(d){return "Sveikinu! Tu užbaigei paskutinį lygį ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"a trofėjų","other":n(d,"numTrophies")+" trofėjus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Jūsų programa blokus gali taip pat atstovauti JavaScript, pasaulyje labiausiai plačiai naudojama programavimo kalba:"};
+exports.generatedCodeInfo = function(d){return "Net ir aukščiausiai įvertinti universitetai Pasaulyje moko programavimo naudojant blokelius (pvz., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tačiau tavo sudėlioti blokeliai gali būti atvaizduojami ir JavaScript - populiariausia programavimo kalba Pasaulyje:"};
 
 exports.hashError = function(d){return "Atsiprašome, '%1' nesutampa su jokia įrašyta programa."};
 
@@ -5538,13 +5538,13 @@ exports.nextLevel = function(d){return "Sveikinu! Tu išsprendei galvosūkį "+v
 
 exports.nextLevelTrophies = function(d){return "Sveikinu! Užbaigėte galvosūkį "+v(d,"puzzleNumber")+" ir laimėjote "+p(d,"numTrophies",0,"lt",{"one":"trofėju","other":n(d,"numTrophies")+" trofėjų"})+"."};
 
-exports.nextStage = function(d){return "Sveikinu! Užbaigėte lygį "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Sveikinu! Tu užbaigei "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"lt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextStageTrophies = function(d){return "Sveikinu! Tu užbaigei lygį "+v(d,"stageName")+" ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"trofėjų","other":n(d,"numTrophies")+" trofėjus"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Sveikinu! Tu išsprendei "+v(d,"puzzleNumber")+" užduotį. (Beje, galėjai panaudoti tik "+p(d,"numBlocks",0,"lt",{"vieną":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
+exports.numBlocksNeeded = function(d){return "Sveikinu! Tu išsprendei "+v(d,"puzzleNumber")+" užduotį. (Beje, galėjai panaudoti tik "+p(d,"numBlocks",0,"lt",{"vieną":"1 blokelį","other":n(d,"numBlocks")+" blokelių"})+".)"};
 
-exports.numLinesOfCodeWritten = function(d){return "Tu parašei  "+p(d,"numLines",0,"lt",{"one":"1 line","other":n(d,"numLines")+" lines"})+" kodo!"};
+exports.numLinesOfCodeWritten = function(d){return "Tu parašei  "+p(d,"numLines",0,"lt",{"one":"1 eilutę","other":n(d,"numLines")+" eilučių"})+" kodo!"};
 
 exports.puzzleTitle = function(d){return "Užduotis "+v(d,"puzzle_number")+" iš "+v(d,"stage_total")};
 
@@ -5574,13 +5574,13 @@ exports.toolboxHeader = function(d){return "Blokeliai"};
 
 exports.openWorkspace = function(d){return "Kaip tai veikia"};
 
-exports.totalNumLinesOfCodeWritten = function(d){return "Iš viso: "+p(d,"numLines",0,"lt",{"one":"1 line","other":n(d,"numLines")+" lines"})+" kodo."};
+exports.totalNumLinesOfCodeWritten = function(d){return "Iš viso: "+p(d,"numLines",0,"lt",{"one":"1 eilutė","other":n(d,"numLines")+" eilučių"})+" kodo."};
 
 exports.tryAgain = function(d){return "Pabandyk dar kartą"};
 
 exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5590,7 +5590,7 @@ exports.typeFuncs = function(d){return "Galimos funkcijos:%1"};
 
 exports.typeHint = function(d){return "Įsidėmėk, kad skliausteliai ir kabliataškiai yra būtini."};
 
-exports.workspaceHeader = function(d){return "Sudėliok savo blokelius čia: "};
+exports.workspaceHeader = function(d){return "Iš viso panaudojai blokelių: "};
 
 exports.infinity = function(d){return "Begalybė"};
 
@@ -5606,7 +5606,7 @@ exports.tryHOC = function(d){return "Išmėgink Vienos Valandos Kodą"};
 
 exports.signup = function(d){return "Užsiregistruok į kursą pradedantiesiems"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Štai patarimas:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

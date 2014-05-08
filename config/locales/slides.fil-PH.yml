@@ -3,23 +3,24 @@
     maze_intro:
       1:
         image: notes/hoc1_1.jpg
-        text: Welcome to your first hour of code! Let's dive right into your first
-          taste of programming.
+        text: Maligayang pagdating sa iyong unang oras ng code! Halina at umpisahan
+          natin kaagad ang iyong unang tikim sa programming.
       2:
         image: notes/hoc1_2.jpg
-        text: We'll be using Blockly, a visual programming language where you drag
-          and drop blocks to write code.
+        text: Ang gagamitin natin ay Blockly, isang visual na programming language
+          kung saan maaari kang mag-drag at mag-drop ng mga block upang makapagsulat
+          ng code.
       3:
         image: notes/hoc1_3.jpg
-        text: Most code is typed, but Blockly is visual. Each blocks corresponds to
-          a line of "real" code.
+        text: Halos lahat ng code ay tina-type, ngunit ang Blockly ay visual. Bawat
+          mga block ay tumutugon sa isang linya ng "tunay" na code.
       4:
         image: notes/hoc1_4.jpg
-        text: You'll learn the foundations of computer science, concepts which are
-          used anywhere from making apps to controlling the Mars rover.
+        text: Matututuhan mo ang pundasyon ng computer science, mga konsepto na ginagamit
+          kahit saan mula sa paggawa ng apps hanggang sa pagkontrol ng Mars rover.
       5:
         image: notes/hoc1_5.jpg
-        text: A program is a set of instructions for your computer to follow.
+        text: Ang program ay grupo ng mga instruksiyon upang sundin ng iyong computer.
       6:
         image: notes/hoc1_6.jpg
         text: The goal of your first program is to get an Angry Bird through a maze
@@ -51,7 +52,7 @@
           button.
       13:
         image: notes/hoc1_13.jpg
-        text: Let's go get those pigs!
+        text: Halina at hulihin natin ang mga baboy!
     artist_intro:
       1:
         image: notes/stage5_1.jpg
@@ -252,7 +253,7 @@
           until we drag out our "fill 5" function block from functions category.
       5:
         image: notes/stage13_5.jpg
-        text: 'Let''s put the "fun" back in "FUNction!" '
+        text: Halina't ibalik natin ang "fun" sa "FUNction!" 
     loop_while:
       1:
         image: notes/stage9_5.jpg

@@ -28,24 +28,28 @@
           desc: Година Коду
           Maze: Етап 1
         Edit Code:
-          desc: Редагування коду
+          desc: Редагування коду (бета-версія)
           MazeEC: Етап 1
         2014 Levels:
-          desc: Завдання 2014 (бета-версія)
-          Bounce: Stage 1
+          desc: Арканоід (бета-версія)
+          Bounce: Етап 1
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: Завдання, створені користувачами (бета-версія)
+          Custom: Етап 1
         Flappy Levels:
           desc: Пташок Пурх
-          Flappy: Stage 1
+          Flappy: Етап 1
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: Головоломки (бета-версія)
+          Jigsaw: Етап 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: Вступ до інформатики
         Maze: Лабіринт
+        Multi: Multiple Choice Stuffs
         Unplug2: Обчислювальне мислення
         Unplug3: Програмування на розграфленому папері
         Artist: Художник
@@ -65,9 +69,10 @@
         Artist5: Художник 5
         Unplug11: Підведення підсумків
         MazeEC: Лабіринт
-        Bounce: Відбити
+        Bounce: Арканоід
         Flappy: Пташок Пурх
-        Jigsaw: Jigsaw
+        Jigsaw: Головоломки
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: Бронза
@@ -99,8 +104,10 @@
           три блоки.
         maze_2_7: Допоможіть прогнати лихе порося, використовуючи найменшу кількість
           блоків. Спробуйте використати кілька блоків "повторити... разів".
-        maze_2_8: 'Щоб розв''язати це завдання, спробуйте використати блок "повторити...
-          разів" з трьома блоками всередині: рухатись, рухатись, повернути.'
+        maze_2_8: 'Коли блок сірий, це означає, що ви не можете видалити його або
+          змінити його. Спробуйте вирішити це завдання, використовуючи "Повторити"
+          блок, який повторює 3 рази. Спробуйте розмістити ці 3 блоки всередині сірого
+          блоку "Повторити": рухатись, рухатись, повернути.'
         maze_2_9: Гаразд, спробуйте новий блок "повторювати до" - дії повторюватимуться,
           доки я не дістанусь до набридливої свині.
         maze_2_10: Гаразд, ще раз для практики - ви зможете розв'язати це завдання,
@@ -127,7 +134,7 @@
           лабіринт? Якщо ви це зробите правильно, я зможу проходити по довільному
           кривому шляху будь-якої довжини.
         turtle_1_1: Привіт, Я художник. Ви можете написати код, щоб дозволити мені
-          малювати майже що завгодно. Використовуйте кілька блоків, щоб дозволяти
+          малювати майже що завгодно. Використовуйте кілька блоків, щоб допомогти
           мені малювати над сірими лініями на рисунку.
         turtle_1_2: 'Тепер намалюйте квадрат. ПРИМІТКА: вибирайте і використовуйте
           ваш улюблений колір в новому блоці "встановити колір".'
@@ -154,9 +161,8 @@
           ширину". Розважайтеся!'
         turtle_4_1: 'Можете намалювати трикутник (з сторонами 100 пікселів) лише 3
           блоками? Підказка: використовуйте блок "повторити".'
-        turtle_4_2: 'Спробуйте додати 1 блок, аби завершити цю головоломку. Підказка:
-          Ми вже надали 2 однакові блоки для рисування трикутників, вам потрібно поставити
-          "поворот" між ними і вирішити, коли потрібно повернути.'
+        turtle_4_2: Додайте блок "повернути праворуч на 90 градусів" десь в середині
+          програми, що вже є на робочій області, щоб намалювати ці трикутники.
         turtle_4_3: Добре. Ось код, який ви написали, щоб намалювати один трикутник.
           Ви можете додати блок "повторити" та "повернути", щоб зробити чарівну квітку?
         turtle_4_4: 'Ось подібний код від попередньої головоломки, але повертайте
@@ -357,12 +363,13 @@
           "додати бал" і "додати бал супротивнику" до блоків "коли м'яч влучає в ціль"
           і "коли м'яч промахується повз платформу". Подивіться, скільки очок ви можете
           заробити, перш ніж супротивник отримає два очка.
-        bounce_11: You can now attach blocks to the "when game starts" block. Try
-          changing the speed of the paddle and the ball and see how many points you
-          can score before your opponent scores twice.
-        bounce_12: Create your own Bounce game. You can change all the visuals and
-          the rules. When you're done, click Share to let friends try your game on
-          their phones.
+        bounce_11: Блоки тепер можна приєднати до блоку "Коли гра починається". Вам
+          доведеться додавати блок "запуск нового м'яча" у кількох місцях. Також,
+          спробуйте змінити сцени або швидкість платформи і м'яча і подивитися, скільки
+          очок ви можете забити, перш ніж ваш противник отримає подвійний бал.
+        bounce_12: Створіть свою власну гру Арканоід. Ви можете змінити всі візуальні
+          ефекти та правила. Коли ви завершите роботу, натисніть кнопку надання спільного
+          доступу, щоб запросити друзів спробувати вашу гру на своїх телефонах.
         Custom_builder: Перетягуйте блоки з панелі інструментів на робочу область
           для того, щоб намалювати рівень, який бажаєте створити. Клацніть "Запустити
           програму" коли все готово.
@@ -390,17 +397,35 @@
           візуальні ефекти і правила гри, навіть силу тяжіння! Коли ви завершите,
           натисніть кнопку спільний доступ, щоб дозволити друзям спробувати вашу гру
           на своїх телефонах.
-        jigsaw_1: Click the block
-        jigsaw_2: Drag the block to the target
-        jigsaw_3: Arrange the blocks to form the image
-        jigsaw_4: Arrange the blocks to form the image
-        jigsaw_5: Arrange the blocks to form the image
-        jigsaw_6: Arrange the blocks to form the image
-        jigsaw_7: Arrange the blocks to form the image
-        jigsaw_8: Arrange the blocks to form the image
-        jigsaw_9: Arrange the blocks to form the image
-        jigsaw_10: Arrange the blocks to form the image
-        jigsaw_11: Arrange the blocks to form the image
+        jigsaw_1: Вибрати блок
+        jigsaw_2: Перетягнути блок до мети
+        jigsaw_3: Розставити блоки для формування зображення
+        jigsaw_4: Розставити блоки для формування зображення
+        jigsaw_5: Розставити блоки для формування зображення
+        jigsaw_6: Розставити блоки для формування зображення
+        jigsaw_7: Розставити блоки для формування зображення
+        jigsaw_8: Розставити блоки для формування зображення
+        jigsaw_9: Розставити блоки для формування зображення
+        jigsaw_10: Розставити блоки для формування зображення
+        jigsaw_11: Розставити блоки для формування зображення
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 'Щоб вирішити цю проблему, знайдіть шаблон, який повторюється. Використовуйте
           блок "повтор" з цих 3 блоків всередині нього: рух вперед, рух вперед, поворот
@@ -430,13 +455,17 @@
         20_wrapup: 20-годинний підсумок
     callout:
       text:
-        drag_blocks: Drag a "move" block and snap it below the other block
-        run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        drag_blocks: Перетягнути блок "рухатись" і прикріпити його під іншим блоком
+        run: Натисніть "Виконати", щоб спробувати програму
+        watch_again: Натисніть тут, щоб дивитися відео знову
+        gray_block_explanation: Сірі блоки не можна переміщувати або видаляти. Ви
+          все-ж можете вирішити головоломку?
+        show_code_explanation: Натисніть тут, щоб побачити код для програми, яку ви
+          робите
+        instructions_repeat_explanation: Інструкції для кожного завдання повторюються
+          тут
+        category_explanation: У вас є все-ті ж блоки, але тепер вони впорядковані
+          у категорії
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

@@ -28,24 +28,28 @@
           desc: ساعة من البرمجة
           Maze: المرحلة 1
         Edit Code:
-          desc: تعديل كود البرنامج
+          desc: تحرير التعليمات البرمجية (بيتا)
           MazeEC: المرحلة 1
         2014 Levels:
-          desc: 2014 Puzzles (beta)
-          Bounce: Stage 1
+          desc: ترتد (بيتا)
+          Bounce: المرحلة 1
         Builder Levels:
-          desc: User-Created Puzzles (beta)
-          Custom: Stage 1
+          desc: الألغاز التي أنشأها المستخدم (بيتا)
+          Custom: المرحلة 1
         Flappy Levels:
           desc: الطائر المرفرف
-          Flappy: Stage 1
+          Flappy: المرحلة 1
         Jigsaw Levels:
-          desc: Jigsaw (beta)
-          Jigsaw: Stage 1
+          desc: بانوراما (بيتا)
+          Jigsaw: المرحلة 1
+        Step Levels:
+          desc: Maze (beta)
+          MazeStep: Stage Step
     game:
       name:
         Unplug1: مقدمة في علوم الكمبيوتر
         Maze: المتاهة
+        Multi: Multiple Choice Stuffs
         Unplug2: التفكير الحاسوبي
         Unplug3: برمجة ورقة الرسم البياني
         Artist: الرسام
@@ -67,7 +71,8 @@
         MazeEC: المتاهة
         Bounce: الارتداد
         Flappy: Flappy Bird
-        Jigsaw: Jigsaw
+        Jigsaw: بانوراما
+        MazeStep: Maze Step Mode
     trophy:
       name:
         Bronze: برونزية
@@ -99,8 +104,9 @@
         maze_2_6: حاول توصيلي الى المتطفل الاخضر باستخدام ثلاث قطع.
         maze_2_7: ساعدني في أبعاد هذا المخلوق الاخضر باستخدام أقل عدد من القطع. حاول
           استخدام اكثر من قطعة "اكرر مرات" .
-        maze_2_8: 'لحل هذا اللغز يجب عليك ان تستخدم قطعة " أكرر حتى " مع وضع ثلاث
-          قطع داخلها والتي هي : تقدم , تقدم , اتجه .'
+        maze_2_8: 'عندما تكون كتلة رمادية، وهذا يعني لا يمكنك حذفه أو تغييره. محاولة
+          لحل هذا اللغز باستخدام كتلة "كرر" أن يكرر 3 مرات. حاول وضع هذه الكتل 3 داخل
+          كتلة "تكرار" الرمادية: التحرك، التحرك، انعطف.'
         maze_2_9: حسناً، جرب القطعة الجديدة "أكرر حتى"- فإنه سيتم تكرارها حتى تصل
           الى المخلوق الاخضر.
         maze_2_10: حسناً، مرة واحدة أخرى للتدريب - ايمكنك حل هذا اللغز باستخدامك 4
@@ -125,8 +131,8 @@
         maze_2_19: هل تستطيع ان تضيف 3 قطع فقط لمساعدتي على حل  هذة المتاهة الاكثر
           تعقيدا ؟ اذا قمت انت بتطبقها بصورة صحيحة, أنا استطيع أن امشي على أي مسار
           متعرج بغض النظر عن طوله.
-        turtle_1_1: مرحبا، أنا الرسام. بأمكانك كتابة كود برمجي لتجعلني أرسم أي شيء
-          تقريبا. استخدم بعض من القطع لتجعلني أرسم عبر الخطوط الرمادية التي في الصورة.
+        turtle_1_1: مرحبا، أنا فنان. يمكنك كتابة التعليمات البرمجية لجعلي أرسم أي
+          شيء تقريبا. استخدام كتل قليلة لجعلي أرسم عبر الخطوط الرمادية في الصورة.
         turtle_1_2: 'الآن، ارسم مربعا. ملاحظة: استخدم لونك المفضل عن طريق اختيار قطعة
           "تعيين لون" .'
         turtle_1_3: اصنع مربع بإستخدام 3 قطع فقط.
@@ -148,9 +154,8 @@
           ندفة الثلج، أو شكل حلزوني. وجرب أيضاً  القطعة الجديدة "تعيين العرض". استمتع!'
         turtle_4_1: 'يمكنك رسم مثلث (مع حواف 100 بكسل) بإستخدامك 3 قطع فقط؟ تلميح:
           استخدم قطعة "اكرر".'
-        turtle_4_2: 'حاول إضافة قطعة واحدة لإكمال هذا اللغز. تلميح: لقد قمنا بتوفير
-          القطع لرسم مثلثان 2 متطابقين، تحتاج إلى وضع "اتجه" في الوسط، وأن تقرر متى
-          يجب الأنعطاف.'
+        turtle_4_2: إضافة كتلة "بدوران لليمين بمقدار 90 درجة" في مكان ما في منتصف
+          البرنامج بالفعل على مساحة العمل لرسم هذه المثلثات.
         turtle_4_3: حسنا، ها هو الكود التي قمت بكتابته لرسم مثلثً واحدً. أيمكنك إضافة
           قطعة "اكرر" و "اتجه" لعمل زهرة جميلة؟
         turtle_4_4: 'هنا نفس الكود الذي استخدم في اللغز السابق، ولكن بانعطاف فقط 36
@@ -310,62 +315,80 @@
           الاخضر .
         bounce_1: إرفاق كتلة إلى "عندما السهم الي اليسار" كتلة واضغط على "تشغيل برنامج".
           انقل المؤشر باستخدام مفتاح السهم إلى اليسار للوصول إلى الهدف النهائي
-        bounce_2: Attach a block to the "when right arrow" and "when left arrow" blocks,
-          then run and move the paddle with the both arrow key to both finish targets.
-        bounce_3: TBD
-        bounce_4: TBD
-        bounce_5: Attach a blocks to the "when right arrow", "when left arrow", "when
-          ball hits wall", and "when ball hits paddle" blocks.
-        bounce_6: Try again with more balls.
-        bounce_7: Now it is getting crazy!
-        bounce_10: There is a now a goal at the top. Attach "increment score" blocks
-          to the the "when ball in goal" and "when ball misses paddle" blocks to make
-          a game.
-        bounce_11: You can now attach blocks to the "when game starts" block. Try
-          changing the speed of the paddle and the ball and see how many points you
-          can score before your opponent scores twice.
-        bounce_12: Create your own Bounce game. You can change all the visuals and
-          the rules. When you're done, click Share to let friends try your game on
-          their phones.
-        Custom_builder: Drag blocks from the toolbox to the workspace to draw the
-          level you wish to create. Press "Run Program" when you are ready.
-        flappy_1: Attach a block to the "when click" block, then press "Run Program"
-          and click or tap to move Flappy to the target.
-        flappy_2: Now we've added some ground.  Attach a block to the "when hit the
-          ground" block, then press "Run Program". To pass this puzzle, your code
-          needs to 'END GAME' when Flappy crashes into the ground.
-        flappy_3: The "when Run is clicked" block allows you to run code when your
-          game first starts.  Try setting the level speed and flapping to the target.
-        flappy_4: Flappy will fly through obstacles unless you write code to make
-          him crash. Attach a block to the "when hit an obstacle" block. To pass the
-          puzzle, your code needs to 'END GAME' and make Flappy crash into the first
-          pipe so he can reach the target.
-        flappy_5: Let's add a scoreboard, and count points when Flappy makes it past
-          obstacles. Add to the "when pass an obstacle" block, and then score a point
-          by flying Flappy through the first set of pipes.
-        flappy_6: See if you can still score a point after making Flappy flap either
-          a smaller or larger amount.
-        flappy_7: Next, try changing the scene by attaching another block to the "when
-          Run is clicked".
-        flappy_8: You can set visuals anytime, not just when the game starts. Try
-          setting a RANDOM scene when other events happen, for example, when passing
-          an obstacle.
-        flappy_9: To mix things up, when hitting an obstacle or the ground, instead
-          of ending the game try setting the score back to 0.
-        flappy_11: Create your own Flappy game and share it. You can change the visuals,
-          or even the rules. Try changing visuals each time Flappy passes an obstacle.
-          Or make Flappy invincible so he never dies.
-        jigsaw_1: Click the block
-        jigsaw_2: Drag the block to the target
-        jigsaw_3: Arrange the blocks to form the image
-        jigsaw_4: Arrange the blocks to form the image
-        jigsaw_5: Arrange the blocks to form the image
-        jigsaw_6: Arrange the blocks to form the image
-        jigsaw_7: Arrange the blocks to form the image
-        jigsaw_8: Arrange the blocks to form the image
-        jigsaw_9: Arrange the blocks to form the image
-        jigsaw_10: Arrange the blocks to form the image
-        jigsaw_11: Arrange the blocks to form the image
+        bounce_2: إرفاق كتلة "سهم لليمين" و "سهم لليسار". انقل المجداف لبلوغ كلا الهدفين.
+        bounce_3: والآن حاول شيئا من هذا القبيل مع كتلة "السهم لأعلى". انقل المجداف
+          بهدف إنهاء الهدف في الجزء العلوي.
+        bounce_4: هذه المرة كنت بحاجة إلى إضافة أربع كتل. انقل المجداف لكل أربعة أهداف
+          لإكمال هذا اللغز.
+        bounce_5: نحن ذاهبون إلى إرسال كرة تطير إلى أسفل نحو المجداف. إرفق كتلة إلى
+          كتلة "عندما يضرب الكرة مضرب" لضمان وصول الكرة إلى الهدف.
+        bounce_6: الآن قم بإنهاء هدف  في الجزء العلوي. تحتاج إلى إرفاق كتل لكل من
+          الكتل "عند ضرب الكرة" في حل هذا اللغز.
+        bounce_7: إرفاق كل من "عند" كتل كتل. ترتد الكرة حتى أنه يضرب هدفا.
+        bounce_10: هناك الآن هدفا أعلى. إرفاق "نقاط نقطة" وكتل "نقاط نقطة الخصم" إلى
+          "عندما الكرة في الهدف" و "الكرة عندما يفتقد مجداف" كتل لجعل لعبة. انظر كيف
+          العديد من النقاط يمكن لك نقاط قبل عشرات الخصم الخاص بك مرتين.
+        bounce_11: يمكنك الآن إرفاق كتل لكتلة "عندما تبدأ اللعبة". يجب عليك إرفاق
+          كتلة جديدة "إطلاق الكرة الجديدة" في أكثر من مكان واحد. أيضا، حاول تغيير
+          المشهد أو سرعة المجداف والكرة وانظر كيف العديد من النقاط يمكن لك نقاط قبل
+          عشرات الخصم الخاص بك مرتين.
+        bounce_12: إنشاء الخاصة بك لعبة ترتد. يمكنك تغيير جميع المرئيات والقواعد.
+          عند الانتهاء من ذلك، انقر فوق مشاركة للسماح لأصدقاء جرب اللعبة الخاصة بك
+          على الهواتف الخاصة بهم.
+        Custom_builder: اسحب كتل من مربع الأدوات إلى مساحة العمل المستوى ترغب في إنشاء
+          رسم. اضغط "تشغيل برنامج" عندما تكون جاهزاً.
+        flappy_1: إرفاق كتلة إلى كتلة "عندما انقر فوق"، ثم اضغط على "تشغيل برنامج".
+          انقر أو اضغط على الشاشة لنقل فلابي إلى الهدف.
+        flappy_2: الآن لقد أضفنا بعض الأرض.  إرفاق كتلة إلى كتلة "عندما سقطت على الأرض".  يحتاج
+          التعليمات البرمجية الخاصة بك إلى 'نهاية اللعبة' عندما تعطل فلابي.
+        flappy_3: كتلة "لعبة عندما يبدأ" يسمح لك تشغيل التعليمات البرمجية عند بدء
+          تشغيل اللعبة.  حاول تحديد مستوى السرعة وترفرف إلى الهدف.
+        flappy_4: Flappy وسوف تطير من خلال العقبات إلا إذا كان يمكنك كتابة التعليمات
+          البرمجية لإجباره على تحطم الطائرة. إرفاق كتلة إلى كتلة "عندما اصطدمت عقبة".
+          يحتاج التعليمات البرمجية الخاصة بك إلى 'نهاية اللعبة' عند فلابي تعطل في
+          أول مجموعة من الأنابيب.
+        flappy_5: دعونا إضافة اللوحة، وتعول النقاط عند فلابي تجعل من الماضي العقبات.
+          إضافة إلى كتلة "عند تمرير عقبة" ومن ثم يسجل نقطة بالطائر فلابي من خلال أول
+          مجموعة من الأنابيب.
+        flappy_6: انظر إذا كنت يمكن لا يزال يسجل نقطة بعد إجراء فلابي رفرف أما كمية
+          أصغر أو أكبر.
+        flappy_7: بعد ذلك، حاول تغيير المشهد بإرفاق مقطع آخر لكتلة "عندما تبدأ اللعبة".
+        flappy_8: يمكنك تعيين صور في أي وقت وليس فقط عند بدء تشغيل اللعبة. حاول إعداد
+          مشهد عشوائي عندما تحدث أحداث أخرى، على سبيل المثال، عند تمرير عقبة.
+        flappy_9: لخلط الأمور حاول تصل، عندما ضرب عقبة أو الأرض، بدلاً من إنهاء اللعبة
+          الإعداد النتيجة مرة أخرى إلى 0.
+        flappy_11: إنشاء الخاصة بك لعبة Flappy. يمكنك تغيير جميع المرئيات وجميع القواعد،
+          وحتى الجاذبية. عند الانتهاء من ذلك، انقر فوق مشاركة للسماح لأصدقاء جرب اللعبة
+          الخاصة بك على الهواتف الخاصة بهم.
+        jigsaw_1: انقر فوق الكتلة
+        jigsaw_2: اسحب الكتلة إلى الهدف
+        jigsaw_3: ترتيب الكتل لتشكيل الصورة
+        jigsaw_4: ترتيب الكتل لتشكيل الصورة
+        jigsaw_5: ترتيب الكتل لتشكيل الصورة
+        jigsaw_6: ترتيب الكتل لتشكيل الصورة
+        jigsaw_7: ترتيب الكتل لتشكيل الصورة
+        jigsaw_8: ترتيب الكتل لتشكيل الصورة
+        jigsaw_9: ترتيب الكتل لتشكيل الصورة
+        jigsaw_10: ترتيب الكتل لتشكيل الصورة
+        jigsaw_11: ترتيب الكتل لتشكيل الصورة
+        jigsaw_12: Arrange the blocks to form the image
+        mazestep_1: Maze step description here
+        mazestep_2: Maze step description here
+        mazestep_3: Maze step description here
+        mazestep_4: Maze step description here
+        mazestep_5: Maze step description here
+        studio_1: Can you make this dog say "hello world"?
+        studio_2: Can you write a program to make this dog move to the target?
+        studio_3: Can you write a program that makes the dog move to the cat, and
+          have the cat say "hello" when the dog reaches him?
+        studio_4: Can you write a program to make this knight move around using the
+          up / down / left /right keys to hit all of the targets?
+        studio_5: The "repeat forever" block allows you to run code continuously.
+          Can you attach blocks to move this dragon up and down repeatedly?
+        studio_6: Can you have the knight say "ouch!" if he runs into the dragon,
+          and then move him with the arrows to the target?
+        studio_99: Create your own story. When you're done, click Share to let friends
+          try your story on their phones.
       levelIncompleteError:
         maze_2_8: 'لحل هذه المشكلة , يجب ان تبحث على الطريقة التي تقوم بالتكرار .
           استخدم قطعة " أكرر " مع وضع ثلاثة قطع داخلها والتي هي : تقدم , تقدم , اتجه
@@ -382,7 +405,7 @@
         maze_intro: مقدمة حول المتاهة
         artist_intro: مقدمة حول الرسام
         farmer_intro: داخل المزارع
-        flappy_intro: Flappy Intro
+        flappy_intro: مقدمة flappy
         loop_times: قطعة أكرر بعدد
         loop_until: قطعة أكرر حتى
         if: قطعة اذا كان
@@ -395,13 +418,15 @@
         20_wrapup: انتهاء 20 ساعة
     callout:
       text:
-        drag_blocks: Drag a "move" block and snap it below the other block
-        run: Hit "Run" to try your program
-        watch_again: Click here to watch the video again
-        gray_block_explanation: Blocks that are grey can't be moved or deleted. Can
-          you solve the puzzle anyway?
-        show_code_explanation: Click here to see the code for the program you're making
-        instructions_repeat_explanation: The instructions for each puzzle are repeated
-          here
-        category_explanation: You have all the same blocks but they've now been arranged
-          in categories
+        drag_blocks: اسحب كتلة "التحرك" وثبتها تحت كتلة أخرى
+        run: اضرب "تشغيل" لمحاولة البرنامج الخاص بك
+        watch_again: انقر هنا لمشاهدة الفيديو مرة أخرى
+        gray_block_explanation: لا يمكن نقل كتل رمادية أو حذفها. يمكنك حل اللغز على
+          أي حال؟
+        show_code_explanation: انقر هنا لمشاهدة التعليمات البرمجية للبرنامج التي قمت
+          بها
+        instructions_repeat_explanation: الإرشادات لكل لغز تتكرر هنا
+        category_explanation: لديك كل نفس الكتل ولكن لقد تم الآن ترتيبها في فئات
+        set_sprite_image: Attach a "set actor to image" block to the "when story starts"
+          block to enable an actor for this story
+        studio_say_text: Type what you want your actor to say within these quotes

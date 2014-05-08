@@ -21,8 +21,8 @@
       placeholder: Código (ABCDEF) ou e-mail (teacher@school.edu)
     submit: Adicionar professor
   add_hint_form:
-    placeholder: Please enter your hint here
-    submit: Add hint
+    placeholder: Por favor introduza a sua dica aqui
+    submit: Adicionar dica
   appname: Code.org
   stage: Nível
   puzzle: Quebra-cabeças
@@ -59,8 +59,6 @@
     no_signup_message: Tu podes <a target="_blank" href="http://learn.code.org"> consultar
       as várias fases e quebra-cabeças</a>, mas precisarás de te inscrever para guardar
       o teu progresso.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
       select a variety of prizes including free Dropbox space, Skype credits, and
       downloadable games from Electronic Arts.
@@ -72,8 +70,6 @@
       para professores de escolas públicas dos EUA que incentivem pelo menos 15 alunos
       a completar o curso. <a href="http://code.org/educate/20hr"> Ver guia do educador
       para obter mais informações.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
     teacher_pitch: Ensine o K-8 Introdução à Informática na sua sala de aula
     teacher_title: Registo de professor
     student_pitch: 'Para além de 1 hora: Tente a nossa K-8 Introdução à informática'
@@ -296,6 +292,7 @@
   user_stats:
     recent_activity: Atividade recente
     show_more: Mostrar mais
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Ou, se já está registado, %{link}
     student_reg_link: Estudante
@@ -310,7 +307,6 @@
     teacher_print_certificates: Print certificates for students who finish this course
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: A sua sala de aula
     student_progress: O seu progresso de aprendizagem
     student_stats: Ganhaste %{trophy_count} de %{trophy_max}  troféus "Mestria de
@@ -400,3 +396,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

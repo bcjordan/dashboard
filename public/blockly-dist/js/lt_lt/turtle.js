@@ -5178,7 +5178,7 @@ Turtle.execute = function() {
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5579,7 +5579,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  Blockly.mainWorkspace.setEnableToolbox(true);
+  // Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5727,9 +5727,9 @@ exports.extraTopBlocks = function(d){return "Tu panaudojai keletą blokų, kurie
 
 exports.finalStage = function(d){return "Sveikinu! Tu baigei paskutinį etapą."};
 
-exports.finalStageTrophies = function(d){return "Sveikinu! Tu užbaigei paskutinį lygį ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.finalStageTrophies = function(d){return "Sveikinu! Tu užbaigei paskutinį lygį ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"a trofėjų","other":n(d,"numTrophies")+" trofėjus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Jūsų programa blokus gali taip pat atstovauti JavaScript, pasaulyje labiausiai plačiai naudojama programavimo kalba:"};
+exports.generatedCodeInfo = function(d){return "Net ir aukščiausiai įvertinti universitetai Pasaulyje moko programavimo naudojant blokelius (pvz., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tačiau tavo sudėlioti blokeliai gali būti atvaizduojami ir JavaScript - populiariausia programavimo kalba Pasaulyje:"};
 
 exports.hashError = function(d){return "Atsiprašome, '%1' nesutampa su jokia įrašyta programa."};
 
@@ -5751,13 +5751,13 @@ exports.nextLevel = function(d){return "Sveikinu! Tu išsprendei galvosūkį "+v
 
 exports.nextLevelTrophies = function(d){return "Sveikinu! Užbaigėte galvosūkį "+v(d,"puzzleNumber")+" ir laimėjote "+p(d,"numTrophies",0,"lt",{"one":"trofėju","other":n(d,"numTrophies")+" trofėjų"})+"."};
 
-exports.nextStage = function(d){return "Sveikinu! Užbaigėte lygį "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Sveikinu! Tu užbaigei "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"lt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextStageTrophies = function(d){return "Sveikinu! Tu užbaigei lygį "+v(d,"stageName")+" ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"trofėjų","other":n(d,"numTrophies")+" trofėjus"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Sveikinu! Tu išsprendei "+v(d,"puzzleNumber")+" užduotį. (Beje, galėjai panaudoti tik "+p(d,"numBlocks",0,"lt",{"vieną":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
+exports.numBlocksNeeded = function(d){return "Sveikinu! Tu išsprendei "+v(d,"puzzleNumber")+" užduotį. (Beje, galėjai panaudoti tik "+p(d,"numBlocks",0,"lt",{"vieną":"1 blokelį","other":n(d,"numBlocks")+" blokelių"})+".)"};
 
-exports.numLinesOfCodeWritten = function(d){return "Tu parašei  "+p(d,"numLines",0,"lt",{"one":"1 line","other":n(d,"numLines")+" lines"})+" kodo!"};
+exports.numLinesOfCodeWritten = function(d){return "Tu parašei  "+p(d,"numLines",0,"lt",{"one":"1 eilutę","other":n(d,"numLines")+" eilučių"})+" kodo!"};
 
 exports.puzzleTitle = function(d){return "Užduotis "+v(d,"puzzle_number")+" iš "+v(d,"stage_total")};
 
@@ -5787,13 +5787,13 @@ exports.toolboxHeader = function(d){return "Blokeliai"};
 
 exports.openWorkspace = function(d){return "Kaip tai veikia"};
 
-exports.totalNumLinesOfCodeWritten = function(d){return "Iš viso: "+p(d,"numLines",0,"lt",{"one":"1 line","other":n(d,"numLines")+" lines"})+" kodo."};
+exports.totalNumLinesOfCodeWritten = function(d){return "Iš viso: "+p(d,"numLines",0,"lt",{"one":"1 eilutė","other":n(d,"numLines")+" eilučių"})+" kodo."};
 
 exports.tryAgain = function(d){return "Pabandyk dar kartą"};
 
 exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5803,7 +5803,7 @@ exports.typeFuncs = function(d){return "Galimos funkcijos:%1"};
 
 exports.typeHint = function(d){return "Įsidėmėk, kad skliausteliai ir kabliataškiai yra būtini."};
 
-exports.workspaceHeader = function(d){return "Sudėliok savo blokelius čia: "};
+exports.workspaceHeader = function(d){return "Iš viso panaudojai blokelių: "};
 
 exports.infinity = function(d){return "Begalybė"};
 
@@ -5819,7 +5819,7 @@ exports.tryHOC = function(d){return "Išmėgink Vienos Valandos Kodą"};
 
 exports.signup = function(d){return "Užsiregistruok į kursą pradedantiesiems"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Štai patarimas:"};
 
 
 },{"messageformat":49}],37:[function(require,module,exports){
@@ -5837,7 +5837,7 @@ exports.blocksUsed = function(d){return "Panaudota blokelių: %1"};
 
 exports.catColour = function(d){return "Spalva"};
 
-exports.catControl = function(d){return "Ciklai"};
+exports.catControl = function(d){return "Kartojimas"};
 
 exports.catMath = function(d){return "Matematika"};
 
@@ -5851,7 +5851,7 @@ exports.catLogic = function(d){return "Logika"};
 
 exports.colourTooltip = function(d){return "Pakeičia pieštuko spalvą."};
 
-exports.degrees = function(d){return "laipsniai"};
+exports.degrees = function(d){return "laipsnių(-iais)"};
 
 exports.dots = function(d){return "pikselių"};
 
@@ -5917,7 +5917,7 @@ exports.penTooltip = function(d){return "Pakelia arba nuleidžia pieštuką, kad
 
 exports.penUp = function(d){return "pakelk pieštuką"};
 
-exports.reinfFeedbackMsg = function(d){return "Ar tai atrodo taip, kaip norėjai? Gali nuspausti mygtuką „Pamėginti iš naujo“, kad pamatytum savo piešinį."};
+exports.reinfFeedbackMsg = function(d){return "Ar tai atrodo taip, kaip norėjai? Gali nuspausti mygtuką „Pabandyk dar kartą“, kad pamatytum savo piešinį."};
 
 exports.setColour = function(d){return "nustatyk spalvą"};
 

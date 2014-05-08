@@ -4741,9 +4741,9 @@ exports.extraTopBlocks = function(d){return "Tu panaudojai keletą blokų, kurie
 
 exports.finalStage = function(d){return "Sveikinu! Tu baigei paskutinį etapą."};
 
-exports.finalStageTrophies = function(d){return "Sveikinu! Tu užbaigei paskutinį lygį ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.finalStageTrophies = function(d){return "Sveikinu! Tu užbaigei paskutinį lygį ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"a trofėjų","other":n(d,"numTrophies")+" trofėjus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Jūsų programa blokus gali taip pat atstovauti JavaScript, pasaulyje labiausiai plačiai naudojama programavimo kalba:"};
+exports.generatedCodeInfo = function(d){return "Net ir aukščiausiai įvertinti universitetai Pasaulyje moko programavimo naudojant blokelius (pvz., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tačiau tavo sudėlioti blokeliai gali būti atvaizduojami ir JavaScript - populiariausia programavimo kalba Pasaulyje:"};
 
 exports.hashError = function(d){return "Atsiprašome, '%1' nesutampa su jokia įrašyta programa."};
 
@@ -4765,13 +4765,13 @@ exports.nextLevel = function(d){return "Sveikinu! Tu išsprendei galvosūkį "+v
 
 exports.nextLevelTrophies = function(d){return "Sveikinu! Užbaigėte galvosūkį "+v(d,"puzzleNumber")+" ir laimėjote "+p(d,"numTrophies",0,"lt",{"one":"trofėju","other":n(d,"numTrophies")+" trofėjų"})+"."};
 
-exports.nextStage = function(d){return "Sveikinu! Užbaigėte lygį "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Sveikinu! Tu užbaigei "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"lt",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextStageTrophies = function(d){return "Sveikinu! Tu užbaigei lygį "+v(d,"stageName")+" ir laimėjai "+p(d,"numTrophies",0,"lt",{"one":"trofėjų","other":n(d,"numTrophies")+" trofėjus"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Sveikinu! Tu išsprendei "+v(d,"puzzleNumber")+" užduotį. (Beje, galėjai panaudoti tik "+p(d,"numBlocks",0,"lt",{"vieną":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
+exports.numBlocksNeeded = function(d){return "Sveikinu! Tu išsprendei "+v(d,"puzzleNumber")+" užduotį. (Beje, galėjai panaudoti tik "+p(d,"numBlocks",0,"lt",{"vieną":"1 blokelį","other":n(d,"numBlocks")+" blokelių"})+".)"};
 
-exports.numLinesOfCodeWritten = function(d){return "Tu parašei  "+p(d,"numLines",0,"lt",{"one":"1 line","other":n(d,"numLines")+" lines"})+" kodo!"};
+exports.numLinesOfCodeWritten = function(d){return "Tu parašei  "+p(d,"numLines",0,"lt",{"one":"1 eilutę","other":n(d,"numLines")+" eilučių"})+" kodo!"};
 
 exports.puzzleTitle = function(d){return "Užduotis "+v(d,"puzzle_number")+" iš "+v(d,"stage_total")};
 
@@ -4801,13 +4801,13 @@ exports.toolboxHeader = function(d){return "Blokeliai"};
 
 exports.openWorkspace = function(d){return "Kaip tai veikia"};
 
-exports.totalNumLinesOfCodeWritten = function(d){return "Iš viso: "+p(d,"numLines",0,"lt",{"one":"1 line","other":n(d,"numLines")+" lines"})+" kodo."};
+exports.totalNumLinesOfCodeWritten = function(d){return "Iš viso: "+p(d,"numLines",0,"lt",{"one":"1 eilutė","other":n(d,"numLines")+" eilučių"})+" kodo."};
 
 exports.tryAgain = function(d){return "Pabandyk dar kartą"};
 
 exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -4817,7 +4817,7 @@ exports.typeFuncs = function(d){return "Galimos funkcijos:%1"};
 
 exports.typeHint = function(d){return "Įsidėmėk, kad skliausteliai ir kabliataškiai yra būtini."};
 
-exports.workspaceHeader = function(d){return "Sudėliok savo blokelius čia: "};
+exports.workspaceHeader = function(d){return "Iš viso panaudojai blokelių: "};
 
 exports.infinity = function(d){return "Begalybė"};
 
@@ -4833,7 +4833,7 @@ exports.tryHOC = function(d){return "Išmėgink Vienos Valandos Kodą"};
 
 exports.signup = function(d){return "Užsiregistruok į kursą pradedantiesiems"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Štai patarimas:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){
@@ -4861,23 +4861,23 @@ exports.finalLevel = function(d){return "Sveikinu! Tu išsprendei paskutinį gal
 
 exports.flap = function(d){return "plasnok"};
 
-exports.flapRandom = function(d){return "flap a random amount"};
+exports.flapRandom = function(d){return "pakilk atsitiktiniu dydžiu"};
 
-exports.flapVerySmall = function(d){return "flap a very small amount"};
+exports.flapVerySmall = function(d){return "pakilk labai mažu dydžiu"};
 
-exports.flapSmall = function(d){return "flap a small amount"};
+exports.flapSmall = function(d){return "pakilk mažu dydžiu"};
 
-exports.flapNormal = function(d){return "flap a normal amount"};
+exports.flapNormal = function(d){return "pakilk normaliu dydžiu"};
 
-exports.flapLarge = function(d){return "flap a large amount"};
+exports.flapLarge = function(d){return "pakilk dideliu dydžiu"};
 
-exports.flapVeryLarge = function(d){return "flap a very large amount"};
+exports.flapVeryLarge = function(d){return "pakilk labai dideliu dydžiu"};
 
 exports.flapTooltip = function(d){return "Nuskraidink Flappy į viršų."};
 
 exports.incrementPlayerScore = function(d){return "gauk tašką"};
 
-exports.incrementPlayerScoreTooltip = function(d){return "Add one to the current player score."};
+exports.incrementPlayerScoreTooltip = function(d){return "Pridėk vieną tašką prie esamo žaidėjo rezultato."};
 
 exports.nextLevel = function(d){return "Sveikinu! Išsprendei šią užduotį."};
 
@@ -4889,41 +4889,41 @@ exports.oneTopBlock = function(d){return "Šiai užduočiai atlikti, tau reikia 
 
 exports.playSoundRandom = function(d){return "groti atsitiktinį garsą"};
 
-exports.playSoundBounce = function(d){return "play bounce sound"};
+exports.playSoundBounce = function(d){return "grok atsimušimo garsą"};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "grok trakšt garsą"};
 
-exports.playSoundDie = function(d){return "play sad sound"};
+exports.playSoundDie = function(d){return "grok liūdną garsą"};
 
-exports.playSoundHit = function(d){return "play smash sound"};
+exports.playSoundHit = function(d){return "grok sutraiškymo garsą"};
 
-exports.playSoundPoint = function(d){return "play point sound"};
+exports.playSoundPoint = function(d){return "grok bakstelėjimo garsą"};
 
-exports.playSoundSwoosh = function(d){return "play swoosh sound"};
+exports.playSoundSwoosh = function(d){return "grok swoosh garsą"};
 
-exports.playSoundWing = function(d){return "play wing sound"};
+exports.playSoundWing = function(d){return "grok sparnų garsą"};
 
-exports.playSoundJet = function(d){return "play jet sound"};
+exports.playSoundJet = function(d){return "grok lėktuvo garsą"};
 
-exports.playSoundCrash = function(d){return "play crash sound"};
+exports.playSoundCrash = function(d){return "grok crash garsą"};
 
-exports.playSoundJingle = function(d){return "play jingle sound"};
+exports.playSoundJingle = function(d){return "grok jingle garsą"};
 
-exports.playSoundSplash = function(d){return "play splash sound"};
+exports.playSoundSplash = function(d){return "grok splash garsą"};
 
-exports.playSoundLaser = function(d){return "play laser sound"};
+exports.playSoundLaser = function(d){return "grok lazerio garsą"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Grok pasirinktą garsą."};
 
 exports.reinfFeedbackMsg = function(d){return "Gali nuspausti mygtuką „Mėginti dar kartą“, kad grįžtum prie savo žaidimo."};
 
 exports.scoreText = function(d){return "Rezultatas: "+v(d,"playerScore")};
 
-exports.setBackgroundRandom = function(d){return "set scene Random"};
+exports.setBackgroundRandom = function(d){return "nustatyk atsitiktinę sceną"};
 
-exports.setBackgroundFlappy = function(d){return "set scene City (day)"};
+exports.setBackgroundFlappy = function(d){return "nustatyk miesto sceną (diena)"};
 
-exports.setBackgroundNight = function(d){return "set scene City (night)"};
+exports.setBackgroundNight = function(d){return "nustatyk miesto sceną (naktis)"};
 
 exports.setBackgroundSciFi = function(d){return "set scene Sci-Fi"};
 
@@ -4995,43 +4995,43 @@ exports.setObstacleLaser = function(d){return "set obstacle Laser"};
 
 exports.setObstacleTooltip = function(d){return "Sets the obstacle image"};
 
-exports.setPlayerRandom = function(d){return "set player Random"};
+exports.setPlayerRandom = function(d){return "žaidėjas = Random"};
 
-exports.setPlayerFlappy = function(d){return "set player Yellow Bird"};
+exports.setPlayerFlappy = function(d){return "žaidėjas = Geltonas paukštis"};
 
-exports.setPlayerRedBird = function(d){return "set player Red Bird"};
+exports.setPlayerRedBird = function(d){return "žaidėjas = Raudonas paukštis"};
 
-exports.setPlayerSciFi = function(d){return "set player Spaceship"};
+exports.setPlayerSciFi = function(d){return "žaidėjas = Kosminis laivas"};
 
-exports.setPlayerUnderwater = function(d){return "set player Fish"};
+exports.setPlayerUnderwater = function(d){return "žaidėjas = Žuvis"};
 
-exports.setPlayerCave = function(d){return "set player Bat"};
+exports.setPlayerCave = function(d){return "žaidėjas = Šikšnosparnis"};
 
-exports.setPlayerSanta = function(d){return "set player Santa"};
+exports.setPlayerSanta = function(d){return "žaidėjas = Kalėdų Senelis"};
 
-exports.setPlayerShark = function(d){return "set player Shark"};
+exports.setPlayerShark = function(d){return "žaidėjas = Ryklys"};
 
-exports.setPlayerEaster = function(d){return "set player Easter Bunny"};
+exports.setPlayerEaster = function(d){return "žaidėjas = Velykų kiškis"};
 
-exports.setPlayerBatman = function(d){return "set player Bat guy"};
+exports.setPlayerBatman = function(d){return "žaidėjas = BatMan"};
 
-exports.setPlayerSubmarine = function(d){return "set player Submarine"};
+exports.setPlayerSubmarine = function(d){return "žaidėjas = Submarine"};
 
-exports.setPlayerUnicorn = function(d){return "set player Unicorn"};
+exports.setPlayerUnicorn = function(d){return "žaidėjas = Vienaragis"};
 
-exports.setPlayerFairy = function(d){return "set player Fairy"};
+exports.setPlayerFairy = function(d){return "žaidėjas = Fėja"};
 
-exports.setPlayerSuperman = function(d){return "set player Flappyman"};
+exports.setPlayerSuperman = function(d){return "žaidėjas = Flappyman"};
 
-exports.setPlayerTurkey = function(d){return "set player Turkey"};
+exports.setPlayerTurkey = function(d){return "žaidėjas = Kalakutas"};
 
 exports.setPlayerTooltip = function(d){return "Sets the player image"};
 
-exports.setScore = function(d){return "set score"};
+exports.setScore = function(d){return "taškai ="};
 
 exports.setScoreTooltip = function(d){return "Sets the player's score"};
 
-exports.setSpeed = function(d){return "set speed"};
+exports.setSpeed = function(d){return "greitis ="};
 
 exports.setSpeedTooltip = function(d){return "Sets the levels speed"};
 
@@ -5041,37 +5041,37 @@ exports.shareFlappyTwitter = function(d){return "Check out the Flappy game I mad
 
 exports.shareGame = function(d){return "Share your game:"};
 
-exports.speedRandom = function(d){return "set speed random"};
+exports.speedRandom = function(d){return "greitis = atsitiktinis"};
 
-exports.speedVerySlow = function(d){return "set speed very slow"};
+exports.speedVerySlow = function(d){return "greitis = labai lėtai"};
 
-exports.speedSlow = function(d){return "set speed slow"};
+exports.speedSlow = function(d){return "greitis = lėtai"};
 
-exports.speedNormal = function(d){return "set speed normal"};
+exports.speedNormal = function(d){return "greitis = normalus"};
 
-exports.speedFast = function(d){return "set speed fast"};
+exports.speedFast = function(d){return "greitis = greitai"};
 
-exports.speedVeryFast = function(d){return "set speed very fast"};
+exports.speedVeryFast = function(d){return "greitis = labai greitai"};
 
-exports.whenClick = function(d){return "when click"};
+exports.whenClick = function(d){return "kai spusteli"};
 
 exports.whenClickTooltip = function(d){return "Execute the actions below when a click event occurs."};
 
-exports.whenCollideGround = function(d){return "when hit the ground"};
+exports.whenCollideGround = function(d){return "kai nuktrenti ant žemės"};
 
 exports.whenCollideGroundTooltip = function(d){return "Execute the actions below when Flappy hits the ground."};
 
-exports.whenCollideObstacle = function(d){return "when hit an obstacle"};
+exports.whenCollideObstacle = function(d){return "kai atsimuši į kliūtį"};
 
 exports.whenCollideObstacleTooltip = function(d){return "Execute the actions below when Flappy hits an obstacle."};
 
-exports.whenEnterObstacle = function(d){return "when pass obstacle"};
+exports.whenEnterObstacle = function(d){return "kai įveiki kliūtį"};
 
 exports.whenEnterObstacleTooltip = function(d){return "Execute the actions below when Flappy enters an obstacle."};
 
-exports.whenRunButtonClick = function(d){return "when Run is clicked"};
+exports.whenRunButtonClick = function(d){return "kai žaidimas prasideda"};
 
-exports.whenRunButtonClickTooltip = function(d){return "Execute the actions below when the run button is pressed."};
+exports.whenRunButtonClickTooltip = function(d){return "Vykdyti nurodytus veiksmus, kai žaidimas prasideda."};
 
 exports.yes = function(d){return "Taip"};
 

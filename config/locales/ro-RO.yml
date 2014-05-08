@@ -58,8 +58,6 @@
     no_signup_message: Poţi <a target="_blank" href="http://learn.code.org"> parcurge
       diverse stadii şi puzzle-uri</a>, dar va trebui să te înregistrezi pentru a-ți
       salva progresul.
-    prizes_header: Primii studenți care termină cursul de câștigă premii! (Numai pentru
-      studenţi din SUA)
     prizes_message: Studenții din S.U.A. care câștigă toate %{num_trophies} trofeele
       de concept pot selecta o varietate de premii precum spațiu gratuit de Dropbox,
       credite Skype, și jocuri descărcabile de la Electronic Arts.
@@ -70,9 +68,6 @@
       către clase, acelor profesori de şcoală publică din U.S.A. care coordonează
       cel puţin 15 elevi prin acest curs. <a href="http://code.org/educate/20hr">
       a se vedea Ghidul educatorului pentru mai multe informaţii.</a> '
-    teacher_prize_limits: '(Limita: $1.000 pentru fiecare profesor. <a target="_blank"
-      href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      A se vedea FAQ pentru mai multe limite</a>)'
     teacher_pitch: Predă Introducerea K-8 în Informatică în clasa ta
     teacher_title: Înregistrare Profesor
     student_pitch: 'Peste 1 oră: încearcă Introducerea noastră K-8 în Informatică'
@@ -301,6 +296,7 @@
   user_stats:
     recent_activity: Activitate recentă
     show_more: Arată mai multe
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Deja înregistrat? %{link}
     student_reg_link: Înregistrare student
@@ -316,7 +312,6 @@
       acest curs
     teacher_read_blog: Citeşte despre ştiri şi actualizări referitoare la materialele
       noastre pe Blog-ul nostru de Educator
-    teacher_survey: Tell us what you think about this course
     classroom: Clasa ta
     student_progress: Progresul tău de învățare
     student_stats: Ai câştigat %{trophy_count} din cele %{trophy_max} trofee de "Concept
@@ -407,3 +402,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

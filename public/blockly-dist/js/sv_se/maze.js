@@ -5322,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5451,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5492,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5503,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5511,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7024,13 +7023,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "\"Upprepa\" eller \"Om\" blocken måste ha andra block inuti sig för att fungera. Se till att det inre blocket sitter rätt inuti blocket."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Du har extra block som inte är kopplade till händelseblock."};
 
 exports.finalStage = function(d){return "Grattis! Du har slutfört den sista nivån."};
 
 exports.finalStageTrophies = function(d){return "Grattis! Du har slutfört den sista nivån och vann "+p(d,"numTrophies",0,"sv",{"en":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blocken i ditt program kan också skrivas i Javascript, världens mest använda programmeringsspråk:"};
+exports.generatedCodeInfo = function(d){return "Även toppuniversitet lär ut blockbaserad programmering (t.ex. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Men under ytan kan blocken du har byggt ihop också visas som JavaScript, världens mest använda programmeringsspråk:"};
 
 exports.hashError = function(d){return "Tyvärr, '%1' finns inte bland dina sparade program."};
 
@@ -7044,7 +7043,7 @@ exports.levelIncompleteError = function(d){return "Du använder alla nödvändig
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Gör ditt eget Flappy-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Prova med en eller flera av blocken nedan att lösa pusslet."};
 
@@ -7052,9 +7051,9 @@ exports.nextLevel = function(d){return "Grattis! Du slutförde pussel "+v(d,"puz
 
 exports.nextLevelTrophies = function(d){return "Grattis! Du slutförde pussel "+v(d,"puzzleNumber")+" och vann "+p(d,"numTrophies",0,"sv",{"one":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
 
-exports.nextStage = function(d){return "Grattis! Du slutförde nivå "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Grattis! Du har klarat "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Grattis! Du slutförde pussel "+v(d,"stageNumber")+" och vann "+p(d,"numTrophies",0,"sv",{"one":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
+exports.nextStageTrophies = function(d){return "Grattis! Du klarade "+v(d,"stageName")+" och har fått "+p(d,"numTrophies",0,"sv",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Grattis! Du slutförde pussel "+v(d,"puzzleNumber")+". (Men du skulle bara behövt använda"+p(d,"numBlocks",0,"sv",{"one":"1 block","other":n(d,"numBlocks")+" block"})+".)"};
 
@@ -7082,7 +7081,7 @@ exports.tooManyBlocksMsg = function(d){return "Detta pusslet kan lösas med <x i
 
 exports.tooMuchWork = function(d){return "Du fick mig att göra en hel del arbete!  Du kan försöka upprepa färre gånger?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Din kod ser bra ut - den kommer att flaxa med varje klick. Men du måste klicka många gånger för att flaxa till målet."};
 
 exports.toolboxHeader = function(d){return "Block"};
 
@@ -7094,7 +7093,7 @@ exports.tryAgain = function(d){return "Försök igen"};
 
 exports.backToPreviousLevel = function(d){return "Gå tillbaka till föregående nivå"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Spara till ditt galleri"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7112,15 +7111,15 @@ exports.rotateText = function(d){return "Rotera din enhet."};
 
 exports.orientationLock = function(d){return "Stäng av orienterings låset i enhetsinställningar."};
 
-exports.wantToLearn = function(d){return "Want to learn to code?"};
+exports.wantToLearn = function(d){return "Vill du lära dig att programmera?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Titta på videon"};
 
-exports.tryHOC = function(d){return "Try the Hour of Code"};
+exports.tryHOC = function(d){return "Prove en Timme med Kod"};
 
-exports.signup = function(d){return "Sign up for the intro course"};
+exports.signup = function(d){return "Registrera dig för introduktionskursen"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Här är ett tips:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

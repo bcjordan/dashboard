@@ -22,6 +22,12 @@
   dir: 'rtl'
   webfonts: false
 
+"az": "az-AZ"
+"az-AZ":
+  english: "Azerbaijani"
+  native: "Azərbaycan dili"
+  webfonts: false
+
 "bg": "bg-BG"
 "bg-BG":
   english: "Bulgarian"

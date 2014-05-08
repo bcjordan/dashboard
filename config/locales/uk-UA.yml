@@ -12,7 +12,7 @@
         gender: Стать
         edit_header: Редагувати дані облікового запису
         error:
-          future: can't be in the future
+          future: не може бути в майбутньому
   hello: Привіт, світ!
   welcome_back: З поверненням, %{name}
   add_teacher_form:
@@ -52,27 +52,25 @@
     need_confirmation: Не отримали вказівок підтвердження?
     need_unlock: Не отримали вказівок розблокування?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
+    overview_student: Створіть обліковий запис, щоб відстежувати свій прогрес.
+    overview_teacher: Викладайте інформатику в своєму класі, створивши обліковий запис.
+      <p/> Ви зможете відстежувати успіхи ваших учнів і отримати винагороду.
     no_signup_message: Ви можете <a target="_blank" href="http://learn.code.org">переглянути
       різні рівні та завдання</a>, але для збереження результатів потрібно реєструватись.
-    prizes_header: Перші учні, які завершать курс, можуть виграти призи! (лише США)
     prizes_message: 'Учні зі США, котрі вибороли всі %{num_trophies} трофеїв, можуть
       вибрати низку призів, таких як: безкоштовний файловий простір Dropbox, кредити
       Skype та ігри від Electronic Arts.'
     teacher_educator_guide: Переглянути посібник для вчителя
-    teacher_prize_header: Виграйте 1000$ у  <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>
+    teacher_prize_header: Виграйте $1000 в <a target="_blank" href="http://DonorsChoose.org">
+      DonorsChoose.org</a> нагороди (до 15 червня 2014, до вичерпання запасів)
     teacher_prize_message: "У партнерстві з <a target=\"_blank\" href=\"http://DonorsChoose.org\">
       DonorsChoose.org</a> Code.org запропонує $1000 тим викладачам державних шкіл
       Сполучених Штат Америки, які навчатимуть принаймні 15 учнів через цей курс.\n<a
       href=\"http://code.org/educate/20hr\">Перегляньте вказівник для вчителів для
       детальнішої інформації</a> \n"
-    teacher_prize_limits: '(Обмеження: $1,000 на вчителя. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">Ознайомтеся
-      із ЧаПи для детальнішої інформації</a>)'
-    teacher_pitch: Навчати вступ до інформатики у вашому класі
+    teacher_pitch: Підписка для вчителя на Code.org
     teacher_title: Реєстрація вчителя
-    student_pitch: 'Більше 1 години: спробуйте вступ до інформатики'
+    student_pitch: Підписка для учня на Code.org
     student_title: Реєстрація учнів
     school_name: Назва навчального закладу (за бажанням)
     school_address: Адреса школи (необов'язково)
@@ -98,7 +96,7 @@
     remember: Запам'ятати мене
     submit: Вхід
   signin:
-    try_heading: Want to try coding without signing up?
+    try_heading: Хочете спробувати програмування без реєстрації?
     try_hoc: Спочатку спробуйте одну Годину Коду
     try_20hours: Спробуйте наш 20-годинний курс вступу до інформатики
   password:
@@ -148,8 +146,8 @@
     provider: 'Постачальник:'
     code: 'Код:'
     redeem_header: 'To redeem:'
-    donorschoose_register: Register as a teacher on DonorsChoose.org
-    donorschoose_project: Post a project
+    donorschoose_register: Зареєструватися як учитель на DonorsChoose.org
+    donorschoose_project: Опублікувати проект
     donorschoose_how_to: Як використовується код
     success: Ви успішно отримали приз, дивіться код нижче.
     error: Ваш виграш не може бути отримано, спробуйте ще раз.
@@ -291,12 +289,13 @@
   user_stats:
     recent_activity: Останні дії
     show_more: Показати більше
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Вже зареєстровані? %{link}
     student_reg_link: Реєстрація учня
     teacher_reg_link: Реєстрація вчителя
-    signin_directions: Використайте обліковий запис для відстеження прогресу та отримання
-      винагород. <br/> Вчителі можуть відстежувати всіх своїх учнів.
+    signin_directions: Використовувати обліковий запис для відстеження прогресу. <br/>
+      Вчителі можуть слідкувати за усім класом.
     teacher_dashboard: Побачити панель досягнень
     teacher_student_count_one: У вас %{count} учнів.
     teacher_student_count: У вас %{count} учнів.
@@ -306,7 +305,6 @@
       курс
     teacher_read_blog: Читати про новини та оновлення наших матеріалів на нашому педагогічному
       блозі
-    teacher_survey: Tell us what you think about this course
     classroom: Ваш клас
     student_progress: Ваші навчальні досягнення
     student_stats: Ви здобули %{trophy_count} із %{trophy_max} трофеїв "Опанування
@@ -319,14 +317,14 @@
     local_school: місцева школа
     online: онлайн
     see_details: Див. докладніше
-    prize_info: 'Призи для учасників (лише зі США): подарункові картки на $10 за завершення
-      курсу учнем і до $1000 нагороди на клас для вчителів державних шкіл.'
+    prize_info: 'Призи за участь (тільки для вчителів державних шкіл США): до $1000
+      нагород на клас.'
     tryfirst: 'Або, ви можете спочатку спробувати і зареєструватися пізніше:'
     trynow: Спробувати
-    add_hint_help: Please help us to add smart hints to Code.org tutorials
-    20hour_overview: This 20-hour course introduces core computer science and programming
-      concepts. The course is designed for use in classrooms for grades K-8, but it
-      is fun to learn at all ages.
+    add_hint_help: Будь ласка, допоможіть нам додати смарт-теги у підручники на Code.org
+    20hour_overview: Цей 20-годинний курс охоплює базові поняття комп'ютерних наук
+      та програмування. Цей курс розроблено для використання на заняттях в основній
+      школі, але може бути цікавим для будь-якого віку.
   gender:
     male: Чоловік
     female: Жінка
@@ -355,8 +353,8 @@
     subtitle: Переглянути ці відео та підказки
     teacher: Вирішення
     auth_error: У вас немає прав на перегляд вирішення.
-    submit: Update Artist Location
-    direction: Start Direction
+    submit: Оновлення розташування Художника
+    direction: Початковий напрямок
   video:
     tab: Відео.
     notes: Немає відео? Показати примітки.
@@ -371,13 +369,13 @@
   download_pdf: Відкрити план уроку
   share_code:
     title: Клацніть 'Запустити програму', щоб побачити роботу моєї програми
-    bounce_og_title: Check out my Bounce Game
+    bounce_og_title: Подивіться на мою гру Арканоід
     flappy_og_title: Поглянь на мою гру в Пурха (Flappy Game)
     og_description: Я самостійно написав код з Code.org
   builder:
     created: Ви створили новий сценарій.
     destroyed: Ви видалили сценарій.
-    manage: Керування скриптами
+    manage: Побудова рівнів
     view: Перегляд
     back: Назад до скриптів
     level:
@@ -386,12 +384,29 @@
       unused: Невикористані рівні
   upsell:
     hoc:
-      title: The Hour of Code
-      body: Try the basics of computer science. Millions have given it a shot.
+      title: Година Коду
+      body: Спробуйте основи інформатики. Мільйони вже скористались цим шансом.
     flappy:
-      title: Flappy Code
-      body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
-        tutorial!
+      title: Код Пурха
+      body: Хочете написати свою власну гру, менш ніж за 10 хвилин? Спробуйте наш
+        підручник з програмування Пурха!
     20hour:
-      title: Intro Course
-      body: Try our 20-hour Intro to Computer Science course.
+      title: Вступний курс
+      body: Спробуйте наші 20-годинний вступний курс інформатики.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

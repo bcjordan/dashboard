@@ -5510,7 +5510,7 @@ exports.finalStage = function(d){return "تهانينا! لقد اتممت ال�
 
 exports.finalStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة النهائية وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.generatedCodeInfo = function(d){return "القطع في برنامجك تستطيع كذلك بأعادة تمثيلها في الـ Java Script , بحيث تعتبر اللغة البرمجية واسعة التكيف عالميا :"};
+exports.generatedCodeInfo = function(d){return "حتى أفضل الجامعات تعلم الترميز القائم على الكتلة (على سبيل المثال، "+v(d,"berkeleyLink")+"، "+v(d,"harvardLink")+"). ولكن تحت غطاء محرك السيارة،يمكن للكتل التي كنت قد جمعتها أيضا أن تظهر في جافا سكريبت، الأكثر استخداما على نطاق واسع كلغة ترميز في العالم:"};
 
 exports.hashError = function(d){return "عذرا , %1 لايتوافق مع اي البرامج المحفوظة ."};
 
@@ -5532,7 +5532,7 @@ exports.nextLevel = function(d){return "تهانينا ! أنت اكملت ال�
 
 exports.nextLevelTrophies = function(d){return "تهانينا! لقد أكملت اللغز "+v(d,"puzzleNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.nextStage = function(d){return "تهانينا! أنت اكملت المرحلة "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "تهانينا! يمكنك إكمال "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة "+v(d,"stageNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
@@ -5574,7 +5574,7 @@ exports.tryAgain = function(d){return "حاول مرة أخرى"};
 
 exports.backToPreviousLevel = function(d){return "الرجوع إلى المستوى السابق"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5600,7 +5600,7 @@ exports.tryHOC = function(d){return "جرب \"Hour of Code\""};
 
 exports.signup = function(d){return "سجل لمشاهدة مقدمة الدورة"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "وإليك نصيحة:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5636,19 +5636,19 @@ exports.catProcedures = function(d){return "Functions"};
 
 exports.catVariables = function(d){return "Variables"};
 
-exports.continue = function(d){return "أستمر"};
+exports.continue = function(d){return "استمرار"};
 
 exports.defaultSayText = function(d){return "type here"};
 
 exports.finalLevel = function(d){return "تهانينا ! لقد قمت بحل اللغز الاخير."};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
+exports.incrementOpponentScore = function(d){return "سجل نقطة الخصم"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "قم بإضافة شخص إلى درجة اللاعب أو الخصم."};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "سجل النقطة"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "اجعل القصة الخاصة بك "};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5660,15 +5660,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 بكسل"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 بكسل"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 بكسل"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 بكسل"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 بكسل"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5688,57 +5688,57 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "تحريك لأسفل"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "تحرك لليسار"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "تحريك لليمين"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "تحريك لأعلى"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
 exports.moveTooltip = function(d){return "Move a character."};
 
-exports.nextLevel = function(d){return "تهانينا ! لقد تم الانتهاء من اللغز."};
+exports.nextLevel = function(d){return "تهانينا! لقد قمت بإكمال هذا اللغز."};
 
 exports.no = function(d){return "لا"};
 
-exports.numBlocksNeeded = function(d){return "يمكن حل هذا اللغز مع قطع %1."};
+exports.numBlocksNeeded = function(d){return "يمكن حل هذا اللغز مع % 1من الكتل ."};
 
-exports.oneTopBlock = function(d){return "لهذا اللغز , أنت بحاجة الى تجميع كل القطع في المساحة البيضاء."};
+exports.oneTopBlock = function(d){return "لهذا اللغز , أنت بحاجة الى تجميع كل الكتل في المساحة البيضاء."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "تشغيل صوت انسحاق"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "تشغيل صوت الهدف 1"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "تشغيل صوت الهدف 2"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "تشغيل صوت ضرب"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "تشغيل صوت فقد نقطة"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "تشغيل صوت فقد نقطة 2"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "تشغيل صوت الرجعية"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "تشغيل صوت المطاط"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "تشغيل صوت صفعة"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "تشغيل الصوت المختار."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "تشغيل صوت الفوز بنقطة"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "تشغيل صوت الفوز بنقطة 2"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "تشغيل صوت الخشب"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5760,7 +5760,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "يمكنك الضغط على زر \"حاول مرة أخرى\" للعودة للعبة الخاصة بك."};
 
 exports.repeatForever = function(d){return "repeat forever"};
 
@@ -5784,23 +5784,23 @@ exports.saySprite6 = function(d){return "character 6 say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
-exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+exports.scoreText = function(d){return "نقاط: "+v(d,"playerScore")+": "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "تعيين خلفية عشوائية"};
 
 exports.setBackgroundBlack = function(d){return "set black background"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "تعيين خلفية المغارة"};
 
 exports.setBackgroundCloudy = function(d){return "set cloudy background"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "تعيين خلفية الملاعب الصلبة"};
 
 exports.setBackgroundNight = function(d){return "set night background"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "تعيين خلفية تحت الماء"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "تحديد صورة الخلفية"};
 
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
@@ -5814,17 +5814,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "إلى صورة خضراء"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "إلى صورة مخفية"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "إلى صورة برتقالية"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpritePink = function(d){return "إلى صورة وردية"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpritePurple = function(d){return "إلى صورة أرجوانية"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpriteRandom = function(d){return "إلى صورة عشوائية"};
 
 exports.setSpriteWitch = function(d){return "to a witch image"};
 
@@ -5832,25 +5832,25 @@ exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor 
 
 exports.setSpriteTooltip = function(d){return "Sets the character image"};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteSpeedRandom = function(d){return "إلى سرعة عشوائية"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "بسرعة بطيئة جداً"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedSlow = function(d){return "بسرعة بطيئة"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedNormal = function(d){return "إلى سرعة العادية"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedFast = function(d){return "إلى سرعة"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedVeryFast = function(d){return "بسرعة سريعة جداً"};
 
 exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "مشاركة"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "تحقق من القصة الذي أدليت به. لقد كتبتها بنفسي ب@codeorg"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "شارك بقصك:"};
 
 exports.setSprite = function(d){return "set"};
 
@@ -5882,21 +5882,21 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
-exports.whenDown = function(d){return "when Down arrow"};
+exports.whenDown = function(d){return "السهم لأسفل"};
 
-exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
+exports.whenDownTooltip = function(d){return "تنفيذ الإجراءات أدناه عند الضغط على مفتاح السهم لأسفل."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "عندما تبدأ القصة"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "تنفيذ الإجراءات أدناه عندما تبدأ القصة."};
 
-exports.whenLeft = function(d){return "when Left arrow"};
+exports.whenLeft = function(d){return "السهم الايسر"};
 
-exports.whenLeftTooltip = function(d){return "Execute the actions below when the Left arrow button is pressed."};
+exports.whenLeftTooltip = function(d){return "تنفيذ الإجراءات أدناه عند الضغط على مفتاح السهم الأيسر."};
 
-exports.whenRight = function(d){return "when Right arrow"};
+exports.whenRight = function(d){return "السهم الأيمن"};
 
-exports.whenRightTooltip = function(d){return "Execute the actions below when the Right arrow button is pressed."};
+exports.whenRightTooltip = function(d){return "تنفيذ الإجراءات أدناه عند الضغط على مفتاح السهم الأيمن."};
 
 exports.whenSpriteClicked = function(d){return "when actor clicked"};
 
@@ -5940,9 +5940,9 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
-exports.whenUp = function(d){return "when Up arrow"};
+exports.whenUp = function(d){return "عند الضغط على السهم لاعلى"};
 
-exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
+exports.whenUpTooltip = function(d){return "تنفيذ الإجراءات أدناه عند الضغط على مفتاح سهم لأعلى."};
 
 exports.yes = function(d){return "نعم"};
 

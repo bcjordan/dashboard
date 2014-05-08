@@ -44,6 +44,9 @@ FactoryGirl.define do
   factory :artist, :parent => Level, :class => Artist do
   end
 
+  factory :maze, :parent => Level, :class => Maze do
+  end
+
   factory :level_source do
     level
     data '<xml/>'

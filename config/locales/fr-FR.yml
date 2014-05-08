@@ -3,7 +3,7 @@
     attributes:
       user:
         name: Nom
-        email: E-mail
+        email: Courriel
         username: Nom d'utilisateur
         password: Mot de passe
         password_confirmation: Confirmation du mot de passe
@@ -12,8 +12,8 @@
         gender: Sexe
         edit_header: Modifier les détails du compte
         error:
-          future: can't be in the future
-  hello: Salut monde entier
+          future: doit avoir lieu au passé ou au présent
+  hello: Monde, bonjour!
   welcome_back: Bienvenue, %{name}
   add_teacher_form:
     code_or_email:
@@ -52,14 +52,12 @@
     need_confirmation: Vous n'avez pas reçu les instructions de confirmation ?
     need_unlock: Pas encore reçu les instructions de déverrouillage ?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
+    overview_student: Inscrivez-vous pour suivre vos progrès.
     overview_teacher: Teach computer science in your classroom by signing up for an
       account.<p/> You'll be able to track your students' progress and get rewards.
     no_signup_message: Vous pouvez <a target="_blank" href="http://learn.code.org">
       parcourir les différentes étapes et énigmes</a>, mais vous devez vous inscrire
       pour pouvoir enregistrer votre progression.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Les étudiants aux États-Unis qui ont gagné tous les %{num_trophies}
       trophées peuvent choisir parmi des prix incluant de l'espace Dropbox, des crédits
       Skype, et des téléchargements de jeux d'Electronic Arts.
@@ -71,8 +69,6 @@
       des écoles publiques américaines qui amèneront au moins 15 étudiants à terminer
       ce cours. <a href="http://code.org/educate/20hr">Voir le guide de l''éducateur
       pour plus d''informations.</a> '
-    teacher_prize_limits: '(Limite: 1 000 $ par enseignant. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Consulter les FAQ pour d''autres limites</a>)'
     teacher_pitch: Enseignez l'introduction à l'informatique pour l'école primaire
       dans votre classe
     teacher_title: Inscription Enseignants
@@ -98,7 +94,7 @@
     teacher_terms: J'accepte d'être lié par les termes du contrat Code.org.
   signin_form:
     title: Vous avez déjà un compte ? Connexion
-    login: E-mail ou nom d'utilisateur
+    login: Courriel ou nom d'utilisateur
     password: Mot de passe
     remember: Se souvenir de moi
     submit: Connexion
@@ -109,7 +105,7 @@
   password:
     reset_form:
       title: Mot de passe oublié ?
-      email: Adresse email
+      email: Adresse de courriel
       submit: Envoie-moi des instructions de réinitialisation de mot de passe
     change_form:
       title: Modifier votre mot de passe
@@ -301,6 +297,7 @@
   user_stats:
     recent_activity: Activité récente
     show_more: Voir plus
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Déjà inscrit? %{link}
     student_reg_link: Inscription Étudiant
@@ -316,7 +313,6 @@
       terminé ce cours
     teacher_read_blog: Lecture sur l'actualité et les mises à jour de notre matériel
       sur notre Educator Blog
-    teacher_survey: Tell us what you think about this course
     classroom: Votre classe
     student_progress: Votre progression d'apprentissage
     student_stats: Tu as gagné %{trophy_count} sur %{trophy_max} trophées "Concept
@@ -405,3 +401,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

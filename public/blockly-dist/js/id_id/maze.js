@@ -5322,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5451,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5492,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5503,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5511,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7030,7 +7029,7 @@ exports.finalStage = function(d){return "Horee! Anda berhasil menyelesaikan taha
 
 exports.finalStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan tahap akhir dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":"piala "+n(d,"numTrophies")})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blok-blok yang digunakan untuk program Anda dapat juga dibuat dengan Javascript, bahasa yang paling populer dalam dunia pemrograman:"};
+exports.generatedCodeInfo = function(d){return "Bahkan Universitas mengajar blok berbasis pengkodean (misalnya, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Tetapi di bawah tenda, blok Anda telah berkumpul dapat juga ditunjukkan dalam JavaScript, dunia yang paling banyak digunakan pengkodean bahasa:"};
 
 exports.hashError = function(d){return "Maaf, '%1' tidak sesuai dengan program yang disimpan."};
 
@@ -7052,7 +7051,7 @@ exports.nextLevel = function(d){return "Horee! Anda berhasil menyelesaikan teka-
 
 exports.nextLevelTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke  "+v(d,"puzzleNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"satu":"a trophy","other":"trophies "+n(d,"numTrophies")})+"."};
 
-exports.nextStage = function(d){return "Horee! Anda berhasil menyelesaikan tahap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Selamat! Anda telah menyelesaikan "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "Horee! Anda berhasil menyelesaikan teka-teki ke "+v(d,"stageNumber")+" dan memenangkan "+p(d,"numTrophies",0,"id",{"one":"piala","other":n(d,"numTrophies")+" piala"})+"."};
 
@@ -7094,7 +7093,7 @@ exports.tryAgain = function(d){return "Ayo coba lagi!"};
 
 exports.backToPreviousLevel = function(d){return "Kembali ke teka-teki sebelumnya"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Simpan ke galeri Anda"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7120,7 +7119,7 @@ exports.tryHOC = function(d){return "Cobalah \"Hour of Code\""};
 
 exports.signup = function(d){return "Daftarlah untuk mengikuti kursus introduksi"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Berikut adalah tip:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

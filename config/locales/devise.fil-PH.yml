@@ -8,13 +8,13 @@
         will receive an email with instructions about how to confirm your account
         in a few minutes.
     failure:
-      already_authenticated: You are already signed in.
-      inactive: Your account was not activated yet.
-      invalid: Invalid email or password.
-      invalid_token: Invalid authentication token.
-      locked: Your account is locked.
-      not_found_in_database: Invalid email or password.
-      timeout: Your session expired, please sign in again to continue.
+      already_authenticated: Ikaw ay naka-sign in na.
+      inactive: Ang iyong account ay hindi pa activated.
+      invalid: Maling email o password.
+      invalid_token: Maling authentication token.
+      locked: Ang iyong account ay locked.
+      not_found_in_database: Maling email o password.
+      timeout: Ang iyong session ay natapos na, maaaring mag-sign in ulit upang makapagpatuloy.
       unauthenticated: You need to sign in or sign up before continuing.
       unconfirmed: You have to confirm your account before continuing.
     mailer:
@@ -66,8 +66,8 @@
       confirmation_period_expired: needs to be confirmed within %{period}, please
         request a new one
       expired: has expired, please request a new one
-      not_found: not found
-      not_locked: was not locked
+      not_found: hindi nahanap
+      not_locked: ay hindi na lock
       not_saved:
         one: '1 error prohibited this %{resource} from being saved:'
         other: '%{count} errors prohibited this %{resource} from being saved:'

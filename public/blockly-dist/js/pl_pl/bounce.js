@@ -5271,11 +5271,11 @@ exports.isWall = function(d){return "czy jest to ściana"};
 
 exports.isWallTooltip = function(d){return "Zwraca prawdę, jeżeli tutaj jest ściana"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "weź nową piłkę"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Weź piłkę do gry."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Stwórz własną grę w Odbijanie"};
 
 exports.moveDown = function(d){return "przesuń w dół"};
 
@@ -5347,7 +5347,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "postaw wieżę na ziemi"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Możesz nacisnąć przycisk \"Spróbuj ponownie\", aby powrócić do swojej gry."};
 
 exports.removeSquare = function(d){return "usuń kwadrat"};
 
@@ -5361,7 +5361,7 @@ exports.scoreText = function(d){return "Wynik: "+v(d,"playerScore")+": "+v(d,"op
 
 exports.setBackgroundRandom = function(d){return "wybierz losową scenę"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "Użyj boisko do tenisa"};
 
 exports.setBackgroundRetro = function(d){return "ustaw scenę retro"};
 
@@ -5369,7 +5369,7 @@ exports.setBackgroundTooltip = function(d){return "Ustawia obraz w tle"};
 
 exports.setBallRandom = function(d){return "wybierz losową piłkę"};
 
-exports.setBallHardcourt = function(d){return "set hardcourt ball"};
+exports.setBallHardcourt = function(d){return "Ustaw piłkę do tenisa"};
 
 exports.setBallRetro = function(d){return "wybierz piłkę retro"};
 
@@ -5391,11 +5391,11 @@ exports.setBallSpeedTooltip = function(d){return "Ustawianie szybkości piłki"}
 
 exports.setPaddleRandom = function(d){return "ustaw losową paletkę"};
 
-exports.setPaddleHardcourt = function(d){return "set hardcourt paddle"};
+exports.setPaddleHardcourt = function(d){return "Ustaw paletkę do tenisa"};
 
 exports.setPaddleRetro = function(d){return "ustaw paletkę retro"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Użyj paletki do tenisa"};
 
 exports.setPaddleSpeedRandom = function(d){return "ustaw losową prędkość paletki"};
 
@@ -5411,11 +5411,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "ustaw bardzo szybką prędk
 
 exports.setPaddleSpeedTooltip = function(d){return "Ustawia szybkość paletki"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Udostępnij"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Sprawdź grę w Odbijanie którą zrobiłem. Napisałem ja sam na @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Podziel się swoją grą:"};
 
 exports.turnLeft = function(d){return "skręć w lewo"};
 
@@ -5520,13 +5520,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Blok powtórz lub blok jeśli musi zawierać inne bloki w środku, by poprawnie działać. Upewnij się, czy wewnętrzny blok pasuje do zewnętrznego."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Pozostały Ci jeszcze bloki, które nie zostały połączone z blokiem zdarzenia."};
 
 exports.finalStage = function(d){return "Gratulacje! Ukończyłeś ostatni etap."};
 
 exports.finalStageTrophies = function(d){return "Gratulacje! Ukończyłeś ostatni etap i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Bloki Twojego programu mogą być również przedstawione w języku JavaScript, najbardziej rozpowszechnionym języku programowania:"};
+exports.generatedCodeInfo = function(d){return "Nawet najlepsze uczelnie uczą kodowania opartego o bloki (np. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Ale bloki które zostały użyte, można również zobaczyć w JavaScript, jednym z najbardziej powszechnie stosowanym języku programowania na świecie:"};
 
 exports.hashError = function(d){return "Przepraszamy, '%1' nie odpowiada żadnemu zapisanemu programowi."};
 
@@ -5548,9 +5548,9 @@ exports.nextLevel = function(d){return "Gratulacje! Rozwiązałeś Łamigłówk�
 
 exports.nextLevelTrophies = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
 
-exports.nextStage = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Gratulacje! Ukonczyłeś etap "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Gratulacje! Ukończyłeś etap "+v(d,"stageNumber")+" i wygrałeś "+p(d,"numTrophies",0,"pl",{"one":"trofeum","other":n(d,"numTrophies")+" trofea"})+"."};
+exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"pl",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Gratulacje! Rozwiązałeś Łamigłówkę nr "+v(d,"puzzleNumber")+". (Jednakże, mogłeś użyć jedynie "+p(d,"numBlocks",0,"pl",{"one":"1 blok","other":n(d,"numBlocks")+" bloków"})+")"};
 
@@ -5590,7 +5590,7 @@ exports.tryAgain = function(d){return "Spróbuj ponownie"};
 
 exports.backToPreviousLevel = function(d){return "Wróć do poprzedniego poziomu"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Zapisz do swojej galerii"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5616,7 +5616,7 @@ exports.tryHOC = function(d){return "Weź udział w Godzinie kodowania (the Hour
 
 exports.signup = function(d){return "Zapisz się na kurs wprowadzający"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Oto wskazówka:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "lançar nova bola"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Lançar uma bola em jogo."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Faça o seu próprio jogo de bolinhas"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "colocar torre"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Você pode pressionar o botão de \"Tentar novamente\" para voltar a jogar o seu jogo."};
 
 exports.removeSquare = function(d){return "remover quadrado"};
 
@@ -5347,7 +5347,7 @@ exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"o
 
 exports.setBackgroundRandom = function(d){return "definir cena aleatória"};
 
-exports.setBackgroundHardcourt = function(d){return "definir cenário de cimento"};
+exports.setBackgroundHardcourt = function(d){return "define o tipo de quadra"};
 
 exports.setBackgroundRetro = function(d){return "definir cenário retrô"};
 
@@ -5355,7 +5355,7 @@ exports.setBackgroundTooltip = function(d){return "Definir a imagem de fundo"};
 
 exports.setBallRandom = function(d){return "definir bola aleatória"};
 
-exports.setBallHardcourt = function(d){return "definir bola dura"};
+exports.setBallHardcourt = function(d){return "defina o tipo de bola"};
 
 exports.setBallRetro = function(d){return "definir bola retrô"};
 
@@ -5381,27 +5381,27 @@ exports.setPaddleHardcourt = function(d){return "raquete para quadras rápidas"}
 
 exports.setPaddleRetro = function(d){return "conjunto retrô raquete"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Definir imagem do remo"};
 
-exports.setPaddleSpeedRandom = function(d){return "definir velocidade de remo aleatório"};
+exports.setPaddleSpeedRandom = function(d){return "define uma velocidade qualquer para a raquete"};
 
 exports.setPaddleSpeedVerySlow = function(d){return "definir velocidade da raquete muito lenta"};
 
-exports.setPaddleSpeedSlow = function(d){return "definir a velocidade do remo lenta"};
+exports.setPaddleSpeedSlow = function(d){return "define a velocidade lenta da raquete"};
 
-exports.setPaddleSpeedNormal = function(d){return "definir a velocidade normal de remo"};
+exports.setPaddleSpeedNormal = function(d){return "define a velocidade normal da raquete"};
 
-exports.setPaddleSpeedFast = function(d){return "definir rápido como velocidade do remo"};
+exports.setPaddleSpeedFast = function(d){return "define a velocidade rápido da raquete"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "definir velocidade de raquete como muito rápido"};
+exports.setPaddleSpeedVeryFast = function(d){return "define a velocidade super rápido da raquete"};
 
 exports.setPaddleSpeedTooltip = function(d){return "Define a velocidade da raquete"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Compartilhar"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Confira o jogo Flappy que eu fiz. Eu escrevi sozinho com @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Compartilhe seu jogo:"};
 
 exports.turnLeft = function(d){return "vire à esquerda"};
 
@@ -5498,7 +5498,7 @@ exports.finalStage = function(d){return "Parabéns! Você concluiu a etapa final
 
 exports.finalStageTrophies = function(d){return "Parabéns! Você concluiu a fase final e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Os blocos para o seu programa também podem ser representados em JavaScript, a linguagem de programação mais adotada no mundo:"};
+exports.generatedCodeInfo = function(d){return "Mesmo as melhores universidades ensinam codificação em blocos (por exemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Mas na verdade, os blocos que você juntou podem ser vistos em JavaScript, a linguagem de codificação mais usada em todo o mundo:"};
 
 exports.hashError = function(d){return "Desculpe, nenhum programa salvo como '%1'."};
 
@@ -5520,9 +5520,9 @@ exports.nextLevel = function(d){return "Parabéns! Você completou o quebra-cabe
 
 exports.nextLevelTrophies = function(d){return "Parabéns! Você completou o quebra-cabeça "+v(d,"puzzleNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.nextStage = function(d){return "Parabéns! Você completou a fase "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Parabéns! Você completou "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
+exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageName")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Parabéns! Você completou o Quebra-cabeça "+v(d,"puzzleNumber")+". (Mas você poderia ter usado apenas "+p(d,"numBlocks",0,"pt",{"one":"1 bloco","other":n(d,"numBlocks")+" blocos"})+".)"};
 
@@ -5562,7 +5562,7 @@ exports.tryAgain = function(d){return "Tente novamente"};
 
 exports.backToPreviousLevel = function(d){return "Voltar"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Salve na sua galeria"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5588,7 +5588,7 @@ exports.tryHOC = function(d){return "Tente a Hora do Código"};
 
 exports.signup = function(d){return "Cadastre-se para o curso de introdução"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aqui vai uma dica:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

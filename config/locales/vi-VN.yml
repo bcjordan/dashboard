@@ -58,8 +58,6 @@
     no_signup_message: Bạn có thể dùng mã <a target="_blank" href="http://learn.code.org">
       để duyệt các màn và các câu đố khác nhau</a>,nhưng bạn cần đăng ký để lưu lại
       tiến trình của bạn.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Những học viên Hoa Kỳ đạt được tất cả %{num_trophies} những danh
       hiệu có thể chọn một loạt những phần thưởng khác nhau bao gồm dung lượng miễn
       phí trên Dropbox, tín dụng của Skype và có thể tải về nhiều trò chơi của Electronic
@@ -71,8 +69,6 @@
       trong hệ thống trường công lập của Hoa Kì đã dẫn dắt ít nhất  15 học sinh qua
       khóa học này. <a href="http://code.org/educate/20hr">Xem Hướng dẫn dành cho
       người đào tạo để có thêm thông tin.</a> '
-    teacher_prize_limits: '(Tối đa: $1,000 cho mỗi giáo viên. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">Xem
-      phần FAQ để biết thêm về các mức</a>)'
     teacher_pitch: 'Dạy "Giới thiệu về Khoa học Máy tính" trong lớp học của bạn (K-8
       : từ Lớp Mẫu giáo tới lớp 8)'
     teacher_title: Giáo viên đăng ký
@@ -296,6 +292,7 @@
   user_stats:
     recent_activity: Hoạt động gần đây
     show_more: Hiển thị thêm
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Or if you're already registered, %{link}
     student_reg_link: Sinh viên đăng ký
@@ -311,7 +308,6 @@
       này
     teacher_read_blog: Đọc về tin tức và cập nhật của chúng tôi tại tài liệu blog
       giáo dục của chúng tôi
-    teacher_survey: Tell us what you think about this course
     classroom: Lớp học của bạn
     student_progress: Tiến độ học tập của bạn
     student_stats: You've earned %{trophy_count} out of %{trophy_max} "Concept Mastery"
@@ -401,3 +397,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

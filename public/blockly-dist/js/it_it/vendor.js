@@ -56,8 +56,8 @@ goog.userAgent.IPAD=goog.userAgent.PLATFORM_KNOWN_?goog.userAgent.ASSUME_IPAD:go
 goog.userAgent.determineVersion_=function(){var a="",b;goog.userAgent.OPERA&&goog.global.opera?(a=goog.global.opera.version,a="function"==typeof a?a():a):(goog.userAgent.GECKO?b=/rv\:([^\);]+)(\)|;)/:goog.userAgent.IE?b=/\b(?:MSIE|rv)[: ]([^\);]+)(\)|;)/:goog.userAgent.WEBKIT&&(b=/WebKit\/(\S+)/),b&&(a=(a=b.exec(goog.userAgent.getUserAgentString()))?a[1]:""));return goog.userAgent.IE&&(b=goog.userAgent.getDocumentMode_(),b>parseFloat(a))?String(b):a};
 goog.userAgent.getDocumentMode_=function(){var a=goog.global.document;return a?a.documentMode:void 0};goog.userAgent.VERSION=goog.userAgent.determineVersion_();goog.userAgent.compare=function(a,b){return goog.string.compareVersions(a,b)};goog.userAgent.isVersionOrHigherCache_={};
 goog.userAgent.isVersionOrHigher=function(a){return goog.userAgent.ASSUME_ANY_VERSION||goog.userAgent.isVersionOrHigherCache_[a]||(goog.userAgent.isVersionOrHigherCache_[a]=0<=goog.string.compareVersions(goog.userAgent.VERSION,a))};goog.userAgent.isVersion=goog.userAgent.isVersionOrHigher;goog.userAgent.isDocumentModeOrHigher=function(a){return goog.userAgent.IE&&goog.userAgent.DOCUMENT_MODE>=a};goog.userAgent.isDocumentMode=goog.userAgent.isDocumentModeOrHigher;
-goog.userAgent.DOCUMENT_MODE=function(){var a=goog.global.document;return a&&goog.userAgent.IE?goog.userAgent.getDocumentMode_()||("CSS1Compat"==a.compatMode?parseInt(goog.userAgent.VERSION,10):5):void 0}();Blockly.BlockSvg=function(a){this.block_=a;this.svgGroup_=Blockly.createSvgElement("g",{"block-id":a.id},null);this.svgPathDark_=Blockly.createSvgElement("path",{"class":"blocklyPathDark",transform:"translate(1, 1)"},this.svgGroup_);this.svgPath_=Blockly.createSvgElement("path",{"class":"blocklyPath"},this.svgGroup_);this.svgPathLight_=Blockly.createSvgElement("path",{"class":"blocklyPathLight"},this.svgGroup_);this.svgPath_.tooltip=this.block_;Blockly.Tooltip.bindMouseEvents(this.svgPath_);this.updateMovable()};
-Blockly.BlockSvg.INLINE=-1;Blockly.BlockSvg.DISABLED_COLOUR="#808080";Blockly.BlockSvg.prototype.init=function(){var a=this.block_;this.updateColour();for(var b=0,c;c=a.inputList[b];b++)c.init();a.mutator&&a.mutator.createIcon()};
+goog.userAgent.DOCUMENT_MODE=function(){var a=goog.global.document;return a&&goog.userAgent.IE?goog.userAgent.getDocumentMode_()||("CSS1Compat"==a.compatMode?parseInt(goog.userAgent.VERSION,10):5):void 0}();Blockly.BlockSvg=function(a){this.block_=a;this.svgGroup_=Blockly.createSvgElement("g",{"block-id":a.id},null);this.svgPathDark_=Blockly.createSvgElement("path",{"class":"blocklyPathDark",transform:"translate(1, 1)"},this.svgGroup_);this.svgPath_=Blockly.createSvgElement("path",{"class":"blocklyPath"},this.svgGroup_);this.block_.getFillPattern()&&(this.svgPathFill_=Blockly.createSvgElement("path",{"class":"blocklyPath"},this.svgGroup_));this.svgPathLight_=Blockly.createSvgElement("path",{"class":"blocklyPathLight"},
+this.svgGroup_);this.svgPath_.tooltip=this.block_;Blockly.Tooltip.bindMouseEvents(this.svgPath_);this.updateMovable()};Blockly.BlockSvg.INLINE=-1;Blockly.BlockSvg.DISABLED_COLOUR="#808080";Blockly.BlockSvg.prototype.init=function(){var a=this.block_;this.updateColour();for(var b=0,c;c=a.inputList[b];b++)c.init();a.mutator&&a.mutator.createIcon()};
 Blockly.BlockSvg.prototype.updateMovable=function(){this.block_.isMovable()?(Blockly.addClass_(this.svgGroup_,"blocklyDraggable"),Blockly.removeClass_(this.svgGroup_,"blocklyUndraggable")):(Blockly.removeClass_(this.svgGroup_,"blocklyDraggable"),Blockly.addClass_(this.svgGroup_,"blocklyUndraggable"));this.updateColour()};Blockly.BlockSvg.prototype.getRootElement=function(){return this.svgGroup_};Blockly.BlockSvg.SEP_SPACE_X=10;Blockly.BlockSvg.SEP_SPACE_Y=10;Blockly.BlockSvg.INLINE_PADDING_Y=5;
 Blockly.BlockSvg.MIN_BLOCK_Y=25;Blockly.BlockSvg.TAB_HEIGHT=20;Blockly.BlockSvg.TAB_WIDTH=8;Blockly.BlockSvg.NOTCH_WIDTH=30;Blockly.BlockSvg.CORNER_RADIUS=8;Blockly.BlockSvg.TITLE_HEIGHT=18;Blockly.BlockSvg.DISTANCE_45_INSIDE=(1-Math.SQRT1_2)*(Blockly.BlockSvg.CORNER_RADIUS-1)+1;Blockly.BlockSvg.DISTANCE_45_OUTSIDE=(1-Math.SQRT1_2)*(Blockly.BlockSvg.CORNER_RADIUS+1)-1;Blockly.BlockSvg.NOTCH_PATH_WIDTH=15;Blockly.BlockSvg.NOTCH_PATH_LEFT="l 6,4 3,0 6,-4";
 Blockly.BlockSvg.NOTCH_PATH_LEFT_HIGHLIGHT="l 6.5,4 2,0 6.5,-4";Blockly.BlockSvg.NOTCH_PATH_RIGHT="l -6,4 -3,0 -6,-4";Blockly.BlockSvg.JAGGED_TEETH="l 8,0 0,4 8,4 -16,8 8,4";Blockly.BlockSvg.JAGGED_TEETH_HEIGHT=20;Blockly.BlockSvg.TAB_PATH_DOWN="v 5 c 0,10 -"+Blockly.BlockSvg.TAB_WIDTH+",-8 -"+Blockly.BlockSvg.TAB_WIDTH+",7.5 s "+Blockly.BlockSvg.TAB_WIDTH+",-2.5 "+Blockly.BlockSvg.TAB_WIDTH+",7.5";
@@ -70,7 +70,7 @@ Blockly.BlockSvg.prototype.disposeUiEffect=function(){Blockly.playAudio("delete"
 b.startDate_=new Date;Blockly.BlockSvg.disposeUiStep_(b)};Blockly.BlockSvg.disposeUiStep_=function(a){var b=(new Date-a.startDate_)/150;1<b?goog.dom.removeNode(a):(a.setAttribute("transform","translate("+(a.translateX_+(Blockly.RTL?-1:1)*a.bBox_.width/2*b+", "+(a.translateY_+a.bBox_.height*b))+") scale("+(1-b)+")"),window.setTimeout(function(){Blockly.BlockSvg.disposeUiStep_(a)},10))};
 Blockly.BlockSvg.prototype.connectionUiEffect=function(){Blockly.playAudio("click");var a=Blockly.getSvgXY_(this.svgGroup_);this.block_.outputConnection?(a.x+=Blockly.RTL?3:-3,a.y+=13):this.block_.previousConnection&&(a.x+=Blockly.RTL?-23:23,a.y+=3);a=Blockly.createSvgElement("circle",{cx:a.x,cy:a.y,r:0,fill:"none",stroke:"#888","stroke-width":10},Blockly.svg);a.startDate_=new Date;Blockly.BlockSvg.connectionUiStep_(a)};
 Blockly.BlockSvg.connectionUiStep_=function(a){var b=(new Date-a.startDate_)/150;1<b?goog.dom.removeNode(a):(a.setAttribute("r",25*b),a.style.opacity=1-b,window.setTimeout(function(){Blockly.BlockSvg.connectionUiStep_(a)},10))};Blockly.BlockSvg.prototype.updateColour=function(){if(!this.block_.disabled){var a;a=this.block_.isMovable()||Blockly.readOnly?Blockly.makeColour(this.block_.getColour(),this.block_.getSaturation(),this.block_.getValue()):Blockly.BlockSvg.DISABLED_COLOUR;this.updateToColour_(a)}};
-Blockly.BlockSvg.prototype.updateToColour_=function(a){var b=goog.color.hexToRgb(a),c=goog.color.lighten(b,0.3),b=goog.color.darken(b,0.4);this.svgPathLight_.setAttribute("stroke",goog.color.rgbArrayToHex(c));this.svgPathDark_.setAttribute("fill",goog.color.rgbArrayToHex(b));this.svgPath_.setAttribute("fill",a);(a=this.block_.getFillPattern())&&this.svgPath_.setAttribute("fill","url(#"+a+")")};
+Blockly.BlockSvg.prototype.updateToColour_=function(a){var b=goog.color.hexToRgb(a),c=goog.color.lighten(b,0.3),b=goog.color.darken(b,0.4);this.svgPathLight_.setAttribute("stroke",goog.color.rgbArrayToHex(c));this.svgPathDark_.setAttribute("fill",goog.color.rgbArrayToHex(b));this.svgPath_.setAttribute("fill",a);(a=this.block_.getFillPattern())&&this.svgPathFill_.setAttribute("fill","url(#"+a+")")};
 Blockly.BlockSvg.prototype.updateDisabled=function(){this.block_.disabled||this.block_.getInheritedDisabled()?(Blockly.addClass_(this.svgGroup_,"blocklyDisabled"),this.svgPath_.setAttribute("fill","url(#blocklyDisabledPattern)")):(Blockly.removeClass_(this.svgGroup_,"blocklyDisabled"),this.updateColour());for(var a=this.block_.getChildren(),b=0,c;c=a[b];b++)c.svg_.updateDisabled()};Blockly.BlockSvg.prototype.addSelect=function(){Blockly.addClass_(this.svgGroup_,"blocklySelected");this.svgGroup_.parentNode.appendChild(this.svgGroup_)};
 Blockly.BlockSvg.prototype.addSelectNoMove=function(){Blockly.addClass_(this.svgGroup_,"blocklySelected")};Blockly.BlockSvg.prototype.removeSelect=function(){Blockly.removeClass_(this.svgGroup_,"blocklySelected")};Blockly.BlockSvg.prototype.addDragging=function(){Blockly.addClass_(this.svgGroup_,"blocklyDragging")};Blockly.BlockSvg.prototype.removeDragging=function(){Blockly.removeClass_(this.svgGroup_,"blocklyDragging")};
 Blockly.BlockSvg.prototype.addSpotlight=function(){Blockly.addClass_(this.svgGroup_,"blocklySpotlight")};Blockly.BlockSvg.prototype.removeSpotlight=function(){Blockly.removeClass_(this.svgGroup_,"blocklySpotlight")};
@@ -81,8 +81,8 @@ Blockly.BlockSvg.prototype.renderCompute_=function(a){var b=this.block_.inputLis
 n.titleWidth=0;1==c.length&&(n.titleWidth+=Blockly.RTL?-a:a);for(var p=0,r;r=n.titleRow[p];p++)0!=p&&(n.titleWidth+=Blockly.BlockSvg.SEP_SPACE_X),r=r.getSize(),n.titleWidth+=r.width,m.height=Math.max(m.height,r.height);m.type!=Blockly.BlockSvg.INLINE&&(m.type==Blockly.NEXT_STATEMENT?(g=!0,e=Math.max(e,n.titleWidth)):(m.type==Blockly.INPUT_VALUE?f=!0:m.type==Blockly.DUMMY_INPUT&&(h=!0),d=Math.max(d,n.titleWidth)))}for(a=0;m=c[a];a++)if(m.thicker=!1,m.type==Blockly.BlockSvg.INLINE)for(b=0;n=m[b];b++)if(n.type==
 Blockly.INPUT_VALUE){m.height+=2*Blockly.BlockSvg.INLINE_PADDING_Y;m.thicker=!0;break}c.statementEdge=2*Blockly.BlockSvg.SEP_SPACE_X+e;g&&(c.rightEdge=Math.max(c.rightEdge,c.statementEdge+Blockly.BlockSvg.NOTCH_WIDTH));f?c.rightEdge=Math.max(c.rightEdge,d+2*Blockly.BlockSvg.SEP_SPACE_X+Blockly.BlockSvg.TAB_WIDTH):h&&(c.rightEdge=Math.max(c.rightEdge,d+2*Blockly.BlockSvg.SEP_SPACE_X));c.hasValue=f;c.hasStatement=g;c.hasDummy=h;return c};
 Blockly.BlockSvg.prototype.renderDraw_=function(a,b){if(this.block_.outputConnection)this.squareBottomLeftCorner_=this.squareTopLeftCorner_=!0;else{this.squareBottomLeftCorner_=this.squareTopLeftCorner_=!1;if(this.block_.previousConnection){var c=this.block_.previousConnection.targetBlock();c&&c.nextConnection&&c.nextConnection.targetConnection==this.block_.previousConnection&&(this.squareTopLeftCorner_=!0)}this.block_.nextConnection&&(c=this.block_.nextConnection.targetBlock())&&c.previousConnection&&
-c.previousConnection.targetConnection==this.block_.nextConnection&&(this.squareBottomLeftCorner_=!0)}var d=this.block_.getRelativeToSurfaceXY(),e=[],f=[],c=[],g=[];this.renderDrawTop_(e,c,d,b.rightEdge);var h=this.renderDrawRight_(e,c,f,g,d,b,a);this.renderDrawBottom_(e,c,d,h);this.renderDrawLeft_(e,c,d,h);d=e.join(" ")+"\n"+f.join(" ");this.svgPath_.setAttribute("d",d);this.svgPathDark_.setAttribute("d",d);d=c.join(" ")+"\n"+g.join(" ");this.svgPathLight_.setAttribute("d",d);Blockly.RTL&&(this.svgPath_.setAttribute("transform",
-"scale(-1 1)"),this.svgPathLight_.setAttribute("transform","scale(-1 1)"),this.svgPathDark_.setAttribute("transform","translate(1,1) scale(-1 1)"))};
+c.previousConnection.targetConnection==this.block_.nextConnection&&(this.squareBottomLeftCorner_=!0)}var d=this.block_.getRelativeToSurfaceXY(),e=[],f=[],c=[],g=[];this.renderDrawTop_(e,c,d,b.rightEdge);var h=this.renderDrawRight_(e,c,f,g,d,b,a);this.renderDrawBottom_(e,c,d,h);this.renderDrawLeft_(e,c,d,h);d=e.join(" ")+"\n"+f.join(" ");this.svgPath_.setAttribute("d",d);this.svgPathFill_&&this.svgPathFill_.setAttribute("d",d);this.svgPathDark_.setAttribute("d",d);d=c.join(" ")+"\n"+g.join(" ");this.svgPathLight_.setAttribute("d",
+d);Blockly.RTL&&(this.svgPath_.setAttribute("transform","scale(-1 1)"),this.svgPathLight_.setAttribute("transform","scale(-1 1)"),this.svgPathDark_.setAttribute("transform","translate(1,1) scale(-1 1)"))};
 Blockly.BlockSvg.prototype.renderDrawTop_=function(a,b,c,d){this.squareTopLeftCorner_?(a.push("m 0,0"),b.push("m 1,1")):(a.push(Blockly.BlockSvg.TOP_LEFT_CORNER_START),b.push(Blockly.RTL?Blockly.BlockSvg.TOP_LEFT_CORNER_START_HIGHLIGHT_RTL:Blockly.BlockSvg.TOP_LEFT_CORNER_START_HIGHLIGHT_LTR),a.push(Blockly.BlockSvg.TOP_LEFT_CORNER),b.push(Blockly.BlockSvg.TOP_LEFT_CORNER_HIGHLIGHT));Blockly.BROKEN_CONTROL_POINTS&&a.push("c 0,5 0,-5 0,0");this.block_.previousConnection&&(a.push("H",Blockly.BlockSvg.NOTCH_WIDTH-
 Blockly.BlockSvg.NOTCH_PATH_WIDTH),b.push("H",Blockly.BlockSvg.NOTCH_WIDTH-Blockly.BlockSvg.NOTCH_PATH_WIDTH),a.push(Blockly.BlockSvg.NOTCH_PATH_LEFT),b.push(Blockly.BlockSvg.NOTCH_PATH_LEFT_HIGHLIGHT),this.block_.previousConnection.moveTo(c.x+(Blockly.RTL?-Blockly.BlockSvg.NOTCH_WIDTH:Blockly.BlockSvg.NOTCH_WIDTH),c.y));a.push("H",d);b.push("H",d+(Blockly.RTL?-1:0))};
 Blockly.BlockSvg.prototype.renderDrawRight_=function(a,b,c,d,e,f,g){for(var h,k=0,l,q,n=0,m;m=f[n];n++){h=Blockly.BlockSvg.SEP_SPACE_X;0==n&&(h+=Blockly.RTL?-g:g);b.push("M",f.rightEdge-1+","+(k+1));if(this.block_.isCollapsed()){var p=m[0];l=k+Blockly.BlockSvg.TITLE_HEIGHT;this.renderTitles_(p.titleRow,h,l);a.push(Blockly.BlockSvg.JAGGED_TEETH);Blockly.RTL?b.push("l 8,0 0,3.8 7,3.2 m -14.5,9 l 8,4"):b.push("h 8");p=m.height-Blockly.BlockSvg.JAGGED_TEETH_HEIGHT;a.push("v",p);Blockly.RTL&&b.push("v",
@@ -1355,8 +1355,8 @@ Blockly.Msg.CONTROLS_FOREACH_INPUT_ITEM = "per ogni elemento";
 Blockly.Msg.CONTROLS_FOREACH_TOOLTIP = "Per ogni elemento in una lista, imposta la variabile '%1'  pari all'elemento e quindi esegue alcune istruzioni.";
 Blockly.Msg.CONTROLS_FOR_HELPURL = "http://it.wikipedia.org/wiki/Struttura_di_controllo#Iterazione";
 Blockly.Msg.CONTROLS_FOR_INPUT_FROM_TO_BY = "da %1 a %2 per %3";
-Blockly.Msg.CONTROLS_FOR_INPUT_WITH = "conta con";
-Blockly.Msg.CONTROLS_FOR_TOOLTIP = "Fa sì che la variabile %1 prenda tutti i valori a partire dal numero di partenza fino a quello di arrivo, con passo pari all'intervallo specificato, ed esegue il blocco indicato.";
+Blockly.Msg.CONTROLS_FOR_INPUT_WITH = "ripeti con";
+Blockly.Msg.CONTROLS_FOR_TOOLTIP = "Ripete le azioni incluse, con la variabile %1 che assume tutti i valori dall'inizio alla fine, usando l'incremento specificato.";
 Blockly.Msg.CONTROLS_IF_ELSEIF_TOOLTIP = "Aggiungi una condizione al blocco \"se\".";
 Blockly.Msg.CONTROLS_IF_ELSE_TOOLTIP = "Aggiungi una condizione finale pigliatutto al blocco \"se\".";
 Blockly.Msg.CONTROLS_IF_HELPURL = "http://it.wikipedia.org/wiki/Struttura_di_controllo#Alternativa_if-then_e_if-then-else";
@@ -1373,7 +1373,7 @@ Blockly.Msg.CONTROLS_REPEAT_INPUT_DO = "fai";
 Blockly.Msg.CONTROLS_REPEAT_TITLE = "ripeti %1 volte";
 Blockly.Msg.CONTROLS_REPEAT_TITLE_REPEAT = "ripeti";
 Blockly.Msg.CONTROLS_REPEAT_TITLE_TIMES = "volte";
-Blockly.Msg.CONTROLS_REPEAT_TOOLTIP = "Esegui alcune istruzioni per il numero di volte indicato.";
+Blockly.Msg.CONTROLS_REPEAT_TOOLTIP = "Esegui le azioni incluse per il numero di volte indicato.";
 Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL = "http://it.wikipedia.org/wiki/Struttura_di_controllo#Iterazione";
 Blockly.Msg.CONTROLS_WHILEUNTIL_OPERATOR_UNTIL = "ripeti fino a che";
 Blockly.Msg.CONTROLS_WHILEUNTIL_OPERATOR_WHILE = "ripeti mentre";
@@ -1410,17 +1410,17 @@ Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_FIRST = "Restituisce il primo elemento d
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_FROM_END = "Restituisce l'elemento nella posizione indicata della lista. \"# 1\" corrisponde all'ultimo elemento della lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_FROM_START = "Restituisce l'elemento nella posizione indicata della lista. \"# 1\" corrisponde al primo elemento della lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_LAST = "Restituisce l'ultimo elemento della lista.";
-Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_RANDOM = "Restituisce un elemento casuale della lista.";
+Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_RANDOM = "Restituisce un elemento della lista scelto a caso.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FIRST = "Rimuove e restituisce il primo elemento della lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FROM_END = "Rimuove dalla lista e restituisce l'elemento nella posizione indicata. \"# 1\" corrisponde all'ultimo elemento della lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FROM_START = "Rimuove dalla lista e restituisce l'elemento nella posizione indicata. \"# 1\" corrisponde al primo elemento della lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_LAST = "Rimuove e restituisce l'ultimo elemento della lista.";
-Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_RANDOM = "Rimuove e restituisce un elemento casuale della lista.";
+Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_RANDOM = "Rimuove e restituisce un elemento della lista scelto a caso.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_FIRST = "Rimuove il primo elemento della  lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_FROM_END = "Rimuove dalla lista l'elemento nella posizione indicata. \"# 1\" corrisponde all'ultimo elemento della lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_FROM_START = "Rimuove dalla lista l'elemento nella posizione indicata. \"# 1\" corrisponde al primo elemento della lista.";
 Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_LAST = "Rimuove l'ultimo elemento della lista.";
-Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM = "Rimuove dalla lista un elemento casuale.";
+Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM = "Rimuove dalla lista un elemento scelto a caso.";
 Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_END = "fino alla posizione # dalla fine";
 Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_START = "fino alla posizione #";
 Blockly.Msg.LISTS_GET_SUBLIST_END_LAST = "fino all'ultimo elemento della lista";
@@ -1451,12 +1451,12 @@ Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_FIRST = "Inserisci l'elemento all'ini
 Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_FROM_END = "Inserisci l'elemento nella lista nella posizione specificata. \"# 1\" corrisponde all'ultimo elemento.";
 Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_FROM_START = "Inserisci l'elemento nella lista nella posizione specificata. \"# 1\" corrisponde al primo elemento.";
 Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_LAST = "Aggiungi l'elemento alla fine della lista.";
-Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM = "Inserisci l'elemento nella lista in una posizione scelta casualmente.";
+Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM = "Inserisci l'elemento nella lista in una posizione scelta a caso.";
 Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_FIRST = "Imposta il primo elemento della lista.";
 Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_FROM_END = "Imposta l'elemento della lista nella posizione specificata. \"# 1\" corrisponde all'ultimo elemento.";
 Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_FROM_START = "Imposta l'elemento della lista nella posizione specificata. \"# 1\" corrisponde al primo elemento.";
 Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_LAST = "Imposta l'ultimo elemento della lista.";
-Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_RANDOM = "Imposta un elemento della lista scelto casualmente.";
+Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_RANDOM = "Imposta un elemento della lista scelto a caso.";
 Blockly.Msg.LISTS_TOOLTIP = "Restituisce vero se la lista è vuota.";
 Blockly.Msg.LOGIC_BOOLEAN_FALSE = "falso";
 Blockly.Msg.LOGIC_BOOLEAN_HELPURL = "http://it.wikipedia.org/wiki/Valore_di_verit%C3%A0";
@@ -1522,7 +1522,7 @@ Blockly.Msg.MATH_ONLIST_OPERATOR_MAX = "massimo della lista";
 Blockly.Msg.MATH_ONLIST_OPERATOR_MEDIAN = "elemento mediano della lista";
 Blockly.Msg.MATH_ONLIST_OPERATOR_MIN = "minimo della lista";
 Blockly.Msg.MATH_ONLIST_OPERATOR_MODE = "elemento \"moda\" della lista";
-Blockly.Msg.MATH_ONLIST_OPERATOR_RANDOM = "elemento casuale della lista";
+Blockly.Msg.MATH_ONLIST_OPERATOR_RANDOM = "elemento della lista scelto a caso";
 Blockly.Msg.MATH_ONLIST_OPERATOR_STD_DEV = "deviazione standard della lista";
 Blockly.Msg.MATH_ONLIST_OPERATOR_SUM = "somma dei valori nella lista";
 Blockly.Msg.MATH_ONLIST_TOOLTIP_AVERAGE = "Restituisce la media (media aritmetica) dei valori numerici nella lista.";
@@ -1530,7 +1530,7 @@ Blockly.Msg.MATH_ONLIST_TOOLTIP_MAX = "Restituisce il numero più grande present
 Blockly.Msg.MATH_ONLIST_TOOLTIP_MEDIAN = "Restituisce il valore mediano della lista.";
 Blockly.Msg.MATH_ONLIST_TOOLTIP_MIN = "Restituisce il numero più piccolo presente nella lista.";
 Blockly.Msg.MATH_ONLIST_TOOLTIP_MODE = "Restituisce una lista degli elementi più frequenti della lista (o dell'elemento più frequente della lista).";
-Blockly.Msg.MATH_ONLIST_TOOLTIP_RANDOM = "Restituisce un elemento scelto casualmente dalla lista.";
+Blockly.Msg.MATH_ONLIST_TOOLTIP_RANDOM = "Restituisce un elemento scelto a caso dalla lista.";
 Blockly.Msg.MATH_ONLIST_TOOLTIP_STD_DEV = "Restituisce la deviazione standard della lista.";
 Blockly.Msg.MATH_ONLIST_TOOLTIP_SUM = "Restituisce la somma di tutti i numeri della lista.";
 Blockly.Msg.MATH_POWER_SYMBOL = "^";
@@ -1572,7 +1572,7 @@ Blockly.Msg.MATH_TRIG_TOOLTIP_TAN = "Restituisce la tangente di un angolo espres
 Blockly.Msg.NEW_VARIABLE = "Nuova variabile...";
 Blockly.Msg.NEW_VARIABLE_TITLE = "Nome della nuova variabile:";
 Blockly.Msg.ORDINAL_NUMBER_SUFFIX = "";
-Blockly.Msg.PROCEDURES_BEFORE_PARAMS = "conː";
+Blockly.Msg.PROCEDURES_BEFORE_PARAMS = "di:";
 Blockly.Msg.PROCEDURES_CALLNORETURN_CALL = "";
 Blockly.Msg.PROCEDURES_CALLNORETURN_HELPURL = "http://it.wikipedia.org/wiki/Funzione_(informatica)";
 Blockly.Msg.PROCEDURES_CALLNORETURN_TOOLTIP = "Esegue la funzione definita dall'utente '%1'.";
@@ -1581,9 +1581,9 @@ Blockly.Msg.PROCEDURES_CALLRETURN_TOOLTIP = "Esegue la funzione definita dall'ut
 Blockly.Msg.PROCEDURES_CREATE_DO = "Crea '%1'";
 Blockly.Msg.PROCEDURES_DEFNORETURN_DO = "";
 Blockly.Msg.PROCEDURES_DEFNORETURN_HELPURL = "http://it.wikipedia.org/wiki/Funzione_(informatica)";
-Blockly.Msg.PROCEDURES_DEFNORETURN_PROCEDURE = "fare qualcosa";
-Blockly.Msg.PROCEDURES_DEFNORETURN_TITLE = "per";
-Blockly.Msg.PROCEDURES_DEFNORETURN_TOOLTIP = "Crea una funzione che non restituisce un risultato.";
+Blockly.Msg.PROCEDURES_DEFNORETURN_PROCEDURE = "un'azione";
+Blockly.Msg.PROCEDURES_DEFNORETURN_TITLE = "per fare";
+Blockly.Msg.PROCEDURES_DEFNORETURN_TOOLTIP = "Crea una funzione che non restituisce risultato.";
 Blockly.Msg.PROCEDURES_DEFRETURN_HELPURL = "http://it.wikipedia.org/wiki/Funzione_(informatica)";
 Blockly.Msg.PROCEDURES_DEFRETURN_RETURN = "restituisce";
 Blockly.Msg.PROCEDURES_DEFRETURN_TOOLTIP = "Crea una funzione che restituisce un risultato.";
@@ -1591,8 +1591,8 @@ Blockly.Msg.PROCEDURES_DEF_DUPLICATE_WARNING = "Attenzioneː Questa funzione ha 
 Blockly.Msg.PROCEDURES_HIGHLIGHT_DEF = "Evidenzia la definizione della funzione";
 Blockly.Msg.PROCEDURES_IFRETURN_TOOLTIP = "Se un valore è vero allora restituisce un secondo valore.";
 Blockly.Msg.PROCEDURES_IFRETURN_WARNING = "Attenzioneː Questo blocco può essere usato solo all'interno di una definizione di funzione.";
-Blockly.Msg.PROCEDURES_MUTATORARG_TITLE = "nome dell'ingresso:";
-Blockly.Msg.PROCEDURES_MUTATORCONTAINER_TITLE = "ingressi";
+Blockly.Msg.PROCEDURES_MUTATORARG_TITLE = "nome del parametro:";
+Blockly.Msg.PROCEDURES_MUTATORCONTAINER_TITLE = "parametri";
 Blockly.Msg.REMOVE_COMMENT = "Rimuovi il commento";
 Blockly.Msg.RENAME_VARIABLE = "Rinomina la variabile...";
 Blockly.Msg.RENAME_VARIABLE_TITLE = "Rinomina tutte le variabili '%1' in:";
@@ -1611,7 +1611,7 @@ Blockly.Msg.TEXT_CHARAT_FROM_START = "prendi la lettera in posizione #";
 Blockly.Msg.TEXT_CHARAT_HELPURL = "https://code.google.com/p/blockly/wiki/Teesto#Estrarre_testo";
 Blockly.Msg.TEXT_CHARAT_INPUT_INTEXT = "nel testo";
 Blockly.Msg.TEXT_CHARAT_LAST = "prendi l'ultima lettera";
-Blockly.Msg.TEXT_CHARAT_RANDOM = "prendi una lettera scelta casualmente";
+Blockly.Msg.TEXT_CHARAT_RANDOM = "prendi una lettera scelta a caso";
 Blockly.Msg.TEXT_CHARAT_TAIL = "";
 Blockly.Msg.TEXT_CHARAT_TOOLTIP = "Restituisce la lettera nella posizione indicata.";
 Blockly.Msg.TEXT_CREATE_JOIN_ITEM_TOOLTIP = "Aggiungi un elemento al testo.";
@@ -1662,7 +1662,7 @@ Blockly.Msg.VARIABLES_GET_CREATE_SET = "Crea 'imposta %1'";
 Blockly.Msg.VARIABLES_GET_HELPURL = "http://it.wikipedia.org/wiki/Variabile_%28informatica%29";
 Blockly.Msg.VARIABLES_GET_TAIL = "";
 Blockly.Msg.VARIABLES_GET_TITLE = "";
-Blockly.Msg.VARIABLES_GET_TOOLTIP = "Restituisce il valore di una variabile.";
+Blockly.Msg.VARIABLES_GET_TOOLTIP = "Ricorda il valore assegnato a una variabile.";
 Blockly.Msg.VARIABLES_SET_CREATE_GET = "Crea 'prendi %1'";
 Blockly.Msg.VARIABLES_SET_HELPURL = "http://it.wikipedia.org/wiki/Variabile_%28informatica%29";
 Blockly.Msg.VARIABLES_SET_TAIL = "a";

@@ -96,30 +96,30 @@
     flappy_intro:
       1:
         image: notes/flappy01.jpg
-        text: Hi, I'm Katie! One of the most exciting things about computer science
-          is that a computer program can be interactive.
+        text: Witam jestem Katie! Jedną z najbardziej ekscytujących rzeczy związanych
+          z informatyką jest to, że program komputerowy może być interaktywny.
       2:
         image: notes/flappy02.jpg
-        text: Any time somebody clicks or taps or types on a computer or phone, that
-          generates an EVENT, and there's some code that decides what to do when an
-          EVENT occurs.
+        text: Za każdym razem, kiedy ktoś klika, stuka lub pisze na komputerze czy
+          telefonie, generuje tym samym ZDARZENIE i jakaś część kodu decyduje co zrobić,
+          kiedy ZDARZENIE występuje.
       3:
         image: notes/flappy03.jpg
-        text: 'For example, you could have an EVENT-HANDLER that says "when the mouse
-          is clicked, play a sound" '
+        text: 'Na przykład, możesz stworzyć PROCEDURĘ OBSŁUGI ZDARZENIA, która mówi
+          "po kliknięciu myszy odtwórz dźwięk" '
       4:
         image: notes/flappy04.jpg
-        text: Have you ever heard of the game FlappyBird? By using Event handlers,
-          we're going to learn to program our own custom version of FlappyBird!
+        text: Czy słyszałeś kiedykolwiek o grze FlappyBird? Używając Procedur obsługi
+          zdarzeń nauczymy się jak stworzyć własną wersję FlappyBird!
       5:
         image: notes/flappy05.jpg
-        text: The code you'll write involves dragging and dropping blocks that represent
-          commands for the computer. Under the hood, each of these blocks is represented
-          by real code.
+        text: Kod, który będziesz pisał polega na przeciąganiu i upuszczaniu bloków,
+          które reprezentują polecenia dla komputera. Za kulisami, każdy z tych bloków
+          jest reprezentowany przez prawdziwy kod.
       6:
         image: notes/flappy06.jpg
-        text: 'If you take a look at the workspace, there are some green blocks that
-          are filled in for you - these are "event handlers" '
+        text: 'Jeśli przyjrzysz się obszarowi roboczemu, znajdziesz tam przygotowane
+          dla Ciebie zielone bloki - są to "obsługiwacze zdarzeń" '
       7:
         image: notes/flappy07.jpg
         text: If you want the bird to FLAP when you CLICK the mouse, you can do that
@@ -127,17 +127,17 @@
           in your game whenever you click the mouse, the bird will flap.
       8:
         image: notes/flappy08.jpg
-        text: In each puzzle of this activity we'll introduce new types of events
-          as green blocks on the workspace, and you can decide the appropriate blocks
-          to add in response to those events.
+        text: W każdej łamigłówce tego rodzaju, będziemy wprowadzać nowe rodzaje zdarzeń
+          w postaci zielonych bloków do obszaru roboczego. Sam będziesz decydował
+          które bloki są odpowiednie aby ich użyć w celu reakcji na występujące zdarzenia.
       9:
         image: notes/flappy09.jpg
-        text: When you see a drop down arrow like this, that means you can change
-          the settings - like what sound to play when flappy hits the ground.
+        text: Gdy zobaczysz rozwijaną strzałką jak ta, oznacza to, że możesz zmienić
+          ustawienia - takie jak dźwięk odtwarzany Flappy spadnie na ziemię.
       10:
         image: notes/flappy10.jpg
-        text: In the final puzzle you'll be able to create your own game and share
-          it with your friends. Have fun!
+        text: W końcowej łamigłówce będziesz w stanie stworzyć własną grę i podzielić
+          się nią ze swoimi przyjaciółmi. Baw się dobrze!
     loop_times:
       1:
         image: notes/hoc2_1.jpg

@@ -12,7 +12,7 @@
         gender: Køn
         edit_header: Rediger kontooplysninger
         error:
-          future: can't be in the future
+          future: kan ikke være i fremtiden
   hello: Hej verden
   welcome_back: Velkommen tilbage %{name}
   add_teacher_form:
@@ -52,30 +52,27 @@
     need_confirmation: Har ikke modtaget bekræftelses instruktioner?
     need_unlock: Ikke modtaget lås op instruktioner?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
+    overview_student: Tilmelde dig en konto til at spore dine fremskridt.
+    overview_teacher: Undervis i datalogi i dit klasseværelse ved tilmelding til en
+      konto. <p/> Du vil være i stand til at spore dine studerendes fremskridt og
+      få belønninger.
     no_signup_message: Du kan <a target="_blank" href="http://learn.code.org">gennemse
       de forskellige faser og gåder</a>, men du bliver nødt til at tilmelde dig for
       at gemme dine fremskridt.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Amerikanske studerende, der tjener alle %{num_trophies} koncept
       trofæer kan vælge en række præmier, herunder gratis Dropbox plads, Skype credits
       og kan downloade spil fra Electronic Arts og Valve.
     teacher_educator_guide: Se lærerens guide
     teacher_prize_header: Vind $1.000 i <a target="_blank" href="http://DonorsChoose.org">
-      DonorsChoose.org</a> belønninger
+      DonorsChoose.org</a> belønninger (gennem juni 15, 2014, indtil lager haves)
     teacher_prize_message: 'I partnerskab med <a target="_blank" href="http://DonorsChoose.org">
       DonorsChoose.org</a>, tilbyder Code.org op til $1.000 til klasseværelset til
       de amerikanske offentlige skolelærere, der fører mindst 15 studerende gennem
       dette kursus. <a href="http://code.org/educate/20hr"> Se pædagogisk guide for
       mere info.</a> '
-    teacher_prize_limits: '(Begrænsning: $1.000 pr. lærer. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Se FAQ for flere grænser</a>)'
-    teacher_pitch: Undervis Folkeskole Intro til Computer Videnskab i dit klasselokale
+    teacher_pitch: Lærer tilmelding til Code.org
     teacher_title: Lærer tilmelding
-    student_pitch: 'Ud over 1 time: Prøv vores Folkeskole Intro til Computer Videnskab'
+    student_pitch: Elev tilmelding til Code.org
     student_title: Tilmelding for studerende
     school_name: Skolens navn (valgfrit)
     school_address: Skolens adresse (valgfri)
@@ -101,7 +98,7 @@
     remember: Husk mig
     submit: Log ind
   signin:
-    try_heading: Want to try coding without signing up?
+    try_heading: Vil du prøvekøre kodning uden tilmelding?
     try_hoc: Prøv En Times Kodning først
     try_20hours: Prøv vores 20 timers Introduktion til datalogi
   password:
@@ -153,8 +150,8 @@
     provider: 'Provider:'
     code: 'Code:'
     redeem_header: 'To redeem:'
-    donorschoose_register: Register as a teacher on DonorsChoose.org
-    donorschoose_project: Post a project
+    donorschoose_register: Tilmeld dig som lærer på DonorsChoose.org
+    donorschoose_project: Send et projekt
     donorschoose_how_to: Sådan bruger du din kode
     success: Your prize was succesfully redeemed, see code below.
     error: Your prize could not be redeemed, please try again.
@@ -296,12 +293,13 @@
   user_stats:
     recent_activity: Nylig aktivitet
     show_more: Vis mere
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Allerede registreret? %{link}
     student_reg_link: Tilmelding for studerende
     teacher_reg_link: Tilmelding for studerende
-    signin_directions: Use an account to track progress and get rewards.<br/> Teachers,
-      track your entire class.
+    signin_directions: Brug en konto til at følge op på fremdriften. <br/> Lærere,
+      spor hele din klasse.
     teacher_dashboard: Se fremskridts oversigt
     teacher_student_count_one: Du har %{count} studerende.
     teacher_student_count: Du har %{count} studerende.
@@ -311,7 +309,6 @@
       med dette kursus
     teacher_read_blog: Læs om nyheder og opdateringer til vores materialer på vores
       underviser blog
-    teacher_survey: Tell us what you think about this course
     classroom: Dit klasseværelse
     student_progress: Dit lærings fremskridt
     student_stats: Du har optjent %{trophy_count} ud af %{trophy_max} "Koncept beherskelses"
@@ -324,14 +321,14 @@
     local_school: lokal skole
     online: online
     see_details: Se detaljer
-    prize_info: 'Prizes for participation (U.S. only): $10 gift cards for student
-      completion and up to $1,000 in classroom rewards for public school teachers'
+    prize_info: 'Præmier for deltagelse (kun amerikanske offentlige skolelærere):
+      op til $1.000 i klasseværelset belønninger.'
     tryfirst: 'Eller du kan prøve det først, og tilmeld dig bagefter:'
     trynow: Prøv nu
-    add_hint_help: Please help us to add smart hints to Code.org tutorials
-    20hour_overview: This 20-hour course introduces core computer science and programming
-      concepts. The course is designed for use in classrooms for grades K-8, but it
-      is fun to learn at all ages.
+    add_hint_help: Hjælp os med at tilføje smart tips til Code.org undervisning
+    20hour_overview: Dette 20-timers kursus introducerer centrale computer videnskabs
+      og programmering begreber. Kurset er designet til brug i folkeskolens klasseværelser,
+      men det er sjovt at lære i alle aldre.
   gender:
     male: Mand
     female: Kvinde
@@ -361,8 +358,8 @@
     subtitle: Se disse videoer og tips
     teacher: Se løsningen
     auth_error: Du har ikke rettigheder til at se løsningen.
-    submit: Update Artist Location
-    direction: Start Direction
+    submit: Opdater kunstner placering
+    direction: Start retning
   video:
     tab: Video.
     notes: Ingen video? Vis noter.
@@ -377,13 +374,13 @@
   download_pdf: Åben lektionsplan
   share_code:
     title: Klik 'Kør program' at se mit program i aktion
-    bounce_og_title: Check out my Bounce Game
+    bounce_og_title: Tjek mit hoppe spil
     flappy_og_title: Tjek mit Flappy spil
     og_description: Jeg skrev selv koden med Code.org
   builder:
     created: Du har oprettet et nyt script.
     destroyed: Du ødelagde et script.
-    manage: Manage Scripts
+    manage: Byg niveauer
     view: Se
     back: Tilbage til scripts
     level:
@@ -392,12 +389,29 @@
       unused: Ubrugte niveauer
   upsell:
     hoc:
-      title: The Hour of Code
-      body: Try the basics of computer science. Millions have given it a shot.
+      title: Kodetimen
+      body: Prøv grundlæggende i datalogi. Millioner har givet det et forsøg.
     flappy:
-      title: Flappy Code
-      body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
-        tutorial!
+      title: Flappy kode
+      body: Vil du skrive dit eget spil på mindre end 10 minutter? Prøv vores Flappy
+        kode undervisning!
     20hour:
-      title: Intro Course
-      body: Try our 20-hour Intro to Computer Science course.
+      title: Intro kursus
+      body: Prøv vores 20-timers Introduktion til datalogi kursus.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

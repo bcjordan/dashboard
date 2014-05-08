@@ -12,7 +12,7 @@
         gender: Jenis kelamin
         edit_header: Edit rincian akun
         error:
-          future: can't be in the future
+          future: tidak mungkin di masa depan
   hello: Halo dunia
   welcome_back: Selamat datang kembali, %{name}
   add_teacher_form:
@@ -53,31 +53,27 @@
     need_confirmation: Tidak menerima instruksi konfirmasi?
     need_unlock: Tidak menerima instruksi untuk membuka?
   signup_form:
-    overview_student: Sign up for an account to track your progress.
-    overview_teacher: Teach computer science in your classroom by signing up for an
-      account.<p/> You'll be able to track your students' progress and get rewards.
+    overview_student: Sign up untuk dapat melacak kemajuan Anda.
+    overview_teacher: Mengajar ilmu komputer di kelas Anda dengan mendaftar untuk
+      sebuah akun. <p/> Anda akan dapat melacak kemajuan siswa Anda dan mendapatkan
+      imbalan.
     no_signup_message: Anda dapat <a target="_blank" href="http://learn.code.org">
       mencoba berbagai tahap dan berbagai teka-teki</a>, tetapi Anda akan perlu untuk
       masuk supaya kemajuan belajar Anda dapat dicatat.
-    prizes_header: Para siswa yang pertama yang menyelesaikan kursus akan memenangkan
-      hadiah! (hanya untuk siswa di Amerika Serikat)
     prizes_message: Siswa Amerika Serikat yang memperoleh semua %{num_trophies} piala
       konsep dapat memilih berbagai hadiah seperti ruang simpan Dropbox gratis, kredit
       Skype, dan mengunduh permainan dari Electronic Arts.
     teacher_educator_guide: Lihat panduan guru
-    teacher_prize_header: Memenangkan $1.000 hadiah dari <a target="_blank" href="http://DonorsChoose.org">
-      DonorsChoose.org</a>
+    teacher_prize_header: Win $1.000 di <a target="_blank" href="http://DonorsChoose.org">
+      DonorsChoose.org</a> imbalan (melalui 15 Juni 2014, persediaan terbatas)
     teacher_prize_message: 'Bekerja sama dengan <a target="_blank" href="http://DonorsChoose.org">
       DonorsChoose.org</a>, Code.org akan menawarkan hadiah hingga $1.000 dalam kelas
       pendanaan untuk US guru sekolah umum yang memimpin setidaknya 15 siswa melalui
       kursus ini. <a href="http://code.org/educate/20hr"> Lihat pendidik panduan untuk
       info lebih lanjut.</a> '
-    teacher_prize_limits: '(Batas: $1.000 per guru. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Lihat FAQ untuk membaca persyaratan yang lain</a>)'
-    teacher_pitch: Ajarilah ilmu komputer tingkat pemula di kelas Anda
+    teacher_pitch: Guru daftar untuk Code.org
     teacher_title: Guru mendaftar
-    student_pitch: 'Setelah 1 jam: Cobalah pengantar ilmu komputer untuk sekolah dasar
-      dan menengah'
+    student_pitch: Siswa daftar untuk Code.org
     student_title: Daftar sebagai siswa
     school_name: Nama sekolah (opsional)
     school_address: Alamat sekolah (opsional)
@@ -103,7 +99,7 @@
     remember: Ingat saya
     submit: Masuk
   signin:
-    try_heading: Want to try coding without signing up?
+    try_heading: Ingin mencoba coding tanpa mendaftar?
     try_hoc: Cobalah 1 Jam berkode
     try_20hours: 'Cobalah program 20 jam perkenalan ilmu komputer '
   password:
@@ -152,8 +148,8 @@
     provider: 'Penyedia:'
     code: 'Kode:'
     redeem_header: 'Untuk menebus:'
-    donorschoose_register: Register as a teacher on DonorsChoose.org
-    donorschoose_project: Post a project
+    donorschoose_register: Daftar sebagai guru pada DonorsChoose.org
+    donorschoose_project: Kirim sebuah proyek
     donorschoose_how_to: Bagaimana menggunakan kode Anda
     success: Hadiah Anda telah berhasil ditebus, silahkan lihat kode di bawah ini.
     error: Hadiah Anda tidak bisa ditebus, silakan coba lagi.
@@ -300,12 +296,13 @@
   user_stats:
     recent_activity: Aktivitas terakhir
     show_more: Tunjukkan lebih banyak
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Sudah terdaftar? %{link}
     student_reg_link: Daftar sebagai siswa
     teacher_reg_link: Daftar sebagai guru
-    signin_directions: Menggunakan akun untuk melacak kemajuan dan mendapatkan hadiah.
-      <br/> Untuk para guru, Anda dapat memperhatikan seluruh siswa-siswi.
+    signin_directions: Gunakan akun untuk melacak kemajuan. <br/> Untuk para guru,
+      anda dapat lacak seluruh kelas.
     teacher_dashboard: Lihat kemajuan di dasbor
     teacher_student_count_one: Anda memiliki  %{count} siswa.
     teacher_student_count: Anda memiliki  %{count} siswa.
@@ -315,7 +312,6 @@
       kursus ini
     teacher_read_blog: Baca lebih lanjut berita dan bahan-bahan di blog pendidikan
       kami
-    teacher_survey: Tell us what you think about this course
     classroom: Kelas anda
     student_progress: Kemajuan belajar Anda
     student_stats: Anda telah menerima  %{trophy_count} dari total %{trophy_max} piala
@@ -328,14 +324,16 @@
     local_school: sekolah lokal
     online: online
     see_details: Lihat rincian
-    prize_info: 'Hadiah untuk partisipasi (terbatas untuk daerah AS): hadiah $10 untuk
-      siswa yang menyelesaikan dan maximum $1.000 per kelas untuk guru sekolah umum.'
+    prize_info: 'Hadiah untuk partisipasi (hanya untuk guru sekolah umum dari US):
+      maximal $1.000 imbalan.'
     tryfirst: 'Atau, Anda dapat mencobanya dulu kemudian mendaftar:'
     trynow: Coba sekarang
-    add_hint_help: Please help us to add smart hints to Code.org tutorials
-    20hour_overview: This 20-hour course introduces core computer science and programming
-      concepts. The course is designed for use in classrooms for grades K-8, but it
-      is fun to learn at all ages.
+    add_hint_help: Harap membantu kami untuk menambah petunjuk bermanfaat untuk tutorial
+      Code.org
+    20hour_overview: Kursus selama 20 jam ini memperkenalkan ilmu komputer tingkat
+      dasar dan konsep-konsep pemrograman. Kursus ini dirancang untuk digunakan di
+      ruang kelas untuk sekolah dasar dan menengah, tapi tetap menyenangkan dipelajari
+      untuk semua usia.
   gender:
     male: Laki-laki
     female: Wanita
@@ -364,8 +362,8 @@
     subtitle: Lihat video ini dan tips lainnya
     teacher: Lihat solusi
     auth_error: Anda tidak diizinkan untuk melihat solusi.
-    submit: Update Artist Location
-    direction: Start Direction
+    submit: Memperbarui lokasi artis
+    direction: Mulai arah
   video:
     tab: Video.
     notes: Tidak ada video? Tunjukkan catatan kaki.
@@ -380,13 +378,13 @@
   download_pdf: Rencana pelajaran terbuka
   share_code:
     title: Klik 'Jalankan program' untuk melihat bagaimana program bekerja
-    bounce_og_title: Check out my Bounce Game
+    bounce_og_title: Check out permainan Bouncing ku
     flappy_og_title: Cobalah permainan Flappyku
     og_description: Saya menulis kode ini sendiri dengan Code.org
   builder:
     created: Kamu membuat skript baru.
     destroyed: Anda menghapus satu script.
-    manage: kelola script
+    manage: Bangun tingkatan
     view: Tampilan
     back: Kembali ke skrip
     level:
@@ -395,12 +393,29 @@
       unused: Tingkat yang tidak terpakai
   upsell:
     hoc:
-      title: The Hour of Code
-      body: Try the basics of computer science. Millions have given it a shot.
+      title: Jam kode
+      body: Coba dasar-dasar ilmu komputer. Jutaan orang telah mencobanya.
     flappy:
-      title: Flappy Code
-      body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
-        tutorial!
+      title: Kode Flappy
+      body: Anda ingin menulis permainan anda sendiri dalam waktu kurang dari 10 menit?
+        Mencoba tutorial Flappy kode dari kami!
     20hour:
-      title: Intro Course
-      body: Try our 20-hour Intro to Computer Science course.
+      title: Kursus perkenalan
+      body: Mencoba kami Introduksi Kursus ilmu komputer dalam 20 jam.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

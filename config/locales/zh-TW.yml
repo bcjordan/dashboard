@@ -56,16 +56,12 @@
     overview_teacher: Teach computer science in your classroom by signing up for an
       account.<p/> You'll be able to track your students' progress and get rewards.
     no_signup_message: 您可以從 <a target="_blank"href="HTTP://learn.code.org"> 瀏覽各個階段和關卡</a>，但您需要註冊一個帳號來保存您的進度。
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: 贏得所有 %{num_trophies} 個概念獎盃的美國學生，可以以下項目中選取獎品，包括免費的DropBox空間、Skype點數及EA所提供的遊戲下載。
     teacher_educator_guide: 請參閱教育者指南
     teacher_prize_header: ' 贏取由<a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>所提供的
       $1,000 獎勵'
     teacher_prize_message: 透過與 <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>合作。
       Code.org 將為帶領15位以上學生參加本次課程的全美公立學校教師提供高達$1000的教學基金。 <a href="http://code.org/educate/20hr">更詳細的訊息請參閱教師指南。</a> 
-    teacher_prize_limits: (每個教師獎金上限為 $1,000 。<a target="_blank"href="HTTP://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      請參閱常見問題</a>)
     teacher_pitch: 在您的班上進行K-8電腦科學簡介課程。
     teacher_title: 教師註冊
     student_pitch: 在一小時之後：試試我們的K-8電腦科學簡介課程
@@ -263,6 +259,7 @@
   user_stats:
     recent_activity: 最近的活動
     show_more: 顯示更多
+    classroom_activity: Unplugged Activity
   home:
     signin_message: 已經註冊了? %{link}
     student_reg_link: 學生登入
@@ -274,7 +271,6 @@
     teacher_averages: '你的學生平均下來獲得了 %{trophy_average}/%{trophy_max} "概念通達"獎盃。 '
     teacher_print_certificates: 為完成此課程的學生列印證書
     teacher_read_blog: 在Educator Blog閱讀我們的最新資訊
-    teacher_survey: Tell us what you think about this course
     classroom: 您的教室
     student_progress: 您的學習進度
     student_stats: 你已經獲得 %{trophy_count}/%{trophy_max} "概念通達"獎盃
@@ -359,3 +355,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

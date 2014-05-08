@@ -5487,13 +5487,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "\"Upprepa\" eller \"Om\" blocken måste ha andra block inuti sig för att fungera. Se till att det inre blocket sitter rätt inuti blocket."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Du har extra block som inte är kopplade till händelseblock."};
 
 exports.finalStage = function(d){return "Grattis! Du har slutfört den sista nivån."};
 
 exports.finalStageTrophies = function(d){return "Grattis! Du har slutfört den sista nivån och vann "+p(d,"numTrophies",0,"sv",{"en":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blocken i ditt program kan också skrivas i Javascript, världens mest använda programmeringsspråk:"};
+exports.generatedCodeInfo = function(d){return "Även toppuniversitet lär ut blockbaserad programmering (t.ex. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Men under ytan kan blocken du har byggt ihop också visas som JavaScript, världens mest använda programmeringsspråk:"};
 
 exports.hashError = function(d){return "Tyvärr, '%1' finns inte bland dina sparade program."};
 
@@ -5507,7 +5507,7 @@ exports.levelIncompleteError = function(d){return "Du använder alla nödvändig
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Gör ditt eget Flappy-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Prova med en eller flera av blocken nedan att lösa pusslet."};
 
@@ -5515,9 +5515,9 @@ exports.nextLevel = function(d){return "Grattis! Du slutförde pussel "+v(d,"puz
 
 exports.nextLevelTrophies = function(d){return "Grattis! Du slutförde pussel "+v(d,"puzzleNumber")+" och vann "+p(d,"numTrophies",0,"sv",{"one":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
 
-exports.nextStage = function(d){return "Grattis! Du slutförde nivå "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Grattis! Du har klarat "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Grattis! Du slutförde pussel "+v(d,"stageNumber")+" och vann "+p(d,"numTrophies",0,"sv",{"one":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
+exports.nextStageTrophies = function(d){return "Grattis! Du klarade "+v(d,"stageName")+" och har fått "+p(d,"numTrophies",0,"sv",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Grattis! Du slutförde pussel "+v(d,"puzzleNumber")+". (Men du skulle bara behövt använda"+p(d,"numBlocks",0,"sv",{"one":"1 block","other":n(d,"numBlocks")+" block"})+".)"};
 
@@ -5545,7 +5545,7 @@ exports.tooManyBlocksMsg = function(d){return "Detta pusslet kan lösas med <x i
 
 exports.tooMuchWork = function(d){return "Du fick mig att göra en hel del arbete!  Du kan försöka upprepa färre gånger?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Din kod ser bra ut - den kommer att flaxa med varje klick. Men du måste klicka många gånger för att flaxa till målet."};
 
 exports.toolboxHeader = function(d){return "Block"};
 
@@ -5557,7 +5557,7 @@ exports.tryAgain = function(d){return "Försök igen"};
 
 exports.backToPreviousLevel = function(d){return "Gå tillbaka till föregående nivå"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Spara till ditt galleri"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5575,15 +5575,15 @@ exports.rotateText = function(d){return "Rotera din enhet."};
 
 exports.orientationLock = function(d){return "Stäng av orienterings låset i enhetsinställningar."};
 
-exports.wantToLearn = function(d){return "Want to learn to code?"};
+exports.wantToLearn = function(d){return "Vill du lära dig att programmera?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Titta på videon"};
 
-exports.tryHOC = function(d){return "Try the Hour of Code"};
+exports.tryHOC = function(d){return "Prove en Timme med Kod"};
 
-exports.signup = function(d){return "Sign up for the intro course"};
+exports.signup = function(d){return "Registrera dig för introduktionskursen"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Här är ett tips:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5606,15 +5606,15 @@ exports.continue = function(d){return "Fortsätt"};
 
 exports.defaultSayText = function(d){return "type here"};
 
-exports.finalLevel = function(d){return "Grattis! Du har löst det sista pusslet."};
+exports.finalLevel = function(d){return "Grattis! Du har löst den sista uppgiften."};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
+exports.incrementOpponentScore = function(d){return "motståndarens poäng"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Lägg till ett till spelaren eller motståndarens poäng."};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "spelarens poäng"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Skapa din egen berättelse"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5626,15 +5626,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 pixlar"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 pixlar"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 pixlar"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 pixlar"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 pixlar"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5654,29 +5654,29 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "flytta neråt"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "flytta vänster"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "flytta höger"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "flytta uppåt"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
 exports.moveTooltip = function(d){return "Move a character."};
 
-exports.nextLevel = function(d){return "Grattis! Du har slutfört detta pusslet."};
+exports.nextLevel = function(d){return "Grattis! Du har slutfört den här uppgiften."};
 
 exports.no = function(d){return "Nej"};
 
-exports.numBlocksNeeded = function(d){return "Detta pusslet kan lösas med %1 block."};
+exports.numBlocksNeeded = function(d){return "Den här uppgiften kan lösas med %1 block."};
 
 exports.oneTopBlock = function(d){return "För detta pussel måste du använda alla block och sätta ihop dem i den vita arbetsytan."};
 
@@ -5906,9 +5906,9 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
-exports.whenUp = function(d){return "when Up arrow"};
+exports.whenUp = function(d){return "när pil upp"};
 
-exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
+exports.whenUpTooltip = function(d){return "Utför handlingarna nedan när pil-upptangenten trycks ner."};
 
 exports.yes = function(d){return "Ja"};
 
