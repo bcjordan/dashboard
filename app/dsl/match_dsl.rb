@@ -1,5 +1,8 @@
-class ProcessMatch < ProcessDSL
-  def name(text) @name = text end
+class MatchDSL < BaseDSL
+  def initialize
+    @hash = { :questions => [], :answers => [] }
+  end
+
   def title(text) @hash[:title] = text end
   def description(text) @hash[:description] = text end
   def question(text) @hash[:questions] << { text: text } end
@@ -10,14 +13,11 @@ class ProcessMatch < ProcessDSL
     @hash[:answers] << answer
   end
 
-  @hash = { :questions => [], :answers => [] }
-
-  def parse(filename)
-    super
-    [{ name: @name, properties: @hash }, i18n_hash]
+  def parse_output
+    {name: @name, properties: @hash}
   end
 
-  def i18n_hash
+  def i18n_strings
     strings = {}
     strings[@hash[:title]] = @hash[:title]
     strings[@hash[:description]] = @hash[:description]
@@ -29,8 +29,7 @@ class ProcessMatch < ProcessDSL
       text = answer[:text]
       strings[text] = text
     end
-
-    {"en" => { "data" => { suffix => { @name => strings }}}}
+    strings
   end
 
 end
