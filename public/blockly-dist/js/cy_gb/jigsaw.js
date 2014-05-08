@@ -2938,6 +2938,7 @@ exports.load = function(assetUrl, id) {
   skin.computer = skin.assetUrl('computer.png');
 
   skin.blank = skin.assetUrl('blank.png');
+  skin.smallStaticAvatar = skin.blank;
 
   // Settings
   skin.graph = config.graph;
