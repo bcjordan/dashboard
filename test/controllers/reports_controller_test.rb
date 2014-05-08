@@ -230,7 +230,7 @@ class ReportsControllerTest < ActionController::TestCase
   end
 
   # 'report-stage-1' instead of 'report-stage-1: Report Stage 1'
-  test "shoulder render single stage name for custom script" do
+  test "should render single stage name for custom script" do
     # first script has 1 stage, second script has 2 stages
     create(:script_level, script: @script, stage: @stage2)
     get :header_stats, script_id: @script.id
