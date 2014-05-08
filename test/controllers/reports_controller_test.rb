@@ -9,9 +9,9 @@ class ReportsControllerTest < ActionController::TestCase
 
     @not_admin = create(:user)
 
-    @script = create(:script)
-    @stage = create(:stage, script: @script)
-    @stage2 = create(:stage, script: @script)
+    @script = create(:script, name: 'Report Script')
+    @stage = create(:stage, script: @script, name: 'Report Stage 1')
+    @stage2 = create(:stage, script: @script, name: 'Report Stage 2')
     @script_level = create(:script_level, script: @script, stage: @stage)
     @script_level2 = create(:script_level, script: @script, stage: @stage2)
     @script_level.move_to_bottom
@@ -229,5 +229,14 @@ class ReportsControllerTest < ActionController::TestCase
     assert_redirected_to_sign_in
   end
 
+  # 'report-stage-1' instead of 'report-stage-1: Report Stage 1'
+  test "should render single stage name for custom script" do
+    # first script has 1 stage, second script has 2 stages
+    create(:script_level, script: @script, stage: @stage2)
+    get :header_stats, script_id: @script.id
+    # render string from test translation data
+    assert_select 'div.stage', 2
+    assert_select 'div.stage', /\Areport-stage-\d\z/
+  end
 
 end

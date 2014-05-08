@@ -8,6 +8,8 @@ else
 end
 
 ENV["RAILS_ENV"] ||= "test"
+ENV['RAKE_TEST'] ||= '1'
+
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 
