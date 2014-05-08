@@ -2298,8 +2298,8 @@ Jigsaw.init = function(config) {
   BlocklyApps.init(config);
 
   document.getElementById('runButton').style.display = 'none';
-  Blockly.addChangeListener(function(evt) {
-    BlocklyApps.runButtonClick();
+  Jigsaw.successListener = Blockly.addChangeListener(function(evt) {
+    checkForSuccess();
   });
 
   // Only used by level1, in which the success criteria is clicking on the block
@@ -2311,14 +2311,15 @@ Jigsaw.init = function(config) {
   }
 };
 
-BlocklyApps.runButtonClick = function() {
+function checkForSuccess() {
   var success = level.goal.successCondition();
   if (success) {
-    Jigsaw.result = ResultType.SUCCESS;
+    Blockly.removeChangeListener(Jigsaw.successListener);
 
+    Jigsaw.result = ResultType.SUCCESS;
     Jigsaw.onPuzzleComplete();
   }
-};
+}
 
 /**
  * Outcomes of running the user program.
