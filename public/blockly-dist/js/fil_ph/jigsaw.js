@@ -2020,7 +2020,7 @@ exports.install = function(blockly, skin) {
     var level = levels[key];
     generateJigsawBlocksForLevel(blockly, skin, {
       image: skin[level.image.name],
-      HSV: HSV,
+      HSV: level.backgroundHSV || HSV,
       width: level.image.width,
       height: level.image.height,
       numBlocks: level.numBlocks,
@@ -2210,6 +2210,8 @@ var loadLevel = function() {
 
   Jigsaw.MAZE_WIDTH = 0;
   Jigsaw.MAZE_HEIGHT = 0;
+
+  Jigsaw.block1Clicked = false;
 };
 
 var drawMap = function() {
@@ -2304,8 +2306,7 @@ Jigsaw.init = function(config) {
   var block1 = document.querySelectorAll("[block-id='1']")[0];
   if (block1) {
     dom.addMouseDownTouchEvent(block1, function () {
-      Jigsaw.BLOCK1_CLICKED = true;
-      Blockly.runButtonClick();
+      Jigsaw.block1Clicked = true;
     });
   }
 };
@@ -2475,19 +2476,20 @@ var validateSimplePuzzle = function (types, options) {
 
 module.exports = {
   '1': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'apple',
     image: {
-      name: 'smiley',
+      name: 'apple',
       width: 200,
       height: 200
     },
+    backgroundHSV: [41, 1.00, 0.969],
     numBlocks: 1,
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
     goal: {
       successCondition: function () {
-        return Jigsaw.BLOCK1_CLICKED;
+        return Jigsaw.block1Clicked;
       }
     },
     startBlocks:
@@ -2500,6 +2502,7 @@ module.exports = {
       width: 200,
       height: 200
     },
+    backgroundHSV: [184, 1.00, 0.733],
     ghost: {
       x: 400,
       y: 100
@@ -2525,12 +2528,13 @@ module.exports = {
       jigsawBlock('jigsaw_2A', 20, 20)
   },
   '3': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'snail',
     image: {
-      name: 'smiley',
+      name: 'snail',
       width: 200,
       height: 200
     },
+    backgroundHSV: [36, 1.00, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2550,12 +2554,13 @@ module.exports = {
   },
 
   '4': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'elephant',
     image: {
-      name: 'smiley',
+      name: 'elephant',
       width: 200,
       height: 200
     },
+    backgroundHSV: [320, 0.60, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2575,12 +2580,13 @@ module.exports = {
   },
 
   '5': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'fish',
     image: {
-      name: 'smiley',
+      name: 'fish',
       width: 200,
       height: 200
     },
+    backgroundHSV: [209, 0.57, 0.600],
     ghost: {
       x: 400,
       y: 100
@@ -2601,12 +2607,13 @@ module.exports = {
   },
 
   '6': {
-    instructionsIcon: 'smiley',
+    instructionsIcon: 'doggie',
     image: {
-      name: 'smiley',
+      name: 'doggie',
       width: 200,
       height: 200
     },
+    backgroundHSV: [25, 0.57, 0.960],
     ghost: {
       x: 400,
       y: 100
@@ -2627,12 +2634,13 @@ module.exports = {
   },
 
   '7': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'tree',
     image: {
-      name: 'artist',
+      name: 'tree',
       width: 200,
       height: 200
     },
+    backgroundHSV: [238, 0.51, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2653,12 +2661,13 @@ module.exports = {
   },
 
   '8': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'flower',
     image: {
-      name: 'artist',
+      name: 'flower',
       width: 200,
       height: 200
     },
+    backgroundHSV: [75, 0.80, 0.999],
     ghost: {
       x: 400,
       y: 100
@@ -2679,12 +2688,13 @@ module.exports = {
   },
 
   '9': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'house',
     image: {
-      name: 'artist',
+      name: 'house',
       width: 200,
       height: 200
     },
+    backgroundHSV: [110, 0.56, 0.60],
     ghost: {
       x: 400,
       y: 100
@@ -2704,12 +2714,13 @@ module.exports = {
   },
 
   '10': {
-    instructionsIcon: 'artist',
+    instructionsIcon: 'computer',
     image: {
-      name: 'artist',
+      name: 'computer',
       width: 200,
       height: 200
     },
+    backgroundHSV: [300, 0.25, 0.80],
     ghost: {
       x: 400,
       y: 100
@@ -2911,11 +2922,23 @@ exports.load = function(assetUrl, id) {
   var skin = skinsBase.load(assetUrl, id);
   var config = CONFIGS[skin.id];
 
-  skin.smiley = skin.assetUrl('smiley.png');
+
   skin.artist = skin.assetUrl('artist.png');
   skin.blocks = skin.assetUrl('blocks.png');
 
+  skin.apple = skin.assetUrl('apple.png');
+  skin.smiley = skin.assetUrl('smiley.png');
+  skin.snail = skin.assetUrl('snail.png');
+  skin.elephant = skin.assetUrl('elephant.png');
+  skin.fish = skin.assetUrl('fish.png');
+  skin.doggie = skin.assetUrl('doggie.png');
+  skin.tree = skin.assetUrl('tree.png');
+  skin.flower = skin.assetUrl('flower.png');
+  skin.house = skin.assetUrl('house.png');
+  skin.computer = skin.assetUrl('computer.png');
+
   skin.blank = skin.assetUrl('blank.png');
+  skin.smallStaticAvatar = skin.blank;
 
   // Settings
   skin.graph = config.graph;
@@ -3494,29 +3517,29 @@ exports.parseElement = function(text) {
 var MessageFormat = require("messageformat");MessageFormat.locale.fil=function(n){return n===0||n==1?"one":"other"}
 exports.blocklyMessage = function(d){return "Blockly"};
 
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Mga aksyon"};
 
-exports.catColour = function(d){return "Colour"};
+exports.catColour = function(d){return "Kulay"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Lohika"};
 
-exports.catLists = function(d){return "Lists"};
+exports.catLists = function(d){return "Mga listahan"};
 
-exports.catLoops = function(d){return "Loops"};
+exports.catLoops = function(d){return "Mga loop"};
 
 exports.catMath = function(d){return "Math"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Mga function"};
 
 exports.catText = function(d){return "Text"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "Mga variable"};
 
-exports.codeTooltip = function(d){return "See generated JavaScript code."};
+exports.codeTooltip = function(d){return "Tingnan ang nabuo na JavaScripy code."};
 
-exports.continue = function(d){return "Continue"};
+exports.continue = function(d){return "Magpatuloy"};
 
-exports.dialogCancel = function(d){return "Cancel"};
+exports.dialogCancel = function(d){return "Kanselahin"};
 
 exports.dialogOK = function(d){return "OK"};
 
@@ -3528,21 +3551,21 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
-exports.emptyBlocksErrorMsg = function(d){return "The \"Repeat\" or \"If\" block needs to have other blocks inside it to work. Make sure the inner block fits properly inside the containing block."};
+exports.emptyBlocksErrorMsg = function(d){return "Ang \"Repeat\" o \"if\" block ay kailangan ng iba pang mga block sa loob nito upang gumana. Siguraduhin na ang block na asa loob ay nakasukat ng maayos sa loob ng naglalaman na block."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Meron kang extra na mga block na hindi nakasama sa event block."};
 
-exports.finalStage = function(d){return "Congratulations! You have completed the final stage."};
+exports.finalStage = function(d){return "Maligayang pagbati! Natapos mo na ang pinakahuling stage."};
 
-exports.finalStageTrophies = function(d){return "Congratulations! You have completed the final stage and won "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.finalStageTrophies = function(d){return "Maligayang pagbati! Nakumpleto mo na ang pinakahuling stage at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.generatedCodeInfo = function(d){return "The blocks for your program can also be represented in JavaScript, the world's most widely adopted programming language:"};
 
 exports.hashError = function(d){return "Sorry, '%1' doesn't correspond with any saved program."};
 
-exports.help = function(d){return "Help"};
+exports.help = function(d){return "Tulong"};
 
-exports.hintTitle = function(d){return "Hint:"};
+exports.hintTitle = function(d){return "Pahiwatig:"};
 
 exports.jump = function(d){return "jump"};
 
@@ -3550,7 +3573,7 @@ exports.levelIncompleteError = function(d){return "You are using all of the nece
 
 exports.listVariable = function(d){return "list"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Gumawa Ng Sarili Mong Flappy Game"};
 
 exports.missingBlocksErrorMsg = function(d){return "Try one or more of the blocks below to solve this puzzle."};
 
@@ -3568,17 +3591,17 @@ exports.numLinesOfCodeWritten = function(d){return "You just wrote "+p(d,"numLin
 
 exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" of "+v(d,"stage_total")};
 
-exports.resetProgram = function(d){return "Reset"};
+exports.resetProgram = function(d){return "Ulitin"};
 
 exports.runProgram = function(d){return "Run Program"};
 
 exports.runTooltip = function(d){return "Run the program defined by the blocks in the workspace."};
 
-exports.showCodeHeader = function(d){return "Show Code"};
+exports.showCodeHeader = function(d){return "Ipakita ang Code"};
 
-exports.showGeneratedCode = function(d){return "Show code"};
+exports.showGeneratedCode = function(d){return "Ipakita ang Code"};
 
-exports.subtitle = function(d){return "a visual programming environment"};
+exports.subtitle = function(d){return "isang visual programming na environment"};
 
 exports.textVariable = function(d){return "text"};
 
@@ -3590,9 +3613,9 @@ exports.tooMuchWork = function(d){return "You made me do a lot of work!  Could y
 
 exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
 
-exports.toolboxHeader = function(d){return "Blocks"};
+exports.toolboxHeader = function(d){return "Mga block"};
 
-exports.openWorkspace = function(d){return "How It Works"};
+exports.openWorkspace = function(d){return "Kung Paano Ito Gumagana"};
 
 exports.totalNumLinesOfCodeWritten = function(d){return "All-time total: "+p(d,"numLines",0,"fil",{"one":"1 line","other":n(d,"numLines")+" lines"})+" of code."};
 
@@ -3600,11 +3623,11 @@ exports.tryAgain = function(d){return "Try again"};
 
 exports.backToPreviousLevel = function(d){return "Back to previous level"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "I-save sa iyong gallery"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
-exports.typeCode = function(d){return "Type your JavaScript code below these instructions."};
+exports.typeCode = function(d){return "I-type ang iyong JavaScript code pagkatapos nitong mga instruction."};
 
 exports.typeFuncs = function(d){return "Available functions:%1"};
 
@@ -3612,17 +3635,17 @@ exports.typeHint = function(d){return "Note that the parentheses and semicolons 
 
 exports.workspaceHeader = function(d){return "Assemble your blocks here: "};
 
-exports.infinity = function(d){return "Infinity"};
+exports.infinity = function(d){return "Walang katapusan"};
 
-exports.rotateText = function(d){return "Rotate your device."};
+exports.rotateText = function(d){return "Paikutin ang iyong device."};
 
 exports.orientationLock = function(d){return "Turn off orientation lock in device settings."};
 
 exports.wantToLearn = function(d){return "Want to learn to code?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Panoorin ang Video"};
 
-exports.tryHOC = function(d){return "Try the Hour of Code"};
+exports.tryHOC = function(d){return "Subukan ang Hour of Code"};
 
 exports.signup = function(d){return "Sign up for the intro course"};
 
@@ -3631,23 +3654,23 @@ exports.hintHeader = function(d){return "Here's a tip:"};
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fil=function(n){return n===0||n==1?"one":"other"}
-exports.continue = function(d){return "Continue"};
+exports.continue = function(d){return "Magpatuloy"};
 
-exports.nextLevel = function(d){return "Congratulations! You have completed this puzzle."};
+exports.nextLevel = function(d){return "Maligayang pagbati! Natapos mo ang puzzle na ito."};
 
-exports.no = function(d){return "No"};
+exports.no = function(d){return "Hindi"};
 
-exports.numBlocksNeeded = function(d){return "This puzzle can be solved with %1 blocks."};
+exports.numBlocksNeeded = function(d){return "Ang puzzle na ito ay maaaring malutas sa %1 na mga block."};
 
-exports.oneTopBlock = function(d){return "For this puzzle, you need to stack together all of the blocks in the white workspace."};
+exports.oneTopBlock = function(d){return "Para sa puzzle na ito, kailangan mo isalansan lahat ang mga block sa puting workspace."};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Maaarin mo pindutin ang \"Subukan muli\" na button upang bumalik sa paglalaro."};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Ibahagi"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Ibahagi ang iyong laro:"};
 
-exports.yes = function(d){return "Yes"};
+exports.yes = function(d){return "Oo"};
 
 
 },{"messageformat":43}],32:[function(require,module,exports){

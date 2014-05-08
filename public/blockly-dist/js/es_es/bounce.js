@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "¿Es esto una pared?"};
 
 exports.isWallTooltip = function(d){return "Devuelve verdadero si hay un muro"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "lanzar nueva pelota"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Lanza una pelota en el juego."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Crea tu Propio Bounce Game"};
 
 exports.moveDown = function(d){return "Bajar"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "Baja la torre"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Puedes pulsar el botón \"Intentarlo de nuevo\" para volver a jugar tu juego."};
 
 exports.removeSquare = function(d){return "eliminar cuadrado"};
 
@@ -5381,7 +5381,7 @@ exports.setPaddleHardcourt = function(d){return "Establecer paleta para cancha d
 
 exports.setPaddleRetro = function(d){return "Establecer paleta retro"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Establece la imagen de la pala"};
 
 exports.setPaddleSpeedRandom = function(d){return "Establecer velocidad de paleta al azar"};
 
@@ -5397,11 +5397,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "Establecer velocidad de pal
 
 exports.setPaddleSpeedTooltip = function(d){return "Establece la velocidad de la paleta de juego"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Compartir"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Echa un vistazo al juego Bounce game que he creado. Lo escribí yo mismo en @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Comparte tu juego:"};
 
 exports.turnLeft = function(d){return "Vuelta a la izquierda"};
 

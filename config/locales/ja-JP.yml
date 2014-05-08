@@ -56,8 +56,6 @@
     overview_teacher: Teach computer science in your classroom by signing up for an
       account.<p/> You'll be able to track your students' progress and get rewards.
     no_signup_message: <a target="_blank"href="http://learn.code.org"> いろいろなステージとパズルを見られます。</a>しかし、あなたの進捗状況を保存するために入会する必要があります。
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: コンセプトトロフィー %{num_trophies} こ（全部）を獲得した米国の学生は無料Dropbox、スカイプのクレジット、とかElectronic
       Artsからの無料ダウンロードできるゲームなど、バラエティにあふれる商品が選べます。
     teacher_educator_guide: 教育者のガイドを参照してください。
@@ -65,8 +63,6 @@
       rewards
     teacher_prize_message: <a target="_blank" href="http://DonorsChoose.org">DonorsChoose.org</a>とパートナーを組んで,Code.orgでは
       $1,000を上限とするクラスで使う資金を、このコースの間に少なくとも15人の学生を導いた米国の公立学校の教師へ提供します。 <a href="http://code.org/educate/20hr">詳細は教育者ガイドを参考にしてください。</a> 
-    teacher_prize_limits: '(制限: 教師 1 人あたり $1,000。<a target="_blank"href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      多くの制限を参照してくださいよくあるご質問</a>）'
     teacher_pitch: あなたの教室でK 8(幼稚園から８学年生）にコンピューター科学の紹介を教える。
     teacher_title: 教師入会
     student_pitch: '1 時間を超えて: 私たちのK 8 入門コンピューターサイエンスを試してみてください'
@@ -271,6 +267,7 @@
   user_stats:
     recent_activity: 最近の活動
     show_more: もっと見る
+    classroom_activity: Unplugged Activity
   home:
     signin_message: 既に登録されていますか？% {リンク}
     student_reg_link: 学生は、サインアップ（登録）
@@ -283,7 +280,6 @@
     teacher_averages: 平均であなたの学生わ %{trophy_max}のうち%{trophy_average}　"コンセプト習得"のトロフィーを獲得しています。
     teacher_print_certificates: このコースを終了した生徒の証明書を印刷します。
     teacher_read_blog: ニュースと更新（教師用ブログ）を読みます
-    teacher_survey: Tell us what you think about this course
     classroom: あなたの教室
     student_progress: 学習の進行状況
     student_stats: '%{trophy_max}このうち%{trophy_count} の"コンセプト"習得のトロフィーを獲得しました。'
@@ -370,3 +366,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

@@ -58,8 +58,6 @@
     no_signup_message: Þú getur <a target="_blank" href="http://learn.code.org">skoðað
       hina ýmsu áfanga og þrautir</a>, en þú verður að skrá þig til að geta vistað
       árangur þinn.
-    prizes_header: Fyrstu nemendurnir til að ljúka námskeiðinu vinna til verðlauna!
-      (aðeins bandarískir nemendur)
     prizes_message: Bandarískir nemendur sem safna öllum %{num_trophies} hugtakabikurunum
       geta valið ýmiss verðlaun þar á meðal ókeypis pláss á Dropbox, inneign hjá Skype
       og leikjaniðurhal hjá Electronic Arts.
@@ -70,8 +68,6 @@
       skólum í Bandaríkjunum hjá þeim kennurum sem leiða a.m.k. 15 nemendur í gegnum
       þetta námskeið. <a href="http://code.org/educate/20hr">Sjá nánar í leiðarvísi
       fyrir kennara.</a> 
-    teacher_prize_limits: '(Hámark: $1.000 á kennara. <a target="_blank">href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">Nánar
-      um takmarkanir í FAQ lista</a>)'
     teacher_pitch: Kenndu nemendum þínum K8 Inngang að tölvunarfræði
     teacher_title: Nýskráning kennara
     student_pitch: 'Að lokinni 1 klst: prófaðu K-8 Intro to Computer Science'
@@ -296,6 +292,7 @@
   user_stats:
     recent_activity: Nýleg virkni
     show_more: Sýna meira
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Þegar skráð(ur)? %{link}
     student_reg_link: Skráning nemanda
@@ -310,7 +307,6 @@
     teacher_print_certificates: Prenta skírteini fyrir nemendur sem ljúka þessu námskeiði
     teacher_read_blog: Lesa um fréttir og uppfærslur á efni okkar á kennarabloggi
       okkar
-    teacher_survey: Tell us what you think about this course
     classroom: Bekkjarstofan þín
     student_progress: Námsframvinda þín
     student_stats: Þú hefur unnið til %{trophy_count} af %{trophy_max} mögulegum "Concept
@@ -399,3 +395,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

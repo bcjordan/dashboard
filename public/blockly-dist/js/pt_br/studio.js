@@ -5493,7 +5493,7 @@ exports.finalStage = function(d){return "Parabéns! Você concluiu a etapa final
 
 exports.finalStageTrophies = function(d){return "Parabéns! Você concluiu a fase final e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Os blocos para o seu programa também podem ser representados em JavaScript, a linguagem de programação mais adotada no mundo:"};
+exports.generatedCodeInfo = function(d){return "Mesmo as melhores universidades ensinam codificação em blocos (por exemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Mas na verdade, os blocos que você juntou podem ser vistos em JavaScript, a linguagem de codificação mais usada em todo o mundo:"};
 
 exports.hashError = function(d){return "Desculpe, nenhum programa salvo como '%1'."};
 
@@ -5515,9 +5515,9 @@ exports.nextLevel = function(d){return "Parabéns! Você completou o quebra-cabe
 
 exports.nextLevelTrophies = function(d){return "Parabéns! Você completou o quebra-cabeça "+v(d,"puzzleNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.nextStage = function(d){return "Parabéns! Você completou a fase "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Parabéns! Você completou "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
+exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageName")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Parabéns! Você completou o Quebra-cabeça "+v(d,"puzzleNumber")+". (Mas você poderia ter usado apenas "+p(d,"numBlocks",0,"pt",{"one":"1 bloco","other":n(d,"numBlocks")+" blocos"})+".)"};
 
@@ -5557,7 +5557,7 @@ exports.tryAgain = function(d){return "Tente novamente"};
 
 exports.backToPreviousLevel = function(d){return "Voltar"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Salve na sua galeria"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5583,7 +5583,7 @@ exports.tryHOC = function(d){return "Tente a Hora do Código"};
 
 exports.signup = function(d){return "Cadastre-se para o curso de introdução"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aqui vai uma dica:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5606,15 +5606,15 @@ exports.continue = function(d){return "Continuar"};
 
 exports.defaultSayText = function(d){return "type here"};
 
-exports.finalLevel = function(d){return "Parabéns! Você resolveu o quebra-cabeça final."};
+exports.finalLevel = function(d){return "Parabéns! Você resolveu o enigma final."};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
+exports.incrementOpponentScore = function(d){return "marca o ponto do oponente"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Adiciona um ponto para o jogador ou oponente."};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "define o ponto do jogador"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Crie sua propria história"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5654,19 +5654,19 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "mover para baixo"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "move para esquerda"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "move para a direita"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "move para cima"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
@@ -5676,35 +5676,35 @@ exports.nextLevel = function(d){return "Parabéns! Você completou este quebra-c
 
 exports.no = function(d){return "Não"};
 
-exports.numBlocksNeeded = function(d){return "Este quebra-cabeça pode ser resolvido com %1 blocos."};
+exports.numBlocksNeeded = function(d){return "Este quebra-cabeça pode ser resolvido com blocos de %1."};
 
-exports.oneTopBlock = function(d){return "Para este quebra-cabeça, você precisa empilhar todos os blocos na área branca."};
+exports.oneTopBlock = function(d){return "Para este enigma, você precisa empilhar juntos todos os blocos na área de trabalho branca."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "toque som de triturar"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "tocar som do objetivo 1"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "tocar som do objetivo 2"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "toca o som do toque"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "toca o som do ponto perdido"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "toca o som do ponto perdido 2"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "toca o som retro"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "tocar som de borracha"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "toca o som de palmas"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Toca o som de opção escolhida."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "toca o som do ponto de vitória"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "tocar som de ponto ganho 2"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "tocar som de madeira"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 

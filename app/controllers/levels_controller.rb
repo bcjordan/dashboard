@@ -80,11 +80,13 @@ class LevelsController < ApplicationController
 
     begin
       @level = type_class.create_from_level_builder(params, level_params)
-    rescue ArgumentError
-      render status: :not_acceptable, text: "There is a non integer value in the grid." and return
+    rescue ArgumentError => e
+      render status: :not_acceptable, json: {error: e.message}.to_json and return
+    rescue ActiveRecord::RecordInvalid => invalid
+      render status: :not_acceptable, json: invalid.record.errors.to_json and return
     end
 
-    render json: { redirect: game_level_url(@level.game, @level) }
+    render json: { redirect: game_level_url(@level.game, @level) }.to_json
   end
 
   # DELETE /levels/1

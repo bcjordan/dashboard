@@ -276,4 +276,22 @@ class LevelsControllerTest < ActionController::TestCase
     values = skin_select.map { |option| option.attributes["value"] }
     assert_equal skins, values
   end
+
+  test "should populate artist start direction with current value" do
+    level = create(:artist, :start_direction => 180)
+    get :edit, id: level, game_id: level.game
+    assert_select "#level_start_direction[value='180']"
+  end
+
+  test "should populate maze start direction with current value" do
+    level = create(:maze, :start_direction => 2)
+    get :edit, id: level, game_id: level.game
+    assert_select "#level_start_direction option[value='2'][selected='selected']"
+  end
+
+  test "should populate level skin with current value" do
+    level = create(:maze, :skin => 'pvz')
+    get :edit, id: level, game_id: level.game
+    assert_select "#level_skin option[value='pvz'][selected='selected']"
+  end
 end

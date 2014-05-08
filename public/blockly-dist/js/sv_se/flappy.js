@@ -4728,13 +4728,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "\"Upprepa\" eller \"Om\" blocken måste ha andra block inuti sig för att fungera. Se till att det inre blocket sitter rätt inuti blocket."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Du har extra block som inte är kopplade till händelseblock."};
 
 exports.finalStage = function(d){return "Grattis! Du har slutfört den sista nivån."};
 
 exports.finalStageTrophies = function(d){return "Grattis! Du har slutfört den sista nivån och vann "+p(d,"numTrophies",0,"sv",{"en":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blocken i ditt program kan också skrivas i Javascript, världens mest använda programmeringsspråk:"};
+exports.generatedCodeInfo = function(d){return "Även toppuniversitet lär ut blockbaserad programmering (t.ex. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Men under ytan kan blocken du har byggt ihop också visas som JavaScript, världens mest använda programmeringsspråk:"};
 
 exports.hashError = function(d){return "Tyvärr, '%1' finns inte bland dina sparade program."};
 
@@ -4748,7 +4748,7 @@ exports.levelIncompleteError = function(d){return "Du använder alla nödvändig
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Gör ditt eget Flappy-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Prova med en eller flera av blocken nedan att lösa pusslet."};
 
@@ -4756,9 +4756,9 @@ exports.nextLevel = function(d){return "Grattis! Du slutförde pussel "+v(d,"puz
 
 exports.nextLevelTrophies = function(d){return "Grattis! Du slutförde pussel "+v(d,"puzzleNumber")+" och vann "+p(d,"numTrophies",0,"sv",{"one":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
 
-exports.nextStage = function(d){return "Grattis! Du slutförde nivå "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Grattis! Du har klarat "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Grattis! Du slutförde pussel "+v(d,"stageNumber")+" och vann "+p(d,"numTrophies",0,"sv",{"one":"en trofé","other":n(d,"numTrophies")+" troféer"})+"."};
+exports.nextStageTrophies = function(d){return "Grattis! Du klarade "+v(d,"stageName")+" och har fått "+p(d,"numTrophies",0,"sv",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Grattis! Du slutförde pussel "+v(d,"puzzleNumber")+". (Men du skulle bara behövt använda"+p(d,"numBlocks",0,"sv",{"one":"1 block","other":n(d,"numBlocks")+" block"})+".)"};
 
@@ -4786,7 +4786,7 @@ exports.tooManyBlocksMsg = function(d){return "Detta pusslet kan lösas med <x i
 
 exports.tooMuchWork = function(d){return "Du fick mig att göra en hel del arbete!  Du kan försöka upprepa färre gånger?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Din kod ser bra ut - den kommer att flaxa med varje klick. Men du måste klicka många gånger för att flaxa till målet."};
 
 exports.toolboxHeader = function(d){return "Block"};
 
@@ -4798,7 +4798,7 @@ exports.tryAgain = function(d){return "Försök igen"};
 
 exports.backToPreviousLevel = function(d){return "Gå tillbaka till föregående nivå"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Spara till ditt galleri"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -4816,15 +4816,15 @@ exports.rotateText = function(d){return "Rotera din enhet."};
 
 exports.orientationLock = function(d){return "Stäng av orienterings låset i enhetsinställningar."};
 
-exports.wantToLearn = function(d){return "Want to learn to code?"};
+exports.wantToLearn = function(d){return "Vill du lära dig att programmera?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Titta på videon"};
 
-exports.tryHOC = function(d){return "Try the Hour of Code"};
+exports.tryHOC = function(d){return "Prove en Timme med Kod"};
 
-exports.signup = function(d){return "Sign up for the intro course"};
+exports.signup = function(d){return "Registrera dig för introduktionskursen"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Här är ett tips:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){
@@ -4841,19 +4841,19 @@ exports.endGameTooltip = function(d){return "Avslutar spelet."};
 
 exports.finalLevel = function(d){return "Grattis! Du har löst det sista pusslet."};
 
-exports.flap = function(d){return "flap"};
+exports.flap = function(d){return "flaxa"};
 
-exports.flapRandom = function(d){return "flap a random amount"};
+exports.flapRandom = function(d){return "flaxa slumpmässigt antal gånger"};
 
-exports.flapVerySmall = function(d){return "flap a very small amount"};
+exports.flapVerySmall = function(d){return "flaxa väldigt lite"};
 
-exports.flapSmall = function(d){return "flap a small amount"};
+exports.flapSmall = function(d){return "flaxa lite"};
 
-exports.flapNormal = function(d){return "flap a normal amount"};
+exports.flapNormal = function(d){return "flaxa normalt"};
 
-exports.flapLarge = function(d){return "flap a large amount"};
+exports.flapLarge = function(d){return "flaxa mycket"};
 
-exports.flapVeryLarge = function(d){return "flap a very large amount"};
+exports.flapVeryLarge = function(d){return "flaxa väldigt mycket"};
 
 exports.flapTooltip = function(d){return "Flyga Flappy uppåt."};
 
@@ -4887,173 +4887,173 @@ exports.playSoundWing = function(d){return "spela vinge ljud"};
 
 exports.playSoundJet = function(d){return "spela jetplan ljud"};
 
-exports.playSoundCrash = function(d){return "play crash sound"};
+exports.playSoundCrash = function(d){return "spela upp ett krasch-ljud"};
 
-exports.playSoundJingle = function(d){return "play jingle sound"};
+exports.playSoundJingle = function(d){return "spela upp ett pingel-ljud"};
 
-exports.playSoundSplash = function(d){return "play splash sound"};
+exports.playSoundSplash = function(d){return "spela upp ett plask-ljud"};
 
-exports.playSoundLaser = function(d){return "play laser sound"};
+exports.playSoundLaser = function(d){return "spela upp ett laser-ljud"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Spela upp det valda ljudet."};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Du kan klicka på \"Försök igen\" för att gå tillbaka till att spela ditt spel."};
 
-exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+exports.scoreText = function(d){return "Poäng: "+v(d,"playerScore")};
 
-exports.setBackgroundRandom = function(d){return "set scene Random"};
+exports.setBackgroundRandom = function(d){return "ange slumpmässig scen"};
 
-exports.setBackgroundFlappy = function(d){return "set scene City (day)"};
+exports.setBackgroundFlappy = function(d){return "ange stads-scen (dag)"};
 
-exports.setBackgroundNight = function(d){return "set scene City (night)"};
+exports.setBackgroundNight = function(d){return "ange stads-scen (natt)"};
 
-exports.setBackgroundSciFi = function(d){return "set scene Sci-Fi"};
+exports.setBackgroundSciFi = function(d){return "ange science-fiction-scen"};
 
-exports.setBackgroundUnderwater = function(d){return "set scene Underwater"};
+exports.setBackgroundUnderwater = function(d){return "ange undervattens-scen"};
 
-exports.setBackgroundCave = function(d){return "set scene Cave"};
+exports.setBackgroundCave = function(d){return "ange grott-scen"};
 
-exports.setBackgroundSanta = function(d){return "set scene Santa"};
+exports.setBackgroundSanta = function(d){return "ange jultomte-scen"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Ange bakgrundsbild"};
 
-exports.setGapRandom = function(d){return "set a random gap"};
+exports.setGapRandom = function(d){return "ange slumpmässigt mellanrum"};
 
-exports.setGapVerySmall = function(d){return "set a very small gap"};
+exports.setGapVerySmall = function(d){return "ange ett väldigt litet mellanrum"};
 
-exports.setGapSmall = function(d){return "set a small gap"};
+exports.setGapSmall = function(d){return "ange ett litet mellanrum"};
 
-exports.setGapNormal = function(d){return "set a normal gap"};
+exports.setGapNormal = function(d){return "ange ett normalt mellanrum"};
 
-exports.setGapLarge = function(d){return "set a large gap"};
+exports.setGapLarge = function(d){return "ange ett stort mellanrum"};
 
-exports.setGapVeryLarge = function(d){return "set a very large gap"};
+exports.setGapVeryLarge = function(d){return "ange ett väldigt stort mellanrum"};
 
-exports.setGapHeightTooltip = function(d){return "Sets the vertical gap in an obstacle"};
+exports.setGapHeightTooltip = function(d){return "Anger det vertikala mellanrummet i ett hinder"};
 
-exports.setGravityRandom = function(d){return "set gravity random"};
+exports.setGravityRandom = function(d){return "ange slumpmässig gravitation"};
 
-exports.setGravityVeryLow = function(d){return "set gravity very low"};
+exports.setGravityVeryLow = function(d){return "ange väldigt låg gravitation"};
 
-exports.setGravityLow = function(d){return "set gravity low"};
+exports.setGravityLow = function(d){return "ange låg gravitation"};
 
-exports.setGravityNormal = function(d){return "set gravity normal"};
+exports.setGravityNormal = function(d){return "ange normal gravitation"};
 
-exports.setGravityHigh = function(d){return "set gravity high"};
+exports.setGravityHigh = function(d){return "ange hög gravitation"};
 
-exports.setGravityVeryHigh = function(d){return "set gravity very high"};
+exports.setGravityVeryHigh = function(d){return "ange väldigt hög gravitation"};
 
-exports.setGravityTooltip = function(d){return "Sets the level's gravity"};
+exports.setGravityTooltip = function(d){return "Anger nivåns gravitation"};
 
-exports.setGroundRandom = function(d){return "set ground Random"};
+exports.setGroundRandom = function(d){return "ange slumpmässig mark"};
 
-exports.setGroundFlappy = function(d){return "set ground Ground"};
+exports.setGroundFlappy = function(d){return "ange vanlig mark"};
 
-exports.setGroundSciFi = function(d){return "set ground Sci-Fi"};
+exports.setGroundSciFi = function(d){return "ange science-fiction-mark"};
 
-exports.setGroundUnderwater = function(d){return "set ground Underwater"};
+exports.setGroundUnderwater = function(d){return "ange undervattens-mark"};
 
-exports.setGroundCave = function(d){return "set ground Cave"};
+exports.setGroundCave = function(d){return "ange grott-mark"};
 
-exports.setGroundSanta = function(d){return "set ground Santa"};
+exports.setGroundSanta = function(d){return "ange jultomte-mark"};
 
-exports.setGroundLava = function(d){return "set ground Lava"};
+exports.setGroundLava = function(d){return "ange lava-mark"};
 
-exports.setGroundTooltip = function(d){return "Sets the ground image"};
+exports.setGroundTooltip = function(d){return "Anger mark-bilden"};
 
-exports.setObstacleRandom = function(d){return "set obstacle Random"};
+exports.setObstacleRandom = function(d){return "ange slumpmässigt hinder"};
 
-exports.setObstacleFlappy = function(d){return "set obstacle Pipe"};
+exports.setObstacleFlappy = function(d){return "ange rör-hinder"};
 
-exports.setObstacleSciFi = function(d){return "set obstacle Sci-Fi"};
+exports.setObstacleSciFi = function(d){return "ange science-fiction-hinder"};
 
-exports.setObstacleUnderwater = function(d){return "set obstacle Plant"};
+exports.setObstacleUnderwater = function(d){return "ange växt-hinder"};
 
-exports.setObstacleCave = function(d){return "set obstacle Cave"};
+exports.setObstacleCave = function(d){return "ange grott-hinder"};
 
-exports.setObstacleSanta = function(d){return "set obstacle Chimney"};
+exports.setObstacleSanta = function(d){return "ange skorstens-hinder"};
 
-exports.setObstacleLaser = function(d){return "set obstacle Laser"};
+exports.setObstacleLaser = function(d){return "ange laser-hinder"};
 
-exports.setObstacleTooltip = function(d){return "Sets the obstacle image"};
+exports.setObstacleTooltip = function(d){return "Anger hinder-bild"};
 
-exports.setPlayerRandom = function(d){return "set player Random"};
+exports.setPlayerRandom = function(d){return "ange slumpmässig spelare"};
 
-exports.setPlayerFlappy = function(d){return "set player Yellow Bird"};
+exports.setPlayerFlappy = function(d){return "ange gul fågel som spelare"};
 
-exports.setPlayerRedBird = function(d){return "set player Red Bird"};
+exports.setPlayerRedBird = function(d){return "ange röd fågel som spelare"};
 
-exports.setPlayerSciFi = function(d){return "set player Spaceship"};
+exports.setPlayerSciFi = function(d){return "ange rymdskepp som spelare"};
 
-exports.setPlayerUnderwater = function(d){return "set player Fish"};
+exports.setPlayerUnderwater = function(d){return "ange fisk som spelare"};
 
-exports.setPlayerCave = function(d){return "set player Bat"};
+exports.setPlayerCave = function(d){return "ange fladdermus som spelare"};
 
-exports.setPlayerSanta = function(d){return "set player Santa"};
+exports.setPlayerSanta = function(d){return "ange jultomten som spelare"};
 
-exports.setPlayerShark = function(d){return "set player Shark"};
+exports.setPlayerShark = function(d){return "ange haj som spelare"};
 
-exports.setPlayerEaster = function(d){return "set player Easter Bunny"};
+exports.setPlayerEaster = function(d){return "ange påskharen som spelare"};
 
-exports.setPlayerBatman = function(d){return "set player Bat guy"};
+exports.setPlayerBatman = function(d){return "ange Bat-killen som spelare"};
 
-exports.setPlayerSubmarine = function(d){return "set player Submarine"};
+exports.setPlayerSubmarine = function(d){return "ange ubåt som spelare"};
 
-exports.setPlayerUnicorn = function(d){return "set player Unicorn"};
+exports.setPlayerUnicorn = function(d){return "ange enhörning som spelare"};
 
-exports.setPlayerFairy = function(d){return "set player Fairy"};
+exports.setPlayerFairy = function(d){return "ange älva som spelare"};
 
-exports.setPlayerSuperman = function(d){return "set player Flappyman"};
+exports.setPlayerSuperman = function(d){return "ange Flaxmannen som spelare"};
 
-exports.setPlayerTurkey = function(d){return "set player Turkey"};
+exports.setPlayerTurkey = function(d){return "ange kalkon som spelare"};
 
-exports.setPlayerTooltip = function(d){return "Sets the player image"};
+exports.setPlayerTooltip = function(d){return "Anger spelarens bild"};
 
-exports.setScore = function(d){return "set score"};
+exports.setScore = function(d){return "anger poäng"};
 
-exports.setScoreTooltip = function(d){return "Sets the player's score"};
+exports.setScoreTooltip = function(d){return "Anger spelarens poäng"};
 
-exports.setSpeed = function(d){return "set speed"};
+exports.setSpeed = function(d){return "ange hastighet"};
 
-exports.setSpeedTooltip = function(d){return "Sets the levels speed"};
+exports.setSpeedTooltip = function(d){return "Anger nivåns hastighet"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Dela"};
 
-exports.shareFlappyTwitter = function(d){return "Check out the Flappy game I made. I wrote it myself with @codeorg"};
+exports.shareFlappyTwitter = function(d){return "Kolla in Flappyspelet jag gjort. Jag skrev det själv med @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Dela ditt spel:"};
 
-exports.speedRandom = function(d){return "set speed random"};
+exports.speedRandom = function(d){return "ange slumpmässig hastighet"};
 
-exports.speedVerySlow = function(d){return "set speed very slow"};
+exports.speedVerySlow = function(d){return "ange väldigt långsam hastighet"};
 
-exports.speedSlow = function(d){return "set speed slow"};
+exports.speedSlow = function(d){return "ange långsam hastighet"};
 
-exports.speedNormal = function(d){return "set speed normal"};
+exports.speedNormal = function(d){return "ange normal hastighet"};
 
-exports.speedFast = function(d){return "set speed fast"};
+exports.speedFast = function(d){return "ange snabb hastighet"};
 
-exports.speedVeryFast = function(d){return "set speed very fast"};
+exports.speedVeryFast = function(d){return "ange väldigt snabb hastighet"};
 
-exports.whenClick = function(d){return "when click"};
+exports.whenClick = function(d){return "när ett klick sker"};
 
-exports.whenClickTooltip = function(d){return "Execute the actions below when a click event occurs."};
+exports.whenClickTooltip = function(d){return "Utför kommandona nedan när en klick-händelse inträffar."};
 
-exports.whenCollideGround = function(d){return "when hit the ground"};
+exports.whenCollideGround = function(d){return "när slår i marken"};
 
-exports.whenCollideGroundTooltip = function(d){return "Execute the actions below when Flappy hits the ground."};
+exports.whenCollideGroundTooltip = function(d){return "Utför kommandona nedan när Flappy träffar marken."};
 
-exports.whenCollideObstacle = function(d){return "when hit an obstacle"};
+exports.whenCollideObstacle = function(d){return "när träffar ett hinder"};
 
-exports.whenCollideObstacleTooltip = function(d){return "Execute the actions below when Flappy hits an obstacle."};
+exports.whenCollideObstacleTooltip = function(d){return "Utför kommandona nedan när Flappy träffar ett hinder."};
 
-exports.whenEnterObstacle = function(d){return "when pass obstacle"};
+exports.whenEnterObstacle = function(d){return "när passerar ett hinder"};
 
-exports.whenEnterObstacleTooltip = function(d){return "Execute the actions below when Flappy enters an obstacle."};
+exports.whenEnterObstacleTooltip = function(d){return "Utför kommandona nedan när Flappy åker genom ett hinder."};
 
-exports.whenRunButtonClick = function(d){return "when Run is clicked"};
+exports.whenRunButtonClick = function(d){return "när spelet börjar"};
 
-exports.whenRunButtonClickTooltip = function(d){return "Execute the actions below when the run button is pressed."};
+exports.whenRunButtonClickTooltip = function(d){return "Utför kommandona nedan när spelet startar."};
 
 exports.yes = function(d){return "Ja"};
 

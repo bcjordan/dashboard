@@ -5322,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5451,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5492,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5503,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5511,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7067,7 +7066,7 @@ exports.nextLevelTrophies = function(d){return "Поздравляю! Ты за�
 
 exports.nextStage = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+" и выиграл "+p(d,"numTrophies",0,"ru",{"one":"кубок","other":n(d,"numTrophies")+" кубков"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравляем! Вы выполнили "+v(d,"stageName")+" и выиграли "+p(d,"numTrophies",0,"ru",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравляю! Ты завершил головоломку "+v(d,"puzzleNumber")+". (Однако, можно было обойтись всего  "+p(d,"numBlocks",0,"ru",{"one":"1 блоком","other":n(d,"numBlocks")+" блоками"})+".)"};
 
@@ -7107,7 +7106,7 @@ exports.tryAgain = function(d){return "Попытаться ещё раз"};
 
 exports.backToPreviousLevel = function(d){return "Вернуться на предыдущий уровень"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Сохранить в галерею"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 

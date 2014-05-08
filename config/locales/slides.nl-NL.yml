@@ -98,8 +98,8 @@
     flappy_intro:
       1:
         image: notes/flappy01.jpg
-        text: Hi, I'm Katie! One of the most exciting things about computer science
-          is that a computer program can be interactive.
+        text: Hoi, ik ben Katie! Een van de meest spannende dingen over informatica
+          is dat een computerprogramma interactief kan zijn.
       2:
         image: notes/flappy02.jpg
         text: Any time somebody clicks or taps or types on a computer or phone, that
@@ -111,22 +111,23 @@
           is clicked, play a sound" '
       4:
         image: notes/flappy04.jpg
-        text: Have you ever heard of the game FlappyBird? By using Event handlers,
-          we're going to learn to program our own custom version of FlappyBird!
+        text: Heb je ooit van het spel FlappyBird gehoord? Met behulp van gebeurtenis-verwerkers
+          gaan we leren om  onze eigen aangepaste versie van FlappyBird te programmeren!
       5:
         image: notes/flappy05.jpg
-        text: The code you'll write involves dragging and dropping blocks that represent
-          commands for the computer. Under the hood, each of these blocks is represented
-          by real code.
+        text: De code die zul je schrijven omvat slepen en neerzetten van blokken
+          met daarin opdrachten voor de computer. Onder de motorkap wordt elk van
+          deze blokken vertegenwoordigd door echte code.
       6:
         image: notes/flappy06.jpg
-        text: 'If you take a look at the workspace, there are some green blocks that
-          are filled in for you - these are "event handlers" '
+        text: 'Als je een kijkje neemt in de werkplaats, zie je een aantal groene
+          blokken die voor je zijn ingevuld - dit zijn "gebeurtenis-verwerkers" '
       7:
         image: notes/flappy07.jpg
-        text: If you want the bird to FLAP when you CLICK the mouse, you can do that
-          by attaching the "FLAP" block to the appropriate event handler, and now
-          in your game whenever you click the mouse, the bird will flap.
+        text: Als je wilt dat de vogel FLAPPERT als je met de muis KLIKT, krijg je
+          dat voor elkaar door het "FLAP" blok aan de goede gebeurtenis-verwerker
+          te verbinden. Telkens als je nu in je spel met de muis klikt, zal de vogel
+          flapperen.
       8:
         image: notes/flappy08.jpg
         text: In each puzzle of this activity we'll introduce new types of events

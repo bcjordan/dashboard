@@ -5322,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5451,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5492,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5503,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5511,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7047,7 +7046,7 @@ exports.finalStage = function(d){return "تهانينا! لقد اتممت ال�
 
 exports.finalStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة النهائية وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.generatedCodeInfo = function(d){return "القطع في برنامجك تستطيع كذلك بأعادة تمثيلها في الـ Java Script , بحيث تعتبر اللغة البرمجية واسعة التكيف عالميا :"};
+exports.generatedCodeInfo = function(d){return "حتى أفضل الجامعات تعلم الترميز القائم على الكتلة (على سبيل المثال، "+v(d,"berkeleyLink")+"، "+v(d,"harvardLink")+"). ولكن تحت غطاء محرك السيارة،يمكن للكتل التي كنت قد جمعتها أيضا أن تظهر في جافا سكريبت، الأكثر استخداما على نطاق واسع كلغة ترميز في العالم:"};
 
 exports.hashError = function(d){return "عذرا , %1 لايتوافق مع اي البرامج المحفوظة ."};
 
@@ -7069,7 +7068,7 @@ exports.nextLevel = function(d){return "تهانينا ! أنت اكملت ال�
 
 exports.nextLevelTrophies = function(d){return "تهانينا! لقد أكملت اللغز "+v(d,"puzzleNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
-exports.nextStage = function(d){return "تهانينا! أنت اكملت المرحلة "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "تهانينا! يمكنك إكمال "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "تهانينا! لقد أكملت المرحلة "+v(d,"stageNumber")+" وفزت بـ "+p(d,"numTrophies",0,"ar",{"one":"جائزة","other":n(d,"numTrophies")+" جوائز"})+"."};
 
@@ -7111,7 +7110,7 @@ exports.tryAgain = function(d){return "حاول مرة أخرى"};
 
 exports.backToPreviousLevel = function(d){return "الرجوع إلى المستوى السابق"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7137,7 +7136,7 @@ exports.tryHOC = function(d){return "جرب \"Hour of Code\""};
 
 exports.signup = function(d){return "سجل لمشاهدة مقدمة الدورة"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "وإليك نصيحة:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

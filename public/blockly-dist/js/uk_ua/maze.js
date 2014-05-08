@@ -5322,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5451,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5492,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5503,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5511,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7043,7 +7042,7 @@ exports.finalStage = function(d){return "Вітання! Завершено ос
 
 exports.finalStageTrophies = function(d){return "Вітання! Ви завершили останній етап і виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоки програми можна представити мовою JavaScript, яка є найпоширенішою мовою програмування у світі:"};
+exports.generatedCodeInfo = function(d){return "Навіть кращі університети навчають програмуванню на основі блоків (наприклад, "+v(d,"berkeleyLink")+" "+v(d,"harvardLink")+"). Але всередині ці блоки, які ви зібрали, можуть показуватись у JavaScript, найбільш широко використовуваній мові програмування:"};
 
 exports.hashError = function(d){return "Шкода, але  '%1' не відповідає жодній збереженій програмі."};
 
@@ -7065,9 +7064,9 @@ exports.nextLevel = function(d){return "Вітання! Завершено за�
 
 exports.nextLevelTrophies = function(d){return "Вітання! Ви завершили завдання "+v(d,"puzzleNumber")+" та виграли  "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеїв"})+"."};
 
-exports.nextStage = function(d){return "Вітаємо! Завершено етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Вітаємо! Ви завершили "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап  "+v(d,"stageNumber")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеї"})+"."};
+exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап "+v(d,"stageName")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Вітаємо! Ви завершили завдання  "+v(d,"puzzleNumber")+". (Проте, його можна було вирішити, використавши лише "+p(d,"numBlocks",0,"uk",{"one":"1 блок","other":n(d,"numBlocks")+" блоки"})+".)"};
 
@@ -7107,7 +7106,7 @@ exports.tryAgain = function(d){return "Спробуй знову"};
 
 exports.backToPreviousLevel = function(d){return "Повернутися до попереднього рівня"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Зберегти до вашої колекції"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7133,7 +7132,7 @@ exports.tryHOC = function(d){return "Спробуйте годину коду"};
 
 exports.signup = function(d){return "Підпишіться на вступний курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Підказка:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

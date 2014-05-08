@@ -5493,7 +5493,7 @@ exports.finalStage = function(d){return "Complimenti! Hai completato l'ultima le
 
 exports.finalStageTrophies = function(d){return "Complimenti! Hai completato l'ultima lezione e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
 
-exports.generatedCodeInfo = function(d){return "I blocchi per il tuo programma possono essere rappresentati anche in JavaScript, uno dei linguaggi di programmazione più usati al mondo:"};
+exports.generatedCodeInfo = function(d){return "Anche le migliori università (p.es., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+") insegnano la programmazione visuale con i blocchi. Ma i blocchi che metti insieme possono essere rappresentati anche in JavaScript, uno dei linguaggi di programmazione più usati al mondo:"};
 
 exports.hashError = function(d){return "Siamo spiacenti, '%1' non corrisponde ad alcun programma salvato."};
 
@@ -5507,23 +5507,23 @@ exports.levelIncompleteError = function(d){return "Stai usando tutti i tipi di b
 
 exports.listVariable = function(d){return "lista"};
 
-exports.makeYourOwnFlappy = function(d){return "Costruisci il tuo gioco Flappy"};
+exports.makeYourOwnFlappy = function(d){return "Costruisci la tua versione del gioco Flappy"};
 
-exports.missingBlocksErrorMsg = function(d){return "Prova uno o più dei blocchi che trovi qui sotto per risolvere questo puzzle."};
+exports.missingBlocksErrorMsg = function(d){return "Prova uno o più dei blocchi che trovi qui sotto per risolvere questo esercizio."};
 
-exports.nextLevel = function(d){return "Complimenti! Hai completato il puzzle "+v(d,"puzzleNumber")+"."};
+exports.nextLevel = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+"."};
 
-exports.nextLevelTrophies = function(d){return "Complimenti! Hai completato il Puzzle "+v(d,"puzzleNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
+exports.nextLevelTrophies = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.nextStage = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageNumber")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"un trofeo","other":n(d,"numTrophies")+" trofei"})+"."};
+exports.nextStageTrophies = function(d){return "Complimenti! Hai completato la lezione "+v(d,"stageName")+" e vinto "+p(d,"numTrophies",0,"it",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Complimenti! Hai completato il Puzzle "+v(d,"puzzleNumber")+". (Avresti però potuto usare solo "+p(d,"numBlocks",0,"it",{"one":"1 blocco","other":n(d,"numBlocks")+" blocchi"})+".)"};
+exports.numBlocksNeeded = function(d){return "Complimenti! Hai completato l'esercizio "+v(d,"puzzleNumber")+". (Avresti però potuto usare solo "+p(d,"numBlocks",0,"it",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
 
 exports.numLinesOfCodeWritten = function(d){return "Hai appena scritto "+p(d,"numLines",0,"it",{"one":"1 linea","other":n(d,"numLines")+" linee"})+" di codice!"};
 
-exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" di "+v(d,"stage_total")};
+exports.puzzleTitle = function(d){return "Esercizio "+v(d,"puzzle_number")+" di "+v(d,"stage_total")};
 
 exports.resetProgram = function(d){return "Ricomincia"};
 
@@ -5541,7 +5541,7 @@ exports.textVariable = function(d){return "testo"};
 
 exports.tooFewBlocksMsg = function(d){return "Stai usando tutti i tipi di blocchi necessari, ma prova usando più blocchi o usandoli diversamente."};
 
-exports.tooManyBlocksMsg = function(d){return "Questo puzzle può essere risolto con < x id= 'START_SPAN'/><x id='END_SPAN'/> blocchi."};
+exports.tooManyBlocksMsg = function(d){return "Questo esercizio può essere risolto con <x id='START_SPAN'/><x id='END_SPAN'/> blocchi."};
 
 exports.tooMuchWork = function(d){return "Mi hai fatto fare un sacco di lavoro!  Puoi provare a farmi fare meno ripetizioni?"};
 
@@ -5557,7 +5557,7 @@ exports.tryAgain = function(d){return "Riprova"};
 
 exports.backToPreviousLevel = function(d){return "Torna al livello precedente"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Salva nella tua galleria"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5583,7 +5583,7 @@ exports.tryHOC = function(d){return "Prova l'Ora di Codice"};
 
 exports.signup = function(d){return "Iscriviti al corso introduttivo"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ecco un suggerimento:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5606,15 +5606,15 @@ exports.continue = function(d){return "Prosegui"};
 
 exports.defaultSayText = function(d){return "type here"};
 
-exports.finalLevel = function(d){return "Complimenti! Hai risolto il puzzle finale."};
+exports.finalLevel = function(d){return "Complimenti! Hai risolto l'esercizio finale."};
 
-exports.incrementOpponentScore = function(d){return "aumenta il punteggio dell'avversario"};
+exports.incrementOpponentScore = function(d){return "l'avversario ha fatto 1 punto"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Aggiungi uno ai punteggi del giocatore e dell'avversario."};
 
-exports.incrementPlayerScore = function(d){return "aumenta il punteggio del giocatore"};
+exports.incrementPlayerScore = function(d){return "il giocatore ha fatto un punto"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Crea La Tua Storia"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5626,15 +5626,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 pixel"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 pixel"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 pixel"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 pixel"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 pixel"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5672,39 +5672,39 @@ exports.moveUpTooltip = function(d){return "Sposta la racchetta in alto."};
 
 exports.moveTooltip = function(d){return "Move a character."};
 
-exports.nextLevel = function(d){return "Complimenti! Hai completato questo puzzle."};
+exports.nextLevel = function(d){return "Complimenti! Hai completato questo esercizio."};
 
 exports.no = function(d){return "No"};
 
-exports.numBlocksNeeded = function(d){return "Questo puzzle può essere risolto con %1 blocchi."};
+exports.numBlocksNeeded = function(d){return "Questo esercizio può essere risolto con %1 blocchi."};
 
-exports.oneTopBlock = function(d){return "Per questo puzzle, devi sovrapporre verticalmente tutti i blocchi nell'area di lavoro bianca."};
+exports.oneTopBlock = function(d){return "Per questo esercizio, devi sovrapporre verticalmente tutti i blocchi nell'area di lavoro bianca."};
 
-exports.playSoundCrunch = function(d){return "Fai il rumore di uno sgranocchiamento"};
+exports.playSoundCrunch = function(d){return "riproduci il suono di uno sgranocchiamento"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "riproduci il suono per 1 obiettivo raggiunto"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "riproduci il suono per 2 obiettivi raggiunti"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "riproduci il suono di un colpo"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "riproduci il suono di 1 punto perso"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "riproduci il suono di 2 punti persi"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "riproduci un suono retrò"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "riproduci il suono della gomma"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "riproduci il suono di uno schiaffo"};
 
-exports.playSoundTooltip = function(d){return "Fai il rumore scelto."};
+exports.playSoundTooltip = function(d){return "Riproduci il suono scelto."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "riproduci il suono di 1 punto vinto"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "riproduci il suono di 2 punti vinti"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "riproduci il suono del legno"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5726,7 +5726,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "Premi \"Ricomincia\" per ricominciare a raccontare la tua storia."};
 
 exports.repeatForever = function(d){return "repeat forever"};
 
@@ -5752,21 +5752,21 @@ exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the a
 
 exports.scoreText = function(d){return "Punteggio: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "imposta uno sfondo scelto a caso"};
 
 exports.setBackgroundBlack = function(d){return "set black background"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "imposta lo sfondo Grotta"};
 
 exports.setBackgroundCloudy = function(d){return "set cloudy background"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "imposta lo sfondo per polo"};
 
 exports.setBackgroundNight = function(d){return "set night background"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "imposta lo sfondo Sottomarino"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Imposta l'immagine di sfondo"};
 
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
@@ -5780,17 +5780,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "a un'immagine verde"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "a un'immagine nascosta"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "a un'immagine arancione"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpritePink = function(d){return "a un'immagine rosa"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpritePurple = function(d){return "a un'immagine porpora"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpriteRandom = function(d){return "a un'immagine scelta a caso"};
 
 exports.setSpriteWitch = function(d){return "to a witch image"};
 
@@ -5798,25 +5798,25 @@ exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor 
 
 exports.setSpriteTooltip = function(d){return "Sets the character image"};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteSpeedRandom = function(d){return "a una velocità scelta a caso"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "a una velocità molto lenta"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedSlow = function(d){return "a una velocità lenta"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedNormal = function(d){return "a una velocità normale"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedFast = function(d){return "a una velocità veloce"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedVeryFast = function(d){return "a una velocità molto veloce"};
 
 exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Condividi"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "Guarda la storia che ho creato io. L'ho fatta per conto mio @codeorg"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "Condividi la tua storia:"};
 
 exports.setSprite = function(d){return "set"};
 
@@ -5850,19 +5850,19 @@ exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
 exports.whenDown = function(d){return "quando la freccia in basso"};
 
-exports.whenDownTooltip = function(d){return "Esegui le azioni qua sotto quando viene premuto il tasto \"freccia in basso\"."};
+exports.whenDownTooltip = function(d){return "Esegue le azioni qua sotto quando viene premuto il tasto \"freccia in basso\"."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "quando inizia la storia"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Esegue le azioni qua sotto quando la storia inizia."};
 
 exports.whenLeft = function(d){return "quando la freccia a sinistra"};
 
-exports.whenLeftTooltip = function(d){return "Esegui le azioni qua sotto quando viene premuto il tasto \"freccia a sinistra\"."};
+exports.whenLeftTooltip = function(d){return "Esegue le azioni qua sotto quando viene premuto il tasto \"freccia a sinistra\"."};
 
 exports.whenRight = function(d){return "quando la freccia a destra"};
 
-exports.whenRightTooltip = function(d){return "Esegui le azioni qua sotto quando viene premuto il tasto \"freccia a destra\"."};
+exports.whenRightTooltip = function(d){return "Esegue le azioni qua sotto quando viene premuto il tasto \"freccia a destra\"."};
 
 exports.whenSpriteClicked = function(d){return "when actor clicked"};
 
@@ -5908,7 +5908,7 @@ exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
 exports.whenUp = function(d){return "quando la freccia in alto"};
 
-exports.whenUpTooltip = function(d){return "Esegui le azioni qua sotto quando viene premuto il tasto \"freccia in alto\"."};
+exports.whenUpTooltip = function(d){return "Esegue le azioni qua sotto quando viene premuto il tasto \"freccia in alto\"."};
 
 exports.yes = function(d){return "Sì"};
 

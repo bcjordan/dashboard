@@ -22,7 +22,7 @@
     submit: Afegeix un professor
   add_hint_form:
     placeholder: Please enter your hint here
-    submit: Add hint
+    submit: Afegeix pista
   appname: Code.org
   stage: Etapa
   puzzle: Puzzle
@@ -59,8 +59,6 @@
     no_signup_message: Pots <a target="_blank" href="http://learn.code.org">navegar
       pels diversos puzzles i nivells</a>, però necessitaràs registrar-te per a desar
       el teu progrés.
-    prizes_header: Els primers estudiants a completar el curs guanyaran premis! (només
-      estudiants EUA)
     prizes_message: U.S. students who earn all %{num_trophies} concept trophies can
       select a variety of prizes including free Dropbox space, Skype credits, and
       downloadable games from Electronic Arts.
@@ -70,12 +68,10 @@
       Code.org will offer up to $1,000 in classroom funding to U.S. public school
       teachers who lead at least 15 students through this course. <a href="http://code.org/educate/20hr">See
       educator guide for more info.</a> '
-    teacher_prize_limits: '(Limit: $1,000 per teacher. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">See
-      FAQ for more limits</a>)'
-    teacher_pitch: Ensenya la introducció K-8 d'Informàtica en la teua classe
+    teacher_pitch: Alta a Code.org per professors
     teacher_title: Professor registrat
-    student_pitch: 'Més enllà d''una hora: prova la nostra introducció a la Informàtica'
-    student_title: Inscriure's
+    student_pitch: Alta a Code.org per estudiants
+    student_title: Alta per estudiants
     school_name: Nom de l'escola (opcional)
     school_address: Adreça de l'escola (opcional)
     address_placeholder: adreça, ciutat, estat, zip
@@ -94,14 +90,14 @@
       pares o tutors legals per utilitzar els serveis de Code.org.
     teacher_terms: Estic d'acord en estar obligat pels termes de servei de Code.org.
   signin_form:
-    title: Inicia la sessió
+    title: Ja tens un compte? Entra
     login: E-mail o nom d'usuari
     password: Contrasenya
     remember: Recorda'm
     submit: Inicia la sessió
   signin:
-    try_heading: Want to try coding without signing up?
-    try_hoc: Try one Hour of Code first
+    try_heading: Vols provar a programar sense donar-te d'alta?
+    try_hoc: Prova una Hora de Codi primer
     try_20hours: Try our 20 hour Intro to Computer Science
   password:
     reset_form:
@@ -175,7 +171,7 @@
       apple_itunes: Targeta de regal iTunes de 10$
       donors_choose: Crèdit de 750$ a DonorsChoose.org
       donors_choose_bonus: Crèdit de 250$ a DonorsChoose.org
-      dropbox: 10GB of Dropbox Space
+      dropbox: 10GB d'espai a Dropbox
       valve: Portal 2 (baixada del joc per a PC o Mac)
       ea_bejeweled: Bejeweled 3 (baixada del joc per a PC)
       ea_fifa: FIFA 2013 (baixada del joc per a PC)
@@ -231,8 +227,8 @@
     confirm: Estàs segur?
     created: '%{model} s''ha creat correctament.'
     updated: '%{model} s''ha actualitzat correctament.'
-    destroyed: '%{model} was successfully deleted.'
-    access_denied: You do not have access to this %{model}.
+    destroyed: '%{model} s''ha esborrat correctament.'
+    access_denied: No tens accés a aquest %{model}.
   nav:
     header:
       finished_hoc: He acabat la meva Hora de Codi
@@ -258,9 +254,9 @@
       prizes_link: més informació
   teacher:
     title:
-      one: El teu mestre és %{name}
+      one: 'El teu professor:'
       other: 'Els teus mestres:'
-    remove: (remove teacher)
+    remove: (eliminar professor)
     confirm:
       remove: Are you sure you want to remove this teacher?
     tools: Eines del mestre
@@ -280,7 +276,7 @@
       for %{student_name}'
   user:
     email_confirm_needed: 'Email address has not been confirmed:'
-    email_resend_confirm: Resend confirmation instructions
+    email_resend_confirm: Torna a enviar les instruccions de confirmació
     new_password_hint: (deixa-ho en blanc si no vols canviar-lo)
     current_password_hint: (necessitem la teva contrasenya actual per a confirmar
       els canvis)
@@ -294,6 +290,7 @@
   user_stats:
     recent_activity: Activitat recent
     show_more: Mostra més
+    classroom_activity: Unplugged Activity
   home:
     signin_message: O si ja estàs registrat, %{link}
     student_reg_link: Estudiant
@@ -305,10 +302,10 @@
     teacher_student_count: Tens %{count} estudiants.
     teacher_averages: "Els teus estudiants han guanyat de mitjana %{trophy_average}
       fora del \n%{trophy_max} \"Concepte de Domini\" de trofeus.\n"
-    teacher_print_certificates: Print certificates for students who finish this course
+    teacher_print_certificates: Imprimeix certificats per als estudiants que acabin
+      aquest curs
     teacher_read_blog: Read about news and updates to our materials at our Educator
       Blog
-    teacher_survey: Tell us what you think about this course
     classroom: La teva classe
     student_progress: El teu progrés d'aprenentatge
     student_stats: Has guanyat %{trophy_count} fora del %{trophy_max} "Concepte de
@@ -355,8 +352,8 @@
   reference_area:
     title: Necessites ajuda?
     subtitle: Mira aquests vídeos i consells
-    teacher: See the solution
-    auth_error: You are not authorized to see the solution.
+    teacher: Mira la solució
+    auth_error: No estàs autoritzat a veure la solució.
     submit: Update Artist Location
     direction: Start Direction
   video:
@@ -377,23 +374,40 @@
     flappy_og_title: Check out my Flappy Game
     og_description: I wrote the code myself with Code.org
   builder:
-    created: You created a new script.
-    destroyed: You destroyed a script.
+    created: Has creat un script nou.
+    destroyed: Has destruït un script.
     manage: Manage Scripts
-    view: View
-    back: Back to scripts
+    view: Visualitza
+    back: Torna als scripts
     level:
-      create: Create new level
-      current: Current Levels
-      unused: Unused Levels
+      create: Crea un nivell nou
+      current: Nivells actuals
+      unused: Nivells sense usar
   upsell:
     hoc:
-      title: The Hour of Code
+      title: L'Hora de Codi
       body: Try the basics of computer science. Millions have given it a shot.
     flappy:
       title: Flappy Code
       body: Wanna write your own game in less than 10 minutes? Try our Flappy Code
         tutorial!
     20hour:
-      title: Intro Course
+      title: Curs d'Introducció
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

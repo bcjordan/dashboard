@@ -5487,13 +5487,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "“Repeat”或“If”模块需要其他的模块充填在里面才能工作。请确保在容器模块里填入了合适的模块。"};
 
-exports.extraTopBlocks = function(d){return "你有多余的块没有附加到任何的事件块。"};
+exports.extraTopBlocks = function(d){return "你有多余的块，这些块没有附加到任何的事件块。"};
 
-exports.finalStage = function(d){return "祝贺你 ！您已完成最终章。"};
+exports.finalStage = function(d){return "祝贺你 ！您已完成最后一章。"};
 
 exports.finalStageTrophies = function(d){return "祝贺你 ！已完成最终章并赢得了 "+p(d,"numTrophies",0,"zh",{"one":"1个奖杯","other":n(d,"numTrophies")+" 奖杯"})+"。"};
 
-exports.generatedCodeInfo = function(d){return "你的程序里所用到的各种模块也可以使用 Javascript来书写展示，一种世界上最广泛被采用的程序语言:"};
+exports.generatedCodeInfo = function(d){return "即使是顶级的大学教授基于块的编码(如。"+v(d,"berkeleyLink")+","+v(d,"harvardLink")+")。但是,你组装的模块也可以显示在JavaScript中,世界上最广泛使用的编程语言:\n"};
 
 exports.hashError = function(d){return "对不起，'%1' 并不对应任何已保存的程序。"};
 
@@ -5515,21 +5515,21 @@ exports.nextLevel = function(d){return "祝贺你 ！完成了谜题 "+v(d,"puzz
 
 exports.nextLevelTrophies = function(d){return "祝贺你 ！完成了谜题 "+v(d,"puzzleNumber")+"，并且赢得了"+p(d,"numTrophies",0,"zh",{"one":"1个奖杯","other":n(d,"numTrophies")+" 奖杯"})+"."};
 
-exports.nextStage = function(d){return "祝贺你 ！完成了第 "+v(d,"stageNumber")+"章。"};
+exports.nextStage = function(d){return "祝贺你 ！您完成了 "+v(d,"stageName")+"。"};
 
-exports.nextStageTrophies = function(d){return "祝贺你 ！完成了第 "+v(d,"stageNumber")+"章，并赢得 "+p(d,"numTrophies",0,"zh",{"one":"1个奖杯","other":n(d,"numTrophies")+" 奖杯"})+"。"};
+exports.nextStageTrophies = function(d){return "Congratulations! You completed "+v(d,"stageName")+" and won "+p(d,"numTrophies",0,"zh",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "祝贺你 ！完成了谜题 "+v(d,"puzzleNumber")+"。(然而，你其实可以只使用"+p(d,"numBlocks",0,"zh",{"one":"1个模块","other":n(d,"numBlocks")+" 模块"})+"。)"};
 
 exports.numLinesOfCodeWritten = function(d){return "你刚刚写了"+p(d,"numLines",0,"zh",{"one":"1行","other":n(d,"numLines")+" 行"})+" 的代码 ！"};
 
-exports.puzzleTitle = function(d){return "第"+v(d,"stage_total")+"章之谜题 "+v(d,"puzzle_number")+" "};
+exports.puzzleTitle = function(d){return "第"+v(d,"stage_total")+"章的谜题 "+v(d,"puzzle_number")+" "};
 
 exports.resetProgram = function(d){return "重置"};
 
-exports.runProgram = function(d){return "启动程序"};
+exports.runProgram = function(d){return "运行"};
 
-exports.runTooltip = function(d){return "运行你在工作区里由各种模块组装定义出的程序。"};
+exports.runTooltip = function(d){return "运行你在工作区里由各种模块组装出的程序。"};
 
 exports.showCodeHeader = function(d){return "显示代码"};
 
@@ -5543,7 +5543,7 @@ exports.tooFewBlocksMsg = function(d){return "您正在使用所有必要类型�
 
 exports.tooManyBlocksMsg = function(d){return "可以使用 < x id = 'START_SPAN' / > < x id = 'END_SPAN' / > 模块来解决这个谜题。"};
 
-exports.tooMuchWork = function(d){return "你让我多做了很多工作 ！你可以尝试少重复几次吗？"};
+exports.tooMuchWork = function(d){return "你让我多做很多工作 ！你可以尝试少重复几次吗？"};
 
 exports.flappySpecificFail = function(d){return "您的代码看起来不错-每次点击它将飞动一下。但你需要点击多次使它飞到目标。"};
 
@@ -5557,7 +5557,7 @@ exports.tryAgain = function(d){return "再次尝试"};
 
 exports.backToPreviousLevel = function(d){return "返回到上一级"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "保存到您的画廊"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5579,11 +5579,11 @@ exports.wantToLearn = function(d){return "想要学习如何写代码吗？"};
 
 exports.watchVideo = function(d){return "观看视频"};
 
-exports.tryHOC = function(d){return "来试试编程训练"};
+exports.tryHOC = function(d){return "来试试”编程一小时“项目！"};
 
 exports.signup = function(d){return "注册账号后参加简介课程"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "这里有一个提示："};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
@@ -5606,15 +5606,15 @@ exports.continue = function(d){return "继续"};
 
 exports.defaultSayText = function(d){return "type here"};
 
-exports.finalLevel = function(d){return "恭喜你！你完成了最后一个谜题。"};
+exports.finalLevel = function(d){return "恭喜你！你完成了最后一个难题。"};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
+exports.incrementOpponentScore = function(d){return "对手的得分点"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "添加一个玩家或对手得分。"};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "玩家得分点"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "制作自己的故事"};
 
 exports.moveDirectionDown = function(d){return "down"};
 
@@ -5626,15 +5626,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 像素"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50像素"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100像素"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200像素"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400像素"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5654,19 +5654,19 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "向下移动"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "向左移动"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "向右移动"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "向上移动"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
@@ -5678,33 +5678,33 @@ exports.no = function(d){return "不"};
 
 exports.numBlocksNeeded = function(d){return "这个谜题可以用%1个块解决。"};
 
-exports.oneTopBlock = function(d){return "要解开这个谜题，你需要把白色的工作区中所有的块都连在一起。"};
+exports.oneTopBlock = function(d){return "要解开这个谜题，你需要把白色的工作区中所有的块都合并在一起。"};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "播放吱嘎声"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "播放目标 1 声音"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "播放目标 2 的声音"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "播放命中的声音"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "播放失去点数的声音"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "播放失去点数2的声音"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "播放复古的声音。"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "播放橡胶的声音"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "播放巴掌的声音"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "播放所选声音"};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "播放赢得点数的声音"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "播放赢得点数的声音2"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "播放木的声音"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5726,7 +5726,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "你可以按“重试”按钮来返回你的游戏"};
 
 exports.repeatForever = function(d){return "repeat forever"};
 
@@ -5750,23 +5750,23 @@ exports.saySprite6 = function(d){return "character 6 say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
-exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+exports.scoreText = function(d){return "积分: "+v(d,"playerScore")+": "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "设置随机背景"};
 
 exports.setBackgroundBlack = function(d){return "set black background"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "设置洞穴的背景"};
 
 exports.setBackgroundCloudy = function(d){return "set cloudy background"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "设置硬地背景"};
 
 exports.setBackgroundNight = function(d){return "set night background"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "设置水下背景"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "设置背景图案"};
 
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
@@ -5780,17 +5780,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "到一个绿色图片"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "到一个隐藏的图像\n"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "到一个橙色的图像"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpritePink = function(d){return "到一个粉红色的图像"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpritePurple = function(d){return "到一个紫色的图像"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpriteRandom = function(d){return "到一个随机的图像"};
 
 exports.setSpriteWitch = function(d){return "to a witch image"};
 
@@ -5798,25 +5798,25 @@ exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor 
 
 exports.setSpriteTooltip = function(d){return "Sets the character image"};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteSpeedRandom = function(d){return "到一个随机的速度"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "到一个非常慢的速度"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedSlow = function(d){return "到一个较慢的速度"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedNormal = function(d){return "到一个普通的速度"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedFast = function(d){return "到一个比较快的速度"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedVeryFast = function(d){return "到一个非常快的速度"};
 
 exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "分享"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "看看我的故事。我用@codeorg自己写的\n"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "分享您的故事："};
 
 exports.setSprite = function(d){return "set"};
 
@@ -5848,21 +5848,21 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
-exports.whenDown = function(d){return "when Down arrow"};
+exports.whenDown = function(d){return "当箭头键向下"};
 
-exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
+exports.whenDownTooltip = function(d){return "执行下面按向上箭头键时采取的行动。"};
 
-exports.whenGameStarts = function(d){return "当游戏开始时"};
+exports.whenGameStarts = function(d){return "当故事开始的时候"};
 
-exports.whenGameStartsTooltip = function(d){return "执行以下指令在游戏的开始时。"};
+exports.whenGameStartsTooltip = function(d){return "执行下面这个故事开始的时候行动。"};
 
-exports.whenLeft = function(d){return "when Left arrow"};
+exports.whenLeft = function(d){return "当箭头向左"};
 
-exports.whenLeftTooltip = function(d){return "Execute the actions below when the Left arrow button is pressed."};
+exports.whenLeftTooltip = function(d){return "执行下面按向左箭头键时采取的行动。"};
 
-exports.whenRight = function(d){return "when Right arrow"};
+exports.whenRight = function(d){return "当箭头向右"};
 
-exports.whenRightTooltip = function(d){return "Execute the actions below when the Right arrow button is pressed."};
+exports.whenRightTooltip = function(d){return "执行下面按向右箭头键时采取的行动。"};
 
 exports.whenSpriteClicked = function(d){return "when actor clicked"};
 
@@ -5906,11 +5906,11 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
-exports.whenUp = function(d){return "when Up arrow"};
+exports.whenUp = function(d){return "当箭头向上"};
 
-exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
+exports.whenUpTooltip = function(d){return "执行下面按向上箭头键时采取的行动。"};
 
-exports.yes = function(d){return "是"};
+exports.yes = function(d){return "对"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

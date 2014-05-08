@@ -1,7 +1,7 @@
 "ca":
   devise:
     confirmations:
-      confirmed: El teu compte ha estat confirmat amb èxit! Ja has iniciat sessió.
+      confirmed: La teva adreça d'email s'ha confirmat correctament.
       send_instructions: Rebràs un email amb instruccions sobre com confirmar el teu
         compte en pocs minuts.
       send_paranoid_instructions: Si la teva adreça de correu electrònic existeix
@@ -20,9 +20,9 @@
       unconfirmed: Necessites confirmar el teu compte abans de continuar.
     mailer:
       confirmation_instructions:
-        subject: Instruccions de confirmació
+        subject: Instruccions de confirmació de Code.org
       reset_password_instructions:
-        subject: Instruccions per restablir contrasenya
+        subject: Instruccions per inicialitzar la contrasenya de Code.org
       unlock_instructions:
         subject: Instruccions de desbloqueig
     omniauth_callbacks:

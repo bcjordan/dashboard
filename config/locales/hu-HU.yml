@@ -59,8 +59,6 @@
     no_signup_message: <a target="_blank" href="http://learn.code.org">Böngészhetsz
       a különböző szintek és feladatok között</a>, de regisztrálnod kell, hogy elmenthesd,
       hogy hol tartassz.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Azok az U.S. diákok, akik megszereztek minden %{num_trophies}
       trófeát választhatnak számos jutalom közül, mint pl.  Dropbox tárhely, Skype
       használat és letölthető Electronic Arts and Valve játékok.
@@ -70,8 +68,6 @@
       DonorsChoose.org</a> Code.org kínál akár $1,000-t  csoportot szervező USA állami
       iskolában  tanító tanárokak, akik legalább 15 diákok végigsegítenek a kurzuson.
       <a href="http://code.org/educate/20hr"> lásd a pedagógus útmutató további info.</a> '
-    teacher_prize_limits: '(Limit: 1.000 $ / tanár. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Lásd a GYIK-ban a további korlátozások</a>)'
     teacher_pitch: Tanítsd az általános iskolás Bevezetés a Számítógépes Tudományba
       anyagot a tanteremben
     teacher_title: Tanár regisztrálás
@@ -291,6 +287,7 @@
   user_stats:
     recent_activity: Mostani tevékenységek
     show_more: Mutass többet
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Már regisztrált? %{link}
     student_reg_link: Diák Bejelentkezés
@@ -306,7 +303,6 @@
       a tanfolyamot
     teacher_read_blog: Olvastam a híreket és frissítéseket az anyagokhoz  a Pedagógus
       Blog-ban
-    teacher_survey: Tell us what you think about this course
     classroom: A tantermed
     student_progress: Fejlődésed
     student_stats: Már megszereztél %{trophy_count} trófeát a %{trophy_max} "Concept
@@ -397,3 +393,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

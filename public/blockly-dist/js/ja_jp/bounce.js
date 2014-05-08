@@ -5345,7 +5345,7 @@ exports.repeatUntilFinish = function(d){return "完了するまで繰り返し�
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "状況をランダムに設定"};
+exports.setBackgroundRandom = function(d){return "ランダムな状況を設定"};
 
 exports.setBackgroundHardcourt = function(d){return " hardcourtの状況を設定"};
 
@@ -5397,7 +5397,7 @@ exports.setPaddleSpeedVeryFast = function(d){return "ラケット速度を非常
 
 exports.setPaddleSpeedTooltip = function(d){return "ラケット速度を設定"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "シェア"};
 
 exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
 

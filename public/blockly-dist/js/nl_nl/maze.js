@@ -5322,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5451,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5492,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5503,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5511,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7024,13 +7023,13 @@ exports.directionWestLetter = function(d){return "W"};
 
 exports.emptyBlocksErrorMsg = function(d){return "De \"herhaal\" of \"als\" blokken hebben andere blokken in hun nodig om te werken. Zorg ervoor dat de binnenste blok correct past in de bevattende blok."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Je hebt blokken over die niet aan een gebeurtenisblok geplakt zijn."};
 
 exports.finalStage = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid."};
 
 exports.finalStageTrophies = function(d){return "Gefeliciteerd! U hebt de laatste fase voltooid en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.generatedCodeInfo = function(d){return "De blokken voor je programma kunnen ook worden weergegeven in JavaScript, de meest gebruikte programmeertaal in de wereld:"};
+exports.generatedCodeInfo = function(d){return "Zelf op topuniversiteiten wordt les gegevens met programmeertalen die op blokken zijn gebaseerd (bijv. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Maar onder de motorkop kunnen de blokken waarmee je een programma hebt gemaakt ook getoond worden in JavaScript, de programmeertaal die wereldwijd het meest wordt gebruikt:"};
 
 exports.hashError = function(d){return "Sorry, '%1' komt niet overeen met een opgeslagen programma."};
 
@@ -7044,7 +7043,7 @@ exports.levelIncompleteError = function(d){return "U gebruikt al de nodige typen
 
 exports.listVariable = function(d){return "lijst"};
 
-exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
+exports.makeYourOwnFlappy = function(d){return "Maak je eigen 'Flappy'-spel"};
 
 exports.missingBlocksErrorMsg = function(d){return "Probeer een of meer van de blokken onderaan om deze puzzel op te lossen."};
 
@@ -7052,9 +7051,9 @@ exports.nextLevel = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,
 
 exports.nextLevelTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"puzzleNumber")+" op en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
 
-exports.nextStage = function(d){return "Gefeliciteerd! U hebt fase "+v(d,"stageNumber")+" opgelost."};
+exports.nextStage = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af."};
 
-exports.nextStageTrophies = function(d){return "Gefeliciteerd! U loste puzzel "+v(d,"stageNumber")+" en won "+p(d,"numTrophies",0,"nl",{"one":"een trofee","other":n(d,"numTrophies")+" trofeeën"})+"."};
+exports.nextStageTrophies = function(d){return "Gefeliciteerd! Je hebt "+v(d,"stageName")+" af en je hebt "+p(d,"numTrophies",0,"nl",{"one":"een medaille","other":n(d,"numTrophies")+" medailles"})+" gewonnen."};
 
 exports.numBlocksNeeded = function(d){return "Gefeliciteerd! U voltooide puzzel "+v(d,"puzzleNumber")+". (Nochtans, u  kon alleen "+p(d,"numBlocks",0,"nl",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)  gebruiken"};
 
@@ -7082,7 +7081,7 @@ exports.tooManyBlocksMsg = function(d){return "Deze puzzel kan worden opgelost m
 
 exports.tooMuchWork = function(d){return "Je laat me veel werk doen! Kun je proberen minder te herhalen?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Je programma ziet er goed uit - bij elke klik zal hij flapperen. Maak je moet nu heel vaak klikken om naar het doel te flapperen."};
 
 exports.toolboxHeader = function(d){return "Blokken"};
 
@@ -7094,7 +7093,7 @@ exports.tryAgain = function(d){return "Probeer opnieuw"};
 
 exports.backToPreviousLevel = function(d){return "Terug naar het vorige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Sla op in je galerij"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7120,14 +7119,14 @@ exports.tryHOC = function(d){return "Probeer \"Hour of Code\""};
 
 exports.signup = function(d){return "Neem deel aan de introductie cursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Een tip:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.nl=function(n){return n===1?"one":"other"}
 exports.avoidCowAndRemove = function(d){return "vermijd de koe en verwijder 1"};
 
-exports.continue = function(d){return "verder te gaan"};
+exports.continue = function(d){return "Verder"};
 
 exports.dig = function(d){return "verwijder 1"};
 
@@ -7149,11 +7148,11 @@ exports.fill = function(d){return "vul in 1"};
 
 exports.fillN = function(d){return "vul "+v(d,"shovelfuls")};
 
-exports.fillStack = function(d){return "fill stack of "+v(d,"shovelfuls")+" holes"};
+exports.fillStack = function(d){return "vul stapel met "+v(d,"shovelfuls")+" gaten"};
 
 exports.fillSquare = function(d){return "vul vierkant"};
 
-exports.fillTooltip = function(d){return "plaats 1 stuke aarde"};
+exports.fillTooltip = function(d){return "plaats 1 stukje aarde"};
 
 exports.finalLevel = function(d){return "Gefeliciteerd! je hebt de laatste puzzel opgelost."};
 
@@ -7161,19 +7160,19 @@ exports.heightParameter = function(d){return "hoogte"};
 
 exports.holePresent = function(d){return "daar is een gat"};
 
-exports.ifCode = function(d){return "if"};
+exports.ifCode = function(d){return "als"};
 
-exports.ifPathAhead = function(d){return "er een pad aankomt"};
+exports.ifPathAhead = function(d){return "als pad vooruit"};
 
-exports.ifTooltip = function(d){return "als er een pad is in de aangegeven richting, doe een paar acties."};
+exports.ifTooltip = function(d){return "Als er een pad is in de aangegeven richting, doe dan een paar acties."};
 
-exports.ifelseTooltip = function(d){return "als er een pad in de opgegeven richting is, doe je het eerste actie blok. anders, doe je de tweede actie blok."};
+exports.ifelseTooltip = function(d){return "Als er een pad in de opgegeven richting is, doe je het eerste actie blok. anders, doe je de tweede actie blok."};
 
 exports.moveEastTooltip = function(d){return "Move me east one space."};
 
 exports.moveForward = function(d){return "vooruit"};
 
-exports.moveForwardTooltip = function(d){return "beweeg me een plek naar voren."};
+exports.moveForwardTooltip = function(d){return "Beweeg me een plek naar voren."};
 
 exports.moveNorthTooltip = function(d){return "Move me north one space."};
 
@@ -7181,9 +7180,9 @@ exports.moveSouthTooltip = function(d){return "Move me south one space."};
 
 exports.moveWestTooltip = function(d){return "Move me west one space."};
 
-exports.nextLevel = function(d){return "Gefeliciteerd! U heeft de puzzel voltooid."};
+exports.nextLevel = function(d){return "Gefeliciteerd! Je hebt de puzzel voltooid."};
 
-exports.no = function(d){return "nee"};
+exports.no = function(d){return "Nee"};
 
 exports.noPathAhead = function(d){return "pad is geblokkerd"};
 
@@ -7191,9 +7190,9 @@ exports.noPathLeft = function(d){return "geen pad naar links"};
 
 exports.noPathRight = function(d){return "geen pad naar rechts"};
 
-exports.numBlocksNeeded = function(d){return "deze puzzel kan opgelost worden met %1 blokken."};
+exports.numBlocksNeeded = function(d){return "Deze puzzel kan opgelost worden met %1 blokken."};
 
-exports.oneTopBlock = function(d){return "voor deze puzzel moet je de blokken in de witte werkruimte opstapelen."};
+exports.oneTopBlock = function(d){return "Voor deze puzzel moet je alle blokken in de witte werkruimte opstapelen."};
 
 exports.pathAhead = function(d){return "pad voor je"};
 
@@ -7223,15 +7222,15 @@ exports.repeatUntilFinish = function(d){return "herhaal tot je klaar bent"};
 
 exports.step = function(d){return "Step"};
 
-exports.turnLeft = function(d){return "Sla linksaf"};
+exports.turnLeft = function(d){return "sla linksaf"};
 
-exports.turnRight = function(d){return "Sla rechtsaf"};
+exports.turnRight = function(d){return "sla rechtsaf"};
 
 exports.turnTooltip = function(d){return "Draait me 90 graden linksom of rechtsom."};
 
 exports.while = function(d){return "terwijl"};
 
-exports.whileTooltip = function(d){return "herhaal de acties totdat je de finish hebt bereikt."};
+exports.whileTooltip = function(d){return "Herhaal de acties totdat je de finish hebt bereikt."};
 
 exports.yes = function(d){return "Ja"};
 

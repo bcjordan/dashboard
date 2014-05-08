@@ -5530,7 +5530,7 @@ exports.nextLevelTrophies = function(d){return "Поздравляю! Ты за�
 
 exports.nextStage = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+" и выиграл "+p(d,"numTrophies",0,"ru",{"one":"кубок","other":n(d,"numTrophies")+" кубков"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравляем! Вы выполнили "+v(d,"stageName")+" и выиграли "+p(d,"numTrophies",0,"ru",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравляю! Ты завершил головоломку "+v(d,"puzzleNumber")+". (Однако, можно было обойтись всего  "+p(d,"numBlocks",0,"ru",{"one":"1 блоком","other":n(d,"numBlocks")+" блоками"})+".)"};
 
@@ -5570,7 +5570,7 @@ exports.tryAgain = function(d){return "Попытаться ещё раз"};
 
 exports.backToPreviousLevel = function(d){return "Вернуться на предыдущий уровень"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Сохранить в галерею"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5652,15 +5652,15 @@ exports.moveDirectionUp = function(d){return "up"};
 
 exports.moveDirectionRandom = function(d){return "random"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 пикселей"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 пикселей"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 пикселей"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 пикселей"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 пикселей"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -5680,19 +5680,19 @@ exports.moveSprite5 = function(d){return "move character 5"};
 
 exports.moveSprite6 = function(d){return "move character 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "Переместить вниз"};
 
 exports.moveDownTooltip = function(d){return "Move the paddle down."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "переместить влево"};
 
 exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "Переместить вправо"};
 
 exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "переместить вверх"};
 
 exports.moveUpTooltip = function(d){return "Move the paddle up."};
 
@@ -5702,35 +5702,35 @@ exports.nextLevel = function(d){return "Поздравляю! Головолом
 
 exports.no = function(d){return "Нет"};
 
-exports.numBlocksNeeded = function(d){return "Головоломка может быть решена %1 блоками."};
+exports.numBlocksNeeded = function(d){return "Головоломка может быть решена %1 блоком."};
 
-exports.oneTopBlock = function(d){return "Для этой головоломки вам надо собрать все блоки вместе на белом рабочем поле."};
+exports.oneTopBlock = function(d){return "Для этой головоломки вам надо собрать все блоки на рабочей области."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "проиграть звук хруста"};
 
 exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
 
 exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "проиграть звук удара"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "проиграть звук потери очка"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "проиграть звук потери очка 2"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "проиграть звук ретро"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "проиграть звук резины"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "проиграть звук шлепка"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Воспроизвести выбранный звук."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "проиграть звук получения очка"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "проиграть звук получения очка 2"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "проиграть звук дерева"};
 
 exports.positionTopLeft = function(d){return "to the top left position"};
 
@@ -5752,7 +5752,7 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "Вы можете нажать кнопку «Повторить», чтобы вернуться в игру."};
 
 exports.repeatForever = function(d){return "repeat forever"};
 
@@ -5792,7 +5792,7 @@ exports.setBackgroundNight = function(d){return "set night background"};
 
 exports.setBackgroundUnderwater = function(d){return "set underwater background"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Установить на задний план изображение"};
 
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
@@ -5840,9 +5840,9 @@ exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a characte
 
 exports.share = function(d){return "Share"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "Проверьте историю, которую я написал. Я написал её сам с @codeorg"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "Поделиться своей историей:"};
 
 exports.setSprite = function(d){return "set"};
 

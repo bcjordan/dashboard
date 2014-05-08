@@ -110,11 +110,10 @@
         - unplug8
       Unplug9:
         title: Programmazione a Staffetta
-        desc: Questa lezione riutilizza l'idea di una prececedente lezione (n.4 -
-          Programmazione su carta a quadretti) ed usa le abilità apprese in quella
-          lezione per sottolineare l'importanza di costruire programmi che operano
-          in sequenza e di controllare spesso se nel programma ci sono errori (detti
-          "bug").
+        desc: Questa lezione riutilizza l'idea di una precedente lezione (n.4 - Programmazione
+          su carta a quadretti) ed usa le abilità apprese in quella lezione per sottolineare
+          l'importanza di costruire programmi che operano in sequenza e di controllare
+          spesso se nel programma ci sono errori (detti "bug").
         video: FFpvtooUrzg
         download: https://s3.amazonaws.com/cdo-videos/new/16-relay-programming-activity.mp4
         pdfs:

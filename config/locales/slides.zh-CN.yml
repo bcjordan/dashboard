@@ -78,39 +78,28 @@
         text: 当有人在电脑或手机上点击或打字时，都会触发一个『事件』，由某些代码决定当『事件』发生时要做什么。
       3:
         image: 标记/ flappy03.jpg
-        text: 'For example, you could have an EVENT-HANDLER that says "when the mouse
-          is clicked, play a sound" '
+        text: 例如，您可能有一个事件处理程序，说："当鼠标单击时播放声音"
       4:
         image: 标记/ flappy04.jpg
-        text: Have you ever heard of the game FlappyBird? By using Event handlers,
-          we're going to learn to program our own custom version of FlappyBird!
+        text: 你听说过游戏 FlappyBird 吗?通过使用事件处理程序，我们要学习编程让 FlappyBird 变成我们自己自定义的版本 ！
       5:
         image: 标记/ flappy05.jpg
-        text: The code you'll write involves dragging and dropping blocks that represent
-          commands for the computer. Under the hood, each of these blocks is represented
-          by real code.
+        text: 你将要写代码涉及拖放代表对计算机的命令块。引擎下，每个块是由真正的代码表示。
       6:
         image: 标记/ flappy06.jpg
-        text: 'If you take a look at the workspace, there are some green blocks that
-          are filled in for you - these are "event handlers" '
+        text: 如果你看看工作区中，有一些为您填写的绿色块-这些都是"事件处理程序"
       7:
         image: 标记/ flappy07.jpg
-        text: If you want the bird to FLAP when you CLICK the mouse, you can do that
-          by attaching the "FLAP" block to the appropriate event handler, and now
-          in your game whenever you click the mouse, the bird will flap.
+        text: 如果要让鸟在您单击鼠标时飞行，你可以通过将"飞行"块附加到适当的事件处理程序中，现在在你的游戏只要你点击鼠标，鸟将飞起来。
       8:
         image: 标记/ flappy08.jpg
-        text: In each puzzle of this activity we'll introduce new types of events
-          as green blocks on the workspace, and you can decide the appropriate blocks
-          to add in response to those events.
+        text: 在这项活动的每个拼图我们会介绍新类型的事件作为在工作区中，绿色块，您可以决定适当的块添加响应这些事件。
       9:
         image: 标记/ flappy09.jpg
-        text: When you see a drop down arrow like this, that means you can change
-          the settings - like what sound to play when flappy hits the ground.
+        text: 当你看到一个下拉箭头像这样时，这意味着您可以更改的设置-像什么进屋落到地面时播放声音。
       10:
         image: 标记/ flappy10.jpg
-        text: In the final puzzle you'll be able to create your own game and share
-          it with your friends. Have fun!
+        text: 在最后的谜题，你会能够创建自己的游戏和它分享给你的朋友。玩得愉快！
     loop_times:
       1:
         image: notes/hoc2_1.jpg
@@ -193,8 +182,7 @@
         text: 我们要工资！我们要工资！翻译尼玛这么多代码还有提示语神马的也不给我们付工资！严正抗议~~~
       4:
         image: notes/stage13_4.jpg
-        text: The definition sits on the workspace, but our farmer won't run the function
-          until we drag out our "fill 5" function block from functions category.
+        text: 定义在工作区中，但农民不会运行该函数，直到我们拖出我们"填充 5"功能块从函数类别。
       5:
         image: notes/stage13_5.jpg
         text: Let's put the "fun" back in "FUNction!"
@@ -239,7 +227,7 @@
         text: 我们要工资！我们要工资！翻译尼玛这么多代码还有提示语神马的也不给我们付工资！严正抗议~~~
       6:
         image: notes/stage15_6.jpg
-        text: 我们要工资！我们要工资！翻译尼玛这么多代码还有提示语神马的也不给我们付工资！严正抗议~~~
+        text: 然后单击的星星上。现在，你想要点击的变量类别并将"长度"块拖动到您的函数定义的"向前"块。并将旧编号块拖走。
       7:
         image: notes/stage15_7.jpg
         text: 我们要工资！我们要工资！翻译尼玛这么多代码还有提示语神马的也不给我们付工资！严正抗议~~~

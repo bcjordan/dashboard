@@ -58,6 +58,18 @@ class ScriptLevelsControllerTest < ActionController::TestCase
     assert_routing({method: "get", path: '/s/1/level/3'},
                    {controller: "script_levels", action: "show", script_id: Script::TWENTY_HOUR_ID.to_s, id: "3"})
   end
+
+  test "routing for custom scripts" do
+    script = create(:script, :name => 'laurel')
+    script_level_1 = create(:script_level, :script => script, :chapter => 1)
+    script_level_2 = create(:script_level, :script => script, :chapter => 2)
+
+    assert_routing({method: "get", path: "/s/laurel/level/#{script_level_1.id}"},
+                   {controller: "script_levels", action: "show", script_id: 'laurel', id: script_level_1.id.to_s})
+
+    assert_routing({method: "get", path: "/s/laurel/level/#{script_level_2.id}"},
+                   {controller: "script_levels", action: "show", script_id: 'laurel', id: script_level_2.id.to_s})
+  end
   
   test "should show script level by chapter" do
     @controller.expects :slog

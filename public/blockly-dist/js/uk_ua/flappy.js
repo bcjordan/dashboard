@@ -4747,7 +4747,7 @@ exports.finalStage = function(d){return "Вітання! Завершено ос
 
 exports.finalStageTrophies = function(d){return "Вітання! Ви завершили останній етап і виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоки програми можна представити мовою JavaScript, яка є найпоширенішою мовою програмування у світі:"};
+exports.generatedCodeInfo = function(d){return "Навіть кращі університети навчають програмуванню на основі блоків (наприклад, "+v(d,"berkeleyLink")+" "+v(d,"harvardLink")+"). Але всередині ці блоки, які ви зібрали, можуть показуватись у JavaScript, найбільш широко використовуваній мові програмування:"};
 
 exports.hashError = function(d){return "Шкода, але  '%1' не відповідає жодній збереженій програмі."};
 
@@ -4769,9 +4769,9 @@ exports.nextLevel = function(d){return "Вітання! Завершено за�
 
 exports.nextLevelTrophies = function(d){return "Вітання! Ви завершили завдання "+v(d,"puzzleNumber")+" та виграли  "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеїв"})+"."};
 
-exports.nextStage = function(d){return "Вітаємо! Завершено етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Вітаємо! Ви завершили "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап  "+v(d,"stageNumber")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"трофей","other":n(d,"numTrophies")+" трофеї"})+"."};
+exports.nextStageTrophies = function(d){return "Вітаємо! Ви завершили етап "+v(d,"stageName")+" та виграли "+p(d,"numTrophies",0,"uk",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Вітаємо! Ви завершили завдання  "+v(d,"puzzleNumber")+". (Проте, його можна було вирішити, використавши лише "+p(d,"numBlocks",0,"uk",{"one":"1 блок","other":n(d,"numBlocks")+" блоки"})+".)"};
 
@@ -4811,7 +4811,7 @@ exports.tryAgain = function(d){return "Спробуй знову"};
 
 exports.backToPreviousLevel = function(d){return "Повернутися до попереднього рівня"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Зберегти до вашої колекції"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -4837,7 +4837,7 @@ exports.tryHOC = function(d){return "Спробуйте годину коду"};
 
 exports.signup = function(d){return "Підпишіться на вступний курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Підказка:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){

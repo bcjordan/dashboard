@@ -5322,8 +5322,6 @@ var displayFeedback = function() {
   if (Maze.waitingForReport || Maze.animating_) {
     return;
   }
-  var stepButton = document.getElementById('stepButton');
-  stepButton.style.display = 'none';
   BlocklyApps.displayFeedback({
     app: 'maze', //XXX
     skin: skin.id,
@@ -5451,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5492,6 +5490,10 @@ Maze.execute = function(stepMode) {
  * Iterate through the recorded path and animate pegman's actions.
  */
 Maze.performStep = function(stepMode) {
+  // Speeding up specific levels
+  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+    skin.movePegmanAnimationSpeedScale;
+
   // All tasks should be complete now.  Clean up the PID list.
   timeoutList.clearTimeouts();
 
@@ -5503,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5511,21 +5513,18 @@ Maze.performStep = function(stepMode) {
 
   animateAction(action, stepMode);
 
-  var performNextStep = false;
+  var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
     if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
       BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
-      performNextStep = true;
+      var stepButton = document.getElementById('stepButton');
+      stepButton.style.display = 'none';
+      finishSteps = true;
     }
-  } else {
-    performNextStep = true;
   }
 
-  if (performNextStep) {
-    // Speeding up specific levels
-    var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
-      skin.movePegmanAnimationSpeedScale;
+  if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
     }, scaledStepSpeed);
@@ -7030,7 +7029,7 @@ exports.finalStage = function(d){return "Parabéns! Você concluiu a etapa final
 
 exports.finalStageTrophies = function(d){return "Parabéns! Você concluiu a fase final e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Os blocos para o seu programa também podem ser representados em JavaScript, a linguagem de programação mais adotada no mundo:"};
+exports.generatedCodeInfo = function(d){return "Mesmo as melhores universidades ensinam codificação em blocos (por exemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Mas na verdade, os blocos que você juntou podem ser vistos em JavaScript, a linguagem de codificação mais usada em todo o mundo:"};
 
 exports.hashError = function(d){return "Desculpe, nenhum programa salvo como '%1'."};
 
@@ -7052,9 +7051,9 @@ exports.nextLevel = function(d){return "Parabéns! Você completou o quebra-cabe
 
 exports.nextLevelTrophies = function(d){return "Parabéns! Você completou o quebra-cabeça "+v(d,"puzzleNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
-exports.nextStage = function(d){return "Parabéns! Você completou a fase "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Parabéns! Você completou "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageNumber")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
+exports.nextStageTrophies = function(d){return "Parabéns! Você completou a Fase "+v(d,"stageName")+" e ganhou "+p(d,"numTrophies",0,"pt",{"one":"um troféu","other":n(d,"numTrophies")+" troféus"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Parabéns! Você completou o Quebra-cabeça "+v(d,"puzzleNumber")+". (Mas você poderia ter usado apenas "+p(d,"numBlocks",0,"pt",{"one":"1 bloco","other":n(d,"numBlocks")+" blocos"})+".)"};
 
@@ -7094,7 +7093,7 @@ exports.tryAgain = function(d){return "Tente novamente"};
 
 exports.backToPreviousLevel = function(d){return "Voltar"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Salve na sua galeria"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -7120,7 +7119,7 @@ exports.tryHOC = function(d){return "Tente a Hora do Código"};
 
 exports.signup = function(d){return "Cadastre-se para o curso de introdução"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aqui vai uma dica:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){

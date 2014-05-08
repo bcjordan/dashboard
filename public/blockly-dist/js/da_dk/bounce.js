@@ -5257,11 +5257,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "affyr ny bold"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Sæt bold i spil."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Lav dit eget hoppe-spil"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5333,7 +5333,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "sæt tårn ned"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Du kan trykke på knappen \"Prøv igen\", for at gå tilbage til dit spil."};
 
 exports.removeSquare = function(d){return "fjern firkant"};
 
@@ -5381,7 +5381,7 @@ exports.setPaddleHardcourt = function(d){return "sæt hardcourt bat"};
 
 exports.setPaddleRetro = function(d){return "sæt retro bat"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Sætter paddel billede"};
 
 exports.setPaddleSpeedRandom = function(d){return "sæt tilfældig bat hastighed"};
 
@@ -5397,11 +5397,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "sæt meget hurtig bat hasti
 
 exports.setPaddleSpeedTooltip = function(d){return "Indstiller battets hastighed"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Del"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Se det hoppe-spil jeg lavede. Jeg skrev det selv med @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Del dit spil:"};
 
 exports.turnLeft = function(d){return "drej til venstre"};
 
@@ -5498,7 +5498,7 @@ exports.finalStage = function(d){return "Tillykke! Du har fuldført det sidste t
 
 exports.finalStageTrophies = function(d){return "Tillykke! Du har afsluttet det sidste trin og vundet "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Blokkene til dit program kan også være repræsenteret i Javascript, verdens mest udbredt programmeringssprog:"};
+exports.generatedCodeInfo = function(d){return "Selv top-universiteter underviser i blok-baseret programmering (f.eks. "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Men under kølerhjelmen, kan de blokke du har samlet også vises i JavaScript, verdens mest udbredte programmeringssprog:"};
 
 exports.hashError = function(d){return "Beklager, '%1' svarer ikke til noget gemt program."};
 
@@ -5520,9 +5520,9 @@ exports.nextLevel = function(d){return "Tillykke! Du fuldførte puslespillet "+v
 
 exports.nextLevelTrophies = function(d){return "Tillykke! Du fuldførte puslespillet "+v(d,"puzzleNumber")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
 
-exports.nextStage = function(d){return "Tillykke! Du fuldførte trin "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Tillykke! Du gennemførte "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Tillykke! Du fuldførte trin "+v(d,"stageNumber")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"et trofæ","other":n(d,"numTrophies")+" trofæer"})+"."};
+exports.nextStageTrophies = function(d){return "Tillykke! Du gennemførte "+v(d,"stageName")+" og vandt "+p(d,"numTrophies",0,"da",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Tillykke! Du fuldførte puslespillet "+v(d,"puzzleNumber")+". (Men du kunne have brugt kun "+p(d,"numBlocks",0,"da",{"one":"1 blok","other":n(d,"numBlocks")+" blokke"})+".)"};
 
@@ -5562,7 +5562,7 @@ exports.tryAgain = function(d){return "Prøv igen"};
 
 exports.backToPreviousLevel = function(d){return "Tilbage til forrige niveau"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Gem til dit galleri"};
 
 exports.savedToGallery = function(d){return "Saved to your gallery!"};
 
@@ -5588,7 +5588,7 @@ exports.tryHOC = function(d){return "Prøv en time af kodeing"};
 
 exports.signup = function(d){return "Tilmeld til Introduktion kursus"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Her er et tip:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

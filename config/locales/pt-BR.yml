@@ -60,8 +60,6 @@
     no_signup_message: Você pode <a target="_blank" href="http://learn.code.org">
       consultar as várias fases e quebra-cabeças</a>, mas você precisará inscrever-se
       para gravar seu progresso.
-    prizes_header: The first students to complete the course win prizes! (U.S. students
-      only)
     prizes_message: Estudantes dos EUA que ganharem todos os %{num_trophies} troféus
       de conceito podem selecionar uma variedade de prêmios, incluindo espaço grátis
       no Dropbox, créditos Skype e download de jogos da Electronic Arts.
@@ -72,8 +70,6 @@
       de escolas públicas dos EUA que conduzirem pelo menos 15 alunos através deste
       curso. <a href="http://code.org/educate/20hr">Ver guia do educador para obter
       mais informações.</a> '
-    teacher_prize_limits: '(Limite: US $1.000 por professor. <a target="_blank" href="http://help.donorschoose.org/app/answers/detail/a_id/454/kw/code.org">
-      Consulte o FAQ para mais limites</a>)'
     teacher_pitch: Ensinar Introdução à Ciência da Computação para o Ensino Fundamental
       em sua sala de aula
     teacher_title: Professor inscreva-se
@@ -304,6 +300,7 @@
   user_stats:
     recent_activity: Atividade recente
     show_more: Mostrar mais
+    classroom_activity: Unplugged Activity
   home:
     signin_message: Já se registrou? %{link}
     student_reg_link: Inscrição de Estudante
@@ -319,7 +316,6 @@
       este curso
     teacher_read_blog: Leia sobre notícias e novidades dos nossos materiais em nosso
       Blog Educativo
-    teacher_survey: Tell us what you think about this course
     classroom: Sua sala de aula
     student_progress: Seu progresso de aprendizagem
     student_stats: Você ganhou  %{trophy_count} de %{trophy_max} em troféus de "Conceito
@@ -410,3 +406,20 @@
     20hour:
       title: Intro Course
       body: Try our 20-hour Intro to Computer Science course.
+  gallery:
+    students_drew_these_with_code: Students drew these with code!
+    picture_count: In the past <b>%{days}</b> days, students have drawn <b>%{count}</b>
+      pictures by writing their own computer programs. Click on the pictures to see
+      each program in action.
+    want_to_make_your_own: Want to make your own?
+    more: More &rarr;
+  landing:
+    prerelease: This page is still under development.
+  multi:
+    wrong_title: Incorrect answer
+    wrong_body: The answer you've entered is not correct.  Please try again!
+  match:
+    wrong_title: Incorrect solution
+    wrong_body: The solution you've entered is not correct.  Please try again!
+  dialog:
+    ok: OK

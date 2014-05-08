@@ -50,4 +50,31 @@ class ScriptsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "should use script name as param where script name is words but looks like a number" do
+    script = create(:script, name: '15-16')
+    get :show, id: "15-16"
+
+    assert_response :success
+    assert_equal script, assigns(:script)
+  end
+
+  test "should use script name as param where script name is words" do
+    script = create(:script, name: 'Heure de Code')
+    get :show, id: "Heure de Code"
+
+    assert_response :success
+    assert_equal script, assigns(:script)
+  end
+
+  test "renders 404 when id is an invalid id" do
+    assert_raises ActiveRecord::RecordNotFound do
+      get :show, id: 232323
+    end
+  end
+
+  test "renders 404 when id is an invalid string" do
+    assert_raises ActiveRecord::RecordNotFound do
+      get :show, id: 'Hat'
+    end
+  end
 end
