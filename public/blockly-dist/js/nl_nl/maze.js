@@ -5449,7 +5449,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  Blockly.mainWorkspace.setEnableToolbox(false);
+  // Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5505,7 +5505,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
