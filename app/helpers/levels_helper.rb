@@ -167,11 +167,11 @@ module LevelsHelper
   end
 
   def multi_t(text)
-    data_t('multi.' + @level.name, text)
+    data_t('multi.' + @level.name, text) || text
   end
 
   def match_t(text)
-    data_t('match.' + @level.name, text)
+    data_t('match.' + @level.name, text) || text
   end
 
 end
