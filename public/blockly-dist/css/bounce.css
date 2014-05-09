@@ -86,17 +86,6 @@ button.arrow:focus {
   vertical-align: top;
   min-width: 204px; }
 
-button.share {
-  border: 1px solid #ffa000;
-  background-color: #ffa000;
-  color: white;
-  margin-left: 0px;
-  margin-right: 5px;
-  padding-top: 11px; }
-
-button.share:focus {
-  outline-style: none; }
-
 .share-cell-none {
   display: none; }
 
