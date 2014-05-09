@@ -81,7 +81,7 @@ class Script < ActiveRecord::Base
       .map { |options, data| add_script(options, data) }
 
       custom_i18n = {}
-      # Load custom scripts from generate_scripts ruby DSL (csv as intermediate format)
+      # Load custom scripts from Script DSL format
       custom_scripts = custom_files.map do |script|
         script_data, i18n = ScriptDSL.parse_file(script)
         custom_i18n.deep_merge!(i18n)
