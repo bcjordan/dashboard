@@ -40,11 +40,11 @@ class ScriptDSL < BaseDSL
   end
 
   def i18n_strings
+    @i18n_strings['desc'] = "Custom script #{@name}"
     @stages.each do |stage|
       @i18n_strings[stage[:stage]] = stage[:stage]
     end
 
-    @i18n_strings['desc'] = "Custom script #{@name}"
     {'name'=> {@name => @i18n_strings}}
   end
 
