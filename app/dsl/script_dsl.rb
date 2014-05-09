@@ -33,6 +33,7 @@ class ScriptDSL < BaseDSL
   def level(name)
     @levels << {
       :name => name,
+      :stage => @stage,
       :skin => @skin,
       :concepts => @concepts.join(',')
     }.select{|_, v| v.present? }

@@ -29,7 +29,7 @@ class MatchDSL < BaseDSL
       text = answer[:text]
       strings[text] = text
     end
-    strings
+    {@name => strings}
   end
 
 end
