@@ -1,4 +1,4 @@
-- Options: {id: 8, name: 'Maze Step Levels', trophies: false, hidden: true }
+- Options: {id: 8, name: 'step', trophies: false, hidden: true }
 - TSV: |
     Game	Name	Level	Skin	Concepts	Url
     MazeStep	Level1	2_1_step	birds

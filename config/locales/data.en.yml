@@ -54,6 +54,24 @@ en:
         'Step Levels':
           desc: 'Maze (beta)'
           'MazeStep': 'Stage Step'
+        'edit-code':
+          desc: 'Edit Code (beta)'
+          'MazeEC': 'Stage 1'
+        'events':
+          desc: 'Bounce (beta)'
+          'Bounce': 'Stage 1'
+        'builder':
+          desc: 'User-Created Puzzles (beta)'
+          'Custom': 'Stage 1'
+        'flappy':
+          desc: 'Flappy Bird'
+          'Flappy': 'Stage 1'
+        'jigsaw':
+          desc: 'Jigsaw (beta)'
+          'Jigsaw': 'Stage 1'
+        'step':
+          desc: 'Maze (beta)'
+          'MazeStep': 'Stage Step'
     game:
       name:
         'Unplug1': 'Introduction to Computer Science'
