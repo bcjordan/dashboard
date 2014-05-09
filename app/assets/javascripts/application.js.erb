@@ -148,7 +148,7 @@ function onYouTubeBlocked(callback) {
 }
 
 function youTubeAvailabilityEndpointURL() {
-  if (window.document.URL.toString().indexOf('force_youtube_fallback') > 0) {
+  if (window.document.URL.toString().indexOf('force_youtube_fallback') >= 0) {
     return 'http://unreachable-test-subdomain.example.com/favicon.ico'
   }
   return "<%= youtube_base_url %>/favicon.ico";
