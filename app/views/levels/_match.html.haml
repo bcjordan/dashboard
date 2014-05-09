@@ -4,6 +4,7 @@
 
   %h2!= match_t(data['title'])
   %p!= match_t(data['description'])
+  %p!= match_t(data['banner'])
 
   - data['answers'].each_with_index do |answer, i|
     - answer['index'] = i

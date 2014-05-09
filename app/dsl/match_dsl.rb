@@ -5,6 +5,8 @@ class MatchDSL < BaseDSL
 
   def title(text) @hash[:title] = text end
   def description(text) @hash[:description] = text end
+  def banner(text) @hash[:banner] = text end
+  def height(text) @hash[:height] = text end
   def question(text) @hash[:questions] << { text: text } end
 
   def answer(text, correct=nil)
@@ -21,6 +23,7 @@ class MatchDSL < BaseDSL
     strings = {}
     strings[@hash[:title]] = @hash[:title]
     strings[@hash[:description]] = @hash[:description]
+    strings[@hash[:banner]] = @hash[:banner]
     @hash[:questions].each do |question|
       text = question[:text]
       strings[text] = text
