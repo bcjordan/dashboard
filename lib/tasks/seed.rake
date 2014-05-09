@@ -47,9 +47,9 @@ namespace :seed do
       multi_strings = {}
       # Parse each .multi file and setup its model.
       Dir.glob('config/scripts/**/*.multi').flatten.each do |script|
-        process_multi = ProcessMulti.new
-        Multi.setup process_multi.parse(script)
-        multi_strings.deep_merge! process_multi.get_strings
+        data, i18n = MultiDSL.parse_file(script)
+        Multi.setup data
+        multi_strings.deep_merge! i18n
       end
       File.write("config/locales/multi.en.yml", multi_strings.to_yaml)
     end
@@ -69,9 +69,9 @@ namespace :seed do
       match_strings = {}
       # Parse each .match file and setup its model.
       Dir.glob('config/scripts/**/*.match').flatten.each do |script|
-        process_match = ProcessMatch.new
-        Match.setup process_match.parse(script)
-        match_strings.deep_merge! process_match.get_strings
+        data, i18n = MatchDSL.parse_file(script)
+        Match.setup data
+        match_strings.deep_merge! i18n
       end
       File.write("config/locales/match.en.yml", match_strings.to_yaml)
     end

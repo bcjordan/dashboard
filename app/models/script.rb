@@ -82,9 +82,10 @@ class Script < ActiveRecord::Base
 
       # Load custom scripts from generate_scripts ruby DSL (csv as intermediate format)
       custom_scripts.map do |script|
+        script_data, i18n = ScriptDSL.parse_file(script)
         add_script(
           {name: File.basename(script, ".script"), trophies: false, hidden: true},
-          parse_csv(`config/generate_scripts #{script}`, "\t", SCRIPT_MAP),
+          script_data.map{|stage| stage[:levels]}.flatten,
           true
         )
       end
