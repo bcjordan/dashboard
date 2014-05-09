@@ -452,12 +452,14 @@ input[type="radio"] {
   .k1 #again-button {
     text-align: center;
     border: none;
-    background: white url("/blockly/media/common_images/tryagain-arrow.png");
-    width: 255px;
-    height: 147px;
-    font-size: 35px; }
+    background: white url("/blockly/media/common_images/tryagain-arrow-button.png");
+    width: 204px;
+    height: 118px;
+    font-size: 27px; }
     .k1 #again-button:hover {
       box-shadow: none; }
+  .k1 #again-button {
+    text-align: right; }
 
 #continue-button {
   background-color: #ffa400;
@@ -468,12 +470,14 @@ input[type="radio"] {
   .k1 #continue-button {
     text-align: center;
     border: none;
-    background: white url("/blockly/media/common_images/next-arrow.png");
-    width: 214px;
-    height: 147px;
-    font-size: 35px; }
+    background: white url("/blockly/media/common_images/next-arrow-button.png");
+    width: 171px;
+    height: 118px;
+    font-size: 27px; }
     .k1 #continue-button:hover {
       box-shadow: none; }
+  .k1 #continue-button {
+    text-align: left; }
 
 #save-to-gallery-button {
   background-color: #7665a0;
