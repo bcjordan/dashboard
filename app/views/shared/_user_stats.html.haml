@@ -33,6 +33,7 @@
               = check_mark_html
       - else
         .games
+          - sl_group = sl_group.sort_by {|sl| sl.stage_or_game_position}
           - sl_group.each do |sl|
             - passed, link = level_info(user, sl)
             - if passed
