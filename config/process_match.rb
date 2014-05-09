@@ -14,6 +14,10 @@ class ProcessMatch
     @hash[:description] = text
   end
 
+  def height(text)
+    @hash[:height] = text
+  end
+  
   def question(text)
     @hash[:questions] << { text: text }
   end

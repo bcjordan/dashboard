@@ -2,26 +2,29 @@
 
   - data = @level.properties
 
-  %h2= match_t(data['title'])
-  %p= match_t(data['description'])
+  %h2!= match_t(data['title'])
+  %p!= match_t(data['description'])
 
   - data['answers'].each_with_index do |answer, i|
     - answer['index'] = i
   - data['answers'].shuffle!
 
+  - height = data['height'] || '20'
+  - height += 'px'
+
   .mainblock
     .column
       %ul#questions
         - data['questions'].each do |question|
-          %li= match_t(question['text'])
+          %li{style: "height: #{height}"}!= match_t(question['text'])
     .column
       %ul#slots.draggablecolumn
         - data['answers'].each do |answer|
-          %li.emptyslot
+          %li.emptyslot{style: "height: #{height}"}
     .column
       %ul#answers.draggablecolumn
         - data['answers'].each do |answer|
-          %li.answer.answerlist{originalIndex: answer['index']}= match_t(answer['text'])
+          %li.answer.answerlist{style: "height: #{height}", originalIndex: answer['index']}!= match_t(answer['text'])
     .clear
     %br/
     %div
