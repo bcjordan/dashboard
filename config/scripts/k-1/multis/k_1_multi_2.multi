@@ -1,0 +1,9 @@
+name 'K-1 multi 2' 
+title 'Maze Multiple Choice Two'
+description 'Choose the best answer.'
+
+question 'Which blocks work?'
+wrong 'E,N'
+wrong 'W,W,N'
+wrong 'N,E,E'
+right 'E,E,N'

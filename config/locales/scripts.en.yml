@@ -8,6 +8,9 @@ en:
           desc: Custom script sample_level_builder
           The Maze: The Maze
           The Coffee: The Coffee
+          The Gunit: The Gunit
+          Young Teek: Young Teek
+          Babushka: Babushka
         k_1:
           desc: Custom script k_1
           The Maze: The Maze
@@ -24,3 +27,29 @@ en:
           The Coffee: The Coffee
         Maze Step Levels:
           desc: Custom script Maze Step Levels
+        k-1:
+          desc: Custom script k-1
+          Learn how to drag and drop: Learn how to drag and drop
+          The Maze: The Maze
+          The Coffee: The Coffee
+          The Jigsaw: The Jigsaw
+          Jigsaw - Learn how to drag and drop: Jigsaw - Learn how to drag and drop
+          'Jigsaw: Learn how to drag and drop': 'Jigsaw: Learn how to drag and drop'
+          Assessment Test: Assessment Test
+          Assessment Test 2: Assessment Test 2
+          'Jigsaw: Learn to drag and drop': 'Jigsaw: Learn to drag and drop'
+        4-5:
+          desc: Custom script 4-5
+          The Maze: The Maze
+          The Coffee: The Coffee
+        2-3:
+          desc: Custom script 2-3
+          The Maze: The Maze
+          The Coffee: The Coffee
+        test:
+          desc: Custom script test
+          'Jigsaw: Learn to drag and drop': 'Jigsaw: Learn to drag and drop'
+          The Maze: The Maze
+          Multi: Multi
+          Match: Match
+          Math Image: Math Image
