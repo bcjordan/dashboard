@@ -27,10 +27,10 @@ Blacklist:
 
 ## Software needs for the non-YouTube fallback player
 
-Chrome: should always work (player will try Flash first, if not available, will use HTML5 player)
-Firefox: for fallback player, need to have Flash player installed
-Safari: for fallback player, have Flash player installed (it may still work when Flash is uninstalled, I haven't been able to test this case)
-iOS / Android: should always work
+* Chrome: should always work (player will try Flash first, if not available, will use HTML5 player)
+* Firefox: for fallback player, need to have Flash player installed
+* Safari: for fallback player, have Flash player installed (it may still work when Flash is uninstalled, I haven't been able to test this case)
+* iOS / Android: should always work
 
 # Detecting missing video
 
