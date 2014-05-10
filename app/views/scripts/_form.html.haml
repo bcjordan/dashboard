@@ -1,0 +1,17 @@
+= form_for(@script) do |f|
+  - if @script.errors.any?
+    #error_explanation
+      %h2
+        = pluralize(@script.errors.count, "error")
+        prohibited this script from being saved:
+      %ul
+        - @script.errors.full_messages.each do |msg|
+          %li= msg
+  .field
+    = f.label :name
+    %br/
+    = f.text_field :name
+  .script_text
+    = text_area_tag('script_text', @script_file, rows: @script_file.lines.count+1, cols: @script_file.lines.max_by(&:length).length)
+  .actions
+    = f.submit

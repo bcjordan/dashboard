@@ -1,4 +1,11 @@
 %h1 All Scripts
+= link_to 'update', scripts_path(rake: '1')
+- if @errors && @errors.any?
+  #error_explanation
+    %h2 Error updating scripts:
+    %ul
+      - @errors.each do |msg|
+        %li= msg
 %table
   %tbody
     - if !@scripts.nil?
@@ -8,3 +15,4 @@
           %td= link_to script.name, script
           - if script_level
             %td= link_to "Play", script_level_path(script, script_level)
+            %td= link_to(t('crud.edit'), {:controller => 'scripts', :action => 'edit', :id => script.id}) if script.id > Script::MAX_DEFAULT_LEVEL_ID
