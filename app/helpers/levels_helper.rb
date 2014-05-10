@@ -171,7 +171,11 @@ module LevelsHelper
   end
 
   def match_t(text)
-    data_t('match.' + @level.name, text) || text
+    if ['.jpg', '.png'].include? File.extname(text)
+      "<img src='" + text + "''></img>"
+    else
+      data_t('match.' + @level.name, text)
+    end
   end
 
 end

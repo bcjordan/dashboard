@@ -1,0 +1,16 @@
+name 'K-1 matching 1' 
+
+title 'Maze Matching One'
+description 'Match the algorithm and the puzzle!'
+
+question "W, W, N"
+answer 'W, W, N'
+
+question "E"
+answer 'E'
+
+question "S, S"
+answer 'S, S'
+
+question "S, E, S"
+answer 'S, E, S'

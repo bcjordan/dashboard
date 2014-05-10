@@ -1,0 +1,18 @@
+name 'K-1 matching image 1' 
+
+title 'Matching Images Two'
+banner 'Match up all the flowers by colour!'
+description '/script_assets/matches/images/head.jpg'
+height '170'
+
+question "/script_assets/matches/images/q1.jpg"
+answer '/script_assets/matches/images/a1.jpg'
+
+question "/script_assets/matches/images/q2.jpg"
+answer '/script_assets/matches/images/a2.jpg'
+
+question "/script_assets/matches/images/q3.jpg"
+answer '/script_assets/matches/images/a3.jpg'
+
+question "/script_assets/matches/images/q4.jpg"
+answer '/script_assets/matches/images/a4.jpg'
