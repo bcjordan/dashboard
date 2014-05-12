@@ -22,8 +22,8 @@ class MatchDSL < BaseDSL
   def i18n_strings
     strings = {}
     strings[@hash[:title]] = @hash[:title]
-    strings[@hash[:description]] = @hash[:description]
-    strings[@hash[:banner]] = @hash[:banner]
+    strings[@hash[:description]] = @hash[:description] unless @hash[:description].blank?
+    strings[@hash[:banner]] = @hash[:banner] unless @hash[:banner].blank?
     @hash[:questions].each do |question|
       text = question[:text]
       strings[text] = text
