@@ -126,10 +126,13 @@ module LevelsHelper
       level['stepOnly'] = @level.step_mode == 2
     end
 
+    # We are editing required blocks required blocks
+    level['edit_required_blocks'] = (params[:type] == 'required_blocks')
+
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
     Hash[%w(
-      start_blocks solution_blocks slider_speed start_direction instructions initial_dirt final_dirt
+      start_blocks required_blocks solution_blocks slider_speed start_direction instructions initial_dirt final_dirt
       toolbox_blocks:toolbox
       x:initialX
       y:initialY
@@ -171,7 +174,11 @@ module LevelsHelper
   end
 
   def match_t(text)
-    data_t('match.' + @level.name, text) || text
+    if ['.jpg', '.png'].include? File.extname(text)
+      "<img src='" + text + "''></img>"
+    else
+      data_t('match.' + @level.name, text)
+    end
   end
 
 end

@@ -1,5 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -23,7 +24,7 @@ StubDialog.prototype.hide = function() {
   console.log(this);
 };
 
-module.exports = function(app, levels, options) {
+module.exports = function(app, levels, options, requiredBlockTests) {
 
   // If a levelId is not provided, then options.level is specified in full.
   // Otherwise, options.level overrides resolved level on a per-property basis.
@@ -33,6 +34,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (requiredBlockTests && options.level.required_blocks) {
+      level.requiredBlocks = utils.parseRequiredBlocks(
+          options.level.required_blocks, requiredBlockTests);
     }
 
     options.level = level;
@@ -71,7 +77,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":28}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -2298,8 +2304,8 @@ Jigsaw.init = function(config) {
   BlocklyApps.init(config);
 
   document.getElementById('runButton').style.display = 'none';
-  Blockly.addChangeListener(function(evt) {
-    BlocklyApps.runButtonClick();
+  Jigsaw.successListener = Blockly.addChangeListener(function(evt) {
+    checkForSuccess();
   });
 
   // Only used by level1, in which the success criteria is clicking on the block
@@ -2311,14 +2317,15 @@ Jigsaw.init = function(config) {
   }
 };
 
-BlocklyApps.runButtonClick = function() {
+function checkForSuccess() {
   var success = level.goal.successCondition();
   if (success) {
-    Jigsaw.result = ResultType.SUCCESS;
+    Blockly.removeChangeListener(Jigsaw.successListener);
 
+    Jigsaw.result = ResultType.SUCCESS;
     Jigsaw.onPuzzleComplete();
   }
-};
+}
 
 /**
  * Outcomes of running the user program.
@@ -2595,6 +2602,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 5, numBlocks: 3});
@@ -2622,6 +2630,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 6, numBlocks: 3});
@@ -2649,6 +2658,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 7, numBlocks: 3});
@@ -2676,6 +2686,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 8, numBlocks: 3});
@@ -2798,91 +2809,6 @@ module.exports = {
       jigsawBlock('jigsaw_purple') +
       jigsawBlock('jigsaw_blue')
     )
-  },
-
-  '21': {
-    instructionsIcon: 'smiley',
-    image: {
-      name: 'smiley',
-      width: 300,
-      height: 300,
-    },
-    ghost: {
-      x: 700,
-      y: 50
-    },
-    numBlocks: 3,
-    requiredBlocks: [],
-    freePlay: false,
-    largeNotches: true,
-    goal: {
-      successCondition: function () {
-        return validateSimplePuzzle(null, {level: 2, numBlocks: 3});
-      },
-    },
-    startBlocks:
-      jigsawBlock('jigsaw_21A', 260, 20) +
-      jigsawBlock('jigsaw_21B', 120, 190) +
-      jigsawBlock('jigsaw_21C', 20, 70)
-  },
-
-  '22': {
-    instructionsIcon: 'artist',
-    image: {
-      name: 'artist',
-      width: 200,
-      height: 200
-    },
-    numBlocks: 3,
-    notchedEnds: true,
-    requiredBlocks: [],
-    freePlay: false,
-    largeNotches: true,
-    goal: {
-      successCondition: function () {
-        return validateSimplePuzzle(null, {level: 3, numBlocks: 3});
-      },
-    },
-    ghost: {
-      x: 100,
-      y: 50
-    },
-    toolbox: createToolbox(
-      jigsawBlock('jigsaw_22C') +
-      jigsawBlock('jigsaw_22B') +
-      jigsawBlock('jigsaw_22A')
-    ),
-    startBlocks: ''
-  },
-
-  '23': {
-    instructionsIcon: 'smiley',
-    image: {
-      name: 'smiley',
-      width: 400,
-      height: 400
-    },
-    ghost: {
-      x: 100,
-      y: 50
-    },
-    numBlocks: 5,
-    requiredBlocks: [],
-    freePlay: false,
-    largeNotches: true,
-    goal: {
-      successCondition: function () {
-        return validateSimplePuzzle(null, {level: 4, numBlocks: 5});
-      },
-    },
-    toolbox: createToolbox(
-      jigsawBlock('jigsaw_23B') +
-      jigsawBlock('jigsaw_23A') +
-      jigsawBlock('jigsaw_23D') +
-      jigsawBlock('jigsaw_23C') +
-      jigsawBlock('jigsaw_23E')
-    ),
-    startBlocks: ''
   }
 };
 
@@ -3339,7 +3265,7 @@ with (locals || {}) { (function(){
   var msg = require('../../locale/es_es/common');
   var hideRunButton = locals.hideRunButton || false;
 ; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');17; };; buf.push('\n');18; // A spot for the server to inject some HTML for help content.
-var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <img src="', escape((41,  assetUrl('media/1x1.gif') )), '" class="run icon21">\n          ', escape((42,  msg.runProgram() )), '\n        </button>\n        <button id="resetButton" class="launch" style="display: none">\n          <img src="', escape((45,  assetUrl('media/1x1.gif') )), '" class="stop icon21">\n            ', escape((46,  msg.resetProgram() )), '\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((67,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((68,  data.blockCounterClass )), '>\n        ', escape((69,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((72,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((74,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');80; codeArea() ; buf.push('\n'); })();
+var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((67,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((68,  data.blockCounterClass )), '>\n        ', escape((69,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((72,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((74,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');80; codeArea() ; buf.push('\n'); })();
 } 
 return buf.join('');
 };
@@ -3433,6 +3359,8 @@ return buf.join('');
   }
 }());
 },{"ejs":32}],28:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -3485,7 +3413,27 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],29:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+},{"./xml":29}],29:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();

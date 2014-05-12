@@ -93,9 +93,43 @@ button.launch > img {
   opacity: 1;
   vertical-align: text-bottom; }
 
-button > img {
-  opacity: 0.6;
-  vertical-align: text-bottom; }
+button.blocklyLaunch {
+  border: 1px solid #ffa400;
+  background-color: #ffa400;
+  min-width: 111px;
+  padding: 7px 10px 7px 6px;
+  /* Can't use "text-align: start" due to IE. */
+  text-align: left; }
+  button.blocklyLaunch img {
+    float: left;
+    margin-top: 0px;
+    margin-left: 6px; }
+  button.blocklyLaunch div {
+    text-align: left;
+    margin-top: 3px;
+    margin-right: 4px;
+    float: right;
+    padding: 0px;
+    margin-left: 6px;
+    min-width: 45px; }
+  html[dir="RTL"] button.blocklyLaunch {
+    margin-right: 0px; }
+  button.blocklyLaunch#resetButton {
+    border: 1px solid #0094ca;
+    background-color: #0094ca; }
+
+button.share {
+  border: 1px solid #ffa000;
+  background-color: #ffa000;
+  color: white;
+  margin-left: 0px;
+  margin-right: 5px; }
+  button.share.shareRight {
+    margin-right: 0px;
+    float: right; }
+
+button.share:focus {
+  outline-style: none; }
 
 button:hover > img {
   opacity: 1; }
@@ -418,12 +452,14 @@ input[type="radio"] {
   .k1 #again-button {
     text-align: center;
     border: none;
-    background: white url("/blockly/media/common_images/tryagain-arrow.png");
-    width: 255px;
-    height: 147px;
-    font-size: 35px; }
+    background: white url("/blockly/media/common_images/tryagain-arrow-button.png");
+    width: 204px;
+    height: 118px;
+    font-size: 27px; }
     .k1 #again-button:hover {
       box-shadow: none; }
+  .k1 #again-button {
+    text-align: right; }
 
 #continue-button {
   background-color: #ffa400;
@@ -434,12 +470,14 @@ input[type="radio"] {
   .k1 #continue-button {
     text-align: center;
     border: none;
-    background: white url("/blockly/media/common_images/next-arrow.png");
-    width: 214px;
-    height: 147px;
-    font-size: 35px; }
+    background: white url("/blockly/media/common_images/next-arrow-button.png");
+    width: 171px;
+    height: 118px;
+    font-size: 27px; }
     .k1 #continue-button:hover {
       box-shadow: none; }
+  .k1 #continue-button {
+    text-align: left; }
 
 #save-to-gallery-button {
   background-color: #7665a0;
@@ -493,3 +531,13 @@ input[type="radio"] {
   .sharing #sharing-input {
     cursor: copy;
     margin: 0; }
+
+.run26 {
+  width: 26px;
+  height: 26px;
+  background: url("/blockly/media/common_images/shared-sprites-26x26.png") 0px 0px; }
+
+.reset26 {
+  width: 26px;
+  height: 26px;
+  background: url("/blockly/media/common_images/shared-sprites-26x26.png") 0px 26px; }
