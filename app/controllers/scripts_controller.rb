@@ -15,7 +15,7 @@ class ScriptsController < ApplicationController
   end
 
   def edit
-    if @script.id <= Script::MAX_DEFAULT_LEVEL_ID
+    if @script.default_script?
       render :status => :forbidden, :text => "Default scripts not editable."
     end
   end

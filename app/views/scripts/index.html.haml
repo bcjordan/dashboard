@@ -15,4 +15,4 @@
           %td= link_to script.name, script
           - if script_level
             %td= link_to "Play", script_level_path(script, script_level)
-            %td= link_to(t('crud.edit'), {:controller => 'scripts', :action => 'edit', :id => script.id}) if script.id > Script::MAX_DEFAULT_LEVEL_ID
+            %td= link_to(t('crud.edit'), {:controller => 'scripts', :action => 'edit', :id => script.id}) unless script.default_script?

@@ -66,6 +66,10 @@ class Script < ActiveRecord::Base
     self.id == HOC_ID
   end
 
+  def default_script?
+    self.id <= MAX_DEFAULT_LEVEL_ID
+  end
+
   def find_script_level(level_id)
     self.script_levels.detect { |sl| sl.level_id == level_id }
   end
