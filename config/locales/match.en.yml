@@ -6,6 +6,7 @@ en:
         Matching: Matching
         Some really easy stuff to match.  Drag it around until you get it.: Some really
           easy stuff to match.  Drag it around until you get it.
+        ! '': 
         What color is the sky?: What color is the sky?
         What's in the ocean?: What's in the ocean?
         What's Brent's last name?: What's Brent's last name?
@@ -14,3 +15,23 @@ en:
         salt: salt
         Van Minnen: Van Minnen
         Sydney: Sydney
+      K-1 matching image 1:
+        Matching Images Two: Matching Images Two
+        /script_assets/matches/images/head.jpg: /script_assets/matches/images/head.jpg
+        Match up all the flowers by colour!: Match up all the flowers by colour!
+        /script_assets/matches/images/q1.jpg: /script_assets/matches/images/q1.jpg
+        /script_assets/matches/images/q2.jpg: /script_assets/matches/images/q2.jpg
+        /script_assets/matches/images/q3.jpg: /script_assets/matches/images/q3.jpg
+        /script_assets/matches/images/q4.jpg: /script_assets/matches/images/q4.jpg
+        /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
+        /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
+        /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
+        /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
+      K-1 matching 1:
+        Maze Matching One: Maze Matching One
+        Match the algorithm and the puzzle!: Match the algorithm and the puzzle!
+        ! '': 
+        W, W, N: W, W, N
+        E: E
+        S, S: S, S
+        S, E, S: S, E, S
