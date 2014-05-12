@@ -345,6 +345,7 @@ en:
     manage: "Build Levels"
     view: "View"
     back: "Back to scripts"
+    success: "You successfully edited the blocks."
     level:
       create: "Create new level"
       current: "Current Levels"

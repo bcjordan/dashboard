@@ -128,6 +128,7 @@ module LevelsHelper
 
     # Pass blockly the edit mode: "<start|toolbox|required>_blocks"
     level['edit_blocks'] = params[:type]
+    level['edit_blocks_success'] = t('builder.success')
 
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
