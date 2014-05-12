@@ -287,3 +287,4 @@ en:
         category_explanation: "You have all the same blocks but they've now been arranged in categories"
         set_sprite_image: 'Attach a "set actor to image" block to the "when story starts" block to enable an actor for this story'
         studio_say_text: "Type what you want your actor to say within these quotes"
+        jigsaw_click: 'Click this block!'
