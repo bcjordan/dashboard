@@ -1,5 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -23,7 +24,7 @@ StubDialog.prototype.hide = function() {
   console.log(this);
 };
 
-module.exports = function(app, levels, options) {
+module.exports = function(app, levels, options, requiredBlockTests) {
 
   // If a levelId is not provided, then options.level is specified in full.
   // Otherwise, options.level overrides resolved level on a per-property basis.
@@ -33,6 +34,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (requiredBlockTests && options.level.required_blocks) {
+      level.requiredBlocks = utils.parseRequiredBlocks(
+          options.level.required_blocks, requiredBlockTests);
     }
 
     options.level = level;
@@ -71,7 +77,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":41}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -4452,15 +4458,17 @@ if (typeof global !== 'undefined') {
 var blocks = require('./blocks');
 var levels = require('./levels');
 var skins = require('./skins');
+var requiredBlocks = require('./requiredBlocks');
 
 window.mazeMain = function(options) {
   options.skinsModule = skins;
   options.blocksModule = blocks;
-  appMain(window.Maze, levels, options);
+
+  appMain(window.Maze, levels, options, requiredBlocks);
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":11,"./levels":15,"./maze":17,"./skins":19}],17:[function(require,module,exports){
+},{"../appMain":1,"./blocks":11,"./levels":15,"./maze":17,"./requiredBlocks":18,"./skins":19}],17:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -6066,6 +6074,7 @@ module.exports = {
   IS_PATH_FORWARD: IS_PATH_FORWARD,
   FOR_LOOP: FOR_LOOP
 };
+
 },{}],19:[function(require,module,exports){
 /**
  * Load Skin for Maze.
@@ -6903,6 +6912,8 @@ exports.clearTimeouts = function () {
 };
 
 },{}],41:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -6955,7 +6966,27 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],42:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+},{"./xml":42}],42:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();

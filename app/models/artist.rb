@@ -17,7 +17,18 @@ class Artist < Level
     level
   end
 
-  def toolbox
+  # Blocks which are supported by required block editing.
+  def required_blocks
+    '<block type="draw_move_by_constant"></block>
+    <block type="draw_turn"></block>
+    <block id="draw-color" type="draw_colour"></block>
+    <block type="controls_repeat"></block>
+    <block type="procedures_defnoreturn"></block>'
+  end
+
+  def toolbox(type)
+    return required_blocks if type == 'required_blocks'
+
     k1_blocks_category + '<category id="actions" name="Actions">
       <block type="draw_move">
         <value name="VALUE">
