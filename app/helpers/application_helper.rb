@@ -76,7 +76,7 @@ module ApplicationHelper
   end
   
   def youtube_base_url
-    'https://www.youtube.com'
+    'https://www.youtubeeducation.com'
   end
 
   def video_thumbnail_url(video)

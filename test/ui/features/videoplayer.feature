@@ -3,10 +3,11 @@ Feature: The video fallback player works as expected
 Background:
   Given I am on "http://learn.code.org/reset_session"
 
-Scenario: Fallback player
-  Given I am on "http://learn.code.org/flappy/1?force_youtube_fallback"
-  When I rotate to landscape
-  Then I see ".video-js"
+# TODO(bjordan): enable when we have a fallback again
+#Scenario: Fallback player
+#  Given I am on "http://learn.code.org/flappy/1?force_youtube_fallback"
+#  When I rotate to landscape
+#  Then I see ".video-js"
 
 @no_mobile
 Scenario: Normal player
