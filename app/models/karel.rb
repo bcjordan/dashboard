@@ -24,7 +24,7 @@ class Karel < Maze
   end
 
   def toolbox(type)
-    common_blocks + '<block type="maze_dig"></block>
+    common_blocks(type) + '<block type="maze_dig"></block>
     <block type="maze_fill"></block>
     <block type="maze_forever"></block>
     <block type="karel_if"></block>
