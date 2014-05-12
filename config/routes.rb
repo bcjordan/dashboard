@@ -60,6 +60,10 @@ Dashboard::Application.routes.draw do
     resources :script_levels, as: :levels, only: [:show], path: "/level", format: false do
       get 'solution', to: 'script_levels#solution'
     end
+    resources :stages, only: [:show], path: "/stage", format: false do
+      resources :script_levels, only: [:show], path: "/puzzle", format: false do
+      end
+    end
   end
 
   get 'reset_session', to: 'application#reset_session_endpoint'
