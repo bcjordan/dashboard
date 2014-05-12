@@ -1,8 +1,8 @@
 Name	script_id	level_num	game_name	localization_key	element_id	qtip_config
 Drag Blocks 20	1	2_2	Maze	drag_blocks	[block-id='1']	{"position": {"my": "top left", "at": "bottom right", "adjust": {"x": 22, "y":60}}, "style": { "classes": "no-tip" }}
 Drag Blocks HoC	2	2_2	Maze	drag_blocks	[block-id='1']	{"position": {"my": "top left", "at": "bottom right", "adjust": {"x": 22, "y":60}}, "style": { "classes": "no-tip" }}
-Run 20	1	2_2	Maze	run	#runButton	
-Run HoC	2	2_2	Maze	run	#runButton	
+Run 20	1	2_2	Maze	run	#runButton
+Run HoC	2	2_2	Maze	run	#runButton
 Watch Video Again 20	1	2_5	Maze	watch_again	[data-key='loop_times']	{"position": {"my": "bottom left", "at": "top right"}}
 Watch Video Again HoC	2	2_5	Maze	watch_again	[data-key='loop_times']	{"position": {"my": "bottom left", "at": "top right"}}
 Undraggable 20	1	2_8	Maze	gray_block_explanation	.blocklyUndraggable	{"position": {"my": "top middle", "at": "bottom middle"}}
@@ -14,3 +14,4 @@ Instructions HoC	2	2_14	Maze	instructions_repeat_explanation	#prompt	{"position"
 Category 20	1	2_1	Artist3	category_explanation	.blocklyTreeRoot	{"position": {"my": "center left", "at": "center right"}}
 Set Sprite Image	4	99	Studio	set_sprite_image	.blocklySvg	{"position": {"my": "top left", "at": "top left", "adjust": {"x": 235, "y": 50}}, "style": { "classes": "no-tip" }}
 Studio Say Text	4	1	Studio	studio_say_text	[block-id='2']	{"position": {"my": "top left", "at": "bottom middle"}}
+Jigsaw Click	7	1	Jigsaw	jigsaw_click	[block-id='1']	{"position": {"my": "top left", "at": "center right"}}
