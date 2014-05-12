@@ -24,12 +24,12 @@ class Level < ActiveRecord::Base
     ([game.intro_video] + concepts.map(&:video)).reject(&:nil?)
   end
 
-  def complete_toolbox
-    "<xml id='toolbox' style='display: none;'>#{toolbox}</xml>"
+  def complete_toolbox(type)
+    "<xml id='toolbox' style='display: none;'>#{toolbox(type)}</xml>"
   end
 
   # Overriden by different level types.
-  def toolbox
+  def toolbox(type)
   end
 
   # Overriden by different level types.

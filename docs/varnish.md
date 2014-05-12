@@ -1,0 +1,10 @@
+# Varnish
+
+Varnish's primary responsibility is offloading as much static traffic off of our front-end Ruby servers as possible because Varnish is order(s) of magnitude faster at serving static content. Varnish is so fast because it's compiled. Plus, we use it with the entire cache in RAM which makes it *really* fast. In this role, it's useful to think of Varnish as **equivilent to a CDN** and Varnish instances as **units of bandwidth** within that CDN.
+
+We use Varnish to **route traffic**. For example we have a rule that sends all [learn.code.org](http://learn.code.org/) to the Dashboard application while [code.org](http://code.org/), [csedweek.org](http://csedweek.org/), etc. requests are sent to the Pegasus application. Routing rules are written in a C-like configuration languge that Varnish compiles to native code making them extremely fast. It is useful to think of Varnish as an **intelligent programmable router**. 
+
+The routing logic goes well beyond URL matching - cookies, headers, even content can be inspected and/or modified for using in routing and handling. This allows similiar requests to be normalized into identical requests to maximize cachability. For example, we use a combination of cookies, browser settings, and other criteria to select the right language to present to the user. By normalizing these requests into a Varnish-added "X-Varnish-Language" header we get great cachability no matter *how* a user chooses their preferred language. Therefore, Varnish is also a tool for **validating and normalizing requests**.
+
+Varnish uses a pool of back-end connection threads/fibers to service a much larger pool of client connections. This moves dispatching of work/blocking into the compiled portion of our stack where the cost of the thread can be measured in KB instead of MB. It's useful to think of Varnish as funneling a bunch of unruly burito eaters into line at Chipolte: fewer do more, faster, for less money. In this role, it's useful to think of Varnish as **directing/balancing traffic**.
+
