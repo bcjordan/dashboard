@@ -1,32 +1,44 @@
 var nextRedirect;
 var previousLevelRedirect;
 var sendReport = function(report) {
-  var httpRequest = new XMLHttpRequest();
-  httpRequest.onload = function() {
-    var response;
-    if (httpRequest.status === 200) {
-      response = JSON.parse(httpRequest.responseText);
-    } else if (report.pass) {
-      response = report.fallbackResponse.success;
-    } else {
-      response = report.fallbackResponse.failure;
-    }
-    nextRedirect = response['redirect'];
-    previousLevelRedirect = response['previous_level'];
-    videoInfo = response['video_info'];
-    if (report.onComplete) {
-      report.onComplete(response);
-    }
-  };
-  httpRequest.open('POST', report.callback);
-  httpRequest.setRequestHeader('Content-Type',
-      'application/x-www-form-urlencoded');
-  httpRequest.setRequestHeader('X-CSRF-Token',
-      $('meta[name="csrf-token"]').attr('content'));
-  var query = [];
+  // jQuery can do this implicitly, but when url-encoding it, jQuery calls a method that 
+  // shows the result dialog immediately
+  var queryItems = [];
   for (var key in report) {
-    query.push(key + '=' + report[key]);
+    if (report.hasOwnProperty(key)) {
+      queryItems.push(key + '=' + report[key]);
+    }
   }
-  query = query.join('&');
-  httpRequest.send(query);
+  var queryString = queryItems.join('&');
+
+  jQuery.ajax({
+    type: 'POST',
+    timeout: 2000,
+    url: report.callback,
+    contentType: 'application/x-www-form-urlencoded',
+    data: queryString,
+    dataType: 'json',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
+    },
+    success: function (response) {
+      reportComplete(report, response);
+    },
+    error: function (xhr, ajaxOptions, thrownError) {
+      reportComplete(report, getFallbackResponse(report));
+    }
+  });
 };
+
+function getFallbackResponse(report) {
+  return report.pass ? report.fallbackResponse.success : report.fallbackResponse.failure;
+}
+
+function reportComplete(report, response) {
+  nextRedirect = response['redirect'];
+  previousLevelRedirect = response['previous_level'];
+  videoInfo = response['video_info'];
+  if (report.onComplete) {
+    report.onComplete(response);
+  }
+}
