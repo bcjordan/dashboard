@@ -2596,6 +2596,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 5, numBlocks: 3});
@@ -2623,6 +2624,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 6, numBlocks: 3});
@@ -2650,6 +2652,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 7, numBlocks: 3});
@@ -2677,6 +2680,7 @@ module.exports = {
     requiredBlocks: [],
     freePlay: false,
     largeNotches: true,
+    notchedEnds: true,
     goal: {
       successCondition: function () {
         return validateSimplePuzzle(null, {level: 8, numBlocks: 3});
@@ -2799,91 +2803,6 @@ module.exports = {
       jigsawBlock('jigsaw_purple') +
       jigsawBlock('jigsaw_blue')
     )
-  },
-
-  '21': {
-    instructionsIcon: 'smiley',
-    image: {
-      name: 'smiley',
-      width: 300,
-      height: 300,
-    },
-    ghost: {
-      x: 700,
-      y: 50
-    },
-    numBlocks: 3,
-    requiredBlocks: [],
-    freePlay: false,
-    largeNotches: true,
-    goal: {
-      successCondition: function () {
-        return validateSimplePuzzle(null, {level: 2, numBlocks: 3});
-      },
-    },
-    startBlocks:
-      jigsawBlock('jigsaw_21A', 260, 20) +
-      jigsawBlock('jigsaw_21B', 120, 190) +
-      jigsawBlock('jigsaw_21C', 20, 70)
-  },
-
-  '22': {
-    instructionsIcon: 'artist',
-    image: {
-      name: 'artist',
-      width: 200,
-      height: 200
-    },
-    numBlocks: 3,
-    notchedEnds: true,
-    requiredBlocks: [],
-    freePlay: false,
-    largeNotches: true,
-    goal: {
-      successCondition: function () {
-        return validateSimplePuzzle(null, {level: 3, numBlocks: 3});
-      },
-    },
-    ghost: {
-      x: 100,
-      y: 50
-    },
-    toolbox: createToolbox(
-      jigsawBlock('jigsaw_22C') +
-      jigsawBlock('jigsaw_22B') +
-      jigsawBlock('jigsaw_22A')
-    ),
-    startBlocks: ''
-  },
-
-  '23': {
-    instructionsIcon: 'smiley',
-    image: {
-      name: 'smiley',
-      width: 400,
-      height: 400
-    },
-    ghost: {
-      x: 100,
-      y: 50
-    },
-    numBlocks: 5,
-    requiredBlocks: [],
-    freePlay: false,
-    largeNotches: true,
-    goal: {
-      successCondition: function () {
-        return validateSimplePuzzle(null, {level: 4, numBlocks: 5});
-      },
-    },
-    toolbox: createToolbox(
-      jigsawBlock('jigsaw_23B') +
-      jigsawBlock('jigsaw_23A') +
-      jigsawBlock('jigsaw_23D') +
-      jigsawBlock('jigsaw_23C') +
-      jigsawBlock('jigsaw_23E')
-    ),
-    startBlocks: ''
   }
 };
 
