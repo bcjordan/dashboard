@@ -1165,6 +1165,7 @@ div.gallery_activity {
   }
   .item {
     padding: 25px;
+    clear: both;
   }
   input {
     margin-top: 0px;
@@ -1177,6 +1178,9 @@ div.gallery_activity {
   .item-label {
     display: inline-block;
     float: left;
+  }
+  img {
+    max-height: 100%;
   }
 }
 

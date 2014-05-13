@@ -2,21 +2,29 @@
 
   - data = @level.properties
 
-  %h2= multi_t(data['title'])
-  %p= multi_t(data['description'])
+  %h2!= multi_t(data['title'])
+  %p!= multi_t(data['description']) if data['description']
+  %p!= multi_t(data['banner']) if data['banner']
+
+  - height = data['height'] || '20'
+  - height += 'px'
 
   .mainblock
-    %b= data['questions'][0]['text']
+    %b!= data['questions'][0]['text']
     %form#voteform{onsubmit: "return doVote()"}
       - data['answers'].each_with_index do |answer, i|
         - correct = answer["correct"]
         .item
           .item-radio
             %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
-          .item-label
-            %label{for: "choice_#{i}"}= multi_t(answer['text'])
-      %br
-      %br
+          .item-label{style: "height: #{height}"}
+            %label{for: "choice_#{i}"}!= multi_t(answer['text'])
+
+    .clear
+
+    %br/
+    %br/
+
     .buttons
       %a.btn.btn-primary.next-stage.submitButton
         Submit
