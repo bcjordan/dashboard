@@ -10,9 +10,11 @@
     %form#voteform{onsubmit: "return doVote()"}
       - data['answers'].each_with_index do |answer, i|
         - correct = answer["correct"]
-        %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
-          %label{for: "choice_#{i}"}= multi_t(answer['text'])
-        %br
+        .item
+          .item-radio
+            %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
+          .item-label
+            %label{for: "choice_#{i}"}= multi_t(answer['text'])
       %br
       %br
     .buttons
