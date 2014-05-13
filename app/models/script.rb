@@ -80,6 +80,10 @@ class Script < ActiveRecord::Base
     self.script_levels.select { |sl| sl.id == script_level_id }.first
   end
 
+  def get_script_level_by_stage_and_position(stage_position, puzzle_position)
+    self.stages.find_by(position: stage_position).script_levels.find_by(position: puzzle_position)
+  end
+
   def get_script_level_by_chapter(chapter)
     self.script_levels.select { |sl| sl.chapter == chapter }.first
   end

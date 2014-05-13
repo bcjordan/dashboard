@@ -3,13 +3,18 @@ module LevelsHelper
     case script_level.script_id
     when Script::HOC_ID
       hoc_chapter_path(script_level.chapter)
-    when Script::TWENTY_HOUR_ID,
-      Script::EDIT_CODE_ID,
-      Script::TWENTY_FOURTEEN_LEVELS_ID,
-      Script::BUILDER_ID,
-      Script::FLAPPY_ID,
-      Script::JIGSAW_ID
-    script_level_path(script_level.script, script_level.position)
+    when Script::TWENTY_HOUR_ID
+      script_level_path(script_level.script, script_level)
+    when Script::EDIT_CODE_ID
+      editcode_chapter_path(script_level.chapter)
+    when Script::TWENTY_FOURTEEN_LEVELS_ID
+      twenty_fourteen_chapter_path(script_level.chapter)
+    when Script::BUILDER_ID
+      builder_chapter_path(script_level.chapter)
+    when Script::FLAPPY_ID
+      flappy_chapter_path(script_level.chapter)
+    when Script::JIGSAW_ID
+      jigsaw_chapter_path(script_level.chapter)
     else
       script_stage_script_level_path(script_level.script, script_level.stage, script_level.position)
     end

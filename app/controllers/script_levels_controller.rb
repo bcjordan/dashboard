@@ -59,10 +59,19 @@ class ScriptLevelsController < ApplicationController
 
     if chapter
       @script_level = @script.get_script_level_by_chapter(chapter.to_i)
+    elsif params[:stage_id]
+      @script_level = @script.get_script_level_by_stage_and_position(params[:stage_id], params[:id])
     else
       @script_level = @script.get_script_level_by_id(script_level_id.to_i)
     end
     raise ActiveRecord::RecordNotFound unless @script_level
+
+    canonical_path = build_script_level_path(@script_level)
+    
+    if request.path != canonical_path
+      redirect_to canonical_path, status: :moved_permanently
+      return
+    end
 
     present_level(@script_level)
 
