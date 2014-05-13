@@ -13,7 +13,7 @@ class BaseDSL
   end
 
   def self.parse_file(filename, name=nil)
-    parse(File.read(filename), name)
+    parse(File.read(filename).to_ascii, name)
   end
 
   def self.parse(str, name=nil)
