@@ -6,6 +6,7 @@ class ScriptsController < ApplicationController
   before_action :set_script_file, only: [:edit, :update, :destroy]
 
   def index
+    authorize! :manage, Script
     rake if params[:rake] == '1'
     # Show all the scripts that a user has created.
     @scripts = Script.all
