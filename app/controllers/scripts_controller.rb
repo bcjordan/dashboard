@@ -1,8 +1,8 @@
 class ScriptsController < ApplicationController
   before_filter :authenticate_user!, except: :show
   check_authorization
-  load_and_authorize_resource
   before_action :set_script, only: [:show, :edit, :update, :destroy]
+  authorize_resource
   before_action :set_script_file, only: [:edit, :update, :destroy]
 
   def index
@@ -16,7 +16,7 @@ class ScriptsController < ApplicationController
 
   def edit
     if @script.default_script?
-      render :status => :forbidden, :text => "Default scripts not editable."
+      render :status => :forbidden, :text => 'Default scripts not editable.'
     end
   end
 
