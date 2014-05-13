@@ -3210,7 +3210,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 900,
+    'minWorkspaceHeight': 1200,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3224,7 +3224,14 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'toolbox':
-      tb(blockOfType('studio_whenSpriteClicked') +
+      tb(blockOfType('studio_setSprite') +
+         blockOfType('studio_setBackground') +
+         blockOfType('studio_whenGameStarts') +
+         blockOfType('studio_whenLeft') +
+         blockOfType('studio_whenRight') +
+         blockOfType('studio_whenUp') +
+         blockOfType('studio_whenDown') +
+         blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
          blockOfType('studio_repeatForever') +
          blockOfType('studio_move') +
@@ -3236,15 +3243,9 @@ module.exports = {
          defaultSayBlock() +
          blockOfType('studio_setSpritePosition') +
          blockOfType('studio_setSpriteSpeed') +
-         blockOfType('studio_setSpriteEmotion') +
-         blockOfType('studio_setBackground') +
-         blockOfType('studio_setSprite')),
+         blockOfType('studio_setSpriteEmotion')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
   '100': {
     'requiredBlocks': [
@@ -3286,11 +3287,16 @@ module.exports = {
                           blockOfType('studio_setBackground') +
                           blockOfType('studio_setSprite')) +
          createCategory(msg.catEvents(),
+                          blockOfType('studio_whenGameStarts') +
+                          blockOfType('studio_whenLeft') +
+                          blockOfType('studio_whenRight') +
+                          blockOfType('studio_whenUp') +
+                          blockOfType('studio_whenDown') +
                           blockOfType('studio_whenSpriteClicked') +
-                          blockOfType('studio_whenSpriteCollided') +
-                          blockOfType('studio_repeatForever')) +
+                          blockOfType('studio_whenSpriteCollided')) +
          createCategory(msg.catControl(),
-                          blockOfType('controls_repeat')) +
+                          blockOfType('controls_repeat') +
+                          blockOfType('studio_repeatForever')) +
          createCategory(msg.catLogic(),
                           blockOfType('controls_if') +
                           blockOfType('logic_compare') +
@@ -3302,11 +3308,7 @@ module.exports = {
                           blockOfType('math_arithmetic')) +
          createCategory(msg.catVariables(), '', 'VARIABLE')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
 };
 
@@ -3696,9 +3698,8 @@ var delegate = function(scope, func, data)
 var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
   var totalDistance = 0;
   
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-    
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var scaleFactor;
       var distThisMove = Math.min(cmd.opts.queuedDistance,
@@ -3725,16 +3726,15 @@ var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
       }
       totalDistance += distThisMove * scaleFactor;
     }
-  }
+  });
 
   return totalDistance;
 };
 
 
 var cancelQueuedMovements = function (index, yAxis) {
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var dir = cmd.opts.dir;
       if (yAxis && (dir === Direction.NORTH || dir === Direction.SOUTH)) {
@@ -3743,7 +3743,7 @@ var cancelQueuedMovements = function (index, yAxis) {
         cmd.opts.queuedDistance = 0;
       }
     }
-  }
+  });
 };
 
 //
@@ -3834,31 +3834,37 @@ var setSpeechText = function(svgText, text) {
   return SPEECH_BUBBLE_HEIGHT - linesLessThanMax * SPEECH_BUBBLE_LINE_HEIGHT;
 };
 
-var callHandler = function (func, name) {
-  if (func) {
-    Studio.currentHandler = name;
-    Studio.cmdQueues[name] = [];
-    try { func(BlocklyApps, api); } catch (e) { }
-    Studio.currentHandler = null;
-  }
+//
+// Execute the code for all of the event handlers that match an event name
+//
+
+var callHandler = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    // Note: we skip executing the code if we have not completed executing
+    // the cmdQueue on this handler (checking for non-zero length)
+    if (handler.name === name &&
+        (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
+      handler.cmdQueue = [];
+      Studio.currentCmdQueue = handler.cmdQueue;
+      try { handler.func(BlocklyApps, api); } catch (e) { }
+      Studio.currentCmdQueue = null;
+    }
+  });
 };
 
 Studio.onTick = function() {
   Studio.tickCount++;
 
   if (Studio.tickCount === 1) {
-    callHandler(Studio.whenGameStarts, 'whenGameStarts');
+    callHandler('whenGameStarts');
   }
   Studio.executeQueue('whenGameStarts');
 
-  if (!Studio.cmdQueues.repeatForever ||
-      (0 === Studio.cmdQueues.repeatForever.length)) {
-    callHandler(Studio.repeatForever, 'repeatForever');
-  }
+  callHandler('repeatForever');
   Studio.executeQueue('repeatForever');
 
   for (var i = 0; i < Studio.spriteCount; i++) {
-    Studio.executeQueue('whenSpriteClicked' + i);
+    Studio.executeQueue('whenSpriteClicked-' + i);
   }
   
   // Run key event handlers for any keys that are down:
@@ -3867,16 +3873,16 @@ Studio.onTick = function() {
         Studio.keyState[Keycodes[key]] == "keydown") {
       switch (Keycodes[key]) {
         case Keycodes.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case Keycodes.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case Keycodes.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case Keycodes.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
@@ -3887,16 +3893,16 @@ Studio.onTick = function() {
         Studio.btnState[ArrowIds[btn]] == ButtonState.DOWN) {
       switch (ArrowIds[btn]) {
         case ArrowIds.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case ArrowIds.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case ArrowIds.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case ArrowIds.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
@@ -3923,8 +3929,7 @@ Studio.onTick = function() {
                            tiles.SPRITE_COLLIDE_DISTANCE)) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
           Studio.sprite[i].collisionMask |= Math.pow(2, j);
-          callHandler(Studio.whenSpriteCollided[i][j],
-                      'whenSpriteCollided-' + i + '-' + j);
+          callHandler('whenSpriteCollided-' + i + '-' + j);
         }
       } else {
           Studio.sprite[i].collisionMask &= ~(Math.pow(2, j));
@@ -3965,8 +3970,7 @@ Studio.onArrowButtonDown = function(e, idBtn) {
 Studio.onSpriteClicked = function(e, spriteIndex) {
   // If we are "running", call the event handler if registered.
   if (Studio.intervalId) {
-    callHandler(Studio.whenSpriteClicked[spriteIndex],
-                'whenSpriteClicked' + spriteIndex);
+    callHandler('whenSpriteClicked-' + spriteIndex);
   }
   e.preventDefault();  // Stop normal events.
 };
@@ -3976,14 +3980,14 @@ Studio.onSvgClicked = function(e) {
   if (Studio.intervalId) {
     // Check the first command in all of the cmdQueues to see if there is a
     // pending "wait for click" command
-    for (var handler in Studio.cmdQueues) {
-      var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-      
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
       if (cmd && cmd.name === 'wait' &&
           cmd.opts.waitForClick && !cmd.opts.waitComplete) {
         cmd.opts.waitComplete = true;
       }
-    }
+    });
   }
   e.preventDefault();  // Stop normal events.
 };
@@ -4136,30 +4140,25 @@ Studio.init = function(config) {
  * Clear the event handlers and stop the onTick timer.
  */
 Studio.clearEventHandlersKillTickLoop = function() {
-  Studio.whenDown = null;
-  Studio.whenLeft = null;
-  Studio.whenRight = null;
-  Studio.whenUp = null;
-  Studio.repeatForever = null;
-  Studio.whenGameStarts = null;
-  Studio.whenSpriteClicked = [];
-  Studio.whenSpriteCollided = [];
+  if (Studio.eventHandlers) {
+    // Check the first command in all of the cmdQueues and clear the timeout
+    // if there is a pending wait command
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
+      if (cmd && cmd.name === 'wait' &&
+          cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
+        window.clearTimeout(cmd.opts.waitTimeout);
+      }
+    });
+  }
+  Studio.eventHandlers = [];
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
-  }
-  // Check the first command in all of the cmdQueues and clear the timeout
-  // if there is a pending wait command
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-    
-    if (cmd && cmd.name === 'wait' &&
-        cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
-      window.clearTimeout(cmd.opts.waitTimeout);
-    }
   }
 };
 
@@ -4190,9 +4189,8 @@ BlocklyApps.reset = function(first) {
   // Reset configurable variables
   Studio.setBackground({'value': 'cave'});
   
-  // Reset the currentHandler, queues, and complete counts:
-  Studio.currentHandler = null;
-  Studio.cmdQueues = [];
+  // Reset currentCmdQueue and sayComplete count:
+  Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
 
   var spriteStartingSkins = [ "witch", "green", "purple", "pink", "orange" ];
@@ -4323,6 +4321,66 @@ Studio.onReportComplete = function(response) {
   displayFeedback();
 };
 
+var registerEventHandler = function (handlers, name, func) {
+  handlers.push({'name': name, 'func': func});
+};
+
+var registerHandlers =
+      function (handlers, blockName, eventNameBase,
+                nameParam1, matchParam1Val,
+                nameParam2, matchParam2Val) {
+  var blocks = Blockly.mainWorkspace.getTopBlocks();
+  for (var x = 0; blocks[x]; x++) {
+    var block = blocks[x];
+    if (block.type === blockName &&
+        (!nameParam1 ||
+         matchParam1Val === parseInt(block.getTitleValue(nameParam1), 10)) &&
+        (!nameParam2 ||
+         matchParam2Val === parseInt(block.getTitleValue(nameParam2), 10))) {
+      var code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
+      if (code) {
+        var func = codegen.functionFromCode(code, {
+                                            BlocklyApps: BlocklyApps,
+                                            Studio: api } );
+        var eventName = eventNameBase;
+        if (nameParam1) {
+          eventName += '-' + matchParam1Val;
+        }
+        if (nameParam2) {
+          eventName += '-' + matchParam2Val;
+        }
+        registerEventHandler(handlers, eventName, func);
+      }
+    }
+  }
+};
+
+var registerHandlersWithSpriteParam =
+      function (handlers, blockName, eventNameBase, blockParam) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    registerHandlers(handlers, blockName, eventNameBase, blockParam, i);
+  }
+};
+
+var registerHandlersWithSpriteParams =
+      function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    for (var j = 0; j < Studio.spriteCount; j++) {
+      if (i === j) {
+        continue;
+      }
+      registerHandlers(handlers,
+                       blockName,
+                       eventNameBase,
+                       blockParam1,
+                       i,
+                       blockParam2,
+                       j);
+    }
+  }
+};
+
+
 /**
  * Execute the user's code.  Heaven help us...
  */
@@ -4350,109 +4408,30 @@ Studio.execute = function() {
       }
     }
   }
-  
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenLeft');
-  var whenLeftFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenRight');
-  var whenRightFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
+  var handlers = [];
+  registerHandlers(handlers, 'studio_whenLeft', 'whenLeft');
+  registerHandlers(handlers, 'studio_whenRight', 'whenRight');
+  registerHandlers(handlers, 'studio_whenUp', 'whenUp');
+  registerHandlers(handlers, 'studio_whenDown', 'whenDown');
+  registerHandlers(handlers, 'studio_repeatForever', 'repeatForever');
+  registerHandlers(handlers, 'studio_whenGameStarts', 'whenGameStarts');
+  registerHandlersWithSpriteParam(handlers,
+                                  'studio_whenSpriteClicked',
+                                  'whenSpriteClicked',
+                                  'SPRITE');
+  registerHandlersWithSpriteParams(handlers,
+                                   'studio_whenSpriteCollided',
+                                   'whenSpriteCollided',
+                                   'SPRITE1',
+                                   'SPRITE2');
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenUp');
-  var whenUpFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenDown');
-  var whenDownFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_repeatForever');
-  var repeatForeverFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenGameStarts');
-  var whenGameStartsFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  var x;
-  var block;
-  var blocks = Blockly.mainWorkspace.getTopBlocks(true);
-
-  var whenSpriteClickedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    for (x = 0; blocks[x]; x++) {
-      block = blocks[x];
-      if (block.type == 'studio_whenSpriteClicked' &&
-          i == parseInt(block.getTitleValue('SPRITE'), 10)) {
-        code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-        whenSpriteClickedFunc[i] = codegen.functionFromCode(
-                                           code, {
-                                            BlocklyApps: BlocklyApps,
-                                            Studio: api } );
-      }
-    }
-  }
-
-  var whenSpriteCollidedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    whenSpriteCollidedFunc[i] = [];
-    for (var j = 0; j < Studio.spriteCount; j++) {
-      if (i == j) {
-        continue;
-      }
-      for (x = 0; blocks[x]; x++) {
-        block = blocks[x];
-        if (block.type == 'studio_whenSpriteCollided' &&
-            i == parseInt(block.getTitleValue('SPRITE1'), 10) &&
-            j == parseInt(block.getTitleValue('SPRITE2'), 10)) {
-          code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-          whenSpriteCollidedFunc[i][j] = codegen.functionFromCode(
-                                             code, {
-                                              BlocklyApps: BlocklyApps,
-                                              Studio: api } );
-        }
-      }
-    }
-  }
-  
   BlocklyApps.playAudio('start', {volume: 0.5});
 
   BlocklyApps.reset(false);
   
   // Set event handlers and start the onTick timer
-  Studio.whenLeft = whenLeftFunc;
-  Studio.whenRight = whenRightFunc;
-  Studio.whenUp = whenUpFunc;
-  Studio.whenDown = whenDownFunc;
-  Studio.repeatForever = repeatForeverFunc;
-  Studio.whenGameStarts = whenGameStartsFunc;
-  Studio.whenSpriteClicked = whenSpriteClickedFunc;
-  Studio.whenSpriteCollided = whenSpriteCollidedFunc;
+  Studio.eventHandlers = handlers;
   Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
@@ -4664,24 +4643,22 @@ Studio.queueCmd = function (id, name, opts) {
       'name': name,
       'opts': opts,
   };
-  Studio.cmdQueues[Studio.currentHandler].push(cmd);
+  Studio.currentCmdQueue.push(cmd);
 };
 
-Studio.executeQueue = function (handler) {
-  var cmdQueue = Studio.cmdQueues[handler];
-  if (cmdQueue) {
-    for (var cmd = cmdQueue[0]; cmd; cmd = cmdQueue[0]) {
-      if (Studio.callCmd(cmd)) {
-        // Command executed immediately, remove from queue and continue
-        cmdQueue.shift();
-      } else {
-        // This command has more work to do, leave it in the queue, return false
-        return false;
+Studio.executeQueue = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    if (handler.name === name && handler.cmdQueue) {
+      for (var cmd = handler.cmdQueue[0]; cmd; cmd = handler.cmdQueue[0]) {
+        if (Studio.callCmd(cmd)) {
+          // Command executed immediately, remove from queue and continue
+          handler.cmdQueue.shift();
+        } else {
+          break;
+        }
       }
     }
-  }
-  // All commands completed, return true
-  return true;
+  });
 };
 
 //
@@ -4704,7 +4681,9 @@ Studio.callCmd = function (cmd) {
       Studio.setSprite(cmd.opts);
       break;
     case 'saySprite':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.saySprite(cmd.opts);
     case 'setSpriteEmotion':
       BlocklyApps.highlight(cmd.id);
@@ -4727,7 +4706,9 @@ Studio.callCmd = function (cmd) {
       Studio.moveSingle(cmd.opts);
       break;
     case 'moveDistance':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.moveDistance(cmd.opts);
     case 'stop':
       BlocklyApps.highlight(cmd.id);
@@ -4738,7 +4719,9 @@ Studio.callCmd = function (cmd) {
       Studio.incrementScore(cmd.opts);
       break;
     case 'wait':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.wait(cmd.opts);
   }
   return true;
@@ -4855,8 +4838,8 @@ Studio.hideSpeechBubble = function (opts) {
 };
 
 Studio.saySprite = function (opts) {
-  if (!opts.sayStarted) {
-    opts.sayStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
     var bblHeight = setSpeechText(bblText, opts.text);
@@ -4886,8 +4869,8 @@ var onWaitComplete = function (opts) {
 };
 
 Studio.wait = function (opts) {
-  if (!opts.waitStarted) {
-    opts.waitStarted = true;
+  if (!opts.started) {
+    opts.started = true;
 
     // opts.value is the number of milliseconds to wait - or zero which means
     // "wait for click"
@@ -4966,8 +4949,8 @@ Studio.moveSingle = function (opts) {
 };
 
 Studio.moveDistance = function (opts) {
-  if (!opts.moveStarted) {
-    opts.moveStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     opts.queuedDistance = opts.distance / Studio.SQUARE_SIZE;
   }
   
@@ -5604,7 +5587,7 @@ exports.directionSouthLetter = function(d){return "S"};
 
 exports.directionEastLetter = function(d){return "E"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "O"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Le bloc « Répéter » ou «Si» doit avoir des autres blocs à l'intérieur pour fonctionner. Assurez-vous que le bloc interne s'adapte correctement à l'intérieur du bloc conteneur."};
 
@@ -5622,7 +5605,7 @@ exports.help = function(d){return "À l'aide"};
 
 exports.hintTitle = function(d){return "Indice :"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "saute"};
 
 exports.levelIncompleteError = function(d){return "Vous utilisez tous les types nécessaires des blocs, mais pas de la bonne manière."};
 
@@ -5636,7 +5619,7 @@ exports.nextLevel = function(d){return "Félicitations ! Vous avez terminé le P
 
 exports.nextLevelTrophies = function(d){return "Félicitations ! Vous avez terminé le Puzzle "+v(d,"puzzleNumber")+" et gagné "+p(d,"numTrophies",0,"fr",{"one":"un trophée","other":n(d,"numTrophies")+" des trophées"})+"."};
 
-exports.nextStage = function(d){return "Félicitations ! Vous avez terminé l'étape "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Félicitations ! Vous avez terminé "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "Félicitations ! Vous avez terminé l'étape "+v(d,"stageNumber")+" et gagné "+p(d,"numTrophies",0,"fr",{"one":"un trophée","other":n(d,"numTrophies")+" des trophées"})+"."};
 
@@ -5678,9 +5661,9 @@ exports.tryAgain = function(d){return "Réessayez"};
 
 exports.backToPreviousLevel = function(d){return "Retour au niveau précédent"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Enregistrer dans votre espace"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Enregistré dans votre espace !"};
 
 exports.typeCode = function(d){return "Tapez votre code JavaScript en dessous de ces instructions."};
 
@@ -5704,7 +5687,7 @@ exports.tryHOC = function(d){return "Essayez l'Heure de Code"};
 
 exports.signup = function(d){return "Inscrivez-vous au cours d'introduction"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Voici une astuce :"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){

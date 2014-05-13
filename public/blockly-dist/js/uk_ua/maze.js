@@ -7058,13 +7058,13 @@ exports.dialogCancel = function(d){return "Скасувати"};
 
 exports.dialogOK = function(d){return "Гаразд"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Пн"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Пд"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "Сх"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "Зх"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоки \"Повторити\" та \"Якщо\" повинні містити інші блоки. Переконайтесь, що внутрішній блок належно розміщений всередині зовнішнього."};
 
@@ -7082,7 +7082,7 @@ exports.help = function(d){return "Допомога"};
 
 exports.hintTitle = function(d){return "Підказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "стрибок"};
 
 exports.levelIncompleteError = function(d){return "Використано усі необхідні типи блоків, але у неправильному порядку."};
 
@@ -7140,7 +7140,7 @@ exports.backToPreviousLevel = function(d){return "Повернутися до п
 
 exports.saveToGallery = function(d){return "Зберегти до вашої колекції"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Збережено в галерею!"};
 
 exports.typeCode = function(d){return "Запишіть нижче свій код JavaScript згідно із вказівками."};
 
@@ -7226,17 +7226,17 @@ exports.ifTooltip = function(d){return "Якщо є шлях у вказаном
 
 exports.ifelseTooltip = function(d){return "Якщо є шлях у вказаному напрямку, то виконуй перший блок дій. У протилежному випадку, виконуй другий блок дій."};
 
-exports.moveEastTooltip = function(d){return "Move me east one space."};
+exports.moveEastTooltip = function(d){return "Перемістіть мене на одну позицію на схід."};
 
 exports.moveForward = function(d){return "рухатись вперед"};
 
 exports.moveForwardTooltip = function(d){return "Перемісти мене на одну клітинку вперед."};
 
-exports.moveNorthTooltip = function(d){return "Move me north one space."};
+exports.moveNorthTooltip = function(d){return "Перемістіть мене на одну позицію на північ."};
 
-exports.moveSouthTooltip = function(d){return "Move me south one space."};
+exports.moveSouthTooltip = function(d){return "Перемістіть мене на одну позицію на півень."};
 
-exports.moveWestTooltip = function(d){return "Move me west one space."};
+exports.moveWestTooltip = function(d){return "Перемістіть мене на одну позицію на захід."};
 
 exports.nextLevel = function(d){return "Вітання! Ви розв'язали останнє завдання."};
 
@@ -7278,7 +7278,7 @@ exports.repeatUntilBlocked = function(d){return "поки є шлях впере
 
 exports.repeatUntilFinish = function(d){return "повторювати до кінця"};
 
-exports.step = function(d){return "Step"};
+exports.step = function(d){return "Крок"};
 
 exports.turnLeft = function(d){return "повернути ліворуч"};
 

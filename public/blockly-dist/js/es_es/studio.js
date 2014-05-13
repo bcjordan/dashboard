@@ -3210,7 +3210,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 900,
+    'minWorkspaceHeight': 1200,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3224,7 +3224,14 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'toolbox':
-      tb(blockOfType('studio_whenSpriteClicked') +
+      tb(blockOfType('studio_setSprite') +
+         blockOfType('studio_setBackground') +
+         blockOfType('studio_whenGameStarts') +
+         blockOfType('studio_whenLeft') +
+         blockOfType('studio_whenRight') +
+         blockOfType('studio_whenUp') +
+         blockOfType('studio_whenDown') +
+         blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
          blockOfType('studio_repeatForever') +
          blockOfType('studio_move') +
@@ -3236,15 +3243,9 @@ module.exports = {
          defaultSayBlock() +
          blockOfType('studio_setSpritePosition') +
          blockOfType('studio_setSpriteSpeed') +
-         blockOfType('studio_setSpriteEmotion') +
-         blockOfType('studio_setBackground') +
-         blockOfType('studio_setSprite')),
+         blockOfType('studio_setSpriteEmotion')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
   '100': {
     'requiredBlocks': [
@@ -3286,11 +3287,16 @@ module.exports = {
                           blockOfType('studio_setBackground') +
                           blockOfType('studio_setSprite')) +
          createCategory(msg.catEvents(),
+                          blockOfType('studio_whenGameStarts') +
+                          blockOfType('studio_whenLeft') +
+                          blockOfType('studio_whenRight') +
+                          blockOfType('studio_whenUp') +
+                          blockOfType('studio_whenDown') +
                           blockOfType('studio_whenSpriteClicked') +
-                          blockOfType('studio_whenSpriteCollided') +
-                          blockOfType('studio_repeatForever')) +
+                          blockOfType('studio_whenSpriteCollided')) +
          createCategory(msg.catControl(),
-                          blockOfType('controls_repeat')) +
+                          blockOfType('controls_repeat') +
+                          blockOfType('studio_repeatForever')) +
          createCategory(msg.catLogic(),
                           blockOfType('controls_if') +
                           blockOfType('logic_compare') +
@@ -3302,11 +3308,7 @@ module.exports = {
                           blockOfType('math_arithmetic')) +
          createCategory(msg.catVariables(), '', 'VARIABLE')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
 };
 
@@ -3696,9 +3698,8 @@ var delegate = function(scope, func, data)
 var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
   var totalDistance = 0;
   
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-    
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var scaleFactor;
       var distThisMove = Math.min(cmd.opts.queuedDistance,
@@ -3725,16 +3726,15 @@ var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
       }
       totalDistance += distThisMove * scaleFactor;
     }
-  }
+  });
 
   return totalDistance;
 };
 
 
 var cancelQueuedMovements = function (index, yAxis) {
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var dir = cmd.opts.dir;
       if (yAxis && (dir === Direction.NORTH || dir === Direction.SOUTH)) {
@@ -3743,7 +3743,7 @@ var cancelQueuedMovements = function (index, yAxis) {
         cmd.opts.queuedDistance = 0;
       }
     }
-  }
+  });
 };
 
 //
@@ -3834,31 +3834,37 @@ var setSpeechText = function(svgText, text) {
   return SPEECH_BUBBLE_HEIGHT - linesLessThanMax * SPEECH_BUBBLE_LINE_HEIGHT;
 };
 
-var callHandler = function (func, name) {
-  if (func) {
-    Studio.currentHandler = name;
-    Studio.cmdQueues[name] = [];
-    try { func(BlocklyApps, api); } catch (e) { }
-    Studio.currentHandler = null;
-  }
+//
+// Execute the code for all of the event handlers that match an event name
+//
+
+var callHandler = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    // Note: we skip executing the code if we have not completed executing
+    // the cmdQueue on this handler (checking for non-zero length)
+    if (handler.name === name &&
+        (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
+      handler.cmdQueue = [];
+      Studio.currentCmdQueue = handler.cmdQueue;
+      try { handler.func(BlocklyApps, api); } catch (e) { }
+      Studio.currentCmdQueue = null;
+    }
+  });
 };
 
 Studio.onTick = function() {
   Studio.tickCount++;
 
   if (Studio.tickCount === 1) {
-    callHandler(Studio.whenGameStarts, 'whenGameStarts');
+    callHandler('whenGameStarts');
   }
   Studio.executeQueue('whenGameStarts');
 
-  if (!Studio.cmdQueues.repeatForever ||
-      (0 === Studio.cmdQueues.repeatForever.length)) {
-    callHandler(Studio.repeatForever, 'repeatForever');
-  }
+  callHandler('repeatForever');
   Studio.executeQueue('repeatForever');
 
   for (var i = 0; i < Studio.spriteCount; i++) {
-    Studio.executeQueue('whenSpriteClicked' + i);
+    Studio.executeQueue('whenSpriteClicked-' + i);
   }
   
   // Run key event handlers for any keys that are down:
@@ -3867,16 +3873,16 @@ Studio.onTick = function() {
         Studio.keyState[Keycodes[key]] == "keydown") {
       switch (Keycodes[key]) {
         case Keycodes.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case Keycodes.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case Keycodes.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case Keycodes.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
@@ -3887,16 +3893,16 @@ Studio.onTick = function() {
         Studio.btnState[ArrowIds[btn]] == ButtonState.DOWN) {
       switch (ArrowIds[btn]) {
         case ArrowIds.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case ArrowIds.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case ArrowIds.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case ArrowIds.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
@@ -3923,8 +3929,7 @@ Studio.onTick = function() {
                            tiles.SPRITE_COLLIDE_DISTANCE)) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
           Studio.sprite[i].collisionMask |= Math.pow(2, j);
-          callHandler(Studio.whenSpriteCollided[i][j],
-                      'whenSpriteCollided-' + i + '-' + j);
+          callHandler('whenSpriteCollided-' + i + '-' + j);
         }
       } else {
           Studio.sprite[i].collisionMask &= ~(Math.pow(2, j));
@@ -3965,8 +3970,7 @@ Studio.onArrowButtonDown = function(e, idBtn) {
 Studio.onSpriteClicked = function(e, spriteIndex) {
   // If we are "running", call the event handler if registered.
   if (Studio.intervalId) {
-    callHandler(Studio.whenSpriteClicked[spriteIndex],
-                'whenSpriteClicked' + spriteIndex);
+    callHandler('whenSpriteClicked-' + spriteIndex);
   }
   e.preventDefault();  // Stop normal events.
 };
@@ -3976,14 +3980,14 @@ Studio.onSvgClicked = function(e) {
   if (Studio.intervalId) {
     // Check the first command in all of the cmdQueues to see if there is a
     // pending "wait for click" command
-    for (var handler in Studio.cmdQueues) {
-      var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-      
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
       if (cmd && cmd.name === 'wait' &&
           cmd.opts.waitForClick && !cmd.opts.waitComplete) {
         cmd.opts.waitComplete = true;
       }
-    }
+    });
   }
   e.preventDefault();  // Stop normal events.
 };
@@ -4136,30 +4140,25 @@ Studio.init = function(config) {
  * Clear the event handlers and stop the onTick timer.
  */
 Studio.clearEventHandlersKillTickLoop = function() {
-  Studio.whenDown = null;
-  Studio.whenLeft = null;
-  Studio.whenRight = null;
-  Studio.whenUp = null;
-  Studio.repeatForever = null;
-  Studio.whenGameStarts = null;
-  Studio.whenSpriteClicked = [];
-  Studio.whenSpriteCollided = [];
+  if (Studio.eventHandlers) {
+    // Check the first command in all of the cmdQueues and clear the timeout
+    // if there is a pending wait command
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
+      if (cmd && cmd.name === 'wait' &&
+          cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
+        window.clearTimeout(cmd.opts.waitTimeout);
+      }
+    });
+  }
+  Studio.eventHandlers = [];
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
-  }
-  // Check the first command in all of the cmdQueues and clear the timeout
-  // if there is a pending wait command
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-    
-    if (cmd && cmd.name === 'wait' &&
-        cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
-      window.clearTimeout(cmd.opts.waitTimeout);
-    }
   }
 };
 
@@ -4190,9 +4189,8 @@ BlocklyApps.reset = function(first) {
   // Reset configurable variables
   Studio.setBackground({'value': 'cave'});
   
-  // Reset the currentHandler, queues, and complete counts:
-  Studio.currentHandler = null;
-  Studio.cmdQueues = [];
+  // Reset currentCmdQueue and sayComplete count:
+  Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
 
   var spriteStartingSkins = [ "witch", "green", "purple", "pink", "orange" ];
@@ -4323,6 +4321,66 @@ Studio.onReportComplete = function(response) {
   displayFeedback();
 };
 
+var registerEventHandler = function (handlers, name, func) {
+  handlers.push({'name': name, 'func': func});
+};
+
+var registerHandlers =
+      function (handlers, blockName, eventNameBase,
+                nameParam1, matchParam1Val,
+                nameParam2, matchParam2Val) {
+  var blocks = Blockly.mainWorkspace.getTopBlocks();
+  for (var x = 0; blocks[x]; x++) {
+    var block = blocks[x];
+    if (block.type === blockName &&
+        (!nameParam1 ||
+         matchParam1Val === parseInt(block.getTitleValue(nameParam1), 10)) &&
+        (!nameParam2 ||
+         matchParam2Val === parseInt(block.getTitleValue(nameParam2), 10))) {
+      var code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
+      if (code) {
+        var func = codegen.functionFromCode(code, {
+                                            BlocklyApps: BlocklyApps,
+                                            Studio: api } );
+        var eventName = eventNameBase;
+        if (nameParam1) {
+          eventName += '-' + matchParam1Val;
+        }
+        if (nameParam2) {
+          eventName += '-' + matchParam2Val;
+        }
+        registerEventHandler(handlers, eventName, func);
+      }
+    }
+  }
+};
+
+var registerHandlersWithSpriteParam =
+      function (handlers, blockName, eventNameBase, blockParam) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    registerHandlers(handlers, blockName, eventNameBase, blockParam, i);
+  }
+};
+
+var registerHandlersWithSpriteParams =
+      function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    for (var j = 0; j < Studio.spriteCount; j++) {
+      if (i === j) {
+        continue;
+      }
+      registerHandlers(handlers,
+                       blockName,
+                       eventNameBase,
+                       blockParam1,
+                       i,
+                       blockParam2,
+                       j);
+    }
+  }
+};
+
+
 /**
  * Execute the user's code.  Heaven help us...
  */
@@ -4350,109 +4408,30 @@ Studio.execute = function() {
       }
     }
   }
-  
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenLeft');
-  var whenLeftFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenRight');
-  var whenRightFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
+  var handlers = [];
+  registerHandlers(handlers, 'studio_whenLeft', 'whenLeft');
+  registerHandlers(handlers, 'studio_whenRight', 'whenRight');
+  registerHandlers(handlers, 'studio_whenUp', 'whenUp');
+  registerHandlers(handlers, 'studio_whenDown', 'whenDown');
+  registerHandlers(handlers, 'studio_repeatForever', 'repeatForever');
+  registerHandlers(handlers, 'studio_whenGameStarts', 'whenGameStarts');
+  registerHandlersWithSpriteParam(handlers,
+                                  'studio_whenSpriteClicked',
+                                  'whenSpriteClicked',
+                                  'SPRITE');
+  registerHandlersWithSpriteParams(handlers,
+                                   'studio_whenSpriteCollided',
+                                   'whenSpriteCollided',
+                                   'SPRITE1',
+                                   'SPRITE2');
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenUp');
-  var whenUpFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenDown');
-  var whenDownFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_repeatForever');
-  var repeatForeverFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenGameStarts');
-  var whenGameStartsFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  var x;
-  var block;
-  var blocks = Blockly.mainWorkspace.getTopBlocks(true);
-
-  var whenSpriteClickedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    for (x = 0; blocks[x]; x++) {
-      block = blocks[x];
-      if (block.type == 'studio_whenSpriteClicked' &&
-          i == parseInt(block.getTitleValue('SPRITE'), 10)) {
-        code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-        whenSpriteClickedFunc[i] = codegen.functionFromCode(
-                                           code, {
-                                            BlocklyApps: BlocklyApps,
-                                            Studio: api } );
-      }
-    }
-  }
-
-  var whenSpriteCollidedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    whenSpriteCollidedFunc[i] = [];
-    for (var j = 0; j < Studio.spriteCount; j++) {
-      if (i == j) {
-        continue;
-      }
-      for (x = 0; blocks[x]; x++) {
-        block = blocks[x];
-        if (block.type == 'studio_whenSpriteCollided' &&
-            i == parseInt(block.getTitleValue('SPRITE1'), 10) &&
-            j == parseInt(block.getTitleValue('SPRITE2'), 10)) {
-          code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-          whenSpriteCollidedFunc[i][j] = codegen.functionFromCode(
-                                             code, {
-                                              BlocklyApps: BlocklyApps,
-                                              Studio: api } );
-        }
-      }
-    }
-  }
-  
   BlocklyApps.playAudio('start', {volume: 0.5});
 
   BlocklyApps.reset(false);
   
   // Set event handlers and start the onTick timer
-  Studio.whenLeft = whenLeftFunc;
-  Studio.whenRight = whenRightFunc;
-  Studio.whenUp = whenUpFunc;
-  Studio.whenDown = whenDownFunc;
-  Studio.repeatForever = repeatForeverFunc;
-  Studio.whenGameStarts = whenGameStartsFunc;
-  Studio.whenSpriteClicked = whenSpriteClickedFunc;
-  Studio.whenSpriteCollided = whenSpriteCollidedFunc;
+  Studio.eventHandlers = handlers;
   Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
@@ -4664,24 +4643,22 @@ Studio.queueCmd = function (id, name, opts) {
       'name': name,
       'opts': opts,
   };
-  Studio.cmdQueues[Studio.currentHandler].push(cmd);
+  Studio.currentCmdQueue.push(cmd);
 };
 
-Studio.executeQueue = function (handler) {
-  var cmdQueue = Studio.cmdQueues[handler];
-  if (cmdQueue) {
-    for (var cmd = cmdQueue[0]; cmd; cmd = cmdQueue[0]) {
-      if (Studio.callCmd(cmd)) {
-        // Command executed immediately, remove from queue and continue
-        cmdQueue.shift();
-      } else {
-        // This command has more work to do, leave it in the queue, return false
-        return false;
+Studio.executeQueue = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    if (handler.name === name && handler.cmdQueue) {
+      for (var cmd = handler.cmdQueue[0]; cmd; cmd = handler.cmdQueue[0]) {
+        if (Studio.callCmd(cmd)) {
+          // Command executed immediately, remove from queue and continue
+          handler.cmdQueue.shift();
+        } else {
+          break;
+        }
       }
     }
-  }
-  // All commands completed, return true
-  return true;
+  });
 };
 
 //
@@ -4704,7 +4681,9 @@ Studio.callCmd = function (cmd) {
       Studio.setSprite(cmd.opts);
       break;
     case 'saySprite':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.saySprite(cmd.opts);
     case 'setSpriteEmotion':
       BlocklyApps.highlight(cmd.id);
@@ -4727,7 +4706,9 @@ Studio.callCmd = function (cmd) {
       Studio.moveSingle(cmd.opts);
       break;
     case 'moveDistance':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.moveDistance(cmd.opts);
     case 'stop':
       BlocklyApps.highlight(cmd.id);
@@ -4738,7 +4719,9 @@ Studio.callCmd = function (cmd) {
       Studio.incrementScore(cmd.opts);
       break;
     case 'wait':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.wait(cmd.opts);
   }
   return true;
@@ -4855,8 +4838,8 @@ Studio.hideSpeechBubble = function (opts) {
 };
 
 Studio.saySprite = function (opts) {
-  if (!opts.sayStarted) {
-    opts.sayStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
     var bblHeight = setSpeechText(bblText, opts.text);
@@ -4886,8 +4869,8 @@ var onWaitComplete = function (opts) {
 };
 
 Studio.wait = function (opts) {
-  if (!opts.waitStarted) {
-    opts.waitStarted = true;
+  if (!opts.started) {
+    opts.started = true;
 
     // opts.value is the number of milliseconds to wait - or zero which means
     // "wait for click"
@@ -4966,8 +4949,8 @@ Studio.moveSingle = function (opts) {
 };
 
 Studio.moveDistance = function (opts) {
-  if (!opts.moveStarted) {
-    opts.moveStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     opts.queuedDistance = opts.distance / Studio.SQUARE_SIZE;
   }
   
@@ -5614,7 +5597,7 @@ exports.finalStage = function(d){return "¡Felicidades! Has completado la etapa 
 
 exports.finalStageTrophies = function(d){return "¡Felicidades! Has completado la etapa final y ganaste  "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Los bloques de tu programa también pueden ser representados en Javascript, el lenguaje de programación más usado en el mundo:"};
+exports.generatedCodeInfo = function(d){return "Incluso mejores universidades enseñan basado en bloques de codificación (por ejemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Pero bajo el capó, los bloques que ha montado puede también ser demostrado en JavaScript, el más utilizado mundial mente lenguaje de codificación:"};
 
 exports.hashError = function(d){return "Lo sentimos, '%1' no se corresponde con ningún programa guardado."};
 
@@ -5622,7 +5605,7 @@ exports.help = function(d){return "Ayuda"};
 
 exports.hintTitle = function(d){return "Sugerencia:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "saltar"};
 
 exports.levelIncompleteError = function(d){return "Estás utilizando todos los tipos necesarios de bloques pero no de la manera correcta."};
 
@@ -5636,9 +5619,9 @@ exports.nextLevel = function(d){return "¡Felicidades! Completaste el Puzzle "+v
 
 exports.nextLevelTrophies = function(d){return "¡Felicidades! Completaste el puzzle "+v(d,"puzzleNumber")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
 
-exports.nextStage = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "¡ Felicidades! Completaste "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageNumber")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
+exports.nextStageTrophies = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageName")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "¡Felicidades! Completaste el puzzle "+v(d,"puzzleNumber")+". (Sin embargo, podrías haber usado sólo "+p(d,"numBlocks",0,"es",{"one":"1 bloque","other":n(d,"numBlocks")+" bloques"})+".)"};
 
@@ -5678,9 +5661,9 @@ exports.tryAgain = function(d){return "Vuelve a intentarlo"};
 
 exports.backToPreviousLevel = function(d){return "Volver al nivel anterior"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Guardar en tu galería"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Guardar en tu galería!"};
 
 exports.typeCode = function(d){return "Escribe tu código JavaScript debajo de estas instrucciones."};
 
@@ -5704,76 +5687,76 @@ exports.tryHOC = function(d){return "Prueba la Hora del Código"};
 
 exports.signup = function(d){return "Únete al curso de introducción"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aquí hay un Consejo:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.es=function(n){return n===1?"one":"other"}
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Acciones"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "Bucles"};
 
-exports.catEvents = function(d){return "Events"};
+exports.catEvents = function(d){return "Eventos"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Lógica"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "Matemáticas"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Funciones"};
 
 exports.catVariables = function(d){return "Variables"};
 
 exports.continue = function(d){return "Continuar"};
 
-exports.defaultSayText = function(d){return "type here"};
+exports.defaultSayText = function(d){return "Escriba aquí"};
 
-exports.finalLevel = function(d){return "¡Felicidades! Has resuelto el puzzle final."};
+exports.finalLevel = function(d){return "¡Felicidades! Has resuelto el rompecabezas final."};
 
-exports.incrementOpponentScore = function(d){return "incrementar puntuación oponente"};
+exports.incrementOpponentScore = function(d){return "Anota un punto al oponente"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Agregue uno a la cuenta de jugador o adversario."};
 
 exports.incrementPlayerScore = function(d){return "incrementar la puntuación del jugador"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Hacer tu propia historia"};
 
-exports.moveDirectionDown = function(d){return "down"};
+exports.moveDirectionDown = function(d){return "abajo"};
 
-exports.moveDirectionLeft = function(d){return "left"};
+exports.moveDirectionLeft = function(d){return "izquierda"};
 
-exports.moveDirectionRight = function(d){return "right"};
+exports.moveDirectionRight = function(d){return "derecha"};
 
-exports.moveDirectionUp = function(d){return "up"};
+exports.moveDirectionUp = function(d){return "arriba"};
 
-exports.moveDirectionRandom = function(d){return "random"};
+exports.moveDirectionRandom = function(d){return "aleatorio"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 píxeles"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 píxeles"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 píxeles"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 píxeles"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 píxeles"};
 
-exports.moveDistanceRandom = function(d){return "random pixels"};
+exports.moveDistanceRandom = function(d){return "pixeles aleatorios"};
 
-exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
+exports.moveDistanceTooltip = function(d){return "Mover un actor una distancia específica en la dirección especificada."};
 
-exports.moveSprite = function(d){return "move"};
+exports.moveSprite = function(d){return "Mover"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
+exports.moveSprite1 = function(d){return "Mueva el actor 1"};
 
-exports.moveSprite2 = function(d){return "move character 2"};
+exports.moveSprite2 = function(d){return "Mueva el actor 2"};
 
-exports.moveSprite3 = function(d){return "move character 3"};
+exports.moveSprite3 = function(d){return "Mueva el actor 3"};
 
-exports.moveSprite4 = function(d){return "move character 4"};
+exports.moveSprite4 = function(d){return "Mueva el actor 4"};
 
-exports.moveSprite5 = function(d){return "move character 5"};
+exports.moveSprite5 = function(d){return "Mueva el actor 5"};
 
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSprite6 = function(d){return "Mueva el actor 6"};
 
 exports.moveDown = function(d){return "Bajar"};
 
@@ -5781,11 +5764,11 @@ exports.moveDownTooltip = function(d){return "Baja la palanca."};
 
 exports.moveLeft = function(d){return "mover hacia la izquierda"};
 
-exports.moveLeftTooltip = function(d){return "Mover la pala a la izquierda."};
+exports.moveLeftTooltip = function(d){return "Mover un actor a la izquierda."};
 
 exports.moveRight = function(d){return "mover hacia la derecha"};
 
-exports.moveRightTooltip = function(d){return "Mover la pala a la derecha."};
+exports.moveRightTooltip = function(d){return "Mover un actor hacia la derecha."};
 
 exports.moveUp = function(d){return "Subir"};
 
@@ -5807,7 +5790,7 @@ exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
 
 exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "reproducir sonido golpe"};
 
 exports.playSoundLosePoint = function(d){return "play lose point sound"};
 
@@ -5953,21 +5936,21 @@ exports.setSprite5 = function(d){return "set character 5"};
 
 exports.setSprite6 = function(d){return "set character 6"};
 
-exports.stopSprite = function(d){return "stop"};
+exports.stopSprite = function(d){return "Parar"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
+exports.stopSprite1 = function(d){return "Parar al actor 1"};
 
-exports.stopSprite2 = function(d){return "stop actor 2"};
+exports.stopSprite2 = function(d){return "Parar al actor 2"};
 
-exports.stopSprite3 = function(d){return "stop actor 3"};
+exports.stopSprite3 = function(d){return "Parar al actor 3"};
 
-exports.stopSprite4 = function(d){return "stop actor 4"};
+exports.stopSprite4 = function(d){return "Parar al actor 4"};
 
-exports.stopSprite5 = function(d){return "stop actor 5"};
+exports.stopSprite5 = function(d){return "Parar al actor 5"};
 
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSprite6 = function(d){return "Parar al actor 6"};
 
-exports.stopTooltip = function(d){return "Stops an actor's movement."};
+exports.stopTooltip = function(d){return "Detener el movimiento del actor."};
 
 exports.waitForClick = function(d){return "wait for click"};
 
@@ -5993,7 +5976,7 @@ exports.whenGameStarts = function(d){return "when game starts"};
 
 exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
 
-exports.whenLeft = function(d){return "cuando la fecha apunta a la izquierda"};
+exports.whenLeft = function(d){return "Cuando la izquierda flecha"};
 
 exports.whenLeftTooltip = function(d){return "Realiza las instrucciones de abajo cuando se presiona la tecla de fecha hacia la izquierda."};
 
@@ -6017,33 +6000,33 @@ exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
 
 exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
+exports.whenSpriteCollided1 = function(d){return "Cuando actor 1"};
 
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
+exports.whenSpriteCollided2 = function(d){return "Cuando actor 2"};
 
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
+exports.whenSpriteCollided3 = function(d){return "Cuando actor 3"};
 
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
+exports.whenSpriteCollided4 = function(d){return "Cuando actor 14"};
 
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
+exports.whenSpriteCollided5 = function(d){return "Cuando actor 5"};
 
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteCollided6 = function(d){return "Cuando actor 6"};
 
-exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
+exports.whenSpriteCollidedTooltip = function(d){return "Ejecutar las acciones abajo cuando un actor toca otro actor."};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
+exports.whenSpriteCollidedWith1 = function(d){return "toca actor 1"};
 
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
+exports.whenSpriteCollidedWith2 = function(d){return "toca actor 2"};
 
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
+exports.whenSpriteCollidedWith3 = function(d){return "toca actor 3"};
 
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
+exports.whenSpriteCollidedWith4 = function(d){return "toca actor 4"};
 
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
+exports.whenSpriteCollidedWith5 = function(d){return "toca actor 5"};
 
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollidedWith6 = function(d){return "toca actor 6"};
 
-exports.whenUp = function(d){return "Cuando la flecha apunte arriba"};
+exports.whenUp = function(d){return "Cuando flecha arriba"};
 
 exports.whenUpTooltip = function(d){return "Realiza las instrucciones de abajo cuando se presiona la tecla de fecha hacia arriba."};
 
