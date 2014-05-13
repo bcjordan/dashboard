@@ -2185,6 +2185,10 @@ exports.incrementScore = function(id, player) {
   Studio.queueCmd(id, 'incrementScore', {'player': player});
 };
 
+exports.wait = function(id, value) {
+  Studio.queueCmd(id, 'wait', {'value': value});
+};
+
 },{"./tiles":19}],12:[function(require,module,exports){
 /**
  * Blockly App: Studio
@@ -2800,7 +2804,7 @@ exports.install = function(blockly, skin) {
   generator.studio_setSprite = function() {
     return generateSetterCode({
       ctx: this,
-      random: 2,
+      random: 1,
       extraParams: (this.getTitleValue('SPRITE') || '0'),
       name: 'setSprite'});
   };
@@ -2895,6 +2899,38 @@ exports.install = function(blockly, skin) {
                blockly.JavaScript.quote_(this.getTitleValue('TEXT')) + ');\n';
   };
   
+  blockly.Blocks.studio_wait = {
+    helpUrl: '',
+    init: function() {
+      var dropdown = new blockly.FieldDropdown(this.VALUES);
+      dropdown.setValue(this.VALUES[2][1]);  // default to half second
+
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+        .appendTitle(dropdown, 'VALUE');
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.waitTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_wait.VALUES =
+      [[msg.waitForClick(), '0'],
+       [msg.waitForRandom(), 'random'],
+       [msg.waitForHalfSecond(), '500'],
+       [msg.waitFor1Second(), '1000'],
+       [msg.waitFor2Seconds(), '2000'],
+       [msg.waitFor5Seconds(), '5000'],
+       [msg.waitFor10Seconds(), '10000']];
+
+  generator.studio_wait = function() {
+    return generateSetterCode({
+      ctx: this,
+      random: 1,
+      name: 'wait'});
+  };
+
   delete blockly.Blocks.procedures_defreturn;
   delete blockly.Blocks.procedures_ifreturn;
 };
@@ -3174,7 +3210,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 800,
+    'minWorkspaceHeight': 900,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3194,6 +3230,7 @@ module.exports = {
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_stop') +
+         blockOfType('studio_wait') +
          blockOfType('studio_playSound') +
          blockOfType('studio_incrementScore') +
          defaultSayBlock() +
@@ -3221,7 +3258,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 800,
+    'minWorkspaceHeight': 900,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3239,6 +3276,7 @@ module.exports = {
                           blockOfType('studio_move') +
                           blockOfType('studio_moveDistance') +
                           blockOfType('studio_stop') +
+                          blockOfType('studio_wait') +
                           blockOfType('studio_playSound') +
                           blockOfType('studio_incrementScore') +
                           defaultSayBlock() +
@@ -3536,6 +3574,9 @@ var drawMap = function() {
   // Adjust outer element size.
   svg.setAttribute('width', Studio.MAZE_WIDTH);
   svg.setAttribute('height', Studio.MAZE_HEIGHT);
+
+  // Attach click handler.
+  dom.addMouseDownTouchEvent(svg, Studio.onSvgClicked);
 
   // Adjust visualization and belowVisualization width.
   var visualization = document.getElementById('visualization');
@@ -3930,6 +3971,23 @@ Studio.onSpriteClicked = function(e, spriteIndex) {
   e.preventDefault();  // Stop normal events.
 };
 
+Studio.onSvgClicked = function(e) {
+  // If we are "running", check the cmdQueues.
+  if (Studio.intervalId) {
+    // Check the first command in all of the cmdQueues to see if there is a
+    // pending "wait for click" command
+    for (var handler in Studio.cmdQueues) {
+      var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
+      
+      if (cmd && cmd.name === 'wait' &&
+          cmd.opts.waitForClick && !cmd.opts.waitComplete) {
+        cmd.opts.waitComplete = true;
+      }
+    }
+  }
+  e.preventDefault();  // Stop normal events.
+};
+
 Studio.onArrowButtonUp = function(e, idBtn) {
   // Store the most recent event type per-button
   Studio.btnState[idBtn] = ButtonState.UP;
@@ -4092,6 +4150,16 @@ Studio.clearEventHandlersKillTickLoop = function() {
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
+  }
+  // Check the first command in all of the cmdQueues and clear the timeout
+  // if there is a pending wait command
+  for (var handler in Studio.cmdQueues) {
+    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
+    
+    if (cmd && cmd.name === 'wait' &&
+        cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
+      window.clearTimeout(cmd.opts.waitTimeout);
+    }
   }
 };
 
@@ -4669,6 +4737,9 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       Studio.incrementScore(cmd.opts);
       break;
+    case 'wait':
+      BlocklyApps.highlight(cmd.id);
+      return Studio.wait(cmd.opts);
   }
   return true;
 };
@@ -4808,6 +4879,28 @@ Studio.saySprite = function (opts) {
   }
 
   return opts.sayComplete;
+};
+
+var onWaitComplete = function (opts) {
+  opts.waitComplete = true;
+};
+
+Studio.wait = function (opts) {
+  if (!opts.waitStarted) {
+    opts.waitStarted = true;
+
+    // opts.value is the number of milliseconds to wait - or zero which means
+    // "wait for click"
+    if (0 === opts.value) {
+      opts.waitForClick = true;
+    } else {
+      opts.waitTimeout = window.setTimeout(
+        delegate(this, onWaitComplete, opts),
+        opts.value);
+    }
+  }
+
+  return opts.waitComplete;
 };
 
 Studio.stop = function (opts) {
@@ -5875,6 +5968,22 @@ exports.stopSprite5 = function(d){return "stop actor 5"};
 exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
+
+exports.waitForClick = function(d){return "wait for click"};
+
+exports.waitForRandom = function(d){return "wait for random"};
+
+exports.waitForHalfSecond = function(d){return "wait for a half second"};
+
+exports.waitFor1Second = function(d){return "wait for 1 second"};
+
+exports.waitFor2Seconds = function(d){return "wait for 2 seconds"};
+
+exports.waitFor5Seconds = function(d){return "wait for 5 seconds"};
+
+exports.waitFor10Seconds = function(d){return "wait for 10 seconds"};
+
+exports.waitTooltip = function(d){return "Waits for a specified amount of time or until a click occurs."};
 
 exports.whenDown = function(d){return "Ketika panah bawah"};
 
