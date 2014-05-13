@@ -10,7 +10,7 @@
   .field
     = f.label :name
     %br/
-    = f.text_field :name
+    = f.text_field :name, readonly: true
   .script_text
     - if @script_file
       = text_area_tag('script_text', @script_file, rows: @script_file.lines.count+1, cols: @script_file.lines.max_by(&:length).length)
