@@ -43,7 +43,7 @@ class LevelsController < ApplicationController
     authorize! :manage, :level
     @level = Level.find(params[:level_id])
     @start_blocks = @level.properties[params[:type]].presence || @level[params[:type]]
-    @toolbox_blocks = @level.complete_toolbox  # Provide complete toolbox for editing start/toolbox blocks.
+    @toolbox_blocks = @level.complete_toolbox(params[:type])  # Provide complete toolbox for editing start/toolbox blocks.
     @game = @level.game
     @full_width = true
     @callback = game_level_update_blocks_path @game, @level, params[:type]

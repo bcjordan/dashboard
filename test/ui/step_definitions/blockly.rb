@@ -85,3 +85,9 @@ Then(/^block "([^"]*)" is in front of block "([^"]*)"$/) do |block_front, block_
   block_back_index = @browser.execute_script("return $(\"[block-id='#{block_back}']\").index()")
   block_front_index.should be > block_back_index
 end
+
+Then(/^the workspace has "(.*?)" blocks of type "(.*?)"$/) do |n, type|
+  code = "return Blockly.mainWorkspace.getAllBlocks().reduce(function (a, b) { return a + (b.type === '" + type + "' ? 1 : 0) }, 0)"
+  result = @browser.execute_script(code)
+  result.should eq n.to_i
+end

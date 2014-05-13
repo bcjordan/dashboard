@@ -19,6 +19,8 @@
 // Loads all Bootstrap javascripts
 //= require bootstrap
 
+<% environment.context_class.instance_eval { include ApplicationHelper } %>
+
 var KEY_ESCAPE = 27;
 
 // Prevent escape from canceling page loads.
@@ -128,7 +130,6 @@ function showVideo(options) {
 
   dialog.show();
 
-  // Temporarily disabled until youtubeeducation.com has a suitable endpoint
   // setupVideoFallback(options, divHeight, $div.width());
 }
 
@@ -141,9 +142,16 @@ function setupVideoFallback(videoInfo, playerHeight, playerWidth) {
 function onYouTubeBlocked(callback) {
   $("<img width=0 height=0>")
       .on("error", callback)
-      .attr("src", "http://www.youtube.com/favicon.ico?" + Math.random())
+      .attr("src", youTubeAvailabilityEndpointURL() + "?" + Math.random())
       .css("position", "absolute")
       .appendTo("body");
+}
+
+function youTubeAvailabilityEndpointURL() {
+  if (window.document.URL.toString().indexOf('force_youtube_fallback') >= 0) {
+    return 'http://unreachable-test-subdomain.example.com/favicon.ico'
+  }
+  return "<%= youtube_base_url %>/favicon.ico";
 }
 
 function addFallbackVideoPlayer(videoInfo, playerHeight, playerWidth) {

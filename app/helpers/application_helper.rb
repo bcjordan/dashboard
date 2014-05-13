@@ -72,7 +72,11 @@ module ApplicationHelper
       )
     end
     defaults.merge!(args)
-    "https://www.youtubeeducation.com/embed/#{code}/?#{defaults.to_query}"
+    "#{youtube_base_url}/embed/#{code}/?#{defaults.to_query}"
+  end
+  
+  def youtube_base_url
+    'https://www.youtubeeducation.com'
   end
 
   def video_thumbnail_url(video)
