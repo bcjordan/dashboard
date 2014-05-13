@@ -4747,13 +4747,13 @@ exports.dialogCancel = function(d){return "İmtina et"};
 
 exports.dialogOK = function(d){return "Oldu"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Şimal"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Cənub"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "Şərq"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "Qərb"};
 
 exports.emptyBlocksErrorMsg = function(d){return "\"Təkrar\" və ya \"Əgər\" blokları işləsin deyə içərisində başqa blokların olmağı lazımdır. Əmin olun ki, daxili blokun konteyner blokun içərisinə düz yerləşir."};
 
@@ -4819,7 +4819,7 @@ exports.flappySpecificFail = function(d){return "Your code looks good - it will 
 
 exports.toolboxHeader = function(d){return "Bloklar"};
 
-exports.openWorkspace = function(d){return "Bu Necə İşləyir"};
+exports.openWorkspace = function(d){return "Bu necə işləyir?"};
 
 exports.totalNumLinesOfCodeWritten = function(d){return "Ümumi cəm: "+p(d,"numLines",0,"en",{"one":"1 sətir","other":n(d,"numLines")+" sətir"})+" kod."};
 

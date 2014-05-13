@@ -7086,7 +7086,7 @@ exports.help = function(d){return "مساعدة"};
 
 exports.hintTitle = function(d){return "تلميح:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "قفز"};
 
 exports.levelIncompleteError = function(d){return "أنت استخدمت كل انواع القطع الضرورية ولكن ليس في الطريق الصحيح."};
 
@@ -7144,7 +7144,7 @@ exports.backToPreviousLevel = function(d){return "الرجوع إلى المست
 
 exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك!"};
 
 exports.typeCode = function(d){return "اكتب كود الـ JavaScript الخاص بك تحت هذه التعليمات."};
 
@@ -7234,17 +7234,17 @@ exports.ifTooltip = function(d){return "إذا كان الطريق سالكا ف
 
 exports.ifelseTooltip = function(d){return "إذا كان الطريق سالكا في الاتجاه المحدد , قم بتنفيذ القطعة الأولى من الاجراءات. والا, قم بتنفيذ القطعة الثانية من الاجراءات."};
 
-exports.moveEastTooltip = function(d){return "Move me east one space."};
+exports.moveEastTooltip = function(d){return "نقل للشرق مسافة واحدة."};
 
 exports.moveForward = function(d){return "تقدم للامام"};
 
 exports.moveForwardTooltip = function(d){return "تقدم الاعب خطوة واحدة للامام ."};
 
-exports.moveNorthTooltip = function(d){return "Move me north one space."};
+exports.moveNorthTooltip = function(d){return "نقل للشمال مسافة واحدة."};
 
-exports.moveSouthTooltip = function(d){return "Move me south one space."};
+exports.moveSouthTooltip = function(d){return "نقل للجنوب مسافة واحدة."};
 
-exports.moveWestTooltip = function(d){return "Move me west one space."};
+exports.moveWestTooltip = function(d){return "نقل للغرب مسافة واحدة."};
 
 exports.nextLevel = function(d){return "تهانينا ! لقد تم الانتهاء من اللغز."};
 
@@ -7286,7 +7286,7 @@ exports.repeatUntilBlocked = function(d){return "أكرر طالما الطري�
 
 exports.repeatUntilFinish = function(d){return "اكرر حتى النهاية"};
 
-exports.step = function(d){return "Step"};
+exports.step = function(d){return "الخطوة"};
 
 exports.turnLeft = function(d){return "اتجه إلى اليسار"};
 

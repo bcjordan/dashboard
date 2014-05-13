@@ -5598,13 +5598,13 @@ exports.dialogCancel = function(d){return "لغو"};
 
 exports.dialogOK = function(d){return "Ok"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "شمال"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "جنوب"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "شرق"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "غرب"};
 
 exports.emptyBlocksErrorMsg = function(d){return "بلوک های \"تکرار\" (Repeat) یا \"شرطی\" (If)  برای کار کردن، نیاز به بلوکهای دیگری در داخل خود دارند. مطمئن شوید که بلوک داخلی، به درستی درون بلوک اصلی قرار گرفته است."};
 
@@ -5614,7 +5614,7 @@ exports.finalStage = function(d){return "تبریک می‌گوییم! شما م
 
 exports.finalStageTrophies = function(d){return "تبریک می‌گوییم! شما مرحله‌ی آخر را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
 
-exports.generatedCodeInfo = function(d){return "بلوک‌های برنامه‌ی شما همچنین می‌توانند در جاوا اسکریپت که فراگیرترین زبان برنامه نویسی در جهان است، به نمایش درآیند:"};
+exports.generatedCodeInfo = function(d){return "دانشگاههای برتر نیز کدنویسی بر اساس بلوک ها را آموزش می دهند (مثل "+v(d,"berkeleyLink")+" و "+v(d,"harvardLink")+"). اما در پشت پرده، بلوک هایی که شما سر هم کرده اید را می توان به زبان جاوا اسکریپت نشان داد، که پر استفاده ترین زبان کدنویسی در دنیاست:"};
 
 exports.hashError = function(d){return "با عرض پوزش، '%1' با هیچ کدام از برنامه‌های ذخیره شده مطابقت ندارد."};
 
@@ -5622,7 +5622,7 @@ exports.help = function(d){return "راهنما"};
 
 exports.hintTitle = function(d){return "راهنمایی:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "پرش"};
 
 exports.levelIncompleteError = function(d){return "شما همه‌ی بلوک‌های مورد نیاز را بکار بردید، ولی نه به روش درست."};
 
@@ -5636,9 +5636,9 @@ exports.nextLevel = function(d){return "تبریک ! شما پازل "+v(d,"puzz
 
 exports.nextLevelTrophies = function(d){return "تبریک می‌گوییم! شما معمای "+v(d,"puzzleNumber")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
 
-exports.nextStage = function(d){return "تبریک می‌گوییم! شما مرحله‌ی "+v(d,"stageNumber")+" را به پایان رساندید."};
+exports.nextStage = function(d){return "تبریک! شما "+v(d,"stageName")+" را به پایان رساندید."};
 
-exports.nextStageTrophies = function(d){return "تبریک می‌گوییم! شما مرحله‌ی "+v(d,"stageNumber")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
+exports.nextStageTrophies = function(d){return "تبریک! شما مرحله‌ی "+v(d,"stageName")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+" شدید."};
 
 exports.numBlocksNeeded = function(d){return "تبریک می‌گوییم! شما معمای "+v(d,"puzzleNumber")+" را به پایان رساندید. (اگرچه می‌توانستید تنها "+p(d,"numBlocks",0,"fa",{"one":"یک بلوک","other":n(d,"numBlocks")+" بلوک"})+" بکار ببرید.)"};
 
@@ -5678,9 +5678,9 @@ exports.tryAgain = function(d){return "دوباره تلاش کنید"};
 
 exports.backToPreviousLevel = function(d){return "برگرد به سطح قبلی"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "ذخیره در گالری شما"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "در گالری شما ذخیره شد!"};
 
 exports.typeCode = function(d){return "در زیر این دستورات کد جاوا اسکریپتِ خودت رو بنویس."};
 
@@ -5704,48 +5704,48 @@ exports.tryHOC = function(d){return "ساعتِ کد نویسی را امتحا�
 
 exports.signup = function(d){return "برای دوره‌ی مقدماتی نام نویسی کنید"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "نکته اینجاست:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fa=function(n){return "other"}
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "عملیات"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "حلقه‌ها"};
 
-exports.catEvents = function(d){return "Events"};
+exports.catEvents = function(d){return "رویدادها"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "منطق"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "حساب"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "توابع"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "متغیرها"};
 
 exports.continue = function(d){return "ادامه"};
 
-exports.defaultSayText = function(d){return "type here"};
+exports.defaultSayText = function(d){return "ایجا تایپ کن"};
 
-exports.finalLevel = function(d){return "تبریک میگویم! شما پازل نهایی را حل کردید."};
+exports.finalLevel = function(d){return "تبریک میگم . معمای نهایی رو حل کردی ."};
 
 exports.incrementOpponentScore = function(d){return "increment opponent score"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "یکی به امتیاز بازیکن یا حریف اضافه کن ."};
 
 exports.incrementPlayerScore = function(d){return "increment player score"};
 
 exports.makeYourOwn = function(d){return "داستان خودتو بساز"};
 
-exports.moveDirectionDown = function(d){return "down"};
+exports.moveDirectionDown = function(d){return "پایین"};
 
-exports.moveDirectionLeft = function(d){return "left"};
+exports.moveDirectionLeft = function(d){return "سمت چپ"};
 
-exports.moveDirectionRight = function(d){return "right"};
+exports.moveDirectionRight = function(d){return "سمت راست"};
 
-exports.moveDirectionUp = function(d){return "up"};
+exports.moveDirectionUp = function(d){return "بالا"};
 
-exports.moveDirectionRandom = function(d){return "random"};
+exports.moveDirectionRandom = function(d){return "تصادفی"};
 
 exports.moveDistance25 = function(d){return "۲۰ پیکسل"};
 
@@ -5757,47 +5757,47 @@ exports.moveDistance200 = function(d){return "۲۰۰ پیکسل"};
 
 exports.moveDistance400 = function(d){return "۴۰۰ پیکسل"};
 
-exports.moveDistanceRandom = function(d){return "random pixels"};
+exports.moveDistanceRandom = function(d){return "پیکسل های تصادفی"};
 
-exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
+exports.moveDistanceTooltip = function(d){return "یک بازیگر رو در جهت خاص به فاصله خاصی حرکت بده ."};
 
-exports.moveSprite = function(d){return "move"};
+exports.moveSprite = function(d){return "حرکت"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
+exports.moveSprite1 = function(d){return "بازیگر 1 رو حرکت بده"};
 
-exports.moveSprite2 = function(d){return "move character 2"};
+exports.moveSprite2 = function(d){return "بازیگر 2 رو حرکت بده"};
 
-exports.moveSprite3 = function(d){return "move character 3"};
+exports.moveSprite3 = function(d){return "بازیگر 3 رو حرکت بده"};
 
-exports.moveSprite4 = function(d){return "move character 4"};
+exports.moveSprite4 = function(d){return "بازیگر 4 رو حرکت بده"};
 
-exports.moveSprite5 = function(d){return "move character 5"};
+exports.moveSprite5 = function(d){return "بازیگر 5 رو حرکت بده"};
 
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSprite6 = function(d){return "بازیگر 6 رو حرکت بده"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "برو پایین"};
 
-exports.moveDownTooltip = function(d){return "Move the paddle down."};
+exports.moveDownTooltip = function(d){return "یک بازیگر رو پایین ببر ."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "برو به چپ"};
 
-exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
+exports.moveLeftTooltip = function(d){return "یک بازیگر رو به چپ ببر ."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "برو به راست"};
 
-exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
+exports.moveRightTooltip = function(d){return "یک بازیگر رو به راست ببر ."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "برو بالا"};
 
-exports.moveUpTooltip = function(d){return "Move the paddle up."};
+exports.moveUpTooltip = function(d){return "یک بازیگر رو بالا ببر ."};
 
-exports.moveTooltip = function(d){return "Move a character."};
+exports.moveTooltip = function(d){return "یک بازیگر رو حرکت بده ."};
 
-exports.nextLevel = function(d){return "تبریک! شما این مرحله را انجام دادید."};
+exports.nextLevel = function(d){return "تبریک میگم . این پازل رو کامل کردید ."};
 
 exports.no = function(d){return "خیر"};
 
-exports.numBlocksNeeded = function(d){return "این پازل می تواند با 1% از بلوکها حل شود."};
+exports.numBlocksNeeded = function(d){return "این پازل می تواند با 1% بلوکها حل شود."};
 
 exports.oneTopBlock = function(d){return "برای این پازل شما نیاز دارید که همه بلوکها را در یک صفحه کاری سفید جمع کنید."};
 
@@ -5851,11 +5851,11 @@ exports.reinfFeedbackMsg = function(d){return "شما می توانید دکمه
 
 exports.repeatForever = function(d){return "repeat forever"};
 
-exports.repeatDo = function(d){return "do"};
+exports.repeatDo = function(d){return "انجام دادن"};
 
 exports.repeatForeverTooltip = function(d){return "Execute the actions in this block repeatedly while the story is running."};
 
-exports.saySprite = function(d){return "say"};
+exports.saySprite = function(d){return "گفتن"};
 
 exports.saySprite1 = function(d){return "character 1 say"};
 
@@ -5901,11 +5901,11 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "به یک تصویر سبز"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "به یک تصویر مخفی"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "به یک تصویر نارنجی"};
 
 exports.setSpritePink = function(d){return "to a pink image"};
 
@@ -5933,7 +5933,7 @@ exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
 
 exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "به اشتراک گذاری"};
 
 exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
 

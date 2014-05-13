@@ -5589,7 +5589,7 @@ exports.catLogic = function(d){return "Logika"};
 
 exports.catLists = function(d){return "Sąrašai"};
 
-exports.catLoops = function(d){return "Ciklai"};
+exports.catLoops = function(d){return "Kartojimas"};
 
 exports.catMath = function(d){return "Matematika"};
 
@@ -5607,13 +5607,13 @@ exports.dialogCancel = function(d){return "Atšaukti"};
 
 exports.dialogOK = function(d){return "gerai"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Š"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "P"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "R"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "V"};
 
 exports.emptyBlocksErrorMsg = function(d){return "„Kartojimo“ arba „Jei“ blokelių viduje reikia įdėti kitus blokelius, kad jie veiktų. Įsitikink, kad jie yra gerai sukibę vienas su kitu."};
 
@@ -5631,7 +5631,7 @@ exports.help = function(d){return "pagalba"};
 
 exports.hintTitle = function(d){return "Patarimas:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "šok"};
 
 exports.levelIncompleteError = function(d){return "Tu naudoji visus būtinus blokelius, tačiau netinkamai."};
 
@@ -5689,7 +5689,7 @@ exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"}
 
 exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Įrašyti į savo galeriją!"};
 
 exports.typeCode = function(d){return "Įvesk savo JavaScript kodą žemiau šių instrukcijų."};
 
@@ -5727,23 +5727,23 @@ var MessageFormat = require("messageformat");MessageFormat.locale.lt = function 
   }
   return 'other';
 };
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Veiksmai"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "Kartojimas"};
 
-exports.catEvents = function(d){return "Events"};
+exports.catEvents = function(d){return "Įvykiai"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Logika"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "Matematika"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Funkcijos"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "Kintamieji"};
 
 exports.continue = function(d){return "Tęsti"};
 
-exports.defaultSayText = function(d){return "type here"};
+exports.defaultSayText = function(d){return "rašyk čia"};
 
 exports.finalLevel = function(d){return "Sveikinu! Tu išsprendei paskutinį galvosūkį."};
 
@@ -5755,15 +5755,15 @@ exports.incrementPlayerScore = function(d){return "pridėk tašką žaidėjui"};
 
 exports.makeYourOwn = function(d){return "Sukurkite savo istoriją"};
 
-exports.moveDirectionDown = function(d){return "down"};
+exports.moveDirectionDown = function(d){return "žemyn"};
 
-exports.moveDirectionLeft = function(d){return "left"};
+exports.moveDirectionLeft = function(d){return "kairėn"};
 
-exports.moveDirectionRight = function(d){return "right"};
+exports.moveDirectionRight = function(d){return "dešinėn"};
 
-exports.moveDirectionUp = function(d){return "up"};
+exports.moveDirectionUp = function(d){return "aukštyn"};
 
-exports.moveDirectionRandom = function(d){return "random"};
+exports.moveDirectionRandom = function(d){return "atsitiktinis"};
 
 exports.moveDistance25 = function(d){return "25 pikseliai"};
 
@@ -5775,41 +5775,41 @@ exports.moveDistance200 = function(d){return "200 pikselių"};
 
 exports.moveDistance400 = function(d){return "400 pikselių"};
 
-exports.moveDistanceRandom = function(d){return "random pixels"};
+exports.moveDistanceRandom = function(d){return "atsitiktinis pikselių skaičius"};
 
-exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
+exports.moveDistanceTooltip = function(d){return "Pajudink veikėją tam tikru atstumu nurodyta kryptimi."};
 
-exports.moveSprite = function(d){return "move"};
+exports.moveSprite = function(d){return "judėk"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
+exports.moveSprite1 = function(d){return "perkelti aktorių 1"};
 
-exports.moveSprite2 = function(d){return "move character 2"};
+exports.moveSprite2 = function(d){return "perkelti aktorių 2"};
 
-exports.moveSprite3 = function(d){return "move character 3"};
+exports.moveSprite3 = function(d){return "perkelti aktorių 3"};
 
-exports.moveSprite4 = function(d){return "move character 4"};
+exports.moveSprite4 = function(d){return "perkelti aktorių 4"};
 
-exports.moveSprite5 = function(d){return "move character 5"};
+exports.moveSprite5 = function(d){return "perkelti aktorių 5"};
 
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSprite6 = function(d){return "perkelti aktorių 6"};
 
 exports.moveDown = function(d){return "judėk žemyn"};
 
-exports.moveDownTooltip = function(d){return "Move the paddle down."};
+exports.moveDownTooltip = function(d){return "Perkelti aktorių žemyn."};
 
 exports.moveLeft = function(d){return "judėk kairėn"};
 
-exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
+exports.moveLeftTooltip = function(d){return "Perkelti aktorių kairėn."};
 
 exports.moveRight = function(d){return "judėk dešinėn"};
 
-exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
+exports.moveRightTooltip = function(d){return "Perkelti aktorių dešinėn."};
 
 exports.moveUp = function(d){return "judėk aukštyn"};
 
-exports.moveUpTooltip = function(d){return "Move the paddle up."};
+exports.moveUpTooltip = function(d){return "Perkelti aktorių aukštyn."};
 
-exports.moveTooltip = function(d){return "Move a character."};
+exports.moveTooltip = function(d){return "Perkelti aktorių."};
 
 exports.nextLevel = function(d){return "Sveikinu! Išsprendei šią užduotį."};
 
@@ -5845,79 +5845,79 @@ exports.playSoundWinPoint2 = function(d){return "grok antro taško pelnymo gars�
 
 exports.playSoundWood = function(d){return "grok medienos garsą"};
 
-exports.positionTopLeft = function(d){return "to the top left position"};
+exports.positionTopLeft = function(d){return "į poziciją viršuje kairėje"};
 
-exports.positionTopCenter = function(d){return "to the top center position"};
+exports.positionTopCenter = function(d){return "į poziciją viršuje centre"};
 
-exports.positionTopRight = function(d){return "to the top right position"};
+exports.positionTopRight = function(d){return "į poziciją viršuje dešinėn"};
 
-exports.positionMiddleLeft = function(d){return "to the middle left position"};
+exports.positionMiddleLeft = function(d){return "į poziciją viduryje kairėje"};
 
-exports.positionMiddleCenter = function(d){return "to the middle center position"};
+exports.positionMiddleCenter = function(d){return "į poziciją viduryje"};
 
-exports.positionMiddleRight = function(d){return "to the middle right position"};
+exports.positionMiddleRight = function(d){return "į poziciją viduryje dešinėje"};
 
-exports.positionBottomLeft = function(d){return "to the bottom left position"};
+exports.positionBottomLeft = function(d){return "į poziciją apačioje kairėje"};
 
-exports.positionBottomCenter = function(d){return "to the bottom center position"};
+exports.positionBottomCenter = function(d){return "į poziciją apačioje centre"};
 
-exports.positionBottomRight = function(d){return "to the bottom right position"};
+exports.positionBottomRight = function(d){return "į poziciją apačioje dešinėje"};
 
-exports.positionRandom = function(d){return "to the random position"};
+exports.positionRandom = function(d){return "į atsitiktinę poziciją"};
 
 exports.reinfFeedbackMsg = function(d){return "Gali nuspausti mygtuką „Mėginti dar kartą“, kad grįžtum prie savo istorijos."};
 
-exports.repeatForever = function(d){return "repeat forever"};
+exports.repeatForever = function(d){return "kartok amžinai"};
 
-exports.repeatDo = function(d){return "do"};
+exports.repeatDo = function(d){return "daryk"};
 
-exports.repeatForeverTooltip = function(d){return "Execute the actions in this block repeatedly while the story is running."};
+exports.repeatForeverTooltip = function(d){return "Vykdyk veiksmus, esančius šiame bloke, pakartotinai, kol istorija yra rodoma."};
 
-exports.saySprite = function(d){return "say"};
+exports.saySprite = function(d){return "sakyk"};
 
-exports.saySprite1 = function(d){return "character 1 say"};
+exports.saySprite1 = function(d){return "aktorius 1 sakys"};
 
-exports.saySprite2 = function(d){return "character 2 say"};
+exports.saySprite2 = function(d){return "aktorius 2 sakys"};
 
-exports.saySprite3 = function(d){return "character 3 say"};
+exports.saySprite3 = function(d){return "aktorius 3 sakys"};
 
-exports.saySprite4 = function(d){return "character 4 say"};
+exports.saySprite4 = function(d){return "aktorius 4 sakys"};
 
-exports.saySprite5 = function(d){return "character 5 say"};
+exports.saySprite5 = function(d){return "aktorius 5 sakys"};
 
-exports.saySprite6 = function(d){return "character 6 say"};
+exports.saySprite6 = function(d){return "aktorius 6 sakys"};
 
-exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
+exports.saySpriteTooltip = function(d){return "Virš veikėjo galvos atsiras burbulas su nurodytu tekstu."};
 
 exports.scoreText = function(d){return "Rezultatas: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
 exports.setBackgroundRandom = function(d){return "nustatyti atsitiktinį foną"};
 
-exports.setBackgroundBlack = function(d){return "set black background"};
+exports.setBackgroundBlack = function(d){return "nustatyk juodą foną"};
 
 exports.setBackgroundCave = function(d){return "nustatyti foną „urvas“"};
 
-exports.setBackgroundCloudy = function(d){return "set cloudy background"};
+exports.setBackgroundCloudy = function(d){return "nustatyk debesuotą foną"};
 
 exports.setBackgroundHardcourt = function(d){return "nustatyti foną „aikštė“"};
 
-exports.setBackgroundNight = function(d){return "set night background"};
+exports.setBackgroundNight = function(d){return "nustatyk nakties foną"};
 
 exports.setBackgroundUnderwater = function(d){return "nustatyti povandeninį foną"};
 
 exports.setBackgroundTooltip = function(d){return "Nustato fono paveikslėlį"};
 
-exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
+exports.setSpriteEmotionAngry = function(d){return "į piktą emociją"};
 
-exports.setSpriteEmotionHappy = function(d){return "to a happy emotion"};
+exports.setSpriteEmotionHappy = function(d){return "į laimingą emociją"};
 
-exports.setSpriteEmotionNormal = function(d){return "to a normal emotion"};
+exports.setSpriteEmotionNormal = function(d){return "į normalią emociją"};
 
-exports.setSpriteEmotionRandom = function(d){return "to a random emotion"};
+exports.setSpriteEmotionRandom = function(d){return "į atsitiktinę emociją"};
 
-exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
+exports.setSpriteEmotionSad = function(d){return "į liūdną emociją"};
 
-exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
+exports.setSpriteEmotionTooltip = function(d){return "Nustato aktoriaus emociją"};
 
 exports.setSpriteGreen = function(d){return "į žalią paveikslėlį"};
 
@@ -5931,11 +5931,11 @@ exports.setSpritePurple = function(d){return "į violetinį paveikslėlį"};
 
 exports.setSpriteRandom = function(d){return "į atsitiktinį paveikslėlį"};
 
-exports.setSpriteWitch = function(d){return "to a witch image"};
+exports.setSpriteWitch = function(d){return "į raganos vaizdą"};
 
-exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor to the specified location."};
+exports.setSpritePositionTooltip = function(d){return "Iškart perkelia aktorių į nurodytą vietą."};
 
-exports.setSpriteTooltip = function(d){return "Sets the character image"};
+exports.setSpriteTooltip = function(d){return "Nustato aktoriaus išvaizdą"};
 
 exports.setSpriteSpeedRandom = function(d){return "į atsitiktinį greitį"};
 
@@ -5949,7 +5949,7 @@ exports.setSpriteSpeedFast = function(d){return "į greitą greitį"};
 
 exports.setSpriteSpeedVeryFast = function(d){return "į labai greitą greitį"};
 
-exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
+exports.setSpriteSpeedTooltip = function(d){return "Nustato aktoriaus greitį"};
 
 exports.share = function(d){return "Dalintis"};
 
@@ -5957,35 +5957,35 @@ exports.shareStudioTwitter = function(d){return "Pažiūrėk, kokią istoriją s
 
 exports.shareGame = function(d){return "Pasidalink savo istorija:"};
 
-exports.setSprite = function(d){return "set"};
+exports.setSprite = function(d){return "nustatyk"};
 
-exports.setSprite1 = function(d){return "set character 1"};
+exports.setSprite1 = function(d){return "nustatyk aktorių 1"};
 
-exports.setSprite2 = function(d){return "set character 2"};
+exports.setSprite2 = function(d){return "nustatyk aktorių 2"};
 
-exports.setSprite3 = function(d){return "set character 3"};
+exports.setSprite3 = function(d){return "nustatyk aktorių 3"};
 
-exports.setSprite4 = function(d){return "set character 4"};
+exports.setSprite4 = function(d){return "nustatyk aktorių 4"};
 
-exports.setSprite5 = function(d){return "set character 5"};
+exports.setSprite5 = function(d){return "nustatyk aktorių 5"};
 
-exports.setSprite6 = function(d){return "set character 6"};
+exports.setSprite6 = function(d){return "nustatyk aktorių 6"};
 
-exports.stopSprite = function(d){return "stop"};
+exports.stopSprite = function(d){return "sustok"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
+exports.stopSprite1 = function(d){return "sustabdyk aktorių 1"};
 
-exports.stopSprite2 = function(d){return "stop actor 2"};
+exports.stopSprite2 = function(d){return "sustabdyk aktorių 2"};
 
-exports.stopSprite3 = function(d){return "stop actor 3"};
+exports.stopSprite3 = function(d){return "sustabdyk aktorių 3"};
 
-exports.stopSprite4 = function(d){return "stop actor 4"};
+exports.stopSprite4 = function(d){return "sustabdyk aktorių 4"};
 
-exports.stopSprite5 = function(d){return "stop actor 5"};
+exports.stopSprite5 = function(d){return "sustabdyk aktorių 5"};
 
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSprite6 = function(d){return "sustabdyk aktorių 6"};
 
-exports.stopTooltip = function(d){return "Stops an actor's movement."};
+exports.stopTooltip = function(d){return "Sustabdo aktoriaus veiksmus."};
 
 exports.waitForClick = function(d){return "wait for click"};
 
@@ -6019,47 +6019,47 @@ exports.whenRight = function(d){return "kai rodyklė į dešinę"};
 
 exports.whenRightTooltip = function(d){return "Įvykdyk žemiau nurodytus veiksmus, kai bus nuspaustas klaviatūros klavišas rodyklė dešinėn."};
 
-exports.whenSpriteClicked = function(d){return "when actor clicked"};
+exports.whenSpriteClicked = function(d){return "kai yra paspausta ant aktoriaus"};
 
-exports.whenSpriteClicked1 = function(d){return "when character 1 clicked"};
+exports.whenSpriteClicked1 = function(d){return "kai yra paspausta ant aktoriaus 1"};
 
-exports.whenSpriteClicked2 = function(d){return "when character 2 clicked"};
+exports.whenSpriteClicked2 = function(d){return "kai yra paspausta ant aktoriaus 2"};
 
-exports.whenSpriteClicked3 = function(d){return "when character 3 clicked"};
+exports.whenSpriteClicked3 = function(d){return "kai yra paspausta ant aktoriaus 3"};
 
-exports.whenSpriteClicked4 = function(d){return "when character 4 clicked"};
+exports.whenSpriteClicked4 = function(d){return "kai yra paspausta ant aktoriaus 4"};
 
-exports.whenSpriteClicked5 = function(d){return "when character 5 clicked"};
+exports.whenSpriteClicked5 = function(d){return "kai yra paspausta ant aktoriaus 5"};
 
-exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
+exports.whenSpriteClicked6 = function(d){return "kai yra paspausta ant aktoriaus 6"};
 
-exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
+exports.whenSpriteClickedTooltip = function(d){return "Vykdyti veiksmus, nurodytus žemiau, kai bus nuspausta ant aktoriaus."};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
+exports.whenSpriteCollided1 = function(d){return "kai aktorius 1"};
 
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
+exports.whenSpriteCollided2 = function(d){return "kai aktorius 2"};
 
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
+exports.whenSpriteCollided3 = function(d){return "kai aktorius 3"};
 
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
+exports.whenSpriteCollided4 = function(d){return "kai aktorius 4"};
 
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
+exports.whenSpriteCollided5 = function(d){return "kai aktorius 5"};
 
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteCollided6 = function(d){return "kai aktorius 6"};
 
-exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
+exports.whenSpriteCollidedTooltip = function(d){return "Vykdyti veiksmus, nurodytus žemiau, kai aktorius paliečia kitą aktorių."};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
+exports.whenSpriteCollidedWith1 = function(d){return "paliečia aktorių 1"};
 
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
+exports.whenSpriteCollidedWith2 = function(d){return "paliečia aktorių 2"};
 
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
+exports.whenSpriteCollidedWith3 = function(d){return "paliečia aktorių 3"};
 
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
+exports.whenSpriteCollidedWith4 = function(d){return "paliečia aktorių 4"};
 
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
+exports.whenSpriteCollidedWith5 = function(d){return "paliečia aktorių 5"};
 
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollidedWith6 = function(d){return "paliečia aktorių 6"};
 
 exports.whenUp = function(d){return "kai rodyklė aukštyn"};
 

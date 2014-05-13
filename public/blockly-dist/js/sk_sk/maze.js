@@ -7190,7 +7190,7 @@ exports.dirW = function(d){return "Z"};
 
 exports.doCode = function(d){return "vykonaj"};
 
-exports.elseCode = function(d){return "ináč"};
+exports.elseCode = function(d){return "inak"};
 
 exports.fill = function(d){return "vyplniť 1"};
 

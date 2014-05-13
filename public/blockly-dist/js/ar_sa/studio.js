@@ -5639,7 +5639,7 @@ exports.help = function(d){return "مساعدة"};
 
 exports.hintTitle = function(d){return "تلميح:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "قفز"};
 
 exports.levelIncompleteError = function(d){return "أنت استخدمت كل انواع القطع الضرورية ولكن ليس في الطريق الصحيح."};
 
@@ -5697,7 +5697,7 @@ exports.backToPreviousLevel = function(d){return "الرجوع إلى المست
 
 exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك!"};
 
 exports.typeCode = function(d){return "اكتب كود الـ JavaScript الخاص بك تحت هذه التعليمات."};
 
@@ -5743,23 +5743,23 @@ var MessageFormat = require("messageformat");MessageFormat.locale.ar = function(
   }
   return 'other';
 };
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "الإجراءات"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "الجمل التكرارية"};
 
-exports.catEvents = function(d){return "Events"};
+exports.catEvents = function(d){return "الأحداث"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "العمليات المنطقية"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "العمليات الحسابية"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "الدوال"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "المتغيرات"};
 
 exports.continue = function(d){return "استمرار"};
 
-exports.defaultSayText = function(d){return "type here"};
+exports.defaultSayText = function(d){return "اكتب هنا"};
 
 exports.finalLevel = function(d){return "تهانينا ! لقد قمت بحل اللغز الاخير."};
 
@@ -5771,15 +5771,15 @@ exports.incrementPlayerScore = function(d){return "سجل النقطة"};
 
 exports.makeYourOwn = function(d){return "اجعل القصة الخاصة بك "};
 
-exports.moveDirectionDown = function(d){return "down"};
+exports.moveDirectionDown = function(d){return "إلى أسفل"};
 
-exports.moveDirectionLeft = function(d){return "left"};
+exports.moveDirectionLeft = function(d){return "اليسار"};
 
-exports.moveDirectionRight = function(d){return "right"};
+exports.moveDirectionRight = function(d){return "اليمين"};
 
-exports.moveDirectionUp = function(d){return "up"};
+exports.moveDirectionUp = function(d){return "لأعلى"};
 
-exports.moveDirectionRandom = function(d){return "random"};
+exports.moveDirectionRandom = function(d){return "عشوائي"};
 
 exports.moveDistance25 = function(d){return "25 بكسل"};
 
@@ -5791,41 +5791,41 @@ exports.moveDistance200 = function(d){return "200 بكسل"};
 
 exports.moveDistance400 = function(d){return "400 بكسل"};
 
-exports.moveDistanceRandom = function(d){return "random pixels"};
+exports.moveDistanceRandom = function(d){return " بكسل عشوائي"};
 
-exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
+exports.moveDistanceTooltip = function(d){return "التحرك فاعل على مسافة محددة في الاتجاه المحدد."};
 
-exports.moveSprite = function(d){return "move"};
+exports.moveSprite = function(d){return "تحرك"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
+exports.moveSprite1 = function(d){return "التحرك الفاعل 1"};
 
-exports.moveSprite2 = function(d){return "move character 2"};
+exports.moveSprite2 = function(d){return "التحرك الفاعل 2"};
 
-exports.moveSprite3 = function(d){return "move character 3"};
+exports.moveSprite3 = function(d){return "التحرك الفاعل 3"};
 
-exports.moveSprite4 = function(d){return "move character 4"};
+exports.moveSprite4 = function(d){return "التحرك الفاعل 4"};
 
-exports.moveSprite5 = function(d){return "move character 5"};
+exports.moveSprite5 = function(d){return "التحرك الفاعل 5"};
 
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSprite6 = function(d){return "التحرك الفاعل 6"};
 
 exports.moveDown = function(d){return "تحريك لأسفل"};
 
-exports.moveDownTooltip = function(d){return "Move the paddle down."};
+exports.moveDownTooltip = function(d){return "نقل عنصر فاعل إلى أسفل."};
 
 exports.moveLeft = function(d){return "تحرك لليسار"};
 
-exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
+exports.moveLeftTooltip = function(d){return "نقل عنصر فاعل إلى اليسار."};
 
 exports.moveRight = function(d){return "تحريك لليمين"};
 
-exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
+exports.moveRightTooltip = function(d){return "نقل عنصر فاعل إلى اليمين."};
 
 exports.moveUp = function(d){return "تحريك لأعلى"};
 
-exports.moveUpTooltip = function(d){return "Move the paddle up."};
+exports.moveUpTooltip = function(d){return "تحريك عنصر فاعل لأعلى."};
 
-exports.moveTooltip = function(d){return "Move a character."};
+exports.moveTooltip = function(d){return "نقل عنصر فاعل."};
 
 exports.nextLevel = function(d){return "تهانينا! لقد قمت بإكمال هذا اللغز."};
 
@@ -5861,79 +5861,79 @@ exports.playSoundWinPoint2 = function(d){return "تشغيل صوت الفوز ب
 
 exports.playSoundWood = function(d){return "تشغيل صوت الخشب"};
 
-exports.positionTopLeft = function(d){return "to the top left position"};
+exports.positionTopLeft = function(d){return "إلى أعلى يسار"};
 
-exports.positionTopCenter = function(d){return "to the top center position"};
+exports.positionTopCenter = function(d){return "إلى أعلى المركز"};
 
-exports.positionTopRight = function(d){return "to the top right position"};
+exports.positionTopRight = function(d){return "إلى الأيمن العلوي"};
 
-exports.positionMiddleLeft = function(d){return "to the middle left position"};
+exports.positionMiddleLeft = function(d){return "إلى الوسط الأيسر"};
 
-exports.positionMiddleCenter = function(d){return "to the middle center position"};
+exports.positionMiddleCenter = function(d){return "إلى مركز الوسط"};
 
-exports.positionMiddleRight = function(d){return "to the middle right position"};
+exports.positionMiddleRight = function(d){return "الى يمين الوسط"};
 
-exports.positionBottomLeft = function(d){return "to the bottom left position"};
+exports.positionBottomLeft = function(d){return "إلى الأيسر السفلي"};
 
-exports.positionBottomCenter = function(d){return "to the bottom center position"};
+exports.positionBottomCenter = function(d){return "إلى مركز القاع"};
 
-exports.positionBottomRight = function(d){return "to the bottom right position"};
+exports.positionBottomRight = function(d){return "إلى الأيمن السفلي"};
 
-exports.positionRandom = function(d){return "to the random position"};
+exports.positionRandom = function(d){return "إلى مكان عشوائي"};
 
 exports.reinfFeedbackMsg = function(d){return "يمكنك الضغط على زر \"حاول مرة أخرى\" للعودة للعبة الخاصة بك."};
 
-exports.repeatForever = function(d){return "repeat forever"};
+exports.repeatForever = function(d){return "تكرار إلى الأبد"};
 
-exports.repeatDo = function(d){return "do"};
+exports.repeatDo = function(d){return "نفّذ"};
 
-exports.repeatForeverTooltip = function(d){return "Execute the actions in this block repeatedly while the story is running."};
+exports.repeatForeverTooltip = function(d){return "تنفيذ الإجراءات في هذه الكتلة مرارا وتكرارا أثناء تشغيل القصة."};
 
-exports.saySprite = function(d){return "say"};
+exports.saySprite = function(d){return "قول"};
 
-exports.saySprite1 = function(d){return "character 1 say"};
+exports.saySprite1 = function(d){return "قول الممثل 1"};
 
-exports.saySprite2 = function(d){return "character 2 say"};
+exports.saySprite2 = function(d){return "قول الممثل 2"};
 
-exports.saySprite3 = function(d){return "character 3 say"};
+exports.saySprite3 = function(d){return "قول الممثل 3"};
 
-exports.saySprite4 = function(d){return "character 4 say"};
+exports.saySprite4 = function(d){return "قول الممثل 4"};
 
-exports.saySprite5 = function(d){return "character 5 say"};
+exports.saySprite5 = function(d){return "قول الممثل 5"};
 
-exports.saySprite6 = function(d){return "character 6 say"};
+exports.saySprite6 = function(d){return "قول الممثل 6"};
 
-exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
+exports.saySpriteTooltip = function(d){return "يطفو على فقاعة كلام مع النص المرتبط به من الفاعل المحدد."};
 
 exports.scoreText = function(d){return "نقاط: "+v(d,"playerScore")+": "+v(d,"opponentScore")};
 
 exports.setBackgroundRandom = function(d){return "تعيين خلفية عشوائية"};
 
-exports.setBackgroundBlack = function(d){return "set black background"};
+exports.setBackgroundBlack = function(d){return "تعيين خلفية سوداء"};
 
 exports.setBackgroundCave = function(d){return "تعيين خلفية المغارة"};
 
-exports.setBackgroundCloudy = function(d){return "set cloudy background"};
+exports.setBackgroundCloudy = function(d){return "تعيين خلفية غائم"};
 
 exports.setBackgroundHardcourt = function(d){return "تعيين خلفية الملاعب الصلبة"};
 
-exports.setBackgroundNight = function(d){return "set night background"};
+exports.setBackgroundNight = function(d){return "تعيين خلفية  الليل"};
 
 exports.setBackgroundUnderwater = function(d){return "تعيين خلفية تحت الماء"};
 
 exports.setBackgroundTooltip = function(d){return "تحديد صورة الخلفية"};
 
-exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
+exports.setSpriteEmotionAngry = function(d){return "الى عاطفة الغضب"};
 
-exports.setSpriteEmotionHappy = function(d){return "to a happy emotion"};
+exports.setSpriteEmotionHappy = function(d){return "الى عاطفة السعادة"};
 
-exports.setSpriteEmotionNormal = function(d){return "to a normal emotion"};
+exports.setSpriteEmotionNormal = function(d){return "الى عاطفة عادية"};
 
-exports.setSpriteEmotionRandom = function(d){return "to a random emotion"};
+exports.setSpriteEmotionRandom = function(d){return "عاطفة عشوائية"};
 
-exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
+exports.setSpriteEmotionSad = function(d){return "عاطفة حزينة"};
 
-exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
+exports.setSpriteEmotionTooltip = function(d){return "يحدد عاطفة الفاعل"};
 
 exports.setSpriteGreen = function(d){return "إلى صورة خضراء"};
 
@@ -5947,11 +5947,11 @@ exports.setSpritePurple = function(d){return "إلى صورة أرجوانية"}
 
 exports.setSpriteRandom = function(d){return "إلى صورة عشوائية"};
 
-exports.setSpriteWitch = function(d){return "to a witch image"};
+exports.setSpriteWitch = function(d){return "إلى صورة ساحرة"};
 
-exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor to the specified location."};
+exports.setSpritePositionTooltip = function(d){return "على الفور تحرك فاعل للموقع المحدد."};
 
-exports.setSpriteTooltip = function(d){return "Sets the character image"};
+exports.setSpriteTooltip = function(d){return "تعيين صورة الفاعل"};
 
 exports.setSpriteSpeedRandom = function(d){return "إلى سرعة عشوائية"};
 
@@ -5965,7 +5965,7 @@ exports.setSpriteSpeedFast = function(d){return "إلى سرعة"};
 
 exports.setSpriteSpeedVeryFast = function(d){return "بسرعة سريعة جداً"};
 
-exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
+exports.setSpriteSpeedTooltip = function(d){return "تعيين سرعة فاعل"};
 
 exports.share = function(d){return "مشاركة"};
 
@@ -5973,35 +5973,35 @@ exports.shareStudioTwitter = function(d){return "تحقق من القصة الذ
 
 exports.shareGame = function(d){return "شارك بقصك:"};
 
-exports.setSprite = function(d){return "set"};
+exports.setSprite = function(d){return "تعيين"};
 
-exports.setSprite1 = function(d){return "set character 1"};
+exports.setSprite1 = function(d){return "تعيين الفاعل 1"};
 
-exports.setSprite2 = function(d){return "set character 2"};
+exports.setSprite2 = function(d){return "تعيين الفاعل 2"};
 
-exports.setSprite3 = function(d){return "set character 3"};
+exports.setSprite3 = function(d){return "تعيين الفاعل 3"};
 
-exports.setSprite4 = function(d){return "set character 4"};
+exports.setSprite4 = function(d){return "تعيين الفاعل 4"};
 
-exports.setSprite5 = function(d){return "set character 5"};
+exports.setSprite5 = function(d){return "تعيين الفاعل 5"};
 
-exports.setSprite6 = function(d){return "set character 6"};
+exports.setSprite6 = function(d){return "تعيين الفاعل 6"};
 
-exports.stopSprite = function(d){return "stop"};
+exports.stopSprite = function(d){return "وقف"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
+exports.stopSprite1 = function(d){return "إيقاف الفاعل 1"};
 
-exports.stopSprite2 = function(d){return "stop actor 2"};
+exports.stopSprite2 = function(d){return "إيقاف الفاعل 2"};
 
-exports.stopSprite3 = function(d){return "stop actor 3"};
+exports.stopSprite3 = function(d){return "إيقاف الفاعل 3"};
 
-exports.stopSprite4 = function(d){return "stop actor 4"};
+exports.stopSprite4 = function(d){return "إيقاف الفاعل 4"};
 
-exports.stopSprite5 = function(d){return "stop actor 5"};
+exports.stopSprite5 = function(d){return "إيقاف الفاعل 5"};
 
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSprite6 = function(d){return "إيقاف الفاعل 6"};
 
-exports.stopTooltip = function(d){return "Stops an actor's movement."};
+exports.stopTooltip = function(d){return "توقف حركة عنصر فاعل."};
 
 exports.waitForClick = function(d){return "wait for click"};
 
@@ -6035,47 +6035,47 @@ exports.whenRight = function(d){return "السهم الأيمن"};
 
 exports.whenRightTooltip = function(d){return "تنفيذ الإجراءات أدناه عند الضغط على مفتاح السهم الأيمن."};
 
-exports.whenSpriteClicked = function(d){return "when actor clicked"};
+exports.whenSpriteClicked = function(d){return "عند النقر فوق الفاعل"};
 
-exports.whenSpriteClicked1 = function(d){return "when character 1 clicked"};
+exports.whenSpriteClicked1 = function(d){return "عند النقر فوق الفاعل 1"};
 
-exports.whenSpriteClicked2 = function(d){return "when character 2 clicked"};
+exports.whenSpriteClicked2 = function(d){return "عند النقر فوق الفاعل 2"};
 
-exports.whenSpriteClicked3 = function(d){return "when character 3 clicked"};
+exports.whenSpriteClicked3 = function(d){return "عند النقر فوق الفاعل 3"};
 
-exports.whenSpriteClicked4 = function(d){return "when character 4 clicked"};
+exports.whenSpriteClicked4 = function(d){return "عند النقر فوق الفاعل 4"};
 
-exports.whenSpriteClicked5 = function(d){return "when character 5 clicked"};
+exports.whenSpriteClicked5 = function(d){return "عند النقر فوق الفاعل 5"};
 
-exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
+exports.whenSpriteClicked6 = function(d){return "عند النقر فوق الفاعل 6"};
 
-exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
+exports.whenSpriteClickedTooltip = function(d){return "تنفيذ الإجراءات أدناه عند النقر فوق عنصر فاعل."};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
+exports.whenSpriteCollided1 = function(d){return "عند الفاعل 1"};
 
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
+exports.whenSpriteCollided2 = function(d){return "عند الفاعل 2"};
 
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
+exports.whenSpriteCollided3 = function(d){return "عند الفاعل 3"};
 
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
+exports.whenSpriteCollided4 = function(d){return "عند الفاعل 4"};
 
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
+exports.whenSpriteCollided5 = function(d){return "عند الفاعل 5"};
 
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteCollided6 = function(d){return "عند الفاعل 6"};
 
-exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
+exports.whenSpriteCollidedTooltip = function(d){return "تنفيذ الإجراءات أدناه عندما يلامس فاعل فاعل آخر."};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
+exports.whenSpriteCollidedWith1 = function(d){return "لمسات الفاعل 1"};
 
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
+exports.whenSpriteCollidedWith2 = function(d){return "لمسات الفاعل 2"};
 
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
+exports.whenSpriteCollidedWith3 = function(d){return "لمسات الفاعل 3"};
 
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
+exports.whenSpriteCollidedWith4 = function(d){return "لمسات الفاعل 4"};
 
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
+exports.whenSpriteCollidedWith5 = function(d){return "لمسات الفاعل 5"};
 
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollidedWith6 = function(d){return "لمسات الفاعل 6"};
 
 exports.whenUp = function(d){return "عند الضغط على السهم لاعلى"};
 

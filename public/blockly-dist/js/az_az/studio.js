@@ -5598,13 +5598,13 @@ exports.dialogCancel = function(d){return "İmtina et"};
 
 exports.dialogOK = function(d){return "Oldu"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Şimal"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Cənub"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "Şərq"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "Qərb"};
 
 exports.emptyBlocksErrorMsg = function(d){return "\"Təkrar\" və ya \"Əgər\" blokları işləsin deyə içərisində başqa blokların olmağı lazımdır. Əmin olun ki, daxili blokun konteyner blokun içərisinə düz yerləşir."};
 
@@ -5670,7 +5670,7 @@ exports.flappySpecificFail = function(d){return "Your code looks good - it will 
 
 exports.toolboxHeader = function(d){return "Bloklar"};
 
-exports.openWorkspace = function(d){return "Bu Necə İşləyir"};
+exports.openWorkspace = function(d){return "Bu necə işləyir?"};
 
 exports.totalNumLinesOfCodeWritten = function(d){return "Ümumi cəm: "+p(d,"numLines",0,"en",{"one":"1 sətir","other":n(d,"numLines")+" sətir"})+" kod."};
 
@@ -5711,15 +5711,15 @@ exports.hintHeader = function(d){return "Here's a tip:"};
 var MessageFormat = require("messageformat");MessageFormat.locale.en=function(n){return n===1?"one":"other"}
 exports.catActions = function(d){return "Actions"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "Dövrlər"};
 
 exports.catEvents = function(d){return "Events"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Məntiq"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "Riyaziyyat"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Funksiyalar"};
 
 exports.catVariables = function(d){return "Variables"};
 
@@ -5749,11 +5749,11 @@ exports.moveDirectionRandom = function(d){return "random"};
 
 exports.moveDistance25 = function(d){return "25 pixels"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 piksel"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 piksel"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 piksel"};
 
 exports.moveDistance400 = function(d){return "400 pixels"};
 

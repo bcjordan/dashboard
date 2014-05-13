@@ -3466,45 +3466,45 @@ exports.parseElement = function(text) {
 var MessageFormat = require("messageformat");MessageFormat.locale.eu=function(n){return n===1?"one":"other"}
 exports.blocklyMessage = function(d){return "Blockly"};
 
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Ekintzak"};
 
-exports.catColour = function(d){return "Colour"};
+exports.catColour = function(d){return "Kolorea"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Logika"};
 
-exports.catLists = function(d){return "Lists"};
+exports.catLists = function(d){return "Zerrendak"};
 
-exports.catLoops = function(d){return "Loops"};
+exports.catLoops = function(d){return "Itzuliak"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "Matematika"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Funtzioak"};
 
-exports.catText = function(d){return "Text"};
+exports.catText = function(d){return "Testua"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "Aldagaiak"};
 
-exports.codeTooltip = function(d){return "See generated JavaScript code."};
+exports.codeTooltip = function(d){return "Ikusi sortutako Javascript kodea."};
 
-exports.continue = function(d){return "Continue"};
+exports.continue = function(d){return "Jarraitu"};
 
-exports.dialogCancel = function(d){return "Cancel"};
+exports.dialogCancel = function(d){return "Ezeztatu"};
 
-exports.dialogOK = function(d){return "OK"};
+exports.dialogOK = function(d){return "Ongi"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "I"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "H"};
 
 exports.directionEastLetter = function(d){return "E"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "M"};
 
-exports.emptyBlocksErrorMsg = function(d){return "The \"Repeat\" or \"If\" block needs to have other blocks inside it to work. Make sure the inner block fits properly inside the containing block."};
+exports.emptyBlocksErrorMsg = function(d){return "\"Errepikatu\" edo \"baldintza\" blokeak barruan beste bloke batzuk behar ditu funtzionatzeko. Egiaztatu barruko blokeak egoki kokatuak daudela."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Ekintza blokeei lotu gabeko blokeak soberan daude."};
 
-exports.finalStage = function(d){return "Congratulations! You have completed the final stage."};
+exports.finalStage = function(d){return "Zorionak! Azkeneko eszenatokia osatu duzu."};
 
 exports.finalStageTrophies = function(d){return "Congratulations! You have completed the final stage and won "+p(d,"numTrophies",0,"eu",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
@@ -3512,15 +3512,15 @@ exports.generatedCodeInfo = function(d){return "The blocks for your program can 
 
 exports.hashError = function(d){return "Sorry, '%1' doesn't correspond with any saved program."};
 
-exports.help = function(d){return "Help"};
+exports.help = function(d){return "Laguntza"};
 
-exports.hintTitle = function(d){return "Hint:"};
+exports.hintTitle = function(d){return "Aholkua:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "salto egin"};
 
 exports.levelIncompleteError = function(d){return "You are using all of the necessary types of blocks but not in the right way."};
 
-exports.listVariable = function(d){return "list"};
+exports.listVariable = function(d){return "zerrenda"};
 
 exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
 
@@ -3540,15 +3540,15 @@ exports.numLinesOfCodeWritten = function(d){return "You just wrote "+p(d,"numLin
 
 exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" of "+v(d,"stage_total")};
 
-exports.resetProgram = function(d){return "Reset"};
+exports.resetProgram = function(d){return "Leheneratu"};
 
 exports.runProgram = function(d){return "Run Program"};
 
 exports.runTooltip = function(d){return "Run the program defined by the blocks in the workspace."};
 
-exports.showCodeHeader = function(d){return "Show Code"};
+exports.showCodeHeader = function(d){return "Ikusi Iturburua"};
 
-exports.showGeneratedCode = function(d){return "Show code"};
+exports.showGeneratedCode = function(d){return "Ikusi iturburua"};
 
 exports.subtitle = function(d){return "a visual programming environment"};
 
@@ -3592,34 +3592,34 @@ exports.orientationLock = function(d){return "Turn off orientation lock in devic
 
 exports.wantToLearn = function(d){return "Want to learn to code?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Ikusi Bideoa"};
 
 exports.tryHOC = function(d){return "Try the Hour of Code"};
 
 exports.signup = function(d){return "Sign up for the intro course"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Hemen aholkua:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.eu=function(n){return n===1?"one":"other"}
-exports.continue = function(d){return "Continue"};
+exports.continue = function(d){return "Jarraitu"};
 
-exports.nextLevel = function(d){return "Congratulations! You have completed this puzzle."};
+exports.nextLevel = function(d){return "Zorionak! Puzle hau osatu duzu."};
 
-exports.no = function(d){return "No"};
+exports.no = function(d){return "Ez"};
 
-exports.numBlocksNeeded = function(d){return "This puzzle can be solved with %1 blocks."};
+exports.numBlocksNeeded = function(d){return "Puzle hau %1 blokeekin ebaz daiteke."};
 
-exports.oneTopBlock = function(d){return "For this puzzle, you need to stack together all of the blocks in the white workspace."};
+exports.oneTopBlock = function(d){return "Puzzle honetarako, bloke guztiak itsatsi behar dituzu lan espazio txurian."};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "\"Berriro saiatu\" botoiean klikatu dezakezu zure jokora atzera egiteko."};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Partekatu"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Partekatu zure jokoa:"};
 
-exports.yes = function(d){return "Yes"};
+exports.yes = function(d){return "Bai"};
 
 
 },{"messageformat":43}],32:[function(require,module,exports){
