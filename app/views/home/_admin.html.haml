@@ -2,8 +2,14 @@
   %h3= t(:demos)
   %ul
     %li= link_to 'Feedback System', frequent_unsuccessful_level_sources_path
-    - Script.all.each do |script|
-      %li= link_to(data_t_suffix('script.name', script.name, 'desc'), script_level_path(script, ScriptLevel::NEXT))
+    %li
+      = link_to('Scripts', scripts_path)
+      = link_to('(Update all)', scripts_path(rake: '1'))
+      %ul
+        - Script.all.each do |script|
+          %li
+            = link_to("(#{t 'crud.edit'})", edit_script_path(script)) unless script.default_script?
+            = link_to(data_t_suffix('script.name', script.name, 'desc'), script_level_path(script, ScriptLevel::NEXT))
   = link_to t("builder.manage"), levels_new_path
   %h3= link_to 'Admin Stats', admin_stats_path
   %h3= link_to 'Gallery', admin_gallery_path
