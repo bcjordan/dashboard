@@ -4,7 +4,11 @@ Dashboard::Application.routes.draw do
   resources :teacher_prizes
   resources :prizes
   resources :callouts
-  resources :videos
+  resources :videos do
+    collection do
+      get 'test'
+    end
+  end
   resources :concepts
   resources :activities
   resources :sections, only: [:new, :create, :edit, :update, :destroy]
