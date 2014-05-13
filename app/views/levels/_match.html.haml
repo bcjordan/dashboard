@@ -83,8 +83,14 @@
   }
 
   var solution = "none";    // "none", "wrong", "right"
-  var clickedNext = false;  // avoid multiple simultaneous submissions
+  var buttonEnabled = true;  // avoid multiple simultaneous submissions
 
+  function enableButton(enable)
+  {
+    buttonEnabled = enable;
+    $('.submitButton').css({ opacity: enable ? 1.0 : 0.5 });
+  }
+  
   $(function() 
   {
     $("#answers li").draggable({ revert: "invalid", stack: ".answer" });  
@@ -157,9 +163,9 @@
 
   $('.submitButton').click(function() 
   {
-    if (!clickedNext) 
+    if (buttonEnabled) 
     {
-      clickedNext = true;
+      enableButton(false)
 
       var wrongAnswer = false;
 
@@ -179,14 +185,9 @@
 
       solution = wrongAnswer ? "wrong" : "right";
 
-      if (solution == "none") 
-      {
-        clickedNext = false;    
-      }
-      else if (solution == "wrong") 
+      if (solution == "wrong") 
       {
         showDialog();
-        clickedNext = false;
       }
       
       if (solution != "none")
@@ -200,6 +201,11 @@
           testResult: solution == "right" ? 100 : 0,
           onComplete: function() 
           {
+            if (! nextRedirect)
+            {
+              enableButton(true);
+            }
+
             if (videoInfo) 
             {
               showVideo(videoInfo);
