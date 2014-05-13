@@ -60,7 +60,4 @@ class ScriptsController < ApplicationController
     params.require(:script).permit(:name)
   end
 
-  prepend_before_filter do
-    params[:script] &&= script_params
-  end
 end
