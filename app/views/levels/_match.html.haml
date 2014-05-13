@@ -8,7 +8,8 @@
 
   - data['answers'].each_with_index do |answer, i|
     - answer['index'] = i
-  - data['answers'].shuffle!
+  - begin newanswers = data['answers'].shuffle end while newanswers == data['answers']
+  - data['answers'] = newanswers
 
   - height = data['height'] || '20'
   - height += 'px'
@@ -90,7 +91,7 @@
     buttonEnabled = enable;
     $('.submitButton').css({ opacity: enable ? 1.0 : 0.5 });
   }
-  
+
   $(function() 
   {
     $("#answers li").draggable({ revert: "invalid", stack: ".answer" });  
