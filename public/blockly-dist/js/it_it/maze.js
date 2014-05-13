@@ -7051,7 +7051,7 @@ exports.directionSouthLetter = function(d){return "S"};
 
 exports.directionEastLetter = function(d){return "E"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "O"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Il blocco \"ripeti\" o \"se\" deve avere all'interno altri blocchi per poter funzionare. Assicurati che i blocchi interni siano inseriti correttamente all'interno del blocco principale."};
 
@@ -7069,7 +7069,7 @@ exports.help = function(d){return "Aiuto"};
 
 exports.hintTitle = function(d){return "Suggerimento:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "salta"};
 
 exports.levelIncompleteError = function(d){return "Stai usando tutti i tipi di blocchi necessari, ma non nel modo giusto."};
 
@@ -7127,7 +7127,7 @@ exports.backToPreviousLevel = function(d){return "Torna al livello precedente"};
 
 exports.saveToGallery = function(d){return "Salva nella tua galleria"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Salvato nella tua galleria!"};
 
 exports.typeCode = function(d){return "Digita il tuo codice JavaScript sotto queste istruzioni."};
 
@@ -7200,17 +7200,17 @@ exports.ifTooltip = function(d){return "Se c'è strada nella direzione specifica
 
 exports.ifelseTooltip = function(d){return "Se c'è strada nella direzione specificata, allora effettua il primo blocco di azioni. Altrimenti, effettua il secondo."};
 
-exports.moveEastTooltip = function(d){return "Move me east one space."};
+exports.moveEastTooltip = function(d){return "Vai una casella verso est."};
 
 exports.moveForward = function(d){return "vai avanti"};
 
 exports.moveForwardTooltip = function(d){return "Vai avanti di una casella."};
 
-exports.moveNorthTooltip = function(d){return "Move me north one space."};
+exports.moveNorthTooltip = function(d){return "Vai una casella verso nord."};
 
-exports.moveSouthTooltip = function(d){return "Move me south one space."};
+exports.moveSouthTooltip = function(d){return "Vai una casella verso sud."};
 
-exports.moveWestTooltip = function(d){return "Move me west one space."};
+exports.moveWestTooltip = function(d){return "Vai una casella verso ovest."};
 
 exports.nextLevel = function(d){return "Complimenti! Hai completato questo esercizio."};
 
@@ -7252,7 +7252,7 @@ exports.repeatUntilBlocked = function(d){return "mentre c'è strada in avanti"};
 
 exports.repeatUntilFinish = function(d){return "ripeti fino alla fine"};
 
-exports.step = function(d){return "Step"};
+exports.step = function(d){return "Passo"};
 
 exports.turnLeft = function(d){return "gira a sinistra"};
 

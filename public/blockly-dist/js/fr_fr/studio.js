@@ -5604,7 +5604,7 @@ exports.directionSouthLetter = function(d){return "S"};
 
 exports.directionEastLetter = function(d){return "E"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "O"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Le bloc « Répéter » ou «Si» doit avoir des autres blocs à l'intérieur pour fonctionner. Assurez-vous que le bloc interne s'adapte correctement à l'intérieur du bloc conteneur."};
 
@@ -5622,7 +5622,7 @@ exports.help = function(d){return "À l'aide"};
 
 exports.hintTitle = function(d){return "Indice :"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "saute"};
 
 exports.levelIncompleteError = function(d){return "Vous utilisez tous les types nécessaires des blocs, mais pas de la bonne manière."};
 
@@ -5636,7 +5636,7 @@ exports.nextLevel = function(d){return "Félicitations ! Vous avez terminé le P
 
 exports.nextLevelTrophies = function(d){return "Félicitations ! Vous avez terminé le Puzzle "+v(d,"puzzleNumber")+" et gagné "+p(d,"numTrophies",0,"fr",{"one":"un trophée","other":n(d,"numTrophies")+" des trophées"})+"."};
 
-exports.nextStage = function(d){return "Félicitations ! Vous avez terminé l'étape "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Félicitations ! Vous avez terminé "+v(d,"stageName")+"."};
 
 exports.nextStageTrophies = function(d){return "Félicitations ! Vous avez terminé l'étape "+v(d,"stageNumber")+" et gagné "+p(d,"numTrophies",0,"fr",{"one":"un trophée","other":n(d,"numTrophies")+" des trophées"})+"."};
 
@@ -5678,9 +5678,9 @@ exports.tryAgain = function(d){return "Réessayez"};
 
 exports.backToPreviousLevel = function(d){return "Retour au niveau précédent"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Enregistrer dans votre espace"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Enregistré dans votre espace !"};
 
 exports.typeCode = function(d){return "Tapez votre code JavaScript en dessous de ces instructions."};
 
@@ -5704,7 +5704,7 @@ exports.tryHOC = function(d){return "Essayez l'Heure de Code"};
 
 exports.signup = function(d){return "Inscrivez-vous au cours d'introduction"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Voici une astuce :"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){

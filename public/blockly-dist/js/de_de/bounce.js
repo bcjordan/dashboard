@@ -5290,7 +5290,7 @@ exports.launchBall = function(d){return "launch new ball"};
 
 exports.launchBallTooltip = function(d){return "Launch a ball into play."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Erstelle dein Eigenes Bounce Game"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5362,7 +5362,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "Stellen Sie den Turm ab"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Du kannst den \"Versuche erneut\"-Button drücken, um weiterzuspielen."};
 
 exports.removeSquare = function(d){return "Viereck entfernen"};
 
@@ -5426,11 +5426,11 @@ exports.setPaddleSpeedVeryFast = function(d){return "Setze sehr schnelle Schläg
 
 exports.setPaddleSpeedTooltip = function(d){return "Legt die Schlägergeschwindigkeit fest"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Teilen"};
 
 exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Teile dein Spiel:"};
 
 exports.turnLeft = function(d){return "nach links drehen"};
 

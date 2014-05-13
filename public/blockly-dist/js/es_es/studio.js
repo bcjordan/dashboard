@@ -5614,7 +5614,7 @@ exports.finalStage = function(d){return "¡Felicidades! Has completado la etapa 
 
 exports.finalStageTrophies = function(d){return "¡Felicidades! Has completado la etapa final y ganaste  "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Los bloques de tu programa también pueden ser representados en Javascript, el lenguaje de programación más usado en el mundo:"};
+exports.generatedCodeInfo = function(d){return "Incluso mejores universidades enseñan basado en bloques de codificación (por ejemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Pero bajo el capó, los bloques que ha montado puede también ser demostrado en JavaScript, el más utilizado mundial mente lenguaje de codificación:"};
 
 exports.hashError = function(d){return "Lo sentimos, '%1' no se corresponde con ningún programa guardado."};
 
@@ -5622,7 +5622,7 @@ exports.help = function(d){return "Ayuda"};
 
 exports.hintTitle = function(d){return "Sugerencia:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "saltar"};
 
 exports.levelIncompleteError = function(d){return "Estás utilizando todos los tipos necesarios de bloques pero no de la manera correcta."};
 
@@ -5636,9 +5636,9 @@ exports.nextLevel = function(d){return "¡Felicidades! Completaste el Puzzle "+v
 
 exports.nextLevelTrophies = function(d){return "¡Felicidades! Completaste el puzzle "+v(d,"puzzleNumber")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
 
-exports.nextStage = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "¡ Felicidades! Completaste "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageNumber")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
+exports.nextStageTrophies = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageName")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "¡Felicidades! Completaste el puzzle "+v(d,"puzzleNumber")+". (Sin embargo, podrías haber usado sólo "+p(d,"numBlocks",0,"es",{"one":"1 bloque","other":n(d,"numBlocks")+" bloques"})+".)"};
 
@@ -5678,9 +5678,9 @@ exports.tryAgain = function(d){return "Vuelve a intentarlo"};
 
 exports.backToPreviousLevel = function(d){return "Volver al nivel anterior"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Guardar en tu galería"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Guardar en tu galería!"};
 
 exports.typeCode = function(d){return "Escribe tu código JavaScript debajo de estas instrucciones."};
 
@@ -5704,76 +5704,76 @@ exports.tryHOC = function(d){return "Prueba la Hora del Código"};
 
 exports.signup = function(d){return "Únete al curso de introducción"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aquí hay un Consejo:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.es=function(n){return n===1?"one":"other"}
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Acciones"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "Bucles"};
 
-exports.catEvents = function(d){return "Events"};
+exports.catEvents = function(d){return "Eventos"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Lógica"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "Matemáticas"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Funciones"};
 
 exports.catVariables = function(d){return "Variables"};
 
 exports.continue = function(d){return "Continuar"};
 
-exports.defaultSayText = function(d){return "type here"};
+exports.defaultSayText = function(d){return "Escriba aquí"};
 
-exports.finalLevel = function(d){return "¡Felicidades! Has resuelto el puzzle final."};
+exports.finalLevel = function(d){return "¡Felicidades! Has resuelto el rompecabezas final."};
 
-exports.incrementOpponentScore = function(d){return "incrementar puntuación oponente"};
+exports.incrementOpponentScore = function(d){return "Anota un punto al oponente"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Agregue uno a la cuenta de jugador o adversario."};
 
 exports.incrementPlayerScore = function(d){return "incrementar la puntuación del jugador"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Hacer tu propia historia"};
 
-exports.moveDirectionDown = function(d){return "down"};
+exports.moveDirectionDown = function(d){return "abajo"};
 
-exports.moveDirectionLeft = function(d){return "left"};
+exports.moveDirectionLeft = function(d){return "izquierda"};
 
-exports.moveDirectionRight = function(d){return "right"};
+exports.moveDirectionRight = function(d){return "derecha"};
 
-exports.moveDirectionUp = function(d){return "up"};
+exports.moveDirectionUp = function(d){return "arriba"};
 
-exports.moveDirectionRandom = function(d){return "random"};
+exports.moveDirectionRandom = function(d){return "aleatorio"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 píxeles"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 píxeles"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 píxeles"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 píxeles"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 píxeles"};
 
-exports.moveDistanceRandom = function(d){return "random pixels"};
+exports.moveDistanceRandom = function(d){return "pixeles aleatorios"};
 
-exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
+exports.moveDistanceTooltip = function(d){return "Mover un actor una distancia específica en la dirección especificada."};
 
-exports.moveSprite = function(d){return "move"};
+exports.moveSprite = function(d){return "Mover"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
+exports.moveSprite1 = function(d){return "Mueva el actor 1"};
 
-exports.moveSprite2 = function(d){return "move character 2"};
+exports.moveSprite2 = function(d){return "Mueva el actor 2"};
 
-exports.moveSprite3 = function(d){return "move character 3"};
+exports.moveSprite3 = function(d){return "Mueva el actor 3"};
 
-exports.moveSprite4 = function(d){return "move character 4"};
+exports.moveSprite4 = function(d){return "Mueva el actor 4"};
 
-exports.moveSprite5 = function(d){return "move character 5"};
+exports.moveSprite5 = function(d){return "Mueva el actor 5"};
 
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSprite6 = function(d){return "Mueva el actor 6"};
 
 exports.moveDown = function(d){return "Bajar"};
 
@@ -5781,11 +5781,11 @@ exports.moveDownTooltip = function(d){return "Baja la palanca."};
 
 exports.moveLeft = function(d){return "mover hacia la izquierda"};
 
-exports.moveLeftTooltip = function(d){return "Mover la pala a la izquierda."};
+exports.moveLeftTooltip = function(d){return "Mover un actor a la izquierda."};
 
 exports.moveRight = function(d){return "mover hacia la derecha"};
 
-exports.moveRightTooltip = function(d){return "Mover la pala a la derecha."};
+exports.moveRightTooltip = function(d){return "Mover un actor hacia la derecha."};
 
 exports.moveUp = function(d){return "Subir"};
 
@@ -5807,7 +5807,7 @@ exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
 
 exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "reproducir sonido golpe"};
 
 exports.playSoundLosePoint = function(d){return "play lose point sound"};
 
@@ -5953,21 +5953,21 @@ exports.setSprite5 = function(d){return "set character 5"};
 
 exports.setSprite6 = function(d){return "set character 6"};
 
-exports.stopSprite = function(d){return "stop"};
+exports.stopSprite = function(d){return "Parar"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
+exports.stopSprite1 = function(d){return "Parar al actor 1"};
 
-exports.stopSprite2 = function(d){return "stop actor 2"};
+exports.stopSprite2 = function(d){return "Parar al actor 2"};
 
-exports.stopSprite3 = function(d){return "stop actor 3"};
+exports.stopSprite3 = function(d){return "Parar al actor 3"};
 
-exports.stopSprite4 = function(d){return "stop actor 4"};
+exports.stopSprite4 = function(d){return "Parar al actor 4"};
 
-exports.stopSprite5 = function(d){return "stop actor 5"};
+exports.stopSprite5 = function(d){return "Parar al actor 5"};
 
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSprite6 = function(d){return "Parar al actor 6"};
 
-exports.stopTooltip = function(d){return "Stops an actor's movement."};
+exports.stopTooltip = function(d){return "Detener el movimiento del actor."};
 
 exports.waitForClick = function(d){return "wait for click"};
 
@@ -5993,7 +5993,7 @@ exports.whenGameStarts = function(d){return "when game starts"};
 
 exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
 
-exports.whenLeft = function(d){return "cuando la fecha apunta a la izquierda"};
+exports.whenLeft = function(d){return "Cuando la izquierda flecha"};
 
 exports.whenLeftTooltip = function(d){return "Realiza las instrucciones de abajo cuando se presiona la tecla de fecha hacia la izquierda."};
 
@@ -6017,33 +6017,33 @@ exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
 
 exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
+exports.whenSpriteCollided1 = function(d){return "Cuando actor 1"};
 
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
+exports.whenSpriteCollided2 = function(d){return "Cuando actor 2"};
 
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
+exports.whenSpriteCollided3 = function(d){return "Cuando actor 3"};
 
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
+exports.whenSpriteCollided4 = function(d){return "Cuando actor 14"};
 
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
+exports.whenSpriteCollided5 = function(d){return "Cuando actor 5"};
 
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteCollided6 = function(d){return "Cuando actor 6"};
 
-exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
+exports.whenSpriteCollidedTooltip = function(d){return "Ejecutar las acciones abajo cuando un actor toca otro actor."};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
+exports.whenSpriteCollidedWith1 = function(d){return "toca actor 1"};
 
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
+exports.whenSpriteCollidedWith2 = function(d){return "toca actor 2"};
 
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
+exports.whenSpriteCollidedWith3 = function(d){return "toca actor 3"};
 
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
+exports.whenSpriteCollidedWith4 = function(d){return "toca actor 4"};
 
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
+exports.whenSpriteCollidedWith5 = function(d){return "toca actor 5"};
 
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollidedWith6 = function(d){return "toca actor 6"};
 
-exports.whenUp = function(d){return "Cuando la flecha apunte arriba"};
+exports.whenUp = function(d){return "Cuando flecha arriba"};
 
 exports.whenUpTooltip = function(d){return "Realiza las instrucciones de abajo cuando se presiona la tecla de fecha hacia arriba."};
 
