@@ -5286,11 +5286,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "nis nje top te ri"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Nis nje top ne loje."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Krijo Lojen Tende"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5362,7 +5362,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "vendos ne toke nje kulle"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Ju mund te shtypni butonin \"Provo Perseri\" per tu kthyer mrapa dhe per te luajtur lojen tuaj."};
 
 exports.removeSquare = function(d){return "hiq katror"};
 
@@ -5374,15 +5374,15 @@ exports.repeatUntilFinish = function(d){return "perserit deri sa te mbaroje"};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "rregullo nje skene te rastesishme"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "vendos nje skene te forte"};
 
-exports.setBackgroundRetro = function(d){return "set retro scene"};
+exports.setBackgroundRetro = function(d){return "rregullo retro skenen"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Rregullo sfondin e imazhit"};
 
-exports.setBallRandom = function(d){return "set random ball"};
+exports.setBallRandom = function(d){return "rregullo topin e rastesishem"};
 
 exports.setBallHardcourt = function(d){return "set hardcourt ball"};
 

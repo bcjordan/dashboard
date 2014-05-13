@@ -7045,13 +7045,13 @@ exports.dialogCancel = function(d){return "Mégsem"};
 
 exports.dialogOK = function(d){return "OK"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Észak"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Dél"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "Kelet"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "Nyugat"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Akkor van értelme az \"Ismétel\" vagy a \"Ha\" blokknak, ha van  bennük egy vagy több blokk. Bizonyosodj meg róla, hogy a belső blokk megfelelően illeszkedik a külső blokkhoz."};
 
@@ -7061,7 +7061,7 @@ exports.finalStage = function(d){return "Gratulálok! Teljesítetted az utolsó 
 
 exports.finalStageTrophies = function(d){return "Gratulálok! Teljesítetted az utolsó szakaszt és nyertél "+p(d,"numTrophies",0,"hu",{"one":"egy trófeát","other":n(d,"numTrophies")+" trófeát"})+"."};
 
-exports.generatedCodeInfo = function(d){return "A programod blokkjai leírhatóak JavaScript -el is, a világ leggyakrabban használt programozási nyelvével:"};
+exports.generatedCodeInfo = function(d){return "Még a legjobb egyetemei is tanítják a blokk alapú kódolást (például "+v(d,"berkeleyLink")+" "+v(d,"harvardLink")+"). De a motorháztető alatt, a blokkok amiket összeraksz, JavaScript kódok, a világ legszélesebb körben használt kódolási nyelvén:"};
 
 exports.hashError = function(d){return "Sajnálom, de \"%1\" nem felel meg egyetlen mentett programnak sem."};
 
@@ -7069,7 +7069,7 @@ exports.help = function(d){return "Segítség"};
 
 exports.hintTitle = function(d){return "Tanács:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "Ugorj"};
 
 exports.levelIncompleteError = function(d){return "Minden szükséges blokkot felhasználtál, de nem megfelelően."};
 
@@ -7083,9 +7083,9 @@ exports.nextLevel = function(d){return "Gratulálok! Megoldottad a "+v(d,"puzzle
 
 exports.nextLevelTrophies = function(d){return "Gratulálok! Megoldottad a "+v(d,"puzzleNumber")+". feladványt és nyertél "+p(d,"numTrophies",0,"hu",{"one":"egy trófeát","other":n(d,"numTrophies")+" trófeát"})+"."};
 
-exports.nextStage = function(d){return "Gratulálok! Teljesítetted a "+v(d,"stageNumber")+" szakaszt."};
+exports.nextStage = function(d){return "Gratulálok! Teljesítetted a "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Gratulálok! Teljesítetted a "+v(d,"stageNumber")+". szakaszt és nyertél "+p(d,"numTrophies",0,"hu",{"one":"egy trófeát","other":n(d,"numTrophies")+" trófeát"})+"."};
+exports.nextStageTrophies = function(d){return "Gratulálok! Teljesítetted a "+v(d,"stageNumber")+". szakaszát és nyertél "+p(d,"numTrophies",0,"hu",{"one":"egy trófeát","other":n(d,"numTrophies")+" trófeát"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Gratulálok! Megoldottad a "+v(d,"puzzleNumber")+". feladványt. (Habár megoldható csupán "+p(d,"numBlocks",0,"hu",{"one":"1 blokk","other":n(d,"numBlocks")+" blokk"})+" használatával.)"};
 
@@ -7125,9 +7125,9 @@ exports.tryAgain = function(d){return "Próbáld újra"};
 
 exports.backToPreviousLevel = function(d){return "Vissza az előző szintre"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Mentés a galériába"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Elmentve a galáriádba"};
 
 exports.typeCode = function(d){return "Írd be a JavaScript kódod az instrukciók alá."};
 
@@ -7151,7 +7151,7 @@ exports.tryHOC = function(d){return "Próbáld ki a kódolás óráját"};
 
 exports.signup = function(d){return "Regisztrálj a bevezető képzésre"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Egy tipp:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){
