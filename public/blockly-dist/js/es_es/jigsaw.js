@@ -3508,7 +3508,7 @@ exports.finalStage = function(d){return "¡Felicidades! Has completado la etapa 
 
 exports.finalStageTrophies = function(d){return "¡Felicidades! Has completado la etapa final y ganaste  "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Los bloques de tu programa también pueden ser representados en Javascript, el lenguaje de programación más usado en el mundo:"};
+exports.generatedCodeInfo = function(d){return "Incluso mejores universidades enseñan basado en bloques de codificación (por ejemplo, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Pero bajo el capó, los bloques que ha montado puede también ser demostrado en JavaScript, el más utilizado mundial mente lenguaje de codificación:"};
 
 exports.hashError = function(d){return "Lo sentimos, '%1' no se corresponde con ningún programa guardado."};
 
@@ -3516,7 +3516,7 @@ exports.help = function(d){return "Ayuda"};
 
 exports.hintTitle = function(d){return "Sugerencia:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "saltar"};
 
 exports.levelIncompleteError = function(d){return "Estás utilizando todos los tipos necesarios de bloques pero no de la manera correcta."};
 
@@ -3530,9 +3530,9 @@ exports.nextLevel = function(d){return "¡Felicidades! Completaste el Puzzle "+v
 
 exports.nextLevelTrophies = function(d){return "¡Felicidades! Completaste el puzzle "+v(d,"puzzleNumber")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
 
-exports.nextStage = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "¡ Felicidades! Completaste "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageNumber")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"un trofeo","other":n(d,"numTrophies")+" trofeos"})+"."};
+exports.nextStageTrophies = function(d){return "¡Felicidades! Completaste la etapa "+v(d,"stageName")+" y ganaste "+p(d,"numTrophies",0,"es",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "¡Felicidades! Completaste el puzzle "+v(d,"puzzleNumber")+". (Sin embargo, podrías haber usado sólo "+p(d,"numBlocks",0,"es",{"one":"1 bloque","other":n(d,"numBlocks")+" bloques"})+".)"};
 
@@ -3572,9 +3572,9 @@ exports.tryAgain = function(d){return "Vuelve a intentarlo"};
 
 exports.backToPreviousLevel = function(d){return "Volver al nivel anterior"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Guardar en tu galería"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Guardar en tu galería!"};
 
 exports.typeCode = function(d){return "Escribe tu código JavaScript debajo de estas instrucciones."};
 
@@ -3598,22 +3598,22 @@ exports.tryHOC = function(d){return "Prueba la Hora del Código"};
 
 exports.signup = function(d){return "Únete al curso de introducción"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Aquí hay un Consejo:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.es=function(n){return n===1?"one":"other"}
 exports.continue = function(d){return "Continuar"};
 
-exports.nextLevel = function(d){return "¡Felicidades! Has completado este puzzle."};
+exports.nextLevel = function(d){return "¡ Felicidades! Has completado este rompecabezas."};
 
 exports.no = function(d){return "No"};
 
-exports.numBlocksNeeded = function(d){return "Este puzzle puede resolverse con %1 bloques."};
+exports.numBlocksNeeded = function(d){return "Este rompecabezas puede resolverse con %1 de bloques."};
 
-exports.oneTopBlock = function(d){return "Para este puzzle, debes apilar juntos todos los bloques en el espacio de trabajo blanco."};
+exports.oneTopBlock = function(d){return "Para este rompecabezas necesitas apilar juntos todos los bloques en tu espacio de trabajo blanco."};
 
-exports.reinfFeedbackMsg = function(d){return "Puede pulsar el botón \"Inténtalo de nuevo\" para volver a jugar tu juego."};
+exports.reinfFeedbackMsg = function(d){return "Puede presionar el \"inténtalo de nuevo\" botón para volver a jugar su juego. "};
 
 exports.share = function(d){return "Compartir"};
 

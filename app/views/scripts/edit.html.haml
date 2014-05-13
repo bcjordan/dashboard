@@ -1,0 +1,6 @@
+%h3= t('landing.prerelease')
+%h1 Editing script #{@script.name}
+= render 'form'
+= link_to t('crud.show'), @script
+|
+\#{link_to t('crud.back'), scripts_path}
