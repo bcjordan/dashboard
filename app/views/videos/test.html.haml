@@ -81,22 +81,22 @@
     formLink.fillFieldEncoded('youtubeReachable', fakingYouTubeBlocked || 'No, not reached');
   });
 
-  function detectflash(){
+  function hasFlashInstalled(){
     // via http://www.blangdon.com/writing/about/detect-flash-with-javascript/
-      if (navigator.plugins != null && navigator.plugins.length > 0){
-          return navigator.plugins["Shockwave Flash"] && true;
-      }
-      if (~navigator.userAgent.toLowerCase().indexOf("webtv")){
-          return true;
-      }
-      if (~navigator.appVersion.indexOf("MSIE") && !~navigator.userAgent.indexOf("Opera")){
-          try{
-              return new ActiveXObject("ShockwaveFlash.ShockwaveFlash") && true;
-          } catch(e){}
-      }
-      return false;
+    if (navigator.plugins != null && navigator.plugins.length > 0){
+      return navigator.plugins["Shockwave Flash"] && true;
+    }
+    if (~navigator.userAgent.toLowerCase().indexOf("webtv")){
+      return true;
+    }
+    if (~navigator.appVersion.indexOf("MSIE") && !~navigator.userAgent.indexOf("Opera")){
+      try{
+        return new ActiveXObject("ShockwaveFlash.ShockwaveFlash") && true;
+      } catch(e){}
+    }
+    return false;
   }
 
-  var flashStatus = detectflash() ? 'Flash is installed' : 'Flash is not installed';
+  var flashStatus = hasFlashInstalled() ? 'Flash is installed' : 'Flash is not installed';
   $('#flash-installed').html(flashStatus);
-  formLink.fillFieldEncoded('flashInstalled', detectflash() ? 'Yes' : 'No');
+  formLink.fillFieldEncoded('flashInstalled', hasFlashInstalled() ? 'Yes' : 'No');
