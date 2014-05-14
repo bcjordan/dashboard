@@ -34,3 +34,18 @@ Dashboard::Application.configure do
   # Whether or not to display pretty blockly.
   config.pretty_blockly = true
 end
+
+# Modify Rack's WEBrick handler to chdir to Rails root in daemon mode
+# Patch based on rack-1.5.2/lib/rack/handler/webrick.rb:29
+module Rack
+  module Handler
+    class WEBrick < ::WEBrick::HTTPServlet::AbstractServlet
+      def initialize(server, app)
+        # Chdir to Rails.root since Webrick::Daemon.start does a Dir::cwd("/")
+        Dir.chdir(Rails.root)
+        super server
+        @app = app
+      end
+    end
+  end
+end
