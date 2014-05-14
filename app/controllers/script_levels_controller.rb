@@ -60,6 +60,7 @@ private
   def redirect_to_next_script_level
     if current_user
       redirect_to build_script_level_path(current_user.try(:next_untried_level, @script) || @script.script_levels.first)
+      return
     else
       session_progress = session[:progress] || {}
       
