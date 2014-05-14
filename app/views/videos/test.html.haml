@@ -76,7 +76,7 @@
   var fakingYouTubeBlocked = "#{params.has_key?(:force_youtube_fallback) ? 'Faking YouTube blocked' : ''}";
   $('.blockedStatus').css('color', 'green');
   formLink.fillFieldEncoded('youtubeReachable', 'Yes, reached');
-  onURLBlocked(videoInfo['fallback_test_url'], function() {
+  onYouTubeBlocked(function() {
     $('.blockedStatus').html('YouTube could not be reached. Assuming YouTube is blocked. Using fallback.').css('color', 'red');
     formLink.fillFieldEncoded('youtubeReachable', fakingYouTubeBlocked || 'No, not reached');
   });
