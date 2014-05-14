@@ -9,12 +9,11 @@
 
 .user-stats-block
   - levels = script_levels.group_by{ |sl| sl.stage ? sl.stage : sl.level.game }
-  - index = 0
   - levels.each_pair do |game, sl_group|
     - title = data_t_suffix('script.name', script.name, game.name) + ': ' + (data_t('game.name', game.name) || game.name)
     - stage_title = data_t_suffix('script.name', script.name, game.name)
     - game_title = (data_t('game.name', game.name) || game.name)
-    - color = index % 2 == 1 ? '#dadada' : '#eeeeee'
+    - color = cycle '#dadada', '#eeeeee'
     - custom_script = game.instance_of? Stage
     .game-group{style:"background-color: #{color}"}
       .stage
@@ -43,8 +42,6 @@
               %a{ href: link, class: "level_link"}
                 %span.puzzle-number
                   #{sl.stage_or_game_position}
-
-    - index += 1
 
 -if (!defined? hide_trophies)
   -if (!defined? trophies_below) || trophies_below
