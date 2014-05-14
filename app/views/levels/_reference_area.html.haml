@@ -21,4 +21,16 @@
 
     - if can? :edit, @level
       %br/
-      #{@level.name}: #{link_to "edit", edit_game_level_path(@game, @level)} / #{ link_to "stats", level_stats_path(@level) }
+      #{@level.name}:
+      #{link_to "play", game_level_path(@game, @level)}
+      \/
+      #{link_to "edit", edit_game_level_path(@game, @level)}
+      (
+      #{link_to "toolbox", game_level_edit_blocks_path(@game, @level, :toolbox_blocks)}
+      \/
+      #{link_to "start", game_level_edit_blocks_path(@game, @level, :start_blocks)}
+      \/
+      #{link_to "required", game_level_edit_blocks_path(@game, @level, :required_blocks)}
+      )
+      \/
+      #{link_to "stats", level_stats_path(@level)}

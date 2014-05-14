@@ -49,7 +49,8 @@ class Maze < Level
   end
 
   def common_blocks(type)
-    "#{k1_blocks if type != 'required_blocks'} <block type='maze_moveForward'></block>
+    "#{k1_blocks}
+    <block type='maze_moveForward'></block>
     <block type='maze_turn'>
       <title name='DIR'>turnLeft</title>
     </block>
