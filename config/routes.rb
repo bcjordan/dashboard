@@ -57,9 +57,16 @@ Dashboard::Application.routes.draw do
 
   resources :scripts, path: '/s/' do
     post 'sort', to: 'scripts#sort'
+
+    # /s/xxx/level/yyy
     resources :script_levels, as: :levels, only: [:show], path: "/level", format: false do
       get 'solution', to: 'script_levels#solution'
     end
+
+    # /s/xxx/puzzle/yyy
+    get 'puzzle/:chapter', to: 'script_levels#show', as: 'puzzle', format: false
+
+    # /s/xxx/puzzle/stage/yyy/puzzle/zzz
     resources :stages, only: [:show], path: "/stage", format: false do
       resources :script_levels, only: [:show], path: "/puzzle", format: false do
       end
