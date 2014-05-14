@@ -19,8 +19,24 @@ class Artist < Level
 
   # Blocks which are supported by required block editing.
   def required_blocks
-    '<block type="draw_move_by_constant"></block>
+    '<block type="controls_repeat_simplified">
+        <title name="TIMES">5</title>
+    </block>
+    <block type="simple_move_up"></block>
+    <block type="simple_move_down"></block>
+    <block type="simple_move_left"></block>
+    <block type="simple_move_right"></block>
+    <block type="simple_jump_up"></block>
+    <block type="simple_jump_down"></block>
+    <block type="simple_jump_left"></block>
+    <block type="simple_jump_right"></block>
+    <block type="simple_move_up_length"></block>
+    <block type="simple_move_down_length"></block>
+    <block type="simple_move_left_length"></block>
+    <block type="simple_move_right_length"></block>
+    <block type="draw_move_by_constant"></block>
     <block type="draw_turn"></block>
+    <block type="draw_colour_simple"></block>
     <block id="draw-color" type="draw_colour"></block>
     <block type="controls_repeat"></block>
     <block type="procedures_defnoreturn"></block>'
