@@ -8,8 +8,11 @@
 
   - data['answers'].each_with_index do |answer, i|
     - answer['index'] = i
-  - begin newanswers = data['answers'].shuffle end while newanswers == data['answers']
-  - data['answers'] = newanswers
+
+  - # Shuffle answers until they are different to real answers.
+  - if data['answers'].length > 1   # avoid infinite loop
+    - begin newanswers = data['answers'].shuffle end while newanswers == data['answers']
+    - data['answers'] = newanswers
 
   - height = data['height'] || '20'
   - height += 'px'
