@@ -3372,7 +3372,7 @@ exports.install = function(blockly, skin) {
 
   var SimpleMove = {
     DEFAULT_MOVE_LENGTH: 50,
-    SHORT_MOVE_LENGTH: 25,
+    SHORT_MOVE_LENGTH: 50,
     LONG_MOVE_LENGTH: 100,
     DIRECTION_CONFIGS: {
       left: { title: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
