@@ -77,7 +77,7 @@ module.exports = function(app, levels, options, requiredBlockTests) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":41}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":42}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -897,7 +897,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/zh_tw/common":43,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":28,"./templates/buttons.html":30,"./templates/instructions.html":32,"./templates/learn.html":33,"./templates/makeYourOwn.html":34,"./utils":41,"./xml":42}],3:[function(require,module,exports){
+},{"../locale/zh_tw/common":44,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":29,"./templates/buttons.html":31,"./templates/instructions.html":33,"./templates/learn.html":34,"./templates/makeYourOwn.html":35,"./utils":42,"./xml":43}],3:[function(require,module,exports){
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -974,7 +974,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":29,"./utils.js":41,"url":55}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":30,"./utils.js":42,"url":56}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
 var INFINITE_LOOP_TRAP_RE =
     new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
@@ -1863,7 +1863,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/zh_tw/common":43,"./codegen":6,"./dom":7,"./templates/buttons.html":30,"./templates/code.html":31,"./templates/readonly.html":36,"./templates/sharing.html":37,"./templates/showCode.html":38,"./templates/trophy.html":39,"./utils":41}],9:[function(require,module,exports){
+},{"../locale/zh_tw/common":44,"./codegen":6,"./dom":7,"./templates/buttons.html":31,"./templates/code.html":32,"./templates/readonly.html":37,"./templates/sharing.html":38,"./templates/showCode.html":39,"./templates/trophy.html":40,"./utils":42}],9:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -2565,7 +2565,7 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/zh_tw/maze":44,"../codegen":6}],12:[function(require,module,exports){
+},{"../../locale/zh_tw/maze":45,"../codegen":6}],12:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2586,7 +2586,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/maze":44,"ejs":45}],13:[function(require,module,exports){
+},{"../../locale/zh_tw/maze":45,"ejs":46}],13:[function(require,module,exports){
 var levelBase = require('../level_base');
 var Direction = require('./tiles').Direction;
 var msg = require('../../locale/zh_tw/maze');
@@ -3787,7 +3787,7 @@ module.exports = {
   }
 };
 
-},{"../../locale/zh_tw/maze":44,"../level_base":9,"./karelStartBlocks.xml":14,"./tiles":21,"./toolboxes/karel1.xml":22,"./toolboxes/karel2.xml":23,"./toolboxes/karel3.xml":24}],14:[function(require,module,exports){
+},{"../../locale/zh_tw/maze":45,"../level_base":9,"./karelStartBlocks.xml":14,"./tiles":21,"./toolboxes/karel1.xml":22,"./toolboxes/karel2.xml":23,"./toolboxes/karel3.xml":24}],14:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3819,7 +3819,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/maze":44,"ejs":45}],15:[function(require,module,exports){
+},{"../../locale/zh_tw/maze":45,"ejs":46}],15:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
 var reqBlocks = require('./requiredBlocks');
@@ -4449,7 +4449,7 @@ cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
 cloneWithStep('karel_2_9', true, false);
 
-},{"../block_utils":3,"../utils":41,"./karelLevels":13,"./requiredBlocks":18,"./startBlocks.xml":20,"./tiles":21,"./toolboxes/maze.xml":25}],16:[function(require,module,exports){
+},{"../block_utils":3,"../utils":42,"./karelLevels":13,"./requiredBlocks":18,"./startBlocks.xml":20,"./tiles":21,"./toolboxes/maze.xml":25}],16:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -6055,7 +6055,9 @@ Maze.checkSuccess = function() {
   return false;
 };
 
-},{"../../locale/zh_tw/common":43,"../../locale/zh_tw/maze":44,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":27,"../templates/page.html":35,"../timeoutList":40,"../utils":41,"./api":10,"./controls.html":12,"./tiles":21,"./visualization.html":26}],18:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"../../locale/zh_tw/maze":45,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":28,"../templates/page.html":36,"../timeoutList":41,"../utils":42,"./api":10,"./controls.html":12,"./tiles":21,"./visualization.html":26}],18:[function(require,module,exports){
+var requiredBlockUtils = require('../required_block_utils');
+
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
 var TURN_LEFT = {'test': 'turnLeft', 'type': 'maze_turn', 'titles': {'DIR': 'turnLeft'}};
 var TURN_RIGHT = {'test': 'turnRight', 'type': 'maze_turn', 'titles': {'DIR': 'turnRight'}};
@@ -6066,6 +6068,11 @@ var IS_PATH_FORWARD = {'test': 'isPathForward', 'type': 'maze_ifElse', 'titles':
 var FOR_LOOP = {'test': 'for', 'type': 'controls_repeat', titles: {TIMES: '???'}};
 
 module.exports = {
+  moveNorth: requiredBlockUtils.simpleBlock('maze_moveNorth'),
+  moveSouth: requiredBlockUtils.simpleBlock('maze_moveSouth'),
+  moveEast: requiredBlockUtils.simpleBlock('maze_moveEast'),
+  moveWest: requiredBlockUtils.simpleBlock('maze_moveWest'),
+  controls_repeat_simplified: requiredBlockUtils.repeatSimpleBlock('???'),
   MOVE_FORWARD: MOVE_FORWARD,
   TURN_LEFT: TURN_LEFT,
   TURN_RIGHT: TURN_RIGHT,
@@ -6076,7 +6083,7 @@ module.exports = {
   FOR_LOOP: FOR_LOOP
 };
 
-},{}],19:[function(require,module,exports){
+},{"../required_block_utils":27}],19:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -6202,7 +6209,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":27}],20:[function(require,module,exports){
+},{"../skins":28}],20:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6223,7 +6230,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],21:[function(require,module,exports){
+},{"ejs":46}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -6286,7 +6293,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":41}],22:[function(require,module,exports){
+},{"../utils":42}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6307,7 +6314,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],23:[function(require,module,exports){
+},{"ejs":46}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6333,7 +6340,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/zh_tw/common":43,"../../../locale/zh_tw/maze":44,"ejs":45}],24:[function(require,module,exports){
+},{"../../../locale/zh_tw/common":44,"../../../locale/zh_tw/maze":45,"ejs":46}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6367,7 +6374,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/zh_tw/common":43,"ejs":45}],25:[function(require,module,exports){
+},{"../../../locale/zh_tw/common":44,"ejs":46}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6388,7 +6395,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],26:[function(require,module,exports){
+},{"ejs":46}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6409,7 +6416,58 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],27:[function(require,module,exports){
+},{"ejs":46}],27:[function(require,module,exports){
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+},{}],28:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -6451,7 +6509,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -6656,7 +6714,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6677,7 +6735,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],30:[function(require,module,exports){
+},{"ejs":46}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6698,7 +6756,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":43,"ejs":45}],31:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"ejs":46}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6719,7 +6777,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],32:[function(require,module,exports){
+},{"ejs":46}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6740,7 +6798,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":43,"ejs":45}],33:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"ejs":46}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6763,7 +6821,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":43,"ejs":45}],34:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"ejs":46}],35:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6784,7 +6842,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":43,"ejs":45}],35:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"ejs":46}],36:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6809,7 +6867,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":43,"ejs":45}],36:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"ejs":46}],37:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6831,7 +6889,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],37:[function(require,module,exports){
+},{"ejs":46}],38:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6852,7 +6910,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":43,"ejs":45}],38:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"ejs":46}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6873,7 +6931,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/zh_tw/common":43,"ejs":45}],39:[function(require,module,exports){
+},{"../../locale/zh_tw/common":44,"ejs":46}],40:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6894,7 +6952,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],40:[function(require,module,exports){
+},{"ejs":46}],41:[function(require,module,exports){
 var list = [];
 
 /**
@@ -6912,7 +6970,7 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.shallowCopy = function(source) {
@@ -6987,7 +7045,7 @@ exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
   return blocks;
 };
 
-},{"./xml":42}],42:[function(require,module,exports){
+},{"./xml":43}],43:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -7015,7 +7073,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.zh=function(n){return "other"}
 exports.blocklyMessage = function(d){return "模組化"};
 
@@ -7154,7 +7212,7 @@ exports.signup = function(d){return "報名參加簡介課程"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":56}],44:[function(require,module,exports){
+},{"messageformat":57}],45:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.zh=function(n){return "other"}
 exports.avoidCowAndRemove = function(d){return "避開牛隻，並且移除1鏟泥土"};
 
@@ -7267,7 +7325,7 @@ exports.whileTooltip = function(d){return "重覆程式積木內的動作，直�
 exports.yes = function(d){return "確定"};
 
 
-},{"messageformat":56}],45:[function(require,module,exports){
+},{"messageformat":57}],46:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7626,7 +7684,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":46,"./utils":47,"fs":48,"path":50}],46:[function(require,module,exports){
+},{"./filters":47,"./utils":48,"fs":49,"path":51}],47:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -7829,7 +7887,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7855,9 +7913,9 @@ exports.escape = function(html){
 };
  
 
-},{}],48:[function(require,module,exports){
-
 },{}],49:[function(require,module,exports){
+
+},{}],50:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7912,7 +7970,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8140,7 +8198,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":49}],51:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":50}],52:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -8651,7 +8709,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8737,7 +8795,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8824,13 +8882,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":52,"./encode":53}],55:[function(require,module,exports){
+},{"./decode":53,"./encode":54}],56:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -9463,7 +9521,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":51,"querystring":54}],56:[function(require,module,exports){
+},{"punycode":52,"querystring":55}],57:[function(require,module,exports){
 /**
  * messageformat.js
  *
