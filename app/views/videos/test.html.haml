@@ -3,23 +3,37 @@
 
   %p The purpose of this page is to test whether our new video player works in your environment. This is especially helpful to try out if YouTube is blocked in your school. Please follow the instructions.
 
+  %h3 1. Try playing this video
+
   #video-container{width: 600, height:400}
 
-  %h2 Your browser info
+  %ul
+    %li Can you see the video?
+    %li Can you play the video?
+
+  %h3
+    2.
+    %a#survey-link{} Submit our survey
+
+  %h3 Thanks!
+
+  %hr
+
+  %h4 More information (pre-filled in survey)
+
+  %h4 Your browser info
 
   %p= request.env['HTTP_USER_AGENT']
 
+  %p#flash-installed
+
   %p= params[:fallback] ? 'Faking YouTube blocked' : ''
 
-  %h2 YouTube block detection
+  %h4 YouTube block detection
 
   %p.blockedStatus{style: "font-weight: bold"} Detection succeeded. Assuming YouTube is not blocked.
 
-  -#%h2 This video info
-  -#
-  -#%span{style: "width:'500%', height: '500%'"}=  simple_format(JSON.pretty_generate(video_info(Video.first)))
-  -#
-  %h2 Test options
+  %h4 Test options
 
   %span
     Fake YouTube being blocked:
@@ -28,6 +42,30 @@
     %a{href: '?'} off
 
 :javascript
+  var formLink = {
+    template: "https://docs.google.com/forms/d/1yIdim-dyUWcmDQWTV-YeimE9tBUvWK-H7ZULItQ9rR8/viewform?entry.1520933088=browser&entry.515663950=youtubeReachable&entry.1331880569=flashInstalled",
+    prefills: {
+      browser: 'no info',
+      youtubeReachable: 'no info',
+      flashInstalled: 'Yes' // Yes / No
+    },
+    fillTemplate: function() {
+      var filledOut = this.template;
+      for (var k in this.prefills){
+        if (this.prefills.hasOwnProperty(k)) {
+          filledOut = filledOut.replace(k, this.prefills[k]);
+        }
+      }
+      return filledOut;
+    },
+    fillFieldEncoded: function(key, contents) {
+      this.prefills[key] = encodeURIComponent(contents);
+      $('#survey-link').attr('href', this.fillTemplate());
+    }
+  };
+  var userAgent = '#{request.env['HTTP_USER_AGENT']}';
+  formLink.fillFieldEncoded('browser', userAgent);
+
   var videoInfo = #{video_info(Video.first).to_json};
   videoInfo['use_fallback'] = true;
   videoInfo['fallback_test_url'] = '#{params[:fallback] ? 'https://fake.example.com/favicon.ico' : 'https://www.youtube.com/favicon.ico'}';
@@ -36,6 +74,30 @@
   setupVideoFallback(videoInfo, 400, 600);
 
   $('.blockedStatus').css('color', 'green');
+  formLink.fillFieldEncoded('youtubeReachable', 'Yes, reached');
   onURLBlocked(videoInfo['fallback_test_url'], function() {
     $('.blockedStatus').html('YouTube could not be reached. Assuming YouTube is blocked. Using fallback.').css('color', 'red');
+    formLink.fillFieldEncoded('youtubeReachable', 'No, not reached');
   });
+
+  $('.survey-link')
+
+  function detectflash(){
+    // via http://www.blangdon.com/writing/about/detect-flash-with-javascript/
+      if (navigator.plugins != null && navigator.plugins.length > 0){
+          return navigator.plugins["Shockwave Flash"] && true;
+      }
+      if (~navigator.userAgent.toLowerCase().indexOf("webtv")){
+          return true;
+      }
+      if (~navigator.appVersion.indexOf("MSIE") && !~navigator.userAgent.indexOf("Opera")){
+          try{
+              return new ActiveXObject("ShockwaveFlash.ShockwaveFlash") && true;
+          } catch(e){}
+      }
+      return false;
+  }
+
+  var flashStatus = detectflash() ? 'Flash is installed' : 'Flash is not installed';
+  $('#flash-installed').html(flashStatus);
+  formLink.fillFieldEncoded('flashInstalled', detectflash() ? 'Yes' : 'No');
