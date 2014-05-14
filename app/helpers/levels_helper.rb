@@ -16,7 +16,11 @@ module LevelsHelper
     when Script::JIGSAW_ID
       jigsaw_chapter_path(script_level.chapter)
     else
-      script_stage_script_level_path(script_level.script, script_level.stage, script_level.position)
+      if script_level.stage
+        script_stage_script_level_path(script_level.script, script_level.stage, script_level.position)
+      else
+        script_puzzle_path(script_level.script, script_level.chapter)
+      end
     end
   end
 

@@ -76,6 +76,14 @@ class ScriptLevelsControllerTest < ActionController::TestCase
     assert_equal "/jigsaw/3", build_script_level_path(jigsaw_level)
   end
 
+  test "test step script routing" do
+    script = Script.find_by_name 'step'
+    step_level = ScriptLevel.find_by script: script, chapter: 3
+    assert_routing({method: "get", path: '/s/step/puzzle/3'},
+                   {controller: "script_levels", action: "show", script_id: 'step', chapter: "3"})
+    assert_equal "/s/step/puzzle/3", build_script_level_path(step_level)
+  end
+
 
   test "routing for custom scripts with stage" do
     assert_routing({method: "get", path: "/s/laurel/stage/1/puzzle/1"},

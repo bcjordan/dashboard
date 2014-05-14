@@ -1,7 +1,7 @@
 # A sequence of Levels
 class Script < ActiveRecord::Base
   include Seeded
-  has_many :levels, dependent: :destroy, through: :script_levels
+  has_many :levels, through: :script_levels
   has_many :script_levels, -> { order("chapter ASC") }, dependent: :destroy # all script levels, even those w/ stages, are ordered by chapter, see Script#add_script
   has_many :stages, -> { order("position ASC") }
   belongs_to :wrapup_video, foreign_key: 'wrapup_video_id', class_name: 'Video'
