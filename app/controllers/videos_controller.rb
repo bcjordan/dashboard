@@ -1,9 +1,13 @@
 class VideosController < ApplicationController
-  before_filter :authenticate_user!
-  check_authorization
-  load_and_authorize_resource
+  before_filter :authenticate_user!, except: [:test]
+  check_authorization except: [:test]
+  load_and_authorize_resource except: [:test]
 
   before_action :set_video, only: [:show, :edit, :update, :destroy]
+
+  def test
+    @video = Video.first
+  end
 
   def index
     @videos = Video.all
