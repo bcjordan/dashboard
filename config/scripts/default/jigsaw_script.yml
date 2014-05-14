@@ -1,4 +1,4 @@
-- Options: { id: 7, name: 'Jigsaw Levels', trophies: false, hidden: true }
+- Options: { id: 7, name: 'jigsaw', trophies: false, hidden: true }
 - TSV: |
     Game	Name	Level	Skin	Concepts	Url
     Jigsaw	Jigsaw_Level_1	1	jigsaw

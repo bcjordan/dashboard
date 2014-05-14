@@ -6,4 +6,8 @@ class Stage < ActiveRecord::Base
   acts_as_list scope: :script
 
   validates_uniqueness_of :name, scope: :script_id
+
+  def to_param
+    position.to_s
+  end
 end
