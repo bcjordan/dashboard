@@ -4,7 +4,11 @@ Dashboard::Application.routes.draw do
   resources :teacher_prizes
   resources :prizes
   resources :callouts
-  resources :videos
+  resources :videos do
+    collection do
+      get 'test'
+    end
+  end
   resources :concepts
   resources :activities
   resources :sections, only: [:new, :create, :edit, :update, :destroy]
@@ -59,6 +63,10 @@ Dashboard::Application.routes.draw do
     post 'sort', to: 'scripts#sort'
     resources :script_levels, as: :levels, only: [:show], path: "/level", format: false do
       get 'solution', to: 'script_levels#solution'
+    end
+    resources :stages, only: [:show], path: "/stage", format: false do
+      resources :script_levels, only: [:show], path: "/puzzle", format: false do
+      end
     end
   end
 

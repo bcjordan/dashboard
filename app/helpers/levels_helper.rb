@@ -1,9 +1,22 @@
 module LevelsHelper
   def build_script_level_path(script_level)
-    if Script::HOC_ID == script_level.script_id
+    case script_level.script_id
+    when Script::HOC_ID
       hoc_chapter_path(script_level.chapter)
-    else
+    when Script::TWENTY_HOUR_ID
       script_level_path(script_level.script, script_level)
+    when Script::EDIT_CODE_ID
+      editcode_chapter_path(script_level.chapter)
+    when Script::TWENTY_FOURTEEN_LEVELS_ID
+      twenty_fourteen_chapter_path(script_level.chapter)
+    when Script::BUILDER_ID
+      builder_chapter_path(script_level.chapter)
+    when Script::FLAPPY_ID
+      flappy_chapter_path(script_level.chapter)
+    when Script::JIGSAW_ID
+      jigsaw_chapter_path(script_level.chapter)
+    else
+      script_stage_script_level_path(script_level.script, script_level.stage, script_level.position)
     end
   end
 
