@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5296,9 +5297,9 @@ exports.isWallTooltip = function(d){return "Returns true if there is a wall here
 
 exports.launchBall = function(d){return "paleisk naują kamuolį"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Paleidžia kamuolį į žaidimą."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Sukurk savo Bounce Game žaidimą"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5370,7 +5371,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "put down tower"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Gali nuspausti mygtuką „Mėginti dar kartą“, kad grįžtum prie savo žaidimo."};
 
 exports.removeSquare = function(d){return "remove square"};
 
@@ -5388,7 +5389,7 @@ exports.setBackgroundHardcourt = function(d){return "scena = teniso kortai"};
 
 exports.setBackgroundRetro = function(d){return "scena = retro"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Nustato fono paveikslėlį"};
 
 exports.setBallRandom = function(d){return "kamuolys = bet koks"};
 
@@ -5396,7 +5397,7 @@ exports.setBallHardcourt = function(d){return "kamuolys = teniso"};
 
 exports.setBallRetro = function(d){return "kamuolys = retro"};
 
-exports.setBallTooltip = function(d){return "Sets the ball image"};
+exports.setBallTooltip = function(d){return "Nustato kamuolio vaizdą"};
 
 exports.setBallSpeedRandom = function(d){return "kamuolio greitis = bet koks"};
 
@@ -5410,7 +5411,7 @@ exports.setBallSpeedFast = function(d){return "kamuolio greitis = greitai"};
 
 exports.setBallSpeedVeryFast = function(d){return "kamuolio greitis = labai greitai"};
 
-exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
+exports.setBallSpeedTooltip = function(d){return "Nustato kamuolio greitį"};
 
 exports.setPaddleRandom = function(d){return "raketė = bet kokia"};
 
@@ -5418,7 +5419,7 @@ exports.setPaddleHardcourt = function(d){return "raketė = teniso"};
 
 exports.setPaddleRetro = function(d){return "raketė = retro"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Nustato irklo vaizdą"};
 
 exports.setPaddleSpeedRandom = function(d){return "raketės greitis = bet koks"};
 
@@ -5432,11 +5433,11 @@ exports.setPaddleSpeedFast = function(d){return "raketės greitis = greitai"};
 
 exports.setPaddleSpeedVeryFast = function(d){return "raketės greitis = labai greitai"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
+exports.setPaddleSpeedTooltip = function(d){return "Nustato irklo greitį"};
 
 exports.share = function(d){return "Bendrinti"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Pažiūrėk, kokį Bounce game žaidimą sukūriau. Parašiau jį pats puslapyje code.org"};
 
 exports.shareGame = function(d){return "Bendrink savo žaidimą:"};
 
@@ -5460,7 +5461,7 @@ exports.whenDownTooltip = function(d){return "Execute the actions below when the
 
 exports.whenGameStarts = function(d){return "kai žaidimas prasideda"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Vykdyti žemiau nurodytus veiksmus, kai žaidimas prasideda."};
 
 exports.whenLeft = function(d){return "when Left arrow"};
 
@@ -5510,7 +5511,7 @@ exports.catLogic = function(d){return "Logika"};
 
 exports.catLists = function(d){return "Sąrašai"};
 
-exports.catLoops = function(d){return "Ciklai"};
+exports.catLoops = function(d){return "Kartojimas"};
 
 exports.catMath = function(d){return "Matematika"};
 
@@ -5528,13 +5529,13 @@ exports.dialogCancel = function(d){return "Atšaukti"};
 
 exports.dialogOK = function(d){return "gerai"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Š"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "P"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "R"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "V"};
 
 exports.emptyBlocksErrorMsg = function(d){return "„Kartojimo“ arba „Jei“ blokelių viduje reikia įdėti kitus blokelius, kad jie veiktų. Įsitikink, kad jie yra gerai sukibę vienas su kitu."};
 
@@ -5552,7 +5553,7 @@ exports.help = function(d){return "pagalba"};
 
 exports.hintTitle = function(d){return "Patarimas:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "šok"};
 
 exports.levelIncompleteError = function(d){return "Tu naudoji visus būtinus blokelius, tačiau netinkamai."};
 
@@ -5610,7 +5611,7 @@ exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"}
 
 exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Įrašyti į savo galeriją!"};
 
 exports.typeCode = function(d){return "Įvesk savo JavaScript kodą žemiau šių instrukcijų."};
 

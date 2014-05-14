@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5185,7 +5186,7 @@ Turtle.execute = function() {
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5586,7 +5587,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  // Blockly.mainWorkspace.setEnableToolbox(true);
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5746,13 +5747,13 @@ exports.dialogCancel = function(d){return "Откажи"};
 
 exports.dialogOK = function(d){return "У реду"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Север"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Југ"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "Исток"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "Запад"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Да би блок \"Понављај\" или  \"Ако\" радио, у њега треба уградити друге блокове. Постарајте се да је унутрашњи блок правилно убачен у спољни блок."};
 

@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -3482,7 +3483,7 @@ exports.catLogic = function(d){return "Logika"};
 
 exports.catLists = function(d){return "Sąrašai"};
 
-exports.catLoops = function(d){return "Ciklai"};
+exports.catLoops = function(d){return "Kartojimas"};
 
 exports.catMath = function(d){return "Matematika"};
 
@@ -3500,13 +3501,13 @@ exports.dialogCancel = function(d){return "Atšaukti"};
 
 exports.dialogOK = function(d){return "gerai"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Š"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "P"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "R"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "V"};
 
 exports.emptyBlocksErrorMsg = function(d){return "„Kartojimo“ arba „Jei“ blokelių viduje reikia įdėti kitus blokelius, kad jie veiktų. Įsitikink, kad jie yra gerai sukibę vienas su kitu."};
 
@@ -3524,7 +3525,7 @@ exports.help = function(d){return "pagalba"};
 
 exports.hintTitle = function(d){return "Patarimas:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "šok"};
 
 exports.levelIncompleteError = function(d){return "Tu naudoji visus būtinus blokelius, tačiau netinkamai."};
 
@@ -3582,7 +3583,7 @@ exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"}
 
 exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Įrašyti į savo galeriją!"};
 
 exports.typeCode = function(d){return "Įvesk savo JavaScript kodą žemiau šių instrukcijų."};
 

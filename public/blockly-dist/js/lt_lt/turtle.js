@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5185,7 +5186,7 @@ Turtle.execute = function() {
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5586,7 +5587,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  // Blockly.mainWorkspace.setEnableToolbox(true);
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5724,7 +5725,7 @@ exports.catLogic = function(d){return "Logika"};
 
 exports.catLists = function(d){return "Sąrašai"};
 
-exports.catLoops = function(d){return "Ciklai"};
+exports.catLoops = function(d){return "Kartojimas"};
 
 exports.catMath = function(d){return "Matematika"};
 
@@ -5742,13 +5743,13 @@ exports.dialogCancel = function(d){return "Atšaukti"};
 
 exports.dialogOK = function(d){return "gerai"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Š"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "P"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "R"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "V"};
 
 exports.emptyBlocksErrorMsg = function(d){return "„Kartojimo“ arba „Jei“ blokelių viduje reikia įdėti kitus blokelius, kad jie veiktų. Įsitikink, kad jie yra gerai sukibę vienas su kitu."};
 
@@ -5766,7 +5767,7 @@ exports.help = function(d){return "pagalba"};
 
 exports.hintTitle = function(d){return "Patarimas:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "šok"};
 
 exports.levelIncompleteError = function(d){return "Tu naudoji visus būtinus blokelius, tačiau netinkamai."};
 
@@ -5824,7 +5825,7 @@ exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"}
 
 exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Įrašyti į savo galeriją!"};
 
 exports.typeCode = function(d){return "Įvesk savo JavaScript kodą žemiau šių instrukcijų."};
 
@@ -5880,7 +5881,7 @@ exports.catLogic = function(d){return "Logika"};
 
 exports.colourTooltip = function(d){return "Pakeičia pieštuko spalvą."};
 
-exports.degrees = function(d){return "laipsnių(-iais)"};
+exports.degrees = function(d){return "laipsnių"};
 
 exports.dots = function(d){return "pikselių"};
 
@@ -5900,7 +5901,7 @@ exports.heightParameter = function(d){return "aukštis"};
 
 exports.hideTurtle = function(d){return "slėpti menininką"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "šok"};
 
 exports.jumpBackward = function(d){return "peršok atgal per"};
 
@@ -5908,31 +5909,31 @@ exports.jumpForward = function(d){return "peršok į priekį per"};
 
 exports.jumpTooltip = function(d){return "Pajudina menininką jam nieko nepiešiant."};
 
-exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
+exports.jumpEastTooltip = function(d){return "Pajudina menininką į rytus nepaliekant jokių piešimo žymių."};
 
-exports.jumpNorthTooltip = function(d){return "Moves the artist north without leaving any marks."};
+exports.jumpNorthTooltip = function(d){return "Pajudina menininką į šiaurę nepaliekant jokių piešimo žymių."};
 
-exports.jumpSouthTooltip = function(d){return "Moves the artist south without leaving any marks."};
+exports.jumpSouthTooltip = function(d){return "Pajudina menininką į pietus nepaliekant jokių piešimo žymių."};
 
-exports.jumpWestTooltip = function(d){return "Moves the artist west without leaving any marks."};
+exports.jumpWestTooltip = function(d){return "Pajudina menininką į vakarus nepaliekant jokių piešimo žymių."};
 
-exports.lengthParameter = function(d){return "ilgis"};
+exports.lengthParameter = function(d){return "ilgio"};
 
 exports.loopVariable = function(d){return "skaitiklis"};
 
 exports.moveBackward = function(d){return "judėk atgal per"};
 
-exports.moveEastTooltip = function(d){return "Moves the artist east."};
+exports.moveEastTooltip = function(d){return "Pajudina menininką į rytus."};
 
 exports.moveForward = function(d){return "judėk į priekį per"};
 
 exports.moveForwardTooltip = function(d){return "Pajudina menininką į priekį."};
 
-exports.moveNorthTooltip = function(d){return "Moves the artist north."};
+exports.moveNorthTooltip = function(d){return "Pajudina menininką į šiaurę."};
 
-exports.moveSouthTooltip = function(d){return "Moves the artist south."};
+exports.moveSouthTooltip = function(d){return "Pajudina menininką į pietus."};
 
-exports.moveWestTooltip = function(d){return "Moves the artist west."};
+exports.moveWestTooltip = function(d){return "Pajudina menininką į vakarus."};
 
 exports.moveTooltip = function(d){return "Pajudina menininką į priekį arba atgal per nustatytą atstumą."};
 

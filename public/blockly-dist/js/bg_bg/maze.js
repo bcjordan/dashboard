@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5457,7 +5458,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5513,7 +5514,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -7044,13 +7045,13 @@ exports.dialogCancel = function(d){return "Отказ"};
 
 exports.dialogOK = function(d){return "OK"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "север"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "юг"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "изток"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "запад"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоковете \"Повтори\" и \"или\" трябва да съдържат други блокове в себе си, за да работят. Уверете се, че вътрешния блок се вписва правилно във външния блок."};
 
@@ -7060,7 +7061,7 @@ exports.finalStage = function(d){return "Поздравления! Вие зав
 
 exports.finalStageTrophies = function(d){return "Поздравления! Вие завършихте последния етап и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоковете за вашата програма също могат да бъдат представени в JavaScript, най-широко приетия език за програмиране:"};
+exports.generatedCodeInfo = function(d){return "Дори най-добрите университети учат блок базирано програмиране(напр., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Но под капака, блокове представляват кодове, написани на JavaScript, в света най-широко използваниятhttps://crowdin.net/translate/codeorg/43/enus-bg# за програмиране език:"};
 
 exports.hashError = function(d){return "За съжаление '%1' не съответства на нито една запазена програма."};
 
@@ -7068,7 +7069,7 @@ exports.help = function(d){return "Помощ"};
 
 exports.hintTitle = function(d){return "Подсказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "скок"};
 
 exports.levelIncompleteError = function(d){return "Използвате всички необходими видове блокове, но не по правилния начин."};
 
@@ -7082,9 +7083,9 @@ exports.nextLevel = function(d){return "Поздравления! Приключ
 
 exports.nextLevelTrophies = function(d){return "Поздравления! Завършихте пъзел "+v(d,"puzzleNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.nextStage = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Поздравления! Вие завършихте "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageName")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравления! Приключихте пъзел "+v(d,"puzzleNumber")+". (Въпреки това, можехте да използвате само "+p(d,"numBlocks",0,"bg",{"one":"1 блок","other":n(d,"numBlocks")+" блокове"})+".)"};
 
@@ -7124,9 +7125,9 @@ exports.tryAgain = function(d){return "Опитайте отново"};
 
 exports.backToPreviousLevel = function(d){return "Обратно към предишното ниво"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Запазване на вашата галерия"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Запазете вашата галерия!"};
 
 exports.typeCode = function(d){return "Въведете вашия JavaScript код под тези инструкции."};
 
@@ -7150,7 +7151,7 @@ exports.tryHOC = function(d){return "Опитайте Часа на Кодира
 
 exports.signup = function(d){return "Регистрация във встъпителния курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ето един съвет:"};
 
 
 },{"messageformat":56}],44:[function(require,module,exports){
@@ -7199,17 +7200,17 @@ exports.ifTooltip = function(d){return "Ако има път в тази пос�
 
 exports.ifelseTooltip = function(d){return "Ако има път в тази посока,  извърши първия блок действия. Ако няма, извърши втория блок действия."};
 
-exports.moveEastTooltip = function(d){return "Move me east one space."};
+exports.moveEastTooltip = function(d){return "Преместете ме изток един ход."};
 
 exports.moveForward = function(d){return "продължи напред"};
 
 exports.moveForwardTooltip = function(d){return "Премести ме напред с едно поле."};
 
-exports.moveNorthTooltip = function(d){return "Move me north one space."};
+exports.moveNorthTooltip = function(d){return "Преместете ме на Север един ход."};
 
-exports.moveSouthTooltip = function(d){return "Move me south one space."};
+exports.moveSouthTooltip = function(d){return "Преместете ме на юг един ход."};
 
-exports.moveWestTooltip = function(d){return "Move me west one space."};
+exports.moveWestTooltip = function(d){return "Преместете ме изток един ход."};
 
 exports.nextLevel = function(d){return "Поздравления! Вие завършихте този пъзел."};
 
@@ -7245,13 +7246,13 @@ exports.removeStack = function(d){return "премахни натрупанит�
 
 exports.removeSquare = function(d){return "премахни квадрата"};
 
-exports.repeatUntil = function(d){return "повтаряй докато"};
+exports.repeatUntil = function(d){return "повтаряй докато не стане"};
 
 exports.repeatUntilBlocked = function(d){return "докато има място напред"};
 
 exports.repeatUntilFinish = function(d){return "повтаряй докато приключиш"};
 
-exports.step = function(d){return "Step"};
+exports.step = function(d){return "Стъпка"};
 
 exports.turnLeft = function(d){return "завий наляво"};
 

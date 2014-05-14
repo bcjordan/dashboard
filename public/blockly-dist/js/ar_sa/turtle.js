@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5185,7 +5186,7 @@ Turtle.execute = function() {
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5586,7 +5587,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  // Blockly.mainWorkspace.setEnableToolbox(true);
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5774,7 +5775,7 @@ exports.help = function(d){return "مساعدة"};
 
 exports.hintTitle = function(d){return "تلميح:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "قفز"};
 
 exports.levelIncompleteError = function(d){return "أنت استخدمت كل انواع القطع الضرورية ولكن ليس في الطريق الصحيح."};
 
@@ -5832,7 +5833,7 @@ exports.backToPreviousLevel = function(d){return "الرجوع إلى المست
 
 exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك!"};
 
 exports.typeCode = function(d){return "اكتب كود الـ JavaScript الخاص بك تحت هذه التعليمات."};
 
@@ -5916,7 +5917,7 @@ exports.heightParameter = function(d){return "الأرتفاع"};
 
 exports.hideTurtle = function(d){return "اخفاء الاعب"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "قفز"};
 
 exports.jumpBackward = function(d){return "القفز الى الخلف بعدد"};
 
@@ -5924,13 +5925,13 @@ exports.jumpForward = function(d){return "القفز الى الامام بعد�
 
 exports.jumpTooltip = function(d){return "تحريك الاعب بدون ترك اي علامات."};
 
-exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
+exports.jumpEastTooltip = function(d){return "يتحرك الفنان للشرق دون ترك أي علامات."};
 
-exports.jumpNorthTooltip = function(d){return "Moves the artist north without leaving any marks."};
+exports.jumpNorthTooltip = function(d){return "يتحرك الفنان للشمال دون ترك أي علامات."};
 
-exports.jumpSouthTooltip = function(d){return "Moves the artist south without leaving any marks."};
+exports.jumpSouthTooltip = function(d){return "يتحرك الفنان للجنوب دون ترك أي علامات."};
 
-exports.jumpWestTooltip = function(d){return "Moves the artist west without leaving any marks."};
+exports.jumpWestTooltip = function(d){return "يتحرك الفنان للشمال دون ترك أي علامات."};
 
 exports.lengthParameter = function(d){return "الطول"};
 
@@ -5938,17 +5939,17 @@ exports.loopVariable = function(d){return "عداد"};
 
 exports.moveBackward = function(d){return "تقدم  الى الخلف بعدد"};
 
-exports.moveEastTooltip = function(d){return "Moves the artist east."};
+exports.moveEastTooltip = function(d){return "ينتقل الفنان للشرق."};
 
 exports.moveForward = function(d){return "تقدم الى الامام بعدد"};
 
 exports.moveForwardTooltip = function(d){return "تقدم الاعب الى الامام."};
 
-exports.moveNorthTooltip = function(d){return "Moves the artist north."};
+exports.moveNorthTooltip = function(d){return "يتحرك الفنان للشمال."};
 
-exports.moveSouthTooltip = function(d){return "Moves the artist south."};
+exports.moveSouthTooltip = function(d){return "يتحرك الفنان للجنوب."};
 
-exports.moveWestTooltip = function(d){return "Moves the artist west."};
+exports.moveWestTooltip = function(d){return "يتحرك الفنان للغرب."};
 
 exports.moveTooltip = function(d){return "تقدم الاعب الى الامام او الى الخلف بمقدار معين."};
 

@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -4787,7 +4788,7 @@ exports.help = function(d){return "مساعدة"};
 
 exports.hintTitle = function(d){return "تلميح:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "قفز"};
 
 exports.levelIncompleteError = function(d){return "أنت استخدمت كل انواع القطع الضرورية ولكن ليس في الطريق الصحيح."};
 
@@ -4845,7 +4846,7 @@ exports.backToPreviousLevel = function(d){return "الرجوع إلى المست
 
 exports.saveToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "حفظ إلى معرض الصور الخاص بك!"};
 
 exports.typeCode = function(d){return "اكتب كود الـ JavaScript الخاص بك تحت هذه التعليمات."};
 

@@ -19,7 +19,7 @@ class BaseDSL
   def self.parse(str, name=nil)
     object = self.new
     object.name(name) if name.present?
-    object.instance_eval(str)
+    object.instance_eval(str.to_ascii)
     [object.parse_output, object.i18n_hash]
   end
 

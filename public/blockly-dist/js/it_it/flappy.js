@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -4752,7 +4753,7 @@ exports.directionSouthLetter = function(d){return "S"};
 
 exports.directionEastLetter = function(d){return "E"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "O"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Il blocco \"ripeti\" o \"se\" deve avere all'interno altri blocchi per poter funzionare. Assicurati che i blocchi interni siano inseriti correttamente all'interno del blocco principale."};
 
@@ -4770,7 +4771,7 @@ exports.help = function(d){return "Aiuto"};
 
 exports.hintTitle = function(d){return "Suggerimento:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "salta"};
 
 exports.levelIncompleteError = function(d){return "Stai usando tutti i tipi di blocchi necessari, ma non nel modo giusto."};
 
@@ -4828,7 +4829,7 @@ exports.backToPreviousLevel = function(d){return "Torna al livello precedente"};
 
 exports.saveToGallery = function(d){return "Salva nella tua galleria"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Salvato nella tua galleria!"};
 
 exports.typeCode = function(d){return "Digita il tuo codice JavaScript sotto queste istruzioni."};
 

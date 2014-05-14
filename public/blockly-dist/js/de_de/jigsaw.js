@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -3608,15 +3609,15 @@ exports.nextLevel = function(d){return "Herzlichen Glückwunsch! Du hast dieses 
 
 exports.no = function(d){return "Nein"};
 
-exports.numBlocksNeeded = function(d){return "Dieses Puzzle kann mit dem Baustein %1 gelöst werden."};
+exports.numBlocksNeeded = function(d){return "Dieses Puzzle kann mit %1 Blöcken gelöst werden."};
 
 exports.oneTopBlock = function(d){return "Für dieses Puzzle müssen Sie alle  Bausteine auf dem weißen Bereich stapeln."};
 
 exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Teilen"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Teile dein Spiel:"};
 
 exports.yes = function(d){return "Ja"};
 

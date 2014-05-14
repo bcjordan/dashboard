@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5425,7 +5426,7 @@ exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"
 
 exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Del"};
 
 exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
 

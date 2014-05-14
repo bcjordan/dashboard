@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -4746,13 +4747,13 @@ exports.dialogCancel = function(d){return "لغو"};
 
 exports.dialogOK = function(d){return "Ok"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "شمال"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "جنوب"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "شرق"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "غرب"};
 
 exports.emptyBlocksErrorMsg = function(d){return "بلوک های \"تکرار\" (Repeat) یا \"شرطی\" (If)  برای کار کردن، نیاز به بلوکهای دیگری در داخل خود دارند. مطمئن شوید که بلوک داخلی، به درستی درون بلوک اصلی قرار گرفته است."};
 
@@ -4762,7 +4763,7 @@ exports.finalStage = function(d){return "تبریک می‌گوییم! شما م
 
 exports.finalStageTrophies = function(d){return "تبریک می‌گوییم! شما مرحله‌ی آخر را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
 
-exports.generatedCodeInfo = function(d){return "بلوک‌های برنامه‌ی شما همچنین می‌توانند در جاوا اسکریپت که فراگیرترین زبان برنامه نویسی در جهان است، به نمایش درآیند:"};
+exports.generatedCodeInfo = function(d){return "دانشگاههای برتر نیز کدنویسی بر اساس بلوک ها را آموزش می دهند (مثل "+v(d,"berkeleyLink")+" و "+v(d,"harvardLink")+"). اما در پشت پرده، بلوک هایی که شما سر هم کرده اید را می توان به زبان جاوا اسکریپت نشان داد، که پر استفاده ترین زبان کدنویسی در دنیاست:"};
 
 exports.hashError = function(d){return "با عرض پوزش، '%1' با هیچ کدام از برنامه‌های ذخیره شده مطابقت ندارد."};
 
@@ -4770,7 +4771,7 @@ exports.help = function(d){return "راهنما"};
 
 exports.hintTitle = function(d){return "راهنمایی:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "پرش"};
 
 exports.levelIncompleteError = function(d){return "شما همه‌ی بلوک‌های مورد نیاز را بکار بردید، ولی نه به روش درست."};
 
@@ -4784,9 +4785,9 @@ exports.nextLevel = function(d){return "تبریک ! شما پازل "+v(d,"puzz
 
 exports.nextLevelTrophies = function(d){return "تبریک می‌گوییم! شما معمای "+v(d,"puzzleNumber")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
 
-exports.nextStage = function(d){return "تبریک می‌گوییم! شما مرحله‌ی "+v(d,"stageNumber")+" را به پایان رساندید."};
+exports.nextStage = function(d){return "تبریک! شما "+v(d,"stageName")+" را به پایان رساندید."};
 
-exports.nextStageTrophies = function(d){return "تبریک می‌گوییم! شما مرحله‌ی "+v(d,"stageNumber")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
+exports.nextStageTrophies = function(d){return "تبریک! شما مرحله‌ی "+v(d,"stageName")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+" شدید."};
 
 exports.numBlocksNeeded = function(d){return "تبریک می‌گوییم! شما معمای "+v(d,"puzzleNumber")+" را به پایان رساندید. (اگرچه می‌توانستید تنها "+p(d,"numBlocks",0,"fa",{"one":"یک بلوک","other":n(d,"numBlocks")+" بلوک"})+" بکار ببرید.)"};
 
@@ -4826,9 +4827,9 @@ exports.tryAgain = function(d){return "دوباره تلاش کنید"};
 
 exports.backToPreviousLevel = function(d){return "برگرد به سطح قبلی"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "ذخیره در گالری شما"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "در گالری شما ذخیره شد!"};
 
 exports.typeCode = function(d){return "در زیر این دستورات کد جاوا اسکریپتِ خودت رو بنویس."};
 
@@ -4852,7 +4853,7 @@ exports.tryHOC = function(d){return "ساعتِ کد نویسی را امتحا�
 
 exports.signup = function(d){return "برای دوره‌ی مقدماتی نام نویسی کنید"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "نکته اینجاست:"};
 
 
 },{"messageformat":46}],34:[function(require,module,exports){
@@ -4959,17 +4960,17 @@ exports.setGapVeryLarge = function(d){return "تنظیم یک فاصله خیل�
 
 exports.setGapHeightTooltip = function(d){return "Sets the vertical gap in an obstacle"};
 
-exports.setGravityRandom = function(d){return "set gravity random"};
+exports.setGravityRandom = function(d){return "تنظیم جاذبه اتفاقی"};
 
-exports.setGravityVeryLow = function(d){return "set gravity very low"};
+exports.setGravityVeryLow = function(d){return " تنظیم جاذبه به خیلی کم"};
 
-exports.setGravityLow = function(d){return "set gravity low"};
+exports.setGravityLow = function(d){return " تنظیم جاذبه به کم"};
 
-exports.setGravityNormal = function(d){return "set gravity normal"};
+exports.setGravityNormal = function(d){return " تنظیم جاذبه به معمولی"};
 
-exports.setGravityHigh = function(d){return "set gravity high"};
+exports.setGravityHigh = function(d){return " تنظیم جاذبه به زیاد"};
 
-exports.setGravityVeryHigh = function(d){return "set gravity very high"};
+exports.setGravityVeryHigh = function(d){return " تنظیم جاذبه به خیلی زیاد"};
 
 exports.setGravityTooltip = function(d){return "Sets the level's gravity"};
 
@@ -5007,19 +5008,19 @@ exports.setObstacleTooltip = function(d){return "Sets the obstacle image"};
 
 exports.setPlayerRandom = function(d){return "set player Random"};
 
-exports.setPlayerFlappy = function(d){return "set player Yellow Bird"};
+exports.setPlayerFlappy = function(d){return "بازیکن را به پرنده زرد تنظیم کن"};
 
-exports.setPlayerRedBird = function(d){return "set player Red Bird"};
+exports.setPlayerRedBird = function(d){return "بازیکن را به پرنده قرمز تنظیم کن"};
 
-exports.setPlayerSciFi = function(d){return "set player Spaceship"};
+exports.setPlayerSciFi = function(d){return "بازیکن را به سفینه فضایی تنظیم کن"};
 
-exports.setPlayerUnderwater = function(d){return "set player Fish"};
+exports.setPlayerUnderwater = function(d){return "بازیکن را به ماهی تنظیم کن"};
 
-exports.setPlayerCave = function(d){return "set player Bat"};
+exports.setPlayerCave = function(d){return "بازیکن را به خفاش تنظیم کن"};
 
-exports.setPlayerSanta = function(d){return "set player Santa"};
+exports.setPlayerSanta = function(d){return "بازیکن را به سانتا تنظیم کن"};
 
-exports.setPlayerShark = function(d){return "set player Shark"};
+exports.setPlayerShark = function(d){return "بازیکن را به کوسه تنظیم کن"};
 
 exports.setPlayerEaster = function(d){return "set player Easter Bunny"};
 
@@ -5037,15 +5038,15 @@ exports.setPlayerTurkey = function(d){return "set player Turkey"};
 
 exports.setPlayerTooltip = function(d){return "Sets the player image"};
 
-exports.setScore = function(d){return "set score"};
+exports.setScore = function(d){return "تنظیم امتیاز"};
 
 exports.setScoreTooltip = function(d){return "Sets the player's score"};
 
-exports.setSpeed = function(d){return "set speed"};
+exports.setSpeed = function(d){return "تنظیم سرعت"};
 
 exports.setSpeedTooltip = function(d){return "Sets the levels speed"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "به اشتراک گذاری"};
 
 exports.shareFlappyTwitter = function(d){return "Check out the Flappy game I made. I wrote it myself with @codeorg"};
 

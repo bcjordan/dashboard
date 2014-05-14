@@ -1163,8 +1163,24 @@ div.gallery_activity {
   .mainblock {
     margin-left: 20px;
   }
-  label {
-    display: inline;
+  .item {
+    padding: 25px;
+    clear: both;
+  }
+  input {
+    margin-top: 0px;
+    margin-right: 20px;
+  }
+  .item-radio {
+    display: inline-block;
+    float: left;
+  }
+  .item-label {
+    display: inline-block;
+    float: left;
+  }
+  img {
+    max-height: 100%;
   }
 }
 

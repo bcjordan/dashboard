@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -3504,13 +3505,13 @@ exports.dialogCancel = function(d){return "Скасувати"};
 
 exports.dialogOK = function(d){return "Гаразд"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Пн"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Пд"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "Сх"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "Зх"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоки \"Повторити\" та \"Якщо\" повинні містити інші блоки. Переконайтесь, що внутрішній блок належно розміщений всередині зовнішнього."};
 
@@ -3528,7 +3529,7 @@ exports.help = function(d){return "Допомога"};
 
 exports.hintTitle = function(d){return "Підказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "стрибок"};
 
 exports.levelIncompleteError = function(d){return "Використано усі необхідні типи блоків, але у неправильному порядку."};
 
@@ -3586,7 +3587,7 @@ exports.backToPreviousLevel = function(d){return "Повернутися до п
 
 exports.saveToGallery = function(d){return "Зберегти до вашої колекції"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Збережено в галерею!"};
 
 exports.typeCode = function(d){return "Запишіть нижче свій код JavaScript згідно із вказівками."};
 

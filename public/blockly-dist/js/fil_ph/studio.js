@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -2184,6 +2185,10 @@ exports.incrementScore = function(id, player) {
   Studio.queueCmd(id, 'incrementScore', {'player': player});
 };
 
+exports.wait = function(id, value) {
+  Studio.queueCmd(id, 'wait', {'value': value});
+};
+
 },{"./tiles":19}],12:[function(require,module,exports){
 /**
  * Blockly App: Studio
@@ -2799,7 +2804,7 @@ exports.install = function(blockly, skin) {
   generator.studio_setSprite = function() {
     return generateSetterCode({
       ctx: this,
-      random: 2,
+      random: 1,
       extraParams: (this.getTitleValue('SPRITE') || '0'),
       name: 'setSprite'});
   };
@@ -2894,6 +2899,38 @@ exports.install = function(blockly, skin) {
                blockly.JavaScript.quote_(this.getTitleValue('TEXT')) + ');\n';
   };
   
+  blockly.Blocks.studio_wait = {
+    helpUrl: '',
+    init: function() {
+      var dropdown = new blockly.FieldDropdown(this.VALUES);
+      dropdown.setValue(this.VALUES[2][1]);  // default to half second
+
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+        .appendTitle(dropdown, 'VALUE');
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.waitTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_wait.VALUES =
+      [[msg.waitForClick(), '0'],
+       [msg.waitForRandom(), 'random'],
+       [msg.waitForHalfSecond(), '500'],
+       [msg.waitFor1Second(), '1000'],
+       [msg.waitFor2Seconds(), '2000'],
+       [msg.waitFor5Seconds(), '5000'],
+       [msg.waitFor10Seconds(), '10000']];
+
+  generator.studio_wait = function() {
+    return generateSetterCode({
+      ctx: this,
+      random: 1,
+      name: 'wait'});
+  };
+
   delete blockly.Blocks.procedures_defreturn;
   delete blockly.Blocks.procedures_ifreturn;
 };
@@ -3173,7 +3210,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 800,
+    'minWorkspaceHeight': 1200,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3187,26 +3224,28 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'toolbox':
-      tb(blockOfType('studio_whenSpriteClicked') +
+      tb(blockOfType('studio_setSprite') +
+         blockOfType('studio_setBackground') +
+         blockOfType('studio_whenGameStarts') +
+         blockOfType('studio_whenLeft') +
+         blockOfType('studio_whenRight') +
+         blockOfType('studio_whenUp') +
+         blockOfType('studio_whenDown') +
+         blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
          blockOfType('studio_repeatForever') +
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_stop') +
+         blockOfType('studio_wait') +
          blockOfType('studio_playSound') +
          blockOfType('studio_incrementScore') +
          defaultSayBlock() +
          blockOfType('studio_setSpritePosition') +
          blockOfType('studio_setSpriteSpeed') +
-         blockOfType('studio_setSpriteEmotion') +
-         blockOfType('studio_setBackground') +
-         blockOfType('studio_setSprite')),
+         blockOfType('studio_setSpriteEmotion')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
   '100': {
     'requiredBlocks': [
@@ -3220,7 +3259,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 800,
+    'minWorkspaceHeight': 900,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3238,6 +3277,7 @@ module.exports = {
                           blockOfType('studio_move') +
                           blockOfType('studio_moveDistance') +
                           blockOfType('studio_stop') +
+                          blockOfType('studio_wait') +
                           blockOfType('studio_playSound') +
                           blockOfType('studio_incrementScore') +
                           defaultSayBlock() +
@@ -3247,11 +3287,16 @@ module.exports = {
                           blockOfType('studio_setBackground') +
                           blockOfType('studio_setSprite')) +
          createCategory(msg.catEvents(),
+                          blockOfType('studio_whenGameStarts') +
+                          blockOfType('studio_whenLeft') +
+                          blockOfType('studio_whenRight') +
+                          blockOfType('studio_whenUp') +
+                          blockOfType('studio_whenDown') +
                           blockOfType('studio_whenSpriteClicked') +
-                          blockOfType('studio_whenSpriteCollided') +
-                          blockOfType('studio_repeatForever')) +
+                          blockOfType('studio_whenSpriteCollided')) +
          createCategory(msg.catControl(),
-                          blockOfType('controls_repeat')) +
+                          blockOfType('controls_repeat') +
+                          blockOfType('studio_repeatForever')) +
          createCategory(msg.catLogic(),
                           blockOfType('controls_if') +
                           blockOfType('logic_compare') +
@@ -3263,11 +3308,7 @@ module.exports = {
                           blockOfType('math_arithmetic')) +
          createCategory(msg.catVariables(), '', 'VARIABLE')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
 };
 
@@ -3536,6 +3577,9 @@ var drawMap = function() {
   svg.setAttribute('width', Studio.MAZE_WIDTH);
   svg.setAttribute('height', Studio.MAZE_HEIGHT);
 
+  // Attach click handler.
+  dom.addMouseDownTouchEvent(svg, Studio.onSvgClicked);
+
   // Adjust visualization and belowVisualization width.
   var visualization = document.getElementById('visualization');
   visualization.style.width = Studio.MAZE_WIDTH + 'px';
@@ -3654,9 +3698,8 @@ var delegate = function(scope, func, data)
 var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
   var totalDistance = 0;
   
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-    
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var scaleFactor;
       var distThisMove = Math.min(cmd.opts.queuedDistance,
@@ -3683,16 +3726,15 @@ var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
       }
       totalDistance += distThisMove * scaleFactor;
     }
-  }
+  });
 
   return totalDistance;
 };
 
 
 var cancelQueuedMovements = function (index, yAxis) {
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var dir = cmd.opts.dir;
       if (yAxis && (dir === Direction.NORTH || dir === Direction.SOUTH)) {
@@ -3701,7 +3743,7 @@ var cancelQueuedMovements = function (index, yAxis) {
         cmd.opts.queuedDistance = 0;
       }
     }
-  }
+  });
 };
 
 //
@@ -3792,31 +3834,37 @@ var setSpeechText = function(svgText, text) {
   return SPEECH_BUBBLE_HEIGHT - linesLessThanMax * SPEECH_BUBBLE_LINE_HEIGHT;
 };
 
-var callHandler = function (func, name) {
-  if (func) {
-    Studio.currentHandler = name;
-    Studio.cmdQueues[name] = [];
-    try { func(BlocklyApps, api); } catch (e) { }
-    Studio.currentHandler = null;
-  }
+//
+// Execute the code for all of the event handlers that match an event name
+//
+
+var callHandler = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    // Note: we skip executing the code if we have not completed executing
+    // the cmdQueue on this handler (checking for non-zero length)
+    if (handler.name === name &&
+        (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
+      handler.cmdQueue = [];
+      Studio.currentCmdQueue = handler.cmdQueue;
+      try { handler.func(BlocklyApps, api); } catch (e) { }
+      Studio.currentCmdQueue = null;
+    }
+  });
 };
 
 Studio.onTick = function() {
   Studio.tickCount++;
 
   if (Studio.tickCount === 1) {
-    callHandler(Studio.whenGameStarts, 'whenGameStarts');
+    callHandler('whenGameStarts');
   }
   Studio.executeQueue('whenGameStarts');
 
-  if (!Studio.cmdQueues.repeatForever ||
-      (0 === Studio.cmdQueues.repeatForever.length)) {
-    callHandler(Studio.repeatForever, 'repeatForever');
-  }
+  callHandler('repeatForever');
   Studio.executeQueue('repeatForever');
 
   for (var i = 0; i < Studio.spriteCount; i++) {
-    Studio.executeQueue('whenSpriteClicked' + i);
+    Studio.executeQueue('whenSpriteClicked-' + i);
   }
   
   // Run key event handlers for any keys that are down:
@@ -3825,16 +3873,16 @@ Studio.onTick = function() {
         Studio.keyState[Keycodes[key]] == "keydown") {
       switch (Keycodes[key]) {
         case Keycodes.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case Keycodes.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case Keycodes.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case Keycodes.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
@@ -3845,16 +3893,16 @@ Studio.onTick = function() {
         Studio.btnState[ArrowIds[btn]] == ButtonState.DOWN) {
       switch (ArrowIds[btn]) {
         case ArrowIds.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case ArrowIds.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case ArrowIds.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case ArrowIds.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
@@ -3881,8 +3929,7 @@ Studio.onTick = function() {
                            tiles.SPRITE_COLLIDE_DISTANCE)) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
           Studio.sprite[i].collisionMask |= Math.pow(2, j);
-          callHandler(Studio.whenSpriteCollided[i][j],
-                      'whenSpriteCollided-' + i + '-' + j);
+          callHandler('whenSpriteCollided-' + i + '-' + j);
         }
       } else {
           Studio.sprite[i].collisionMask &= ~(Math.pow(2, j));
@@ -3923,8 +3970,24 @@ Studio.onArrowButtonDown = function(e, idBtn) {
 Studio.onSpriteClicked = function(e, spriteIndex) {
   // If we are "running", call the event handler if registered.
   if (Studio.intervalId) {
-    callHandler(Studio.whenSpriteClicked[spriteIndex],
-                'whenSpriteClicked' + spriteIndex);
+    callHandler('whenSpriteClicked-' + spriteIndex);
+  }
+  e.preventDefault();  // Stop normal events.
+};
+
+Studio.onSvgClicked = function(e) {
+  // If we are "running", check the cmdQueues.
+  if (Studio.intervalId) {
+    // Check the first command in all of the cmdQueues to see if there is a
+    // pending "wait for click" command
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
+      if (cmd && cmd.name === 'wait' &&
+          cmd.opts.waitForClick && !cmd.opts.waitComplete) {
+        cmd.opts.waitComplete = true;
+      }
+    });
   }
   e.preventDefault();  // Stop normal events.
 };
@@ -4077,14 +4140,19 @@ Studio.init = function(config) {
  * Clear the event handlers and stop the onTick timer.
  */
 Studio.clearEventHandlersKillTickLoop = function() {
-  Studio.whenDown = null;
-  Studio.whenLeft = null;
-  Studio.whenRight = null;
-  Studio.whenUp = null;
-  Studio.repeatForever = null;
-  Studio.whenGameStarts = null;
-  Studio.whenSpriteClicked = [];
-  Studio.whenSpriteCollided = [];
+  if (Studio.eventHandlers) {
+    // Check the first command in all of the cmdQueues and clear the timeout
+    // if there is a pending wait command
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
+      if (cmd && cmd.name === 'wait' &&
+          cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
+        window.clearTimeout(cmd.opts.waitTimeout);
+      }
+    });
+  }
+  Studio.eventHandlers = [];
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
@@ -4121,9 +4189,8 @@ BlocklyApps.reset = function(first) {
   // Reset configurable variables
   Studio.setBackground({'value': 'cave'});
   
-  // Reset the currentHandler, queues, and complete counts:
-  Studio.currentHandler = null;
-  Studio.cmdQueues = [];
+  // Reset currentCmdQueue and sayComplete count:
+  Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
 
   var spriteStartingSkins = [ "witch", "green", "purple", "pink", "orange" ];
@@ -4254,6 +4321,66 @@ Studio.onReportComplete = function(response) {
   displayFeedback();
 };
 
+var registerEventHandler = function (handlers, name, func) {
+  handlers.push({'name': name, 'func': func});
+};
+
+var registerHandlers =
+      function (handlers, blockName, eventNameBase,
+                nameParam1, matchParam1Val,
+                nameParam2, matchParam2Val) {
+  var blocks = Blockly.mainWorkspace.getTopBlocks();
+  for (var x = 0; blocks[x]; x++) {
+    var block = blocks[x];
+    if (block.type === blockName &&
+        (!nameParam1 ||
+         matchParam1Val === parseInt(block.getTitleValue(nameParam1), 10)) &&
+        (!nameParam2 ||
+         matchParam2Val === parseInt(block.getTitleValue(nameParam2), 10))) {
+      var code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
+      if (code) {
+        var func = codegen.functionFromCode(code, {
+                                            BlocklyApps: BlocklyApps,
+                                            Studio: api } );
+        var eventName = eventNameBase;
+        if (nameParam1) {
+          eventName += '-' + matchParam1Val;
+        }
+        if (nameParam2) {
+          eventName += '-' + matchParam2Val;
+        }
+        registerEventHandler(handlers, eventName, func);
+      }
+    }
+  }
+};
+
+var registerHandlersWithSpriteParam =
+      function (handlers, blockName, eventNameBase, blockParam) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    registerHandlers(handlers, blockName, eventNameBase, blockParam, i);
+  }
+};
+
+var registerHandlersWithSpriteParams =
+      function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    for (var j = 0; j < Studio.spriteCount; j++) {
+      if (i === j) {
+        continue;
+      }
+      registerHandlers(handlers,
+                       blockName,
+                       eventNameBase,
+                       blockParam1,
+                       i,
+                       blockParam2,
+                       j);
+    }
+  }
+};
+
+
 /**
  * Execute the user's code.  Heaven help us...
  */
@@ -4281,109 +4408,30 @@ Studio.execute = function() {
       }
     }
   }
-  
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenLeft');
-  var whenLeftFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenRight');
-  var whenRightFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
+  var handlers = [];
+  registerHandlers(handlers, 'studio_whenLeft', 'whenLeft');
+  registerHandlers(handlers, 'studio_whenRight', 'whenRight');
+  registerHandlers(handlers, 'studio_whenUp', 'whenUp');
+  registerHandlers(handlers, 'studio_whenDown', 'whenDown');
+  registerHandlers(handlers, 'studio_repeatForever', 'repeatForever');
+  registerHandlers(handlers, 'studio_whenGameStarts', 'whenGameStarts');
+  registerHandlersWithSpriteParam(handlers,
+                                  'studio_whenSpriteClicked',
+                                  'whenSpriteClicked',
+                                  'SPRITE');
+  registerHandlersWithSpriteParams(handlers,
+                                   'studio_whenSpriteCollided',
+                                   'whenSpriteCollided',
+                                   'SPRITE1',
+                                   'SPRITE2');
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenUp');
-  var whenUpFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenDown');
-  var whenDownFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_repeatForever');
-  var repeatForeverFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenGameStarts');
-  var whenGameStartsFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  var x;
-  var block;
-  var blocks = Blockly.mainWorkspace.getTopBlocks(true);
-
-  var whenSpriteClickedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    for (x = 0; blocks[x]; x++) {
-      block = blocks[x];
-      if (block.type == 'studio_whenSpriteClicked' &&
-          i == parseInt(block.getTitleValue('SPRITE'), 10)) {
-        code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-        whenSpriteClickedFunc[i] = codegen.functionFromCode(
-                                           code, {
-                                            BlocklyApps: BlocklyApps,
-                                            Studio: api } );
-      }
-    }
-  }
-
-  var whenSpriteCollidedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    whenSpriteCollidedFunc[i] = [];
-    for (var j = 0; j < Studio.spriteCount; j++) {
-      if (i == j) {
-        continue;
-      }
-      for (x = 0; blocks[x]; x++) {
-        block = blocks[x];
-        if (block.type == 'studio_whenSpriteCollided' &&
-            i == parseInt(block.getTitleValue('SPRITE1'), 10) &&
-            j == parseInt(block.getTitleValue('SPRITE2'), 10)) {
-          code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-          whenSpriteCollidedFunc[i][j] = codegen.functionFromCode(
-                                             code, {
-                                              BlocklyApps: BlocklyApps,
-                                              Studio: api } );
-        }
-      }
-    }
-  }
-  
   BlocklyApps.playAudio('start', {volume: 0.5});
 
   BlocklyApps.reset(false);
   
   // Set event handlers and start the onTick timer
-  Studio.whenLeft = whenLeftFunc;
-  Studio.whenRight = whenRightFunc;
-  Studio.whenUp = whenUpFunc;
-  Studio.whenDown = whenDownFunc;
-  Studio.repeatForever = repeatForeverFunc;
-  Studio.whenGameStarts = whenGameStartsFunc;
-  Studio.whenSpriteClicked = whenSpriteClickedFunc;
-  Studio.whenSpriteCollided = whenSpriteCollidedFunc;
+  Studio.eventHandlers = handlers;
   Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
@@ -4595,24 +4643,22 @@ Studio.queueCmd = function (id, name, opts) {
       'name': name,
       'opts': opts,
   };
-  Studio.cmdQueues[Studio.currentHandler].push(cmd);
+  Studio.currentCmdQueue.push(cmd);
 };
 
-Studio.executeQueue = function (handler) {
-  var cmdQueue = Studio.cmdQueues[handler];
-  if (cmdQueue) {
-    for (var cmd = cmdQueue[0]; cmd; cmd = cmdQueue[0]) {
-      if (Studio.callCmd(cmd)) {
-        // Command executed immediately, remove from queue and continue
-        cmdQueue.shift();
-      } else {
-        // This command has more work to do, leave it in the queue, return false
-        return false;
+Studio.executeQueue = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    if (handler.name === name && handler.cmdQueue) {
+      for (var cmd = handler.cmdQueue[0]; cmd; cmd = handler.cmdQueue[0]) {
+        if (Studio.callCmd(cmd)) {
+          // Command executed immediately, remove from queue and continue
+          handler.cmdQueue.shift();
+        } else {
+          break;
+        }
       }
     }
-  }
-  // All commands completed, return true
-  return true;
+  });
 };
 
 //
@@ -4635,7 +4681,9 @@ Studio.callCmd = function (cmd) {
       Studio.setSprite(cmd.opts);
       break;
     case 'saySprite':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.saySprite(cmd.opts);
     case 'setSpriteEmotion':
       BlocklyApps.highlight(cmd.id);
@@ -4658,7 +4706,9 @@ Studio.callCmd = function (cmd) {
       Studio.moveSingle(cmd.opts);
       break;
     case 'moveDistance':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.moveDistance(cmd.opts);
     case 'stop':
       BlocklyApps.highlight(cmd.id);
@@ -4668,6 +4718,11 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       Studio.incrementScore(cmd.opts);
       break;
+    case 'wait':
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
+      return Studio.wait(cmd.opts);
   }
   return true;
 };
@@ -4783,8 +4838,8 @@ Studio.hideSpeechBubble = function (opts) {
 };
 
 Studio.saySprite = function (opts) {
-  if (!opts.sayStarted) {
-    opts.sayStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
     var bblHeight = setSpeechText(bblText, opts.text);
@@ -4807,6 +4862,28 @@ Studio.saySprite = function (opts) {
   }
 
   return opts.sayComplete;
+};
+
+var onWaitComplete = function (opts) {
+  opts.waitComplete = true;
+};
+
+Studio.wait = function (opts) {
+  if (!opts.started) {
+    opts.started = true;
+
+    // opts.value is the number of milliseconds to wait - or zero which means
+    // "wait for click"
+    if (0 === opts.value) {
+      opts.waitForClick = true;
+    } else {
+      opts.waitTimeout = window.setTimeout(
+        delegate(this, onWaitComplete, opts),
+        opts.value);
+    }
+  }
+
+  return opts.waitComplete;
 };
 
 Studio.stop = function (opts) {
@@ -4872,8 +4949,8 @@ Studio.moveSingle = function (opts) {
 };
 
 Studio.moveDistance = function (opts) {
-  if (!opts.moveStarted) {
-    opts.moveStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     opts.queuedDistance = opts.distance / Studio.SQUARE_SIZE;
   }
   
@@ -5520,43 +5597,43 @@ exports.finalStage = function(d){return "Maligayang pagbati! Natapos mo na ang p
 
 exports.finalStageTrophies = function(d){return "Maligayang pagbati! Nakumpleto mo na ang pinakahuling stage at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.generatedCodeInfo = function(d){return "The blocks for your program can also be represented in JavaScript, the world's most widely adopted programming language:"};
+exports.generatedCodeInfo = function(d){return "Kahit ang mga nangungunang mga unibersidad ay nagtuturo ng block-based na coding (eg, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Ngunit sa ilalim nito, ang mga bloke na iyong binuo ay maaari ring ipakita sa JavaScript, pinaka-tinatanggap na mga wika coding ng mundo:"};
 
-exports.hashError = function(d){return "Sorry, '%1' doesn't correspond with any saved program."};
+exports.hashError = function(d){return "Pasensya, '%1' ay walang katumbas sa mga na save na program."};
 
 exports.help = function(d){return "Tulong"};
 
 exports.hintTitle = function(d){return "Pahiwatig:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "talon"};
 
-exports.levelIncompleteError = function(d){return "You are using all of the necessary types of blocks but not in the right way."};
+exports.levelIncompleteError = function(d){return "Ginagamit mo ang lahat ng kinakailangang mga uri ng mga bloke ngunit hindi sa tamang paraan."};
 
 exports.listVariable = function(d){return "list"};
 
 exports.makeYourOwnFlappy = function(d){return "Gumawa Ng Sarili Mong Flappy Game"};
 
-exports.missingBlocksErrorMsg = function(d){return "Try one or more of the blocks below to solve this puzzle."};
+exports.missingBlocksErrorMsg = function(d){return "Subukan ang isa o higit pa sa mga bloke sa ibaba upang malutas itong palaisipan."};
 
-exports.nextLevel = function(d){return "Congratulations! You completed Puzzle "+v(d,"puzzleNumber")+"."};
+exports.nextLevel = function(d){return "Maligayang bati! Natapos mo ang Puzzle "+v(d,"puzzleNumber")+"."};
 
-exports.nextLevelTrophies = function(d){return "Congratulations! You completed Puzzle "+v(d,"puzzleNumber")+" and won "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextLevelTrophies = function(d){return "Maligayang bati! Nakumpleto mo ang Puzzle "+v(d,"puzzleNumber")+" at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.nextStage = function(d){return "Congratulations! You completed Stage "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Maligayang bati! Nakumpleto mo ang "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Congratulations! You completed Stage "+v(d,"stageNumber")+" and won "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextStageTrophies = function(d){return "Maligayang bati! Natapos mo ang "+v(d,"stageName")+" at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Congratulations! You completed Puzzle "+v(d,"puzzleNumber")+". (However, you could have used only "+p(d,"numBlocks",0,"fil",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
+exports.numBlocksNeeded = function(d){return "Maligayang bati! Nakumpleto mo ang Puzzle "+v(d,"puzzleNumber")+". (Subalit, maaari mo sanang gamitin lamang ang "+p(d,"numBlocks",0,"fil",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
 
 exports.numLinesOfCodeWritten = function(d){return "You just wrote "+p(d,"numLines",0,"fil",{"one":"1 line","other":n(d,"numLines")+" lines"})+" of code!"};
 
-exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" of "+v(d,"stage_total")};
+exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" ng "+v(d,"stage_total")};
 
 exports.resetProgram = function(d){return "Ulitin"};
 
 exports.runProgram = function(d){return "Run Program"};
 
-exports.runTooltip = function(d){return "Run the program defined by the blocks in the workspace."};
+exports.runTooltip = function(d){return "Patakbuhin ang program na tinutukoy ng mga block sa workspace."};
 
 exports.showCodeHeader = function(d){return "Ipakita ang Code"};
 
@@ -5566,13 +5643,13 @@ exports.subtitle = function(d){return "isang visual programming na environment"}
 
 exports.textVariable = function(d){return "text"};
 
-exports.tooFewBlocksMsg = function(d){return "You are using all of the necessary types of blocks, but try using more  of these types of blocks to complete this puzzle."};
+exports.tooFewBlocksMsg = function(d){return "Ginagamit mo ang lahat na posibleng klase ng bloke, ngunit subukan mong gamitin ang iba pang mga uri ng mga block upang makumpleto ang puzzle na ito."};
 
-exports.tooManyBlocksMsg = function(d){return "This puzzle can be solved with <x id='START_SPAN'/><x id='END_SPAN'/> blocks."};
+exports.tooManyBlocksMsg = function(d){return "Ang puzzle na ito ay maaaring malutas gamit ang <x id='START_SPAN'/><x id='END_SPAN'/> na mga block."};
 
-exports.tooMuchWork = function(d){return "You made me do a lot of work!  Could you try repeating fewer times?"};
+exports.tooMuchWork = function(d){return "Pinagawa mo ako ng naparaming trabaho! Maaari mo ba na ulitin ng mas kaunting mga beses?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Ang iyong code ay mukhang maganda - ito ay lilipad sa isang click lamang. Ngunit kailangan mo ito i-click ng maraming beses hanggang sa iyong target."};
 
 exports.toolboxHeader = function(d){return "Mga block"};
 
@@ -5580,78 +5657,78 @@ exports.openWorkspace = function(d){return "Kung Paano Ito Gumagana"};
 
 exports.totalNumLinesOfCodeWritten = function(d){return "All-time total: "+p(d,"numLines",0,"fil",{"one":"1 line","other":n(d,"numLines")+" lines"})+" of code."};
 
-exports.tryAgain = function(d){return "Try again"};
+exports.tryAgain = function(d){return "Subukang muli"};
 
-exports.backToPreviousLevel = function(d){return "Back to previous level"};
+exports.backToPreviousLevel = function(d){return "Bumalik sa nakaraang level"};
 
 exports.saveToGallery = function(d){return "I-save sa iyong gallery"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "I-save sa iyong gallery!"};
 
 exports.typeCode = function(d){return "I-type ang iyong JavaScript code pagkatapos nitong mga instruction."};
 
-exports.typeFuncs = function(d){return "Available functions:%1"};
+exports.typeFuncs = function(d){return "Magagamit na mga function:%1"};
 
-exports.typeHint = function(d){return "Note that the parentheses and semicolons are required."};
+exports.typeHint = function(d){return "Tandaan na ang mga panaklong at semicolons ay kinakailangan."};
 
-exports.workspaceHeader = function(d){return "Assemble your blocks here: "};
+exports.workspaceHeader = function(d){return "I-assemble ang iyong mga bloke dito: "};
 
 exports.infinity = function(d){return "Walang katapusan"};
 
 exports.rotateText = function(d){return "Paikutin ang iyong device."};
 
-exports.orientationLock = function(d){return "Turn off orientation lock in device settings."};
+exports.orientationLock = function(d){return "I-off ang orientation ng lock sa mga setting ng device."};
 
-exports.wantToLearn = function(d){return "Want to learn to code?"};
+exports.wantToLearn = function(d){return "Gusto mo matuto mag-code?"};
 
 exports.watchVideo = function(d){return "Panoorin ang Video"};
 
 exports.tryHOC = function(d){return "Subukan ang Hour of Code"};
 
-exports.signup = function(d){return "Sign up for the intro course"};
+exports.signup = function(d){return "Mag-sign up para sa intro ng kurso"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Narito ang isang tip:"};
 
 
 },{"messageformat":47}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fil=function(n){return n===0||n==1?"one":"other"}
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Mga aksyon"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "Mga loop"};
 
-exports.catEvents = function(d){return "Events"};
+exports.catEvents = function(d){return "Mga event"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Lohika"};
 
 exports.catMath = function(d){return "Math"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Mga function"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "Mga variable"};
 
 exports.continue = function(d){return "Magpatuloy"};
 
-exports.defaultSayText = function(d){return "type here"};
+exports.defaultSayText = function(d){return "mag-type dito"};
 
 exports.finalLevel = function(d){return "Maligayang pagbati! Nalutas mo na ang pinakahuling puzzle."};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
+exports.incrementOpponentScore = function(d){return "iskor puntos ng kalaban"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Dagdagan ng isa ang manlalaro o iskor ng kalaban."};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "iskor puntos ng manlalaro"};
 
 exports.makeYourOwn = function(d){return "Gumawa Ng Sarili Mong Kuwento"};
 
-exports.moveDirectionDown = function(d){return "down"};
+exports.moveDirectionDown = function(d){return "baba"};
 
-exports.moveDirectionLeft = function(d){return "left"};
+exports.moveDirectionLeft = function(d){return "kaliwa"};
 
-exports.moveDirectionRight = function(d){return "right"};
+exports.moveDirectionRight = function(d){return "kanan"};
 
-exports.moveDirectionUp = function(d){return "up"};
+exports.moveDirectionUp = function(d){return "taas"};
 
-exports.moveDirectionRandom = function(d){return "random"};
+exports.moveDirectionRandom = function(d){return "nang hindi pinipili"};
 
 exports.moveDistance25 = function(d){return "25 pixels"};
 
@@ -5663,281 +5740,297 @@ exports.moveDistance200 = function(d){return "200 pixels"};
 
 exports.moveDistance400 = function(d){return "400 pixels"};
 
-exports.moveDistanceRandom = function(d){return "random pixels"};
+exports.moveDistanceRandom = function(d){return "random na mga pixel"};
 
-exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
+exports.moveDistanceTooltip = function(d){return "Igalaw ang aktor sa partikular na distansya sa tinukoy na direksyon."};
 
-exports.moveSprite = function(d){return "move"};
+exports.moveSprite = function(d){return "galaw"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
+exports.moveSprite1 = function(d){return "igalaw ang aktor 1"};
 
-exports.moveSprite2 = function(d){return "move character 2"};
+exports.moveSprite2 = function(d){return "igalaw ang aktor 2"};
 
-exports.moveSprite3 = function(d){return "move character 3"};
+exports.moveSprite3 = function(d){return "igalaw ang aktor 3"};
 
-exports.moveSprite4 = function(d){return "move character 4"};
+exports.moveSprite4 = function(d){return "igalaw ang aktor 4"};
 
-exports.moveSprite5 = function(d){return "move character 5"};
+exports.moveSprite5 = function(d){return "igalaw ang aktor 5"};
 
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSprite6 = function(d){return "igalaw ang aktor 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "igalaw pababa"};
 
-exports.moveDownTooltip = function(d){return "Move the paddle down."};
+exports.moveDownTooltip = function(d){return "Igalaw ang aktor pababa."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "igalaw pakaliwa"};
 
-exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
+exports.moveLeftTooltip = function(d){return "Igalaw ang aktor pakaliwa."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "igalaw pakanan"};
 
-exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
+exports.moveRightTooltip = function(d){return "Igalaw ang aktor pakanan."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "igalaw pataas"};
 
-exports.moveUpTooltip = function(d){return "Move the paddle up."};
+exports.moveUpTooltip = function(d){return "Igalaw ang aktor pataas."};
 
-exports.moveTooltip = function(d){return "Move a character."};
+exports.moveTooltip = function(d){return "Igalaw ang aktor."};
 
-exports.nextLevel = function(d){return "Congratulations! You have completed this puzzle."};
+exports.nextLevel = function(d){return "Maligayang pagbati! Natapos mo ang puzzle na ito."};
 
-exports.no = function(d){return "No"};
+exports.no = function(d){return "Hindi"};
 
-exports.numBlocksNeeded = function(d){return "This puzzle can be solved with %1 blocks."};
+exports.numBlocksNeeded = function(d){return "Ang puzzle na ito ay maaaring malutas sa %1 na mga block."};
 
-exports.oneTopBlock = function(d){return "For this puzzle, you need to stack together all of the blocks in the white workspace."};
+exports.oneTopBlock = function(d){return "Para sa puzzle na ito, kailangan mo isalansan lahat ang mga block sa puting workspace."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "magpatugtog ng crunch na tunog"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "patugtugin ang goal 1 na tunog"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "patugtugin ang goal 2 na tunog"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "patugtugin ang hit na tunog"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "patugtugin ang lose point na tunog"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "patugtugin ang lose point 2 na tunog"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "pagtugtugin ang retro na tunog"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "patugtugin ang rubber na tunog"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "patugtugin ang slap na tunog"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Magpatugtog ng napiling tunog."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "patugtugin ang win point na tunog"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "patugtugin ang win point 2 na tunog"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "patugtugin ang wood sound"};
 
-exports.positionTopLeft = function(d){return "to the top left position"};
+exports.positionTopLeft = function(d){return "sa kaliwang tuktok na posisyon"};
 
-exports.positionTopCenter = function(d){return "to the top center position"};
+exports.positionTopCenter = function(d){return "sa gitnang tuktok na posisyon"};
 
-exports.positionTopRight = function(d){return "to the top right position"};
+exports.positionTopRight = function(d){return "sa kanang tuktok na posisyon"};
 
-exports.positionMiddleLeft = function(d){return "to the middle left position"};
+exports.positionMiddleLeft = function(d){return "sa gitnang kaliwa na posisyon"};
 
-exports.positionMiddleCenter = function(d){return "to the middle center position"};
+exports.positionMiddleCenter = function(d){return "sa gitnang posisyon"};
 
-exports.positionMiddleRight = function(d){return "to the middle right position"};
+exports.positionMiddleRight = function(d){return "sa gitnang kanan na posisyon"};
 
-exports.positionBottomLeft = function(d){return "to the bottom left position"};
+exports.positionBottomLeft = function(d){return "sa kaliwang ibaba na posisyon"};
 
-exports.positionBottomCenter = function(d){return "to the bottom center position"};
+exports.positionBottomCenter = function(d){return "sa kanang ibaba na posisyon"};
 
-exports.positionBottomRight = function(d){return "to the bottom right position"};
+exports.positionBottomRight = function(d){return "sa kanang ibaba na posisyon"};
 
-exports.positionRandom = function(d){return "to the random position"};
+exports.positionRandom = function(d){return "sa random na posisyon"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "Maaarin mo pindutin ang \"Subukan muli\" na button upang bumalik sa paglalaro."};
 
-exports.repeatForever = function(d){return "repeat forever"};
+exports.repeatForever = function(d){return "ulitin ng walang katapusan"};
 
-exports.repeatDo = function(d){return "do"};
+exports.repeatDo = function(d){return "gawin"};
 
-exports.repeatForeverTooltip = function(d){return "Execute the actions in this block repeatedly while the story is running."};
+exports.repeatForeverTooltip = function(d){return "Ipatupad ang mga aksyon sa block na ito ng paulit-ulit habang ang kuwento ay tumatakbo."};
 
-exports.saySprite = function(d){return "say"};
+exports.saySprite = function(d){return "sabihin"};
 
-exports.saySprite1 = function(d){return "character 1 say"};
+exports.saySprite1 = function(d){return "sabi ng aktor 1"};
 
-exports.saySprite2 = function(d){return "character 2 say"};
+exports.saySprite2 = function(d){return "sabi ng aktor 2"};
 
-exports.saySprite3 = function(d){return "character 3 say"};
+exports.saySprite3 = function(d){return "sabi ng aktor 3"};
 
-exports.saySprite4 = function(d){return "character 4 say"};
+exports.saySprite4 = function(d){return "sabi ng aktor 4"};
 
-exports.saySprite5 = function(d){return "character 5 say"};
+exports.saySprite5 = function(d){return "sabi ng aktor 5"};
 
-exports.saySprite6 = function(d){return "character 6 say"};
+exports.saySprite6 = function(d){return "sabi ng aktor 6"};
 
-exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
+exports.saySpriteTooltip = function(d){return "Magpakita ng speech bubble ng mga nauugnay na teksto mula sa tinukoy na aktor."};
 
-exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+exports.scoreText = function(d){return "Puntos: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "i-set ang random na background"};
 
-exports.setBackgroundBlack = function(d){return "set black background"};
+exports.setBackgroundBlack = function(d){return "i-set ang itim na background"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "i-set ang kuweba na background"};
 
-exports.setBackgroundCloudy = function(d){return "set cloudy background"};
+exports.setBackgroundCloudy = function(d){return "i-set ang maulap na background"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "i-set ang hardcourt na background"};
 
-exports.setBackgroundNight = function(d){return "set night background"};
+exports.setBackgroundNight = function(d){return "i-set ang gabi na background"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "i-set ang sa ilalim ng dagat na background"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Nilalagay ang larawan sa background"};
 
-exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
+exports.setSpriteEmotionAngry = function(d){return "sa isang galit na damdamin"};
 
-exports.setSpriteEmotionHappy = function(d){return "to a happy emotion"};
+exports.setSpriteEmotionHappy = function(d){return "sa isang masaya na damdamin"};
 
-exports.setSpriteEmotionNormal = function(d){return "to a normal emotion"};
+exports.setSpriteEmotionNormal = function(d){return "sa isang normal na damdamin"};
 
-exports.setSpriteEmotionRandom = function(d){return "to a random emotion"};
+exports.setSpriteEmotionRandom = function(d){return "sa isang random na damdamin"};
 
-exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
+exports.setSpriteEmotionSad = function(d){return "sa isang malungkot na damdamin"};
 
-exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
+exports.setSpriteEmotionTooltip = function(d){return "Itinatakda ang damdamin ng aktor"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteGreen = function(d){return "sa isang berde na imahe"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteHidden = function(d){return "sa isang nakatago na imahe"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteOrange = function(d){return "sa isang orange na imahe"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpritePink = function(d){return "sa isang pink na imahe"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpritePurple = function(d){return "sa isang purple na imahe"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpriteRandom = function(d){return "sa isang random na imahe"};
 
-exports.setSpriteWitch = function(d){return "to a witch image"};
+exports.setSpriteWitch = function(d){return "sa isang witch na imahe"};
 
-exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor to the specified location."};
+exports.setSpritePositionTooltip = function(d){return "Agad na naglilipat ng isang aktor sa tinukoy na lokasyon."};
 
-exports.setSpriteTooltip = function(d){return "Sets the character image"};
+exports.setSpriteTooltip = function(d){return "I-set ang imahe ng aktor"};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteSpeedRandom = function(d){return "sa random na bilis"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "sa napakabagal na bilis"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedSlow = function(d){return "sa mabagal na bilis"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedNormal = function(d){return "sa normal na bilis"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedFast = function(d){return "sa napakabilis"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedVeryFast = function(d){return "sa pinakamabilis"};
 
-exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
+exports.setSpriteSpeedTooltip = function(d){return "Sini-set ang bilis ng aktor"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Ibahagi"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.shareStudioTwitter = function(d){return "Tingnan ang kuwento na ginawa ko. Ako mismo ang nagsulat nito sa @codeorg"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareGame = function(d){return "Ibahagi ang iyong kuwento:"};
 
 exports.setSprite = function(d){return "set"};
 
-exports.setSprite1 = function(d){return "set character 1"};
+exports.setSprite1 = function(d){return "i-set ang aktor 1"};
 
-exports.setSprite2 = function(d){return "set character 2"};
+exports.setSprite2 = function(d){return "i-set ang aktor 2"};
 
-exports.setSprite3 = function(d){return "set character 3"};
+exports.setSprite3 = function(d){return "i-set ang aktor 3"};
 
-exports.setSprite4 = function(d){return "set character 4"};
+exports.setSprite4 = function(d){return "i-set ang aktor 4"};
 
-exports.setSprite5 = function(d){return "set character 5"};
+exports.setSprite5 = function(d){return "i-set ang aktor 5"};
 
-exports.setSprite6 = function(d){return "set character 6"};
+exports.setSprite6 = function(d){return "i-set ang aktor 6"};
 
-exports.stopSprite = function(d){return "stop"};
+exports.stopSprite = function(d){return "hinto"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
+exports.stopSprite1 = function(d){return "itigil ang aktor 1"};
 
-exports.stopSprite2 = function(d){return "stop actor 2"};
+exports.stopSprite2 = function(d){return "itigil ang aktor 2"};
 
-exports.stopSprite3 = function(d){return "stop actor 3"};
+exports.stopSprite3 = function(d){return "itigil ang aktor 3"};
 
-exports.stopSprite4 = function(d){return "stop actor 4"};
+exports.stopSprite4 = function(d){return "itigil ang aktor 4"};
 
-exports.stopSprite5 = function(d){return "stop actor 5"};
+exports.stopSprite5 = function(d){return "itigil ang aktor 5"};
 
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSprite6 = function(d){return "itigil ang aktor 6"};
 
-exports.stopTooltip = function(d){return "Stops an actor's movement."};
+exports.stopTooltip = function(d){return "Itigil ang ginagawa ng aktor."};
 
-exports.whenDown = function(d){return "when Down arrow"};
+exports.waitForClick = function(d){return "wait for click"};
 
-exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
+exports.waitForRandom = function(d){return "wait for random"};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.waitForHalfSecond = function(d){return "wait for a half second"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.waitFor1Second = function(d){return "wait for 1 second"};
 
-exports.whenLeft = function(d){return "when Left arrow"};
+exports.waitFor2Seconds = function(d){return "wait for 2 seconds"};
 
-exports.whenLeftTooltip = function(d){return "Execute the actions below when the Left arrow button is pressed."};
+exports.waitFor5Seconds = function(d){return "wait for 5 seconds"};
 
-exports.whenRight = function(d){return "when Right arrow"};
+exports.waitFor10Seconds = function(d){return "wait for 10 seconds"};
 
-exports.whenRightTooltip = function(d){return "Execute the actions below when the Right arrow button is pressed."};
+exports.waitTooltip = function(d){return "Waits for a specified amount of time or until a click occurs."};
 
-exports.whenSpriteClicked = function(d){return "when actor clicked"};
+exports.whenDown = function(d){return "kapag ang pababang arrow"};
 
-exports.whenSpriteClicked1 = function(d){return "when character 1 clicked"};
+exports.whenDownTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag ang pataas na arrow key ay pinindot."};
 
-exports.whenSpriteClicked2 = function(d){return "when character 2 clicked"};
+exports.whenGameStarts = function(d){return "kapag nagsimula ang kuwento"};
 
-exports.whenSpriteClicked3 = function(d){return "when character 3 clicked"};
+exports.whenGameStartsTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag nagsimula ang kuwento."};
 
-exports.whenSpriteClicked4 = function(d){return "when character 4 clicked"};
+exports.whenLeft = function(d){return "kapag ang kaliwa na arrow"};
 
-exports.whenSpriteClicked5 = function(d){return "when character 5 clicked"};
+exports.whenLeftTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag ang pataas na arrow key ay pinindot."};
 
-exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
+exports.whenRight = function(d){return "kapag ang kanan na arrow"};
 
-exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
+exports.whenRightTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag ang pataas na arrow key ay pinindot."};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
+exports.whenSpriteClicked = function(d){return "kapag ang aktor ay na-click"};
 
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
+exports.whenSpriteClicked1 = function(d){return "kapag ang aktor 1 ay na-click"};
 
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
+exports.whenSpriteClicked2 = function(d){return "kapag ang aktor 2 ay na-click"};
 
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
+exports.whenSpriteClicked3 = function(d){return "kapag ang aktor 3 ay na-click"};
 
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
+exports.whenSpriteClicked4 = function(d){return "kapag ang aktor 4 ay na-click"};
 
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteClicked5 = function(d){return "kapag ang aktor 5 ay na-click"};
 
-exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
+exports.whenSpriteClicked6 = function(d){return "kapag ang aktor 6 ay na-click"};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
+exports.whenSpriteClickedTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag ang isang artista ay na-click."};
 
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
+exports.whenSpriteCollided1 = function(d){return "kapag ang aktor 1"};
 
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
+exports.whenSpriteCollided2 = function(d){return "kapag ang aktor 2"};
 
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
+exports.whenSpriteCollided3 = function(d){return "kapag ang aktor 3"};
 
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
+exports.whenSpriteCollided4 = function(d){return "kapag ang aktor 4"};
 
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollided5 = function(d){return "kapag ang aktor 5"};
 
-exports.whenUp = function(d){return "when Up arrow"};
+exports.whenSpriteCollided6 = function(d){return "kapag ang aktor 6"};
 
-exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
+exports.whenSpriteCollidedTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag ang isang aktor ay hinawakan ang isa pang aktor."};
 
-exports.yes = function(d){return "Yes"};
+exports.whenSpriteCollidedWith1 = function(d){return "hinawakan ang aktor 1"};
+
+exports.whenSpriteCollidedWith2 = function(d){return "hinawakan ang aktor 2"};
+
+exports.whenSpriteCollidedWith3 = function(d){return "hinawakan ang aktor 3"};
+
+exports.whenSpriteCollidedWith4 = function(d){return "hinawakan ang aktor 4"};
+
+exports.whenSpriteCollidedWith5 = function(d){return "hinawakan ang aktor 5"};
+
+exports.whenSpriteCollidedWith6 = function(d){return "hinawakan ang aktor 6"};
+
+exports.whenUp = function(d){return "kapag ang pataas na arrow"};
+
+exports.whenUpTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag ang pataas na arrow key ay pinindot."};
+
+exports.yes = function(d){return "Oo"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5457,7 +5458,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5513,7 +5514,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -7189,7 +7190,7 @@ exports.dirW = function(d){return "Z"};
 
 exports.doCode = function(d){return "vykonaj"};
 
-exports.elseCode = function(d){return "ináč"};
+exports.elseCode = function(d){return "inak"};
 
 exports.fill = function(d){return "vyplniť 1"};
 

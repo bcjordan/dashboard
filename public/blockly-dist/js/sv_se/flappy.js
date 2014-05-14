@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -4863,7 +4864,7 @@ exports.doCode = function(d){return "gör"};
 
 exports.elseCode = function(d){return "annat"};
 
-exports.endGame = function(d){return "slutspelet"};
+exports.endGame = function(d){return "avsluta spelet"};
 
 exports.endGameTooltip = function(d){return "Avslutar spelet."};
 

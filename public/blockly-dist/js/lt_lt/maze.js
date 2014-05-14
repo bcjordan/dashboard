@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5457,7 +5458,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5513,7 +5514,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -7035,7 +7036,7 @@ exports.catLogic = function(d){return "Logika"};
 
 exports.catLists = function(d){return "Sąrašai"};
 
-exports.catLoops = function(d){return "Ciklai"};
+exports.catLoops = function(d){return "Kartojimas"};
 
 exports.catMath = function(d){return "Matematika"};
 
@@ -7053,13 +7054,13 @@ exports.dialogCancel = function(d){return "Atšaukti"};
 
 exports.dialogOK = function(d){return "gerai"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Š"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "P"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "R"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "V"};
 
 exports.emptyBlocksErrorMsg = function(d){return "„Kartojimo“ arba „Jei“ blokelių viduje reikia įdėti kitus blokelius, kad jie veiktų. Įsitikink, kad jie yra gerai sukibę vienas su kitu."};
 
@@ -7077,7 +7078,7 @@ exports.help = function(d){return "pagalba"};
 
 exports.hintTitle = function(d){return "Patarimas:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "šok"};
 
 exports.levelIncompleteError = function(d){return "Tu naudoji visus būtinus blokelius, tačiau netinkamai."};
 
@@ -7135,7 +7136,7 @@ exports.backToPreviousLevel = function(d){return "Grįžti į ankstesnį lygį"}
 
 exports.saveToGallery = function(d){return "Įrašyti į savo galeriją"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Įrašyti į savo galeriją!"};
 
 exports.typeCode = function(d){return "Įvesk savo JavaScript kodą žemiau šių instrukcijų."};
 
@@ -7217,17 +7218,17 @@ exports.ifTooltip = function(d){return "Jei kelias yra nurodytoje kryptyje, atli
 
 exports.ifelseTooltip = function(d){return "Jei kelias yra nurodytoje kryptyje, atlik pirmą veiksmų bloką. Priešingu atveju, atlik antrą veiksmų bloką."};
 
-exports.moveEastTooltip = function(d){return "Move me east one space."};
+exports.moveEastTooltip = function(d){return "Pajudink mane į rytus per vieną laukelį."};
 
 exports.moveForward = function(d){return "judėk į priekį"};
 
 exports.moveForwardTooltip = function(d){return "Perkelk mane į priekį per vieną laukelį."};
 
-exports.moveNorthTooltip = function(d){return "Move me north one space."};
+exports.moveNorthTooltip = function(d){return "Pajudink mane į šiaurę per vieną laukelį."};
 
-exports.moveSouthTooltip = function(d){return "Move me south one space."};
+exports.moveSouthTooltip = function(d){return "Pajudink mane į pietus per vieną laukelį."};
 
-exports.moveWestTooltip = function(d){return "Move me west one space."};
+exports.moveWestTooltip = function(d){return "Pajudink mane į vakarus per vieną laukelį."};
 
 exports.nextLevel = function(d){return "Sveikinu! Išsprendei šią užduotį."};
 
@@ -7269,7 +7270,7 @@ exports.repeatUntilBlocked = function(d){return "kol kelias yra priešaky"};
 
 exports.repeatUntilFinish = function(d){return "kartok iki finišo"};
 
-exports.step = function(d){return "Step"};
+exports.step = function(d){return "Žingsnis"};
 
 exports.turnLeft = function(d){return "pasisuk į kairę"};
 

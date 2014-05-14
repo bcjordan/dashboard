@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5298,11 +5299,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "Запустила новый шарик"};
+exports.launchBall = function(d){return "запустить новый шарик"};
 
-exports.launchBallTooltip = function(d){return "Запустите шар в игру."};
+exports.launchBallTooltip = function(d){return "Запустить шарик в игру."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Создай Свою Игру Шарики"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5374,7 +5375,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "положить башню"};
 
-exports.reinfFeedbackMsg = function(d){return "Вы можете нажать кнопку \"Попробуйте снова\" для возвращения в игру."};
+exports.reinfFeedbackMsg = function(d){return "Вы можете нажать кнопку «Повторить», чтобы вернуться в игру."};
 
 exports.removeSquare = function(d){return "разбросать квадрат"};
 
@@ -5386,63 +5387,63 @@ exports.repeatUntilFinish = function(d){return "повторять до окон
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "Задать случайную сцену"};
+exports.setBackgroundRandom = function(d){return "задать случайную сцену"};
 
-exports.setBackgroundHardcourt = function(d){return "Задать сцену с твердым покрытием"};
+exports.setBackgroundHardcourt = function(d){return "задать сцену с твердым покрытием"};
 
-exports.setBackgroundRetro = function(d){return "Задать ретро сцену"};
+exports.setBackgroundRetro = function(d){return "задать ретро сцену"};
 
-exports.setBackgroundTooltip = function(d){return "Задать фоновую картинку"};
+exports.setBackgroundTooltip = function(d){return "Задает фоновое изображение"};
 
-exports.setBallRandom = function(d){return "Задать случайный мяч"};
+exports.setBallRandom = function(d){return "задать случайный шарик"};
 
-exports.setBallHardcourt = function(d){return "Задать мяч для твердого покрытия"};
+exports.setBallHardcourt = function(d){return "задать шарик для твердого покрытия"};
 
-exports.setBallRetro = function(d){return "Задать ретро мяч"};
+exports.setBallRetro = function(d){return "задать ретро шарик"};
 
-exports.setBallTooltip = function(d){return "Задать изображение мяча "};
+exports.setBallTooltip = function(d){return "Задать изображение шарика"};
 
-exports.setBallSpeedRandom = function(d){return "присвоить случайную скорость мяча"};
+exports.setBallSpeedRandom = function(d){return "задать случайную скорость шарика"};
 
-exports.setBallSpeedVerySlow = function(d){return "присвоить очень медленную  скорость мяча"};
+exports.setBallSpeedVerySlow = function(d){return "задать очень медленную  скорость шарика"};
 
-exports.setBallSpeedSlow = function(d){return "присвоить медленную скорость мяча"};
+exports.setBallSpeedSlow = function(d){return "задать медленную скорость шарика"};
 
-exports.setBallSpeedNormal = function(d){return "присвоить нормальную скорость мяча"};
+exports.setBallSpeedNormal = function(d){return "задать нормальную скорость шарика"};
 
-exports.setBallSpeedFast = function(d){return "присвоить быструю скорость мяча"};
+exports.setBallSpeedFast = function(d){return "задать быструю скорость шарика"};
 
-exports.setBallSpeedVeryFast = function(d){return "присвоить очень быструю скорость мяча"};
+exports.setBallSpeedVeryFast = function(d){return "задать очень быструю скорость шарика"};
 
-exports.setBallSpeedTooltip = function(d){return "Присвоить скорость мяча"};
+exports.setBallSpeedTooltip = function(d){return "Задаёт скорость шарика"};
 
-exports.setPaddleRandom = function(d){return "Задать случайную педаль"};
+exports.setPaddleRandom = function(d){return "задать случайную ракетку"};
 
-exports.setPaddleHardcourt = function(d){return "Задать ракетку для твердого покрытия"};
+exports.setPaddleHardcourt = function(d){return "задать ракетку для твердого покрытия"};
 
-exports.setPaddleRetro = function(d){return "Задать ретро педаль "};
+exports.setPaddleRetro = function(d){return "задать ретро ракетку"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Задаёт изображение ракетки"};
 
-exports.setPaddleSpeedRandom = function(d){return "присвоить случайную скорость удара"};
+exports.setPaddleSpeedRandom = function(d){return "задать случайную скорость ракетки"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "присвоить очень медленную скорость удара"};
+exports.setPaddleSpeedVerySlow = function(d){return "задать очень медленную скорость ракетки"};
 
-exports.setPaddleSpeedSlow = function(d){return "присвоить медленную скорость удара"};
+exports.setPaddleSpeedSlow = function(d){return "задать медленную скорость ракетки"};
 
-exports.setPaddleSpeedNormal = function(d){return "присвоить нормальную скорость удара"};
+exports.setPaddleSpeedNormal = function(d){return "задать нормальную скорость ракетки"};
 
-exports.setPaddleSpeedFast = function(d){return "присвоить быструю скорость удара"};
+exports.setPaddleSpeedFast = function(d){return "задать быструю скорость ракетки"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "присвоить очень быструю скорость удара"};
+exports.setPaddleSpeedVeryFast = function(d){return "задать очень быструю скорость ракетки"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Присвоить скорость удара"};
+exports.setPaddleSpeedTooltip = function(d){return "Задаёт скорость ракетки"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Поделиться"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Поиграйте в игру Шарики, которую сделал я сам. Я ее написал с помощью @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Поделитесь вашей игрой:"};
 
 exports.turnLeft = function(d){return "повернуть налево"};
 
@@ -5536,23 +5537,23 @@ exports.dialogCancel = function(d){return "Отменить"};
 
 exports.dialogOK = function(d){return "Продолжить"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "С"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Ю"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "В"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "З"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блокам \"повторять\" или \"если\" необходимо иметь внутри другие блоки для работы. Убедись  в том, что внутренний блок должным образом подходит к блоку, в котором он содержится."};
 
-exports.extraTopBlocks = function(d){return "У вас есть дополнительные блоки, которые не присоединены к основному блоку."};
+exports.extraTopBlocks = function(d){return "У тебя есть оставшиеся блоки, которые не присоединены к основному блоку."};
 
 exports.finalStage = function(d){return "Поздравляю! Ты завершил последний этап."};
 
 exports.finalStageTrophies = function(d){return "Поздравляю! Ты завершил последний этап и выиграл "+p(d,"numTrophies",0,"ru",{"one":"кубок","other":n(d,"numTrophies")+" кубков"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоки твоей программы также могут быть представлены на JavaScript, наиболее распространённом языке программирования в мире:"};
+exports.generatedCodeInfo = function(d){return "Даже в лучших университетах изучают блочное программирование (например, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Но на самом деле блоки, которые вы собирали могут быть отображены на JavaScript, наиболее широко используемом в мире языке программирования:"};
 
 exports.hashError = function(d){return "К сожалению, «%1» не соответствует какой-либо сохранённой программе."};
 
@@ -5560,13 +5561,13 @@ exports.help = function(d){return "Справка"};
 
 exports.hintTitle = function(d){return "Подсказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "прыжок"};
 
 exports.levelIncompleteError = function(d){return "Ты используешь все необходимые виды блоков, но неправильным способом."};
 
 exports.listVariable = function(d){return "список"};
 
-exports.makeYourOwnFlappy = function(d){return "Создайте свою аркадную игру"};
+exports.makeYourOwnFlappy = function(d){return "Создай свою игру Flappy Bird"};
 
 exports.missingBlocksErrorMsg = function(d){return "Для решения этой головоломки попробуй один или несколько из следующих блоков:"};
 
@@ -5574,9 +5575,9 @@ exports.nextLevel = function(d){return "Поздравляю! Головолом
 
 exports.nextLevelTrophies = function(d){return "Поздравляю! Ты завершил головоломку "+v(d,"puzzleNumber")+" и выиграл "+p(d,"numTrophies",0,"ru",{"one":"кубок","other":n(d,"numTrophies")+" кубков"})+"."};
 
-exports.nextStage = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Поздравляем! Ты закончил "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравляем! Вы выполнили "+v(d,"stageName")+" и выиграли "+p(d,"numTrophies",0,"ru",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageName")+" и выиграл "+p(d,"numTrophies",0,"ru",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравляю! Ты завершил головоломку "+v(d,"puzzleNumber")+". (Однако, можно было обойтись всего  "+p(d,"numBlocks",0,"ru",{"one":"1 блоком","other":n(d,"numBlocks")+" блоками"})+".)"};
 
@@ -5604,7 +5605,7 @@ exports.tooManyBlocksMsg = function(d){return "Эта головоломка м�
 
 exports.tooMuchWork = function(d){return "Ты заставил меня попотеть! Может, будешь стараться делать меньше попыток?"};
 
-exports.flappySpecificFail = function(d){return "Ваш код выглядит хорошо - Она будет взлетать при клике мышкой. Но нужно будет нажимать на мышку до тех пор пока не достигнете цели."};
+exports.flappySpecificFail = function(d){return "Твой код выглядит не плохо - она будет взлетать при клике мышкой. Но тебе прийдется кликать мышкой много раз, чтобы достичь цели."};
 
 exports.toolboxHeader = function(d){return "Блоки"};
 
@@ -5616,9 +5617,9 @@ exports.tryAgain = function(d){return "Попытаться ещё раз"};
 
 exports.backToPreviousLevel = function(d){return "Вернуться на предыдущий уровень"};
 
-exports.saveToGallery = function(d){return "Сохранить в галерею"};
+exports.saveToGallery = function(d){return "Сохранить в твоей галереи"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Сохранено в твоей галереи!"};
 
 exports.typeCode = function(d){return "Введите ваш код  на JavaScript под этой инструкцией."};
 
@@ -5642,7 +5643,7 @@ exports.tryHOC = function(d){return "Попробуйте Час кода"};
 
 exports.signup = function(d){return "Зарегистрируйтесь на вводный курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Подсказка:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

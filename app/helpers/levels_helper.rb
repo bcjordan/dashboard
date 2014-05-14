@@ -169,16 +169,20 @@ module LevelsHelper
     [level, app_options]
   end
 
-  def multi_t(text)
-    data_t('multi.' + @level.name, text) || text
-  end
-
-  def match_t(text)
+  def string_or_image(prefix, text)
     if ['.jpg', '.png'].include? File.extname(text)
       "<img src='" + text + "''></img>"
     else
-      data_t('match.' + @level.name, text)
+      data_t(prefix + '.' + @level.name, text)
     end
+  end
+
+  def multi_t(text)
+    string_or_image('multi', text)
+  end
+
+  def match_t(text)
+    string_or_image('match', text)
   end
 
 end

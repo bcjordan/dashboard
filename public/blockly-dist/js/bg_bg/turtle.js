@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5185,7 +5186,7 @@ Turtle.execute = function() {
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5586,7 +5587,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  // Blockly.mainWorkspace.setEnableToolbox(true);
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5733,13 +5734,13 @@ exports.dialogCancel = function(d){return "Отказ"};
 
 exports.dialogOK = function(d){return "OK"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "север"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "юг"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "изток"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "запад"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоковете \"Повтори\" и \"или\" трябва да съдържат други блокове в себе си, за да работят. Уверете се, че вътрешния блок се вписва правилно във външния блок."};
 
@@ -5749,7 +5750,7 @@ exports.finalStage = function(d){return "Поздравления! Вие зав
 
 exports.finalStageTrophies = function(d){return "Поздравления! Вие завършихте последния етап и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоковете за вашата програма също могат да бъдат представени в JavaScript, най-широко приетия език за програмиране:"};
+exports.generatedCodeInfo = function(d){return "Дори най-добрите университети учат блок базирано програмиране(напр., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Но под капака, блокове представляват кодове, написани на JavaScript, в света най-широко използваниятhttps://crowdin.net/translate/codeorg/43/enus-bg# за програмиране език:"};
 
 exports.hashError = function(d){return "За съжаление '%1' не съответства на нито една запазена програма."};
 
@@ -5757,7 +5758,7 @@ exports.help = function(d){return "Помощ"};
 
 exports.hintTitle = function(d){return "Подсказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "скок"};
 
 exports.levelIncompleteError = function(d){return "Използвате всички необходими видове блокове, но не по правилния начин."};
 
@@ -5771,9 +5772,9 @@ exports.nextLevel = function(d){return "Поздравления! Приключ
 
 exports.nextLevelTrophies = function(d){return "Поздравления! Завършихте пъзел "+v(d,"puzzleNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.nextStage = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Поздравления! Вие завършихте "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageName")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравления! Приключихте пъзел "+v(d,"puzzleNumber")+". (Въпреки това, можехте да използвате само "+p(d,"numBlocks",0,"bg",{"one":"1 блок","other":n(d,"numBlocks")+" блокове"})+".)"};
 
@@ -5813,9 +5814,9 @@ exports.tryAgain = function(d){return "Опитайте отново"};
 
 exports.backToPreviousLevel = function(d){return "Обратно към предишното ниво"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Запазване на вашата галерия"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Запазете вашата галерия!"};
 
 exports.typeCode = function(d){return "Въведете вашия JavaScript код под тези инструкции."};
 
@@ -5839,7 +5840,7 @@ exports.tryHOC = function(d){return "Опитайте Часа на Кодира
 
 exports.signup = function(d){return "Регистрация във встъпителния курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ето един съвет:"};
 
 
 },{"messageformat":49}],37:[function(require,module,exports){
@@ -5848,7 +5849,7 @@ exports.blocksUsed = function(d){return "Използвани блокове: %1
 
 exports.catColour = function(d){return "Цвят"};
 
-exports.catControl = function(d){return "Цикли"};
+exports.catControl = function(d){return "Повторения"};
 
 exports.catMath = function(d){return "Математика"};
 
@@ -5882,7 +5883,7 @@ exports.heightParameter = function(d){return "височина"};
 
 exports.hideTurtle = function(d){return "скрий художника"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "скок"};
 
 exports.jumpBackward = function(d){return "скок назад с"};
 
@@ -5890,13 +5891,13 @@ exports.jumpForward = function(d){return "скок напред с"};
 
 exports.jumpTooltip = function(d){return "Премества художника без да оставя никакви следи."};
 
-exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
+exports.jumpEastTooltip = function(d){return "Премества художника на изток без да оставя следи."};
 
-exports.jumpNorthTooltip = function(d){return "Moves the artist north without leaving any marks."};
+exports.jumpNorthTooltip = function(d){return "Премества художникът на север без да оставя следи."};
 
-exports.jumpSouthTooltip = function(d){return "Moves the artist south without leaving any marks."};
+exports.jumpSouthTooltip = function(d){return "Премества художника на изток без да оставя следи."};
 
-exports.jumpWestTooltip = function(d){return "Moves the artist west without leaving any marks."};
+exports.jumpWestTooltip = function(d){return "Премества художникът на север без да оставя следи."};
 
 exports.lengthParameter = function(d){return "дължина"};
 
@@ -5904,17 +5905,17 @@ exports.loopVariable = function(d){return "брояч"};
 
 exports.moveBackward = function(d){return "премести назад с"};
 
-exports.moveEastTooltip = function(d){return "Moves the artist east."};
+exports.moveEastTooltip = function(d){return "Премества художникът на изток."};
 
 exports.moveForward = function(d){return "премести напред с"};
 
 exports.moveForwardTooltip = function(d){return "Премества художника напред."};
 
-exports.moveNorthTooltip = function(d){return "Moves the artist north."};
+exports.moveNorthTooltip = function(d){return "Премества художникът на север."};
 
-exports.moveSouthTooltip = function(d){return "Moves the artist south."};
+exports.moveSouthTooltip = function(d){return "Премества художникът на юг."};
 
-exports.moveWestTooltip = function(d){return "Moves the artist west."};
+exports.moveWestTooltip = function(d){return "Премества художникът на запад."};
 
 exports.moveTooltip = function(d){return "Премества художника напред или назад на зададеното разстояние."};
 

@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5185,7 +5186,7 @@ Turtle.execute = function() {
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5586,7 +5587,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  // Blockly.mainWorkspace.setEnableToolbox(true);
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5739,7 +5740,7 @@ exports.directionSouthLetter = function(d){return "S"};
 
 exports.directionEastLetter = function(d){return "E"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "O"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Il blocco \"ripeti\" o \"se\" deve avere all'interno altri blocchi per poter funzionare. Assicurati che i blocchi interni siano inseriti correttamente all'interno del blocco principale."};
 
@@ -5757,7 +5758,7 @@ exports.help = function(d){return "Aiuto"};
 
 exports.hintTitle = function(d){return "Suggerimento:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "salta"};
 
 exports.levelIncompleteError = function(d){return "Stai usando tutti i tipi di blocchi necessari, ma non nel modo giusto."};
 
@@ -5815,7 +5816,7 @@ exports.backToPreviousLevel = function(d){return "Torna al livello precedente"};
 
 exports.saveToGallery = function(d){return "Salva nella tua galleria"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Salvato nella tua galleria!"};
 
 exports.typeCode = function(d){return "Digita il tuo codice JavaScript sotto queste istruzioni."};
 
@@ -5882,7 +5883,7 @@ exports.heightParameter = function(d){return "altezza"};
 
 exports.hideTurtle = function(d){return "nascondi l'artista"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "salta"};
 
 exports.jumpBackward = function(d){return "salta all'indietro di"};
 
@@ -5890,13 +5891,13 @@ exports.jumpForward = function(d){return "salta in avanti di"};
 
 exports.jumpTooltip = function(d){return "Sposta l'artista senza tracciare alcun segno."};
 
-exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
+exports.jumpEastTooltip = function(d){return "Sposta l'artista verso est senza tracciare alcun segno."};
 
-exports.jumpNorthTooltip = function(d){return "Moves the artist north without leaving any marks."};
+exports.jumpNorthTooltip = function(d){return "Sposta l'artista verso nord senza tracciare alcun segno."};
 
-exports.jumpSouthTooltip = function(d){return "Moves the artist south without leaving any marks."};
+exports.jumpSouthTooltip = function(d){return "Sposta l'artista verso sud senza tracciare alcun segno."};
 
-exports.jumpWestTooltip = function(d){return "Moves the artist west without leaving any marks."};
+exports.jumpWestTooltip = function(d){return "Sposta l'artista verso ovest senza tracciare alcun segno."};
 
 exports.lengthParameter = function(d){return "lunghezza"};
 
@@ -5904,17 +5905,17 @@ exports.loopVariable = function(d){return "contatore"};
 
 exports.moveBackward = function(d){return "vai indietro di"};
 
-exports.moveEastTooltip = function(d){return "Moves the artist east."};
+exports.moveEastTooltip = function(d){return "Sposta l'artista verso est."};
 
 exports.moveForward = function(d){return "vai avanti di"};
 
 exports.moveForwardTooltip = function(d){return "Sposta l'artista in avanti."};
 
-exports.moveNorthTooltip = function(d){return "Moves the artist north."};
+exports.moveNorthTooltip = function(d){return "Sposta l'artista verso nord."};
 
-exports.moveSouthTooltip = function(d){return "Moves the artist south."};
+exports.moveSouthTooltip = function(d){return "Sposta l'artista verso sud."};
 
-exports.moveWestTooltip = function(d){return "Moves the artist west."};
+exports.moveWestTooltip = function(d){return "Sposta l'artista verso ovest."};
 
 exports.moveTooltip = function(d){return "Sposta l'artista in avanti o all'indietro della quantita di pixel specificata."};
 

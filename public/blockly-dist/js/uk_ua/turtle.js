@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -5185,7 +5186,7 @@ Turtle.execute = function() {
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5586,7 +5587,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  // Blockly.mainWorkspace.setEnableToolbox(true);
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5746,13 +5747,13 @@ exports.dialogCancel = function(d){return "Скасувати"};
 
 exports.dialogOK = function(d){return "Гаразд"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "Пн"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Пд"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "Сх"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "Зх"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоки \"Повторити\" та \"Якщо\" повинні містити інші блоки. Переконайтесь, що внутрішній блок належно розміщений всередині зовнішнього."};
 
@@ -5770,7 +5771,7 @@ exports.help = function(d){return "Допомога"};
 
 exports.hintTitle = function(d){return "Підказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "стрибок"};
 
 exports.levelIncompleteError = function(d){return "Використано усі необхідні типи блоків, але у неправильному порядку."};
 
@@ -5828,7 +5829,7 @@ exports.backToPreviousLevel = function(d){return "Повернутися до п
 
 exports.saveToGallery = function(d){return "Зберегти до вашої колекції"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Збережено в галерею!"};
 
 exports.typeCode = function(d){return "Запишіть нижче свій код JavaScript згідно із вказівками."};
 
@@ -5908,7 +5909,7 @@ exports.heightParameter = function(d){return "висота"};
 
 exports.hideTurtle = function(d){return "приховати художника"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "стрибок"};
 
 exports.jumpBackward = function(d){return "перескочити назад на"};
 
@@ -5916,13 +5917,13 @@ exports.jumpForward = function(d){return "перескочити вперед н
 
 exports.jumpTooltip = function(d){return "Переміщує художника, не залишаючи слідів."};
 
-exports.jumpEastTooltip = function(d){return "Moves the artist east without leaving any marks."};
+exports.jumpEastTooltip = function(d){return "Переміщує художника на схід, не залишаючи сліду."};
 
-exports.jumpNorthTooltip = function(d){return "Moves the artist north without leaving any marks."};
+exports.jumpNorthTooltip = function(d){return "Переміщує художника на північ, не залишаючи сліду."};
 
-exports.jumpSouthTooltip = function(d){return "Moves the artist south without leaving any marks."};
+exports.jumpSouthTooltip = function(d){return "Переміщує художника на південь, не залишаючи сліду."};
 
-exports.jumpWestTooltip = function(d){return "Moves the artist west without leaving any marks."};
+exports.jumpWestTooltip = function(d){return "Переміщує художника на захід, не залишаючи сліду."};
 
 exports.lengthParameter = function(d){return "довжина"};
 
@@ -5930,17 +5931,17 @@ exports.loopVariable = function(d){return "лічильник"};
 
 exports.moveBackward = function(d){return "переміститись назад на"};
 
-exports.moveEastTooltip = function(d){return "Moves the artist east."};
+exports.moveEastTooltip = function(d){return "Переміщує художника на схід."};
 
 exports.moveForward = function(d){return "переміститись вперед на"};
 
 exports.moveForwardTooltip = function(d){return "Переміщує художника вперед."};
 
-exports.moveNorthTooltip = function(d){return "Moves the artist north."};
+exports.moveNorthTooltip = function(d){return "Переміщує художника на північ."};
 
-exports.moveSouthTooltip = function(d){return "Moves the artist south."};
+exports.moveSouthTooltip = function(d){return "Переміщує художника на південь."};
 
-exports.moveWestTooltip = function(d){return "Moves the artist west."};
+exports.moveWestTooltip = function(d){return "Переміщує художника на захід."};
 
 exports.moveTooltip = function(d){return "Переміщує художника вперед або назад на вказану кількість клітинок."};
 
