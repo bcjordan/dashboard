@@ -63,7 +63,11 @@
   function enableButton(enable)
   {
     buttonEnabled = enable;
-    $('.submitButton').css({ opacity: enable ? 1.0 : 0.5 });
+
+    if (enable)
+      $('.submitButton').removeClass("disabled");
+    else
+      $('.submitButton').addClass("disabled");
   }
 
   function showDialog()
