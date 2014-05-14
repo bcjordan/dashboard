@@ -5,7 +5,7 @@
 
   %h3 1. Try playing this video
 
-  #video-container{width: 600, height:400}
+  #video-container{width: 600, height:400, style: 'margin-bottom: 10px;'}
 
   %ul
     %li Can you see the video?
@@ -37,7 +37,7 @@
 
   %span
     Fake YouTube being blocked:
-    %a{href: '?fallback=true'} on
+    %a{href: '?force_youtube_fallback'} on
     \/
     %a{href: '?'} off
 
@@ -67,8 +67,8 @@
   formLink.fillFieldEncoded('browser', userAgent);
 
   var videoInfo = #{video_info(Video.first).to_json};
-  videoInfo['use_fallback'] = true;
-  videoInfo['fallback_test_url'] = '#{params[:fallback] ? 'https://fake.example.com/favicon.ico' : 'https://www.youtube.com/favicon.ico'}';
+  videoInfo['enable_fallback'] = true;
+  videoInfo['src'] = videoInfo['src'].replace('#{youtube_base_url}', 'https://www.youtube.com');
 
   $('#video-container').append(createVideo(videoInfo).width(600).height(400));
   setupVideoFallback(videoInfo, 400, 600);

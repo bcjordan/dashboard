@@ -138,18 +138,24 @@ function showVideo(options) {
 }
 
 function setupVideoFallback(videoInfo, playerHeight, playerWidth) {
-  if (!videoInfo['use_fallback']) {
+  if (!videoInfo['enable_fallback']) {
     return;
   }
 
-  if (!videoInfo['fallback_test_url']) {
-    console.log('Need fallback_test_url set.');
-    return;
-  }
-
-  onURLBlocked(videoInfo['fallback_test_url'], function() {
+  onYouTubeBlocked(function() {
     addFallbackVideoPlayer(videoInfo, playerHeight, playerWidth);
   });
+}
+
+function onYouTubeBlocked(callback) {
+  onURLBlocked(youTubeAvailabilityEndpointURL(), callback);
+}
+
+function youTubeAvailabilityEndpointURL() {
+  if (window.document.URL.toString().indexOf('force_youtube_fallback') >= 0) {
+    return 'http://unreachable-test-subdomain.example.com/favicon.ico'
+  }
+  return "https://www.youtube.com/favicon.ico";
 }
 
 function onURLBlocked(base_url, callback) {

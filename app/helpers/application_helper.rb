@@ -76,7 +76,7 @@ module ApplicationHelper
   end
   
   def youtube_base_url
-    @youtube_base_url || 'https://www.youtubeeducation.com'
+    'https://www.youtubeeducation.com'
   end
 
   def video_thumbnail_url(video)
@@ -89,7 +89,7 @@ module ApplicationHelper
 
   def video_info(video)
     # Note: similar video info is also set in javascript at levels/_blockly.html.haml
-    { src: youtube_url(video.youtube_code), key: video.key, name: data_t('video.name', video.key), download: video.download, thumbnail: video_thumbnail_path(video) }
+    { src: youtube_url(video.youtube_code), key: video.key, name: data_t('video.name', video.key), download: video.download, thumbnail: video_thumbnail_path(video), enable_fallback: false }
   end
 
   def format_xml(xml)

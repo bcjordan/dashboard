@@ -7,7 +7,6 @@ class VideosController < ApplicationController
 
   def test
     @video = Video.first
-    @youtube_base_url = 'https://www.youtube.com'
   end
 
   def index
