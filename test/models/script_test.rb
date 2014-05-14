@@ -9,36 +9,38 @@ class ScriptTest < ActiveSupport::TestCase
   end
 
   test 'create script from DSL' do
-    x = Script.setup([], [@script_file])
-    assert_equal 'Level 1', x[0][0].level.name
-    assert_equal 'Stage2', x[0][3].stage.name
+    scripts, _ = Script.setup([], [@script_file])
+    script = scripts[0]
+    assert_equal 'Level 1', script.levels[0].name
+    assert_equal 'Stage2', script.script_levels[3].stage.name
   end
 
   test 'should not change Script[Level] ID when reseeding' do
-    x = Script.setup([], [@script_file])
-    script_id = x[0][4].script_id
-    script_level_id = x[0][4].id
+    scripts, _ = Script.setup([], [@script_file])
+    script = scripts[0]
+    script_id = script.script_levels[4].script_id
+    script_level_id = script.script_levels[4].id
 
-    x = Script.setup([], [@script_file])
-    assert_equal script_id, x[0][4].script_id
-    assert_equal script_level_id, x[0][4].id
+    scripts,_ = Script.setup([], [@script_file])
+    assert_equal script_id, scripts[0].script_levels[4].script_id
+    assert_equal script_level_id, scripts[0].script_levels[4].id
   end
 
   test 'should not change Script ID when changing script levels and options' do
-    x = Script.setup([], [@script_file])
-    script_id = x[0][4].script_id
-    script_level_id = x[0][4].id
+    scripts,_ = Script.setup([], [@script_file])
+    script_id = scripts[0].script_levels[4].script_id
+    script_level_id = scripts[0].script_levels[4].id
 
-    parsed_csv = Script.parse_csv(`config/generate_scripts #{@script_file}`, "\t", Script::SCRIPT_MAP)
+    parsed_script = ScriptDSL.parse_file(@script_file)[0].map{|stage| stage[:levels]}.flatten
 
     # Set different level name in tested script
-    parsed_csv[4]['name'] = "Level 1"
+    parsed_script[4]['name'] = "Level 1"
 
     # Set different 'trophies' and 'hidden' options from defaults in Script.setup
     options = {name: File.basename(@script_file, ".script"), trophies: true, hidden: false}
-    x = Script.add_script(options, parsed_csv, true)
-    assert_equal script_id, x[4].script_id
-    assert_not_equal script_level_id, x[4].id
+    script = Script.add_script(options, parsed_script, true)
+    assert_equal script_id, script.script_levels[4].script_id
+    assert_not_equal script_level_id, script.script_levels[4].id
   end
 
   test 'should not create two scripts with same name' do
@@ -47,5 +49,42 @@ class ScriptTest < ActiveSupport::TestCase
       create(:script, :name => 'Script')
     end
     assert_equal 'Validation failed: Name has already been taken', raise.message
+  end
+
+  test 'stages are in order' do
+    script = create(:script, name: 's1')
+    create(:stage, script: script)
+    last = create(:stage, script: script)
+    create(:stage, script: script)
+
+    last.move_to_bottom
+
+    script.stages
+
+    assert_equal [1, 2, 3], script.stages.collect(&:position)
+  end
+
+  test 'script_levels are in order' do
+    script = create(:script, name: 's1')
+    s1 = create(:stage, script: script, position: 1)
+    last = create(:script_level, script:script, stage:s1, chapter:3)
+    second = create(:script_level, script:script, stage:s1, chapter:2)
+    create(:script_level, script:script, stage:s1, chapter:1)
+    second.move_to_bottom
+    last.move_to_bottom
+
+    s2 = create(:stage, script: script, position: 2)
+    create(:script_level, script:script, stage:s2, chapter:4)
+    create(:script_level, script:script, stage:s2, chapter:5)
+
+    s3 = create(:stage, script: script, position: 3)
+    last = create(:script_level, script:script, stage:s3, chapter:7)
+    create(:script_level, script:script, stage:s3, chapter:6)
+    last.move_to_bottom
+
+    assert_equal [1, 2, 3], script.stages.collect(&:position)
+
+    assert_equal [1, 1, 1, 2, 2, 3, 3], script.script_levels.collect(&:stage).collect(&:position)
+    assert_equal [1, 2, 3, 1, 2, 1, 2], script.script_levels.collect(&:position)
   end
 end

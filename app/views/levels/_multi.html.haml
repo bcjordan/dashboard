@@ -2,19 +2,29 @@
 
   - data = @level.properties
 
-  %h2= multi_t(data['title'])
-  %p= multi_t(data['description'])
+  %h2!= multi_t(data['title'])
+  %p!= multi_t(data['description']) if data['description']
+  %p!= multi_t(data['banner']) if data['banner']
+
+  - height = data['height'] || '20'
+  - height += 'px'
 
   .mainblock
-    %b= data['questions'][0]['text']
+    %b!= data['questions'][0]['text']
     %form#voteform{onsubmit: "return doVote()"}
       - data['answers'].each_with_index do |answer, i|
         - correct = answer["correct"]
-        %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
-          %label{for: "choice_#{i}"}= multi_t(answer['text'])
-        %br
-      %br
-      %br
+        .item
+          .item-radio
+            %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
+          .item-label{style: "height: #{height}"}
+            %label{for: "choice_#{i}"}!= multi_t(answer['text'])
+
+    .clear
+
+    %br/
+    %br/
+
     .buttons
       %a.btn.btn-primary.next-stage.submitButton
         Submit
@@ -37,18 +47,28 @@
 :javascript
 
   var selection = "none";   // "none", "wrong", "right"
-  var clickedNext = false;  // avoid multiple simultaneous submissions
+  var buttonEnabled = true;  // avoid multiple simultaneous submissions
 
   function radioChanged(index) 
   {
-    $('.submitButton').css({ opacity: 1.0 });
+    enableButton(true);
     selection = $("#choice_" + index).attr("correct") == "true" ? "right" : "wrong";
   }
 
   $(function() 
   {
-    $('.submitButton').css({ opacity: 0.5 });
+    enableButton(false);
   });
+
+  function enableButton(enable)
+  {
+    buttonEnabled = enable;
+
+    if (enable)
+      $('.submitButton').removeClass("disabled");
+    else
+      $('.submitButton').addClass("disabled");
+  }
 
   function showDialog()
   {
@@ -76,9 +96,9 @@
 
   $('.submitButton').click(function() 
   {
-    if (!clickedNext) 
+    if (buttonEnabled) 
     {
-      clickedNext = true;
+      enableButton(false);
 
       if (selection == "wrong") 
       {
@@ -96,8 +116,10 @@
           testResult: selection == "right" ? 100 : 0,
           onComplete: function() 
           {
-            // reenable button
-            clickedNext = false;
+            if (! nextRedirect)
+            {
+              enableButton(true);
+            }
 
             if (videoInfo) 
             {
@@ -112,8 +134,7 @@
       }
       else
       {
-        // reenable button
-        clickedNext = false;
+        enableButton(true);
       }
     }
   });

@@ -305,6 +305,7 @@ en:
     art_from_html: 'Angry Birds&trade; & &copy; 2009 - 2013 <a href="http://www.rovio.com">Rovio Entertainment Ltd</a>. All Rights Reserved.<br/> Plants vs. Zombies&trade; & &copy; 2013 <a href="http://www.ea.com">Electronic Arts Inc.</a>. All Rights Reserved.'
     feedback: 'Provide feedback'
     translate: 'Help us translate to your language'
+    support: Support
     tos: 'Terms of service'
     privacy: 'Privacy Policy'
   prize_mail:
@@ -334,7 +335,7 @@ en:
   next_stage: 'Finished! Continue to next stage'
   download_pdf: 'Open Lesson Plan'
   share_code:
-    title: "Click 'Run program' to see my program in action"
+    title: "Click 'Run' to see my program in action"
     bounce_og_title: "Check out my Bounce Game"
     flappy_og_title: "Check out my Flappy Game"
     og_description: "I wrote the code myself with Code.org"

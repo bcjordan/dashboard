@@ -8,7 +8,11 @@ else
 end
 
 ENV["RAILS_ENV"] ||= "test"
+
 require File.expand_path('../../config/environment', __FILE__)
+I18n.load_path += Dir[Rails.root.join('test', 'en.yml')]
+I18n.backend.reload!
+
 require 'rails/test_help'
 
 require "mocha/test_unit"

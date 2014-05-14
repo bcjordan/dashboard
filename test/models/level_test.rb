@@ -87,7 +87,7 @@ class LevelTest < ActiveSupport::TestCase
 
   test "basic toolbox check" do
     level = Maze.create(@maze_data)
-    toolbox = Nokogiri::XML(level.complete_toolbox)
+    toolbox = Nokogiri::XML(level.complete_toolbox(:start_blocks))
 
     assert_equal "xml", toolbox.root().name
     assert_equal "toolbox", toolbox.root().attributes["id"].value

@@ -9,19 +9,20 @@
 
 .user-stats-block
   - levels = script_levels.group_by{ |sl| sl.stage ? sl.stage : sl.level.game }
-  - index = 0
   - levels.each_pair do |game, sl_group|
     - title = data_t_suffix('script.name', script.name, game.name) + ': ' + (data_t('game.name', game.name) || game.name)
     - stage_title = data_t_suffix('script.name', script.name, game.name)
     - game_title = (data_t('game.name', game.name) || game.name)
-    - color = index % 2 == 1 ? '#dadada' : '#eeeeee'
+    - color = cycle '#dadada', '#eeeeee'
+    - custom_script = game.instance_of? Stage
     .game-group{style:"background-color: #{color}"}
-      - if sl_group.length == 1
-        .stage
-          %span
-            =stage_title + ": "
+      .stage
+        %span
+          = stage_title + (custom_script ? '' : ': ')
+        - unless custom_script # Custom script stages don't map to specific games
           %span.game-title<
             =game_title
+      - if sl_group.length == 1
         .single-game
           - sl = sl_group.first
           - passed, link = level_info(user, sl)
@@ -30,12 +31,8 @@
             - if passed
               = check_mark_html
       - else
-        .stage
-          %span
-            =stage_title + ": "
-          %span.game-title<
-            =game_title
         .games
+          - sl_group = sl_group.sort_by {|sl| sl.stage_or_game_position}
           - sl_group.each do |sl|
             - passed, link = level_info(user, sl)
             - if passed
@@ -45,8 +42,6 @@
               %a{ href: link, class: "level_link"}
                 %span.puzzle-number
                   #{sl.stage_or_game_position}
-
-    - index += 1
 
 -if (!defined? hide_trophies)
   -if (!defined? trophies_below) || trophies_below

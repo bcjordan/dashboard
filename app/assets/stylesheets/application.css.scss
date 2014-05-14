@@ -1048,11 +1048,11 @@ a.download-video {
 
 .match {
   li {
-    height: 20px;
     padding-top: 7px;
     padding-bottom: 7px;
     background-color: lightgrey;
     padding-left: 10px;
+    padding-right: 10px;
     width: 200px;
     margin-top:2px;
     margin-bottom:2px;  
@@ -1163,8 +1163,24 @@ div.gallery_activity {
   .mainblock {
     margin-left: 20px;
   }
-  label {
-    display: inline;
+  .item {
+    padding: 25px;
+    clear: both;
+  }
+  input {
+    margin-top: 0px;
+    margin-right: 20px;
+  }
+  .item-radio {
+    display: inline-block;
+    float: left;
+  }
+  .item-label {
+    display: inline-block;
+    float: left;
+  }
+  img {
+    max-height: 100%;
   }
 }
 
@@ -1175,7 +1191,7 @@ div.gallery_activity {
     margin-left: 20px; 
   }
   .column {
-    width: 220px; 
+    width: 240px; 
     float: left;
   }
   .draggablecolumn {

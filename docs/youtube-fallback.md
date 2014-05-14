@@ -4,17 +4,54 @@ Certain schools block [youtube.com](http://youtube.com) and [youtubeeducation.co
 
 As a fallback, we display the downloadable copy of our videos using video.js.
 
+## Networking / firewall needs
+
+### For native YouTube videos:
+
+Whitelist:
+
+* https://s.youtube.com
+* https://www.youtube.com
+* https://*.googlevideo.com
+* https://*.ytimg.com
+
+### For the non-YouTube code.org fallback video player
+
+Whitelist:
+
+* https://s3.amazonaws.com/cdo-videos/*
+
+Blacklist:
+
+* https://www.youtube.com — specifically https://www.youtube.com/favicon.ico (this is how we detect to serve the fallback player)
+
+## Software needs for the non-YouTube fallback player
+
+* Chrome: should always work (player will try Flash first, if not available, will use HTML5 player)
+* Firefox: for fallback player, need to have Flash player installed
+* Safari: for fallback player, have Flash player installed (it may still work when Flash is uninstalled, I haven't been able to test this case)
+* iOS / Android: should always work
+
 # Detecting missing video
 
 We use the technique from Khan Academy's [YouTube fallback](http://code.google.com/p/khanacademy/issues/detail?id=13721), testing `img` loading of `youtube.com/favicon.ico`.
 
-Youtube.com does not currently have a favicon.ico.
+Since youtubeeducation.com does not have a favicon.ico, we are using youtube.com as the default video address and fallback host. 
+
+We will use the fallback player if either:
+
+1. You visit a url with `?force_youtube_fallback` in it
+2. jQuery detects an error when loading https://www.youtube.com/favicon.ico
 
 # Video.js
 
-To display our videos, we use video.js with files served from our server through the Rails asset pipeline. This includes files in `vendor/assets/[fonts, javascripts, stylesheets, flash]`.
+To display our fallback videos, we use video.js with files served from our server through the Rails asset pipeline. This includes files in `vendor/assets/[fonts, javascripts, stylesheets, flash]`.
+
+These videos are loaded from our video download host: https://s3.amazonaws.com/cdo-videos/
 
 # Manually testing YouTube blocked behavior
+
+For a semi-decent simulation of blocked YouTube, add `?force_youtube_fallback` to the URL. This is how our UI tests 
 
 ## Fake-blocking YouTube
 
@@ -27,6 +64,14 @@ sudo vim /etc/hosts
 127.0.0.1       www.youtubeeducation.com
 127.0.0.1       ytimg.com
 ```
+
+### Using Charles
+
+[Charles](http://www.charlesproxy.com/) is an HTTP proxy, throttling, monitoring power tool.
+
+You can use Charles to block certain hosts and to monitor where requests are being made.
+
+To block certain hosts, go to the Blacklist tool or right click on a request that's been captured and check blacklist.
 
 ## Firefox: Fake-blocking Flash
 

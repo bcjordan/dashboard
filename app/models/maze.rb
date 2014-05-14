@@ -48,17 +48,18 @@ class Maze < Level
     { 'maze' => read_and_convert_maze_to_integer(contents, size) }
   end
 
-  def common_blocks
-    k1_blocks + '<block type="maze_moveForward"></block>
-    <block type="maze_turn">
-      <title name="DIR">turnLeft</title>
+  def common_blocks(type)
+    "#{k1_blocks}
+    <block type='maze_moveForward'></block>
+    <block type='maze_turn'>
+      <title name='DIR'>turnLeft</title>
     </block>
-    <block type="maze_turn">
-      <title name="DIR">turnRight</title>
+    <block type='maze_turn'>
+      <title name='DIR'>turnRight</title>
     </block>
-    <block type="controls_repeat">
-      <title name="TIMES">5</title>
-    </block>'
+    <block type='controls_repeat'>
+      <title name='TIMES'>5</title>
+    </block>"
   end
 
   def k1_blocks
@@ -71,20 +72,9 @@ class Maze < Level
     <block type="maze_moveWest"></block>'
   end
 
-  def toolbox
-      common_blocks + '<block type="maze_forever"></block>
-      <block type="maze_if">
-        <title name="DIR">isPathLeft</title>
-      </block>
+  def toolbox(type)
+      common_blocks(type) + '<block type="maze_forever"></block>
       <block type="maze_if"></block>
-      <block type="maze_ifElse"></block>
-      <block type="maze_forever"></block>
-      <block type="maze_if">
-        <title name="DIR">isPathLeft</title>
-      </block>
-      <block type="maze_if">
-        <title name="DIR">isPathRight</title>
-      </block>
       <block type="maze_ifElse"></block>'
   end
 end

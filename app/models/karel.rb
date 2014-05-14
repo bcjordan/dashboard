@@ -23,8 +23,8 @@ class Karel < Maze
     { 'maze' => map, 'initial_dirt' => initial_dirt, 'final_dirt' => final_dirt }
   end
 
-  def toolbox
-    common_blocks + '<block type="maze_dig"></block>
+  def toolbox(type)
+    common_blocks(type) + '<block type="maze_dig"></block>
     <block type="maze_fill"></block>
     <block type="maze_forever"></block>
     <block type="karel_if"></block>
