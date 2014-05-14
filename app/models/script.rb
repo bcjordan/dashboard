@@ -1,9 +1,9 @@
 # A sequence of Levels
 class Script < ActiveRecord::Base
   include Seeded
-  has_many :levels, through: :script_levels
-  has_many :script_levels, dependent: :destroy
-  has_many :stages
+  has_many :levels, dependent: :destroy, through: :script_levels
+  has_many :script_levels, -> { order("chapter ASC") }, dependent: :destroy # all script levels, even those w/ stages, are ordered by chapter, see Script#add_script
+  has_many :stages, -> { order("position ASC") }
   belongs_to :wrapup_video, foreign_key: 'wrapup_video_id', class_name: 'Video'
   belongs_to :user
   validates_uniqueness_of :name, allow_nil: false, allow_blank: false, case_sensitive: false
@@ -35,7 +35,7 @@ class Script < ActiveRecord::Base
       # a bit of trickery so we support both ids which are numbers and
       # names which are strings that may contain numbers (eg. 2-3)
       find_by = (id.to_i.to_s == id.to_s) ? :id : :name
-      Script.includes(script_levels: { level: [:game, :concepts] }).find_by(find_by => id).tap do |s|
+      Script.find_by(find_by => id).tap do |s|
         raise ActiveRecord::RecordNotFound.new("Couldn't find Script with id|name=#{id}") unless s
       end
     end
@@ -83,6 +83,7 @@ class Script < ActiveRecord::Base
   end
 
   def get_script_level_by_id(script_level_id)
+    script_level_id = script_level_id.to_i
     self.script_levels.select { |sl| sl.id == script_level_id }.first
   end
 
@@ -91,6 +92,7 @@ class Script < ActiveRecord::Base
   end
 
   def get_script_level_by_chapter(chapter)
+    chapter = chapter.to_i
     self.script_levels.select { |sl| sl.chapter == chapter }.first
   end
 

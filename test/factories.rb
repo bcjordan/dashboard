@@ -60,13 +60,27 @@ FactoryGirl.define do
   factory :script_level do
     script
     level
-    chapter 1
-    sequence(:game_chapter)
+
+    chapter do |script_level|
+      (script_level.script.script_levels.maximum(:chapter) || 0) + 1
+    end
+
+    game_chapter do |script_level|
+      (script_level.script.script_levels.maximum(:game_chapter) || 0) + 1
+    end
+
+    position do |script_level|
+      (script_level.stage.script_levels.maximum(:position) || 0) + 1 if script_level.stage
+    end
   end
 
   factory :stage do
     sequence(:name) { |n| "Bogus Stage #{n}" }
     script
+
+    position do |stage|
+      (stage.script.stages.maximum(:position) || 0) + 1
+    end
   end
   
   factory :callout do
