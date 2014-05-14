@@ -8,7 +8,10 @@
 
   - data['answers'].each_with_index do |answer, i|
     - answer['index'] = i
-  - data['answers'].shuffle!
+
+  - # Shuffle answers until they are different to real answers.
+  - if data['answers'].length > 1   # avoid infinite loop
+    - begin shuffled_answers = data['answers'].shuffle end until (shuffled_answers && shuffled_answers != data['answers'])
 
   - height = data['height'] || '20'
   - height += 'px'
@@ -20,11 +23,11 @@
           %li{style: "height: #{height}"}!= match_t(question['text'])
     .column
       %ul#slots.draggablecolumn
-        - data['answers'].each do |answer|
+        - shuffled_answers.each do |answer|
           %li.emptyslot{style: "height: #{height}"}
     .column
       %ul#answers.draggablecolumn
-        - data['answers'].each do |answer|
+        - shuffled_answers.each do |answer|
           %li.answer.answerlist{style: "height: #{height}", originalIndex: answer['index']}!= match_t(answer['text'])
     .clear
     %br/
@@ -83,7 +86,17 @@
   }
 
   var solution = "none";    // "none", "wrong", "right"
-  var clickedNext = false;  // avoid multiple simultaneous submissions
+  var buttonEnabled = true;  // avoid multiple simultaneous submissions
+
+  function enableButton(enable)
+  {
+    buttonEnabled = enable;
+
+    if (enable)
+      $('.submitButton').removeClass("disabled");
+    else
+      $('.submitButton').addClass("disabled");
+  }
 
   $(function() 
   {
@@ -157,15 +170,15 @@
 
   $('.submitButton').click(function() 
   {
-    if (!clickedNext) 
+    if (buttonEnabled) 
     {
-      clickedNext = true;
+      enableButton(false)
 
       var wrongAnswer = false;
 
-      var elements = $("#slots li")
+      var elements = $("#slots li");
       
-      for (index = 0; index < elements.length; elements++)
+      for (index = 0; index < elements.length; index++)
       {
         value = elements[index];
 
@@ -179,14 +192,9 @@
 
       solution = wrongAnswer ? "wrong" : "right";
 
-      if (solution == "none") 
-      {
-        clickedNext = false;    
-      }
-      else if (solution == "wrong") 
+      if (solution == "wrong") 
       {
         showDialog();
-        clickedNext = false;
       }
       
       if (solution != "none")
@@ -200,6 +208,11 @@
           testResult: solution == "right" ? 100 : 0,
           onComplete: function() 
           {
+            if (! nextRedirect)
+            {
+              enableButton(true);
+            }
+
             if (videoInfo) 
             {
               showVideo(videoInfo);

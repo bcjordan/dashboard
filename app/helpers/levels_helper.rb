@@ -1,9 +1,26 @@
 module LevelsHelper
   def build_script_level_path(script_level)
-    if Script::HOC_ID == script_level.script_id
+    case script_level.script_id
+    when Script::HOC_ID
       hoc_chapter_path(script_level.chapter)
-    else
+    when Script::TWENTY_HOUR_ID
       script_level_path(script_level.script, script_level)
+    when Script::EDIT_CODE_ID
+      editcode_chapter_path(script_level.chapter)
+    when Script::TWENTY_FOURTEEN_LEVELS_ID
+      twenty_fourteen_chapter_path(script_level.chapter)
+    when Script::BUILDER_ID
+      builder_chapter_path(script_level.chapter)
+    when Script::FLAPPY_ID
+      flappy_chapter_path(script_level.chapter)
+    when Script::JIGSAW_ID
+      jigsaw_chapter_path(script_level.chapter)
+    else
+      if script_level.stage
+        script_stage_script_level_path(script_level.script, script_level.stage, script_level.position)
+      else
+        script_puzzle_path(script_level.script, script_level.chapter)
+      end
     end
   end
 
@@ -169,16 +186,20 @@ module LevelsHelper
     [level, app_options]
   end
 
-  def multi_t(text)
-    data_t('multi.' + @level.name, text) || text
-  end
-
-  def match_t(text)
+  def string_or_image(prefix, text)
     if ['.jpg', '.png'].include? File.extname(text)
       "<img src='" + text + "''></img>"
     else
-      data_t('match.' + @level.name, text)
+      data_t(prefix + '.' + @level.name, text)
     end
+  end
+
+  def multi_t(text)
+    string_or_image('multi', text)
+  end
+
+  def match_t(text)
+    string_or_image('match', text)
   end
 
 end

@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -909,6 +910,41 @@ exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
+};
+
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
 };
 
 },{}],4:[function(require,module,exports){
@@ -5151,6 +5187,13 @@ exports.shallowCopy = function(source) {
 };
 
 /**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
+};
+
+/**
  * Returns a new object with the properties from defaults overriden by any
  * properties in options. Leaves defaults and options unchanged.
  */
@@ -5285,11 +5328,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "launch new ball"};
+exports.launchBall = function(d){return "pilota berria jaurti"};
 
-exports.launchBallTooltip = function(d){return "Launch a ball into play."};
+exports.launchBallTooltip = function(d){return "Jokuan pilota jaurti."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Sortu zure errebote joko propioa"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5361,7 +5404,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "put down tower"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "\"Berriro saiatu\" botoiean klikatu dezakezu zure jokora atzera egiteko."};
 
 exports.removeSquare = function(d){return "remove square"};
 
@@ -5375,9 +5418,9 @@ exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"o
 
 exports.setBackgroundRandom = function(d){return "ezarri ausazko eszena"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "Ezarri zelai gogor eszenatokia"};
 
-exports.setBackgroundRetro = function(d){return "set retro scene"};
+exports.setBackgroundRetro = function(d){return "Ezarri retro eszenatokia"};
 
 exports.setBackgroundTooltip = function(d){return "Atzeko irudia ezartzen du"};
 
@@ -5385,51 +5428,51 @@ exports.setBallRandom = function(d){return "ezarri ausazko pilota"};
 
 exports.setBallHardcourt = function(d){return "ezarri retro pilota"};
 
-exports.setBallRetro = function(d){return "set retro ball"};
+exports.setBallRetro = function(d){return "Ezarri retro pilota"};
 
-exports.setBallTooltip = function(d){return "Pilotaren irudai ezartzen du"};
+exports.setBallTooltip = function(d){return "Pilotaren irudia ezartzen du"};
 
-exports.setBallSpeedRandom = function(d){return "set random ball speed"};
+exports.setBallSpeedRandom = function(d){return "ezarri ausazko pilota abiadura"};
 
-exports.setBallSpeedVerySlow = function(d){return "set very slow ball speed"};
+exports.setBallSpeedVerySlow = function(d){return "ezarri pilota abiadura oso motela"};
 
-exports.setBallSpeedSlow = function(d){return "set slow ball speed"};
+exports.setBallSpeedSlow = function(d){return "ezarri pilota abiadura motela"};
 
-exports.setBallSpeedNormal = function(d){return "set normal ball speed"};
+exports.setBallSpeedNormal = function(d){return "ezarri pilota abiadura normala"};
 
-exports.setBallSpeedFast = function(d){return "set fast ball speed"};
+exports.setBallSpeedFast = function(d){return "ezarri pilota abiadura azkarra"};
 
-exports.setBallSpeedVeryFast = function(d){return "set very fast ball speed"};
+exports.setBallSpeedVeryFast = function(d){return "ezarri pilota abiadura oso azkarra"};
 
-exports.setBallSpeedTooltip = function(d){return "Sets the speed of the ball"};
+exports.setBallSpeedTooltip = function(d){return "pilotaren abiadura ezartzen du"};
 
-exports.setPaddleRandom = function(d){return "set random paddle"};
+exports.setPaddleRandom = function(d){return "ezarri ausazko erraketa"};
 
-exports.setPaddleHardcourt = function(d){return "set hardcourt paddle"};
+exports.setPaddleHardcourt = function(d){return "ezarri zelai gogorreko erraketa"};
 
-exports.setPaddleRetro = function(d){return "set retro paddle"};
+exports.setPaddleRetro = function(d){return "ezarri retro erraketa"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Erraketaren irudia ezartzen du"};
 
-exports.setPaddleSpeedRandom = function(d){return "set random paddle speed"};
+exports.setPaddleSpeedRandom = function(d){return "Ezarri ausazko erraketa abiadura"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "set very slow paddle speed"};
+exports.setPaddleSpeedVerySlow = function(d){return "ezarri erraketa abiadura oso motela"};
 
-exports.setPaddleSpeedSlow = function(d){return "set slow paddle speed"};
+exports.setPaddleSpeedSlow = function(d){return "ezarri erraketa abiadura motela"};
 
-exports.setPaddleSpeedNormal = function(d){return "set normal paddle speed"};
+exports.setPaddleSpeedNormal = function(d){return "ezarri erraketa abiadura normala"};
 
-exports.setPaddleSpeedFast = function(d){return "set fast paddle speed"};
+exports.setPaddleSpeedFast = function(d){return "ezarri erraketa abiadura azkarra"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "set very fast paddle speed"};
+exports.setPaddleSpeedVeryFast = function(d){return "ezarri erraketa abiadura oso azkarra"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Sets the speed of the paddle"};
+exports.setPaddleSpeedTooltip = function(d){return "Erraketaren abiadura ezartzen du"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Partekatu"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Nik sortutako errebote jokoa begiratu. Nik bakarrik idatzi dut @codeorg-ekin"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Partekatu zure jokoa:"};
 
 exports.turnLeft = function(d){return "turn left"};
 
@@ -5449,9 +5492,9 @@ exports.whenDown = function(d){return "when Down arrow"};
 
 exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.whenGameStarts = function(d){return "Jokoa hasten denean"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.whenGameStartsTooltip = function(d){return "Jokoa hasten denean exekutatu ondorengo ekintzak."};
 
 exports.whenLeft = function(d){return "when Left arrow"};
 
@@ -5484,45 +5527,45 @@ exports.yes = function(d){return "Yes"};
 var MessageFormat = require("messageformat");MessageFormat.locale.eu=function(n){return n===1?"one":"other"}
 exports.blocklyMessage = function(d){return "Blockly"};
 
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Ekintzak"};
 
-exports.catColour = function(d){return "Colour"};
+exports.catColour = function(d){return "Kolorea"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Logika"};
 
-exports.catLists = function(d){return "Lists"};
+exports.catLists = function(d){return "Zerrendak"};
 
-exports.catLoops = function(d){return "Loops"};
+exports.catLoops = function(d){return "Itzuliak"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "Matematika"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Funtzioak"};
 
-exports.catText = function(d){return "Text"};
+exports.catText = function(d){return "Testua"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "Aldagaiak"};
 
-exports.codeTooltip = function(d){return "See generated JavaScript code."};
+exports.codeTooltip = function(d){return "Ikusi sortutako Javascript kodea."};
 
-exports.continue = function(d){return "Continue"};
+exports.continue = function(d){return "Jarraitu"};
 
-exports.dialogCancel = function(d){return "Cancel"};
+exports.dialogCancel = function(d){return "Ezeztatu"};
 
-exports.dialogOK = function(d){return "OK"};
+exports.dialogOK = function(d){return "Ongi"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "I"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "H"};
 
 exports.directionEastLetter = function(d){return "E"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "M"};
 
-exports.emptyBlocksErrorMsg = function(d){return "The \"Repeat\" or \"If\" block needs to have other blocks inside it to work. Make sure the inner block fits properly inside the containing block."};
+exports.emptyBlocksErrorMsg = function(d){return "\"Errepikatu\" edo \"baldintza\" blokeak barruan beste bloke batzuk behar ditu funtzionatzeko. Egiaztatu barruko blokeak egoki kokatuak daudela."};
 
-exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
+exports.extraTopBlocks = function(d){return "Ekintza blokeei lotu gabeko blokeak soberan daude."};
 
-exports.finalStage = function(d){return "Congratulations! You have completed the final stage."};
+exports.finalStage = function(d){return "Zorionak! Azkeneko eszenatokia osatu duzu."};
 
 exports.finalStageTrophies = function(d){return "Congratulations! You have completed the final stage and won "+p(d,"numTrophies",0,"eu",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
@@ -5530,15 +5573,15 @@ exports.generatedCodeInfo = function(d){return "The blocks for your program can 
 
 exports.hashError = function(d){return "Sorry, '%1' doesn't correspond with any saved program."};
 
-exports.help = function(d){return "Help"};
+exports.help = function(d){return "Laguntza"};
 
-exports.hintTitle = function(d){return "Hint:"};
+exports.hintTitle = function(d){return "Aholkua:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "salto egin"};
 
 exports.levelIncompleteError = function(d){return "You are using all of the necessary types of blocks but not in the right way."};
 
-exports.listVariable = function(d){return "list"};
+exports.listVariable = function(d){return "zerrenda"};
 
 exports.makeYourOwnFlappy = function(d){return "Make Your Own Flappy Game"};
 
@@ -5558,15 +5601,15 @@ exports.numLinesOfCodeWritten = function(d){return "You just wrote "+p(d,"numLin
 
 exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" of "+v(d,"stage_total")};
 
-exports.resetProgram = function(d){return "Reset"};
+exports.resetProgram = function(d){return "Leheneratu"};
 
 exports.runProgram = function(d){return "Run Program"};
 
 exports.runTooltip = function(d){return "Run the program defined by the blocks in the workspace."};
 
-exports.showCodeHeader = function(d){return "Show Code"};
+exports.showCodeHeader = function(d){return "Ikusi Iturburua"};
 
-exports.showGeneratedCode = function(d){return "Show code"};
+exports.showGeneratedCode = function(d){return "Ikusi iturburua"};
 
 exports.subtitle = function(d){return "a visual programming environment"};
 
@@ -5610,13 +5653,13 @@ exports.orientationLock = function(d){return "Turn off orientation lock in devic
 
 exports.wantToLearn = function(d){return "Want to learn to code?"};
 
-exports.watchVideo = function(d){return "Watch the Video"};
+exports.watchVideo = function(d){return "Ikusi Bideoa"};
 
 exports.tryHOC = function(d){return "Try the Hour of Code"};
 
 exports.signup = function(d){return "Sign up for the intro course"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Hemen aholkua:"};
 
 
 },{"messageformat":47}],36:[function(require,module,exports){

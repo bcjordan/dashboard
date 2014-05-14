@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -909,6 +910,41 @@ exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
+};
+
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
 };
 
 },{}],4:[function(require,module,exports){
@@ -3371,6 +3407,13 @@ exports.shallowCopy = function(source) {
 };
 
 /**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
+};
+
+/**
  * Returns a new object with the properties from defaults overriden by any
  * properties in options. Leaves defaults and options unchanged.
  */
@@ -3491,13 +3534,13 @@ exports.dialogCancel = function(d){return "Отказ"};
 
 exports.dialogOK = function(d){return "OK"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "север"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "юг"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "изток"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "запад"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоковете \"Повтори\" и \"или\" трябва да съдържат други блокове в себе си, за да работят. Уверете се, че вътрешния блок се вписва правилно във външния блок."};
 
@@ -3507,7 +3550,7 @@ exports.finalStage = function(d){return "Поздравления! Вие зав
 
 exports.finalStageTrophies = function(d){return "Поздравления! Вие завършихте последния етап и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоковете за вашата програма също могат да бъдат представени в JavaScript, най-широко приетия език за програмиране:"};
+exports.generatedCodeInfo = function(d){return "Дори най-добрите университети учат блок базирано програмиране(напр., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Но под капака, блокове представляват кодове, написани на JavaScript, в света най-широко използваниятhttps://crowdin.net/translate/codeorg/43/enus-bg# за програмиране език:"};
 
 exports.hashError = function(d){return "За съжаление '%1' не съответства на нито една запазена програма."};
 
@@ -3515,7 +3558,7 @@ exports.help = function(d){return "Помощ"};
 
 exports.hintTitle = function(d){return "Подсказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "скок"};
 
 exports.levelIncompleteError = function(d){return "Използвате всички необходими видове блокове, но не по правилния начин."};
 
@@ -3529,9 +3572,9 @@ exports.nextLevel = function(d){return "Поздравления! Приключ
 
 exports.nextLevelTrophies = function(d){return "Поздравления! Завършихте пъзел "+v(d,"puzzleNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.nextStage = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Поздравления! Вие завършихте "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageName")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравления! Приключихте пъзел "+v(d,"puzzleNumber")+". (Въпреки това, можехте да използвате само "+p(d,"numBlocks",0,"bg",{"one":"1 блок","other":n(d,"numBlocks")+" блокове"})+".)"};
 
@@ -3571,9 +3614,9 @@ exports.tryAgain = function(d){return "Опитайте отново"};
 
 exports.backToPreviousLevel = function(d){return "Обратно към предишното ниво"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Запазване на вашата галерия"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Запазете вашата галерия!"};
 
 exports.typeCode = function(d){return "Въведете вашия JavaScript код под тези инструкции."};
 
@@ -3597,20 +3640,20 @@ exports.tryHOC = function(d){return "Опитайте Часа на Кодира
 
 exports.signup = function(d){return "Регистрация във встъпителния курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ето един съвет:"};
 
 
 },{"messageformat":43}],31:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bg=function(n){return n===1?"one":"other"}
-exports.continue = function(d){return "Напред"};
+exports.continue = function(d){return "Продължи"};
 
 exports.nextLevel = function(d){return "Поздравления! Вие завършихте този пъзел."};
 
 exports.no = function(d){return "Не"};
 
-exports.numBlocksNeeded = function(d){return "Този пъзел може да бъде решен с %1 блокове."};
+exports.numBlocksNeeded = function(d){return "Този пъзел може да бъде решен с %1 блока."};
 
-exports.oneTopBlock = function(d){return "За този пъзел, трябва да съедините заедно всички блокове в работното поле."};
+exports.oneTopBlock = function(d){return "За този пъзел, трябва да съединиш заедно всички блокове в бялото работно поле."};
 
 exports.reinfFeedbackMsg = function(d){return "Може да натиснете бутона \"Опитай отново\", за да се върнете да играете играта си."};
 

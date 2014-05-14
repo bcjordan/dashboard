@@ -1,0 +1,11 @@
+name 'K-1 multi 3' 
+title 'Maze Multiple Choice Two'
+description '/script_assets/matches/images/head.jpg'
+banner 'This puzzle is all about selecting the correct flowers.'
+height '170'
+
+question 'Which flowers are yellow?'
+wrong '/script_assets/matches/images/a1.jpg'
+wrong '/script_assets/matches/images/a2.jpg'
+right '/script_assets/matches/images/a3.jpg'
+wrong '/script_assets/matches/images/a4.jpg'

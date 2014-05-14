@@ -1,4 +1,4 @@
-- Options: { id: 3, name: 'Edit Code', wrapup_video: 'hoc_wrapup', trophies: false, hidden: true }
+- Options: { id: 3, name: 'edit-code', wrapup_video: 'hoc_wrapup', trophies: false, hidden: true }
 - TSV: |
     Game	Name	Level	Skin	Concepts	Url
     MazeEC	Level1	3_1	birds	sequence

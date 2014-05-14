@@ -77,7 +77,7 @@ module.exports = function(app, levels, options, requiredBlockTests) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":41}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":43}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -854,6 +854,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -896,7 +897,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/no_no/common":43,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":28,"./templates/buttons.html":30,"./templates/instructions.html":32,"./templates/learn.html":33,"./templates/makeYourOwn.html":34,"./utils":41,"./xml":42}],3:[function(require,module,exports){
+},{"../locale/no_no/common":45,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":30,"./templates/buttons.html":32,"./templates/instructions.html":34,"./templates/learn.html":35,"./templates/makeYourOwn.html":36,"./utils":43,"./xml":44}],3:[function(require,module,exports){
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -909,6 +910,41 @@ exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
+};
+
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
 };
 
 },{}],4:[function(require,module,exports){
@@ -973,7 +1009,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":29,"./utils.js":41,"url":55}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":31,"./utils.js":43,"url":57}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
 var INFINITE_LOOP_TRAP_RE =
     new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
@@ -1862,7 +1898,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/no_no/common":43,"./codegen":6,"./dom":7,"./templates/buttons.html":30,"./templates/code.html":31,"./templates/readonly.html":36,"./templates/sharing.html":37,"./templates/showCode.html":38,"./templates/trophy.html":39,"./utils":41}],9:[function(require,module,exports){
+},{"../locale/no_no/common":45,"./codegen":6,"./dom":7,"./templates/buttons.html":32,"./templates/code.html":33,"./templates/readonly.html":38,"./templates/sharing.html":39,"./templates/showCode.html":40,"./templates/trophy.html":41,"./utils":43}],9:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -2156,7 +2192,281 @@ exports.notFinished = function() {
   return !Maze.checkSuccess();
 };
 
-},{"./tiles":21}],11:[function(require,module,exports){
+exports.nectar = function(id) {
+  Maze.bee.getNectar(id);
+};
+
+exports.honey = function(id) {
+  Maze.bee.makeHoney(id);
+};
+
+},{"./tiles":22}],11:[function(require,module,exports){
+var utils = require('../utils');
+
+var Bee = function (maze, config) {
+  this.maze_ = maze;
+  this.skin_ = config.skin;
+
+  this.honeyGoal = config.level.honeyGoal;
+
+  // Create our own copy to ensure that it's not changing underneath us
+  this.initialDirt_ = utils.cloneWithoutFunctions(config.level.initialDirt);
+
+  this.honeyImages_ = [];
+  this.nectarImages_ = [];
+};
+
+module.exports = Bee;
+
+Bee.prototype.reset = function () {
+  this.honey_ = 0;
+  this.nectar_ = 0;
+  this.updateNectarImages_();
+  this.updateHoneyImages_();
+};
+
+/**
+ * Did we both reach our total honey goal, and accomplish any specific hiveGoals
+ */
+Bee.prototype.finished = function () {
+  if (this.honey_ < this.honeyGoal) {
+    return false;
+  }
+
+  for (var row = 0; row < this.initialDirt_.length; row++) {
+    for (var col = 0; col < this.initialDirt_[row].length; col++) {
+      // If any of our hives still have non infinite capactiy, we haven't hit
+      // the hiveGoal
+      var capacity = this.hiveRemainingCapacity(row, col);
+      if (this.isHive(row, col) && capacity > 0 && capacity < Infinity) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Each cell of initialDirt is below zero if it's a hive.  If a hive has no hive
+ * specific goal, it is represented as -1.  If a hive does have a goal, it is
+ * represented as -(1 + hiveGoal).
+ */
+Bee.prototype.isHive = function (row, col) {
+  return this.initialDirt_[row][col] < 0;
+};
+
+/**
+ * See isHive comment.
+ */
+Bee.prototype.hiveGoal = function (row, col) {
+  var val = this.initialDirt_[row][col];
+  if (val >= -1) {
+    return 0;
+  }
+
+  return Math.abs(val) - 1;
+};
+
+
+/**
+ * How much more honey can the hive at (row, col) produce before it hits the goal
+ */
+Bee.prototype.hiveRemainingCapacity = function (row, col) {
+  if (!this.isHive(row, col)) {
+    return 0;
+  }
+
+  var currentVal = this.maze_.dirt_[row][col];
+  var initialVal = this.initialDirt_[row][col];
+  // If we started at -1, we have no hiveGoal and have infinite capacity
+  if (currentVal === -1 && initialVal === -1) {
+    return Infinity;
+  }
+
+  // Otherwise our capacity is how many more until we get to -1
+  return Math.abs(currentVal + 1);
+};
+
+
+// API
+
+Bee.prototype.getNectar = function (id) {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  // Nectar is positive.  Make sure we have it.
+  if (this.maze_.dirt_[row][col] <= 0) {
+    // todo - rationalize with exception throwing changes
+    throw false;
+  }
+
+  BlocklyApps.log.push(['nectar', id]);
+  this.nectar_ += 1;
+};
+
+Bee.prototype.makeHoney = function (id) {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  if (this.nectar_ === 0 || this.hiveRemainingCapacity(row, col) === 0) {
+    // todo - rationalize with exception throwing changes
+    throw false;
+  }
+
+  BlocklyApps.log.push(['honey', id]);
+  this.makeHoneyAt(row, col);
+};
+
+/**
+ * Update model to represent made honey.  Does no validation
+ */
+Bee.prototype.makeHoneyAt = function (row, col) {
+  var capacity = this.hiveRemainingCapacity(row, col);
+  if (capacity > 0 && capacity !== Infinity) {
+    this.maze_.dirt_[row][col] += 1; // update progress towards goal
+
+    // todo (brent) - when a hive with a goal goes to 0, should we display
+    // something different than the goalless hive? (answer is prob yes)
+  }
+
+  this.nectar_ -= 1;
+  this.honey_ += 1;
+};
+
+
+// ANIMATIONS
+
+Bee.prototype.animateGetNectar = function () {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  if (this.maze_.dirt_[row][col] <= 0) {
+    throw new Error("Shouldn't be able to end up with a nectar animation if " +
+      "there was no nectar to be had");
+  }
+
+  this.maze_.dirt_[row][col] -= 1;
+  // todo - i have an improvement for how updateDirt works on a different branch
+  if (this.maze_.dirt_[row][col] === 0) {
+    this.maze_.removeDirt(row, col);
+  } else {
+    this.maze_.updateDirt(row, col);
+  }
+
+  this.nectar_ += 1;
+
+  this.updateNectarImages_();
+
+  // play a sound?
+};
+
+Bee.prototype.updateNectarImages_ = function () {
+  var self = this;
+
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.nectarImages_.length; i < this.nectar_; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'nectarClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 0);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.nectarImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.nectarImages_[i].setAttribute('id', 'nectar' + (i + 1));
+    this.nectarImages_[i].setAttribute('width', 50);
+    this.nectarImages_[i].setAttribute('height', 50);
+    this.nectarImages_[i].setAttribute('x', i * 50);
+    this.nectarImages_[i].setAttribute('y', 0);
+    this.nectarImages_[i].setAttribute('clip-path', 'url(#nectarClip' + (i + 1) + ')');
+    this.nectarImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.skin_.nectar);
+    svg.insertBefore(this.nectarImages_[i], pegmanElement);
+  }
+
+  this.nectarImages_.forEach(function (image, index) {
+    image.setAttribute('display', index < self.nectar_ ? 'block' : 'none');
+  });
+};
+
+
+Bee.prototype.animateMakeHoney = function () {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  if (this.nectar_ === 0 || !this.isHive(row, col)) {
+    throw new Error("Shouldn't be able to end up with a honey animation if " +
+      "we arent at a hive or dont have nectar");
+  }
+
+  this.makeHoneyAt(row, col);
+
+  this.maze_.updateDirt(row, col);
+
+  this.updateNectarImages_();
+  this.updateHoneyImages_();
+};
+
+Bee.prototype.updateHoneyImages_ = function () {
+  var self = this;
+
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.honeyImages_.length; i < this.honey_; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'honeyClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 50);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.honeyImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.honeyImages_[i].setAttribute('id', 'honey' + (i + 1));
+    this.honeyImages_[i].setAttribute('width', 50);
+    this.honeyImages_[i].setAttribute('height', 50);
+    this.honeyImages_[i].setAttribute('x', i * 50);
+    this.honeyImages_[i].setAttribute('y', 50);
+    this.honeyImages_[i].setAttribute('clip-path', 'url(#honeyClip' + (i + 1) + ')');
+    this.honeyImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.skin_.honey);
+    svg.insertBefore(this.honeyImages_[i], pegmanElement);
+  }
+
+  this.honeyImages_.forEach(function (image, index) {
+    image.setAttribute('display', index < self.honey_ ? 'block' : 'none');
+  });
+};
+
+/**
+ * When successfully completing a level, maze gradually fades out paths.  It
+ * assumes all dirt is at 0. For now we'll just set all dirt to 0 so that hives
+ * get hidden.  There may be a better long term approach.
+ */
+Bee.prototype.setTilesTransparent = function () {
+  for (var row = 0; row < this.initialDirt_.length; row++) {
+    for (var col = 0; col < this.initialDirt_[row].length; col++) {
+      if (this.isHive(row, col)) {
+        this.maze_.removeDirt(row, col);
+      }
+    }
+  }
+};
+
+},{"../utils":43}],12:[function(require,module,exports){
 /**
  * Blockly Demo: Maze
  *
@@ -2184,30 +2494,13 @@ exports.notFinished = function() {
 
 var msg = require('../../locale/no_no/maze');
 var codegen = require('../codegen');
+var blockUtils = require('../block_utils');
 
 // Install extensions to Blockly's language and JavaScript generator.
 exports.install = function(blockly, skin) {
 
   var generator = blockly.Generator.get('JavaScript');
   blockly.JavaScript = generator;
-
-  blockly.Blocks.maze_moveForward = {
-    // Block for moving forward.
-    helpUrl: 'http://code.google.com/p/blockly/wiki/Move',
-    init: function() {
-      this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(msg.moveForward());
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setTooltip(msg.moveForwardTooltip());
-    }
-  };
-
-  generator.maze_moveForward = function() {
-    // Generate JavaScript for moving forward.
-    return 'Maze.moveForward(\'block_id_' + this.id + '\');\n';
-  };
 
   var SimpleMove = {
     DIRECTION_CONFIGS: {
@@ -2250,41 +2543,48 @@ exports.install = function(blockly, skin) {
 
   SimpleMove.generateBlocksForAllDirections();
 
-  blockly.Blocks.maze_fill = {
-    // Block for putting dirt on to a tile.
+  // Block for moving forward.
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_moveForward',
+    helpUrl: 'http://code.google.com/p/blockly/wiki/Move',
+    title: msg.moveForward(),
+    tooltip: msg.moveForwardTooltip(),
+    functionName: 'Maze.moveForward'
+  });
+
+  // Block for putting dirt on to a tile.
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_fill',
     helpUrl: 'http://code.google.com/p/blockly/wiki/PutDown',
-    init: function() {
-      this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(msg.fill());
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setTooltip(msg.fillTooltip());
-    }
-  };
+    title: msg.fill(),
+    tooltip: msg.fillTooltip(),
+    functionName: 'Maze.fill'
+  });
 
-  generator.maze_fill = function() {
-    // Generate JavaScript for putting dirt on to a tile.
-    return 'Maze.fill(\'block_id_' + this.id + '\');\n';
-  };
-
-  blockly.Blocks.maze_dig = {
-    // Block for putting for removing dirt from a tile.
+  // Block for putting for removing dirt from a tile.
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_dig',
     helpUrl: 'http://code.google.com/p/blockly/wiki/PickUp',
-    init: function() {
-      this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(msg.dig());
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setTooltip(msg.digTooltip());
-    }
-  };
+    title: msg.dig(),
+    tooltip: msg.digTooltip(),
+    functionName: 'Maze.dig'
+  });
 
-  generator.maze_dig = function() {
-    // Generate JavaScript for removing dirt from a tile.
-    return 'Maze.dig(\'block_id_' + this.id + '\');\n';
-  };
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_nectar',
+    helpUrl: '',
+    title: msg.nectar(),
+    tooltip: msg.nectarTooltip(),
+    functionName: 'Maze.nectar'
+  });
+
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_honey',
+    helpUrl: '',
+    title: msg.honey(),
+    tooltip: msg.honeyTooltip(),
+    functionName: 'Maze.honey'
+  });
 
   blockly.Blocks.maze_turn = {
     // Block for turning left or right.
@@ -2564,7 +2864,7 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/no_no/maze":44,"../codegen":6}],12:[function(require,module,exports){
+},{"../../locale/no_no/maze":46,"../block_utils":3,"../codegen":6}],13:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2585,10 +2885,13 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/maze":44,"ejs":45}],13:[function(require,module,exports){
+},{"../../locale/no_no/maze":46,"ejs":47}],14:[function(require,module,exports){
+/*jshint multistr: true */
+
 var levelBase = require('../level_base');
 var Direction = require('./tiles').Direction;
 var msg = require('../../locale/no_no/maze');
+var blockUtils = require('../block_utils');
 
 //TODO: Fix hacky level-number-dependent toolbox.
 var toolbox = function(page, level) {
@@ -3783,10 +4086,49 @@ module.exports = {
       [ 0, 0, 0, 0, 0, 0, 0, 0 ],
       [ 0, 0, 0, 0, 0, 0, 0, 0 ]
     ]
+  },
+
+  'bee_1': {
+    'toolbox': blockUtils.createToolbox('\
+      <block type="maze_moveForward"></block>\
+      <block type="maze_turn"><title name="DIR">turnLeft</title></block>\
+      <block type="maze_turn"><title name="DIR">turnRight</title></block>\
+      <block type="maze_nectar"></block>\
+      <block type="maze_honey"></block>'
+    ),
+    'startBlocks': startBlocks(1, 1),
+    'requiredBlocks': [
+    ],
+    'scale': {
+      'snapRadius': 2.0
+    },
+    honeyGoal: 2,
+    step: true,
+    'map': [
+      [ 0, 0, 0, 0, 0, 1, 1, 1 ],
+      [ 0, 1, 1, 0, 0, 1, 1, 1 ],
+      [ 0, 0, 0, 0, 0, 1, 1, 1 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 2, 1, 1, 1, 1, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 1, 1, 0, 0, 0, 0 ],
+      [ 0, 0, 1, 1, 0, 0, 0, 0 ]
+    ],
+    'startDirection': Direction.EAST,
+    'initialDirt': [
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, -1, 2, -1, -2, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    ]
   }
 };
 
-},{"../../locale/no_no/maze":44,"../level_base":9,"./karelStartBlocks.xml":14,"./tiles":21,"./toolboxes/karel1.xml":22,"./toolboxes/karel2.xml":23,"./toolboxes/karel3.xml":24}],14:[function(require,module,exports){
+},{"../../locale/no_no/maze":46,"../block_utils":3,"../level_base":9,"./karelStartBlocks.xml":15,"./tiles":22,"./toolboxes/karel1.xml":23,"./toolboxes/karel2.xml":24,"./toolboxes/karel3.xml":25}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3818,7 +4160,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/maze":44,"ejs":45}],15:[function(require,module,exports){
+},{"../../locale/no_no/maze":46,"ejs":47}],16:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
 var reqBlocks = require('./requiredBlocks');
@@ -4448,7 +4790,7 @@ cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
 cloneWithStep('karel_2_9', true, false);
 
-},{"../block_utils":3,"../utils":41,"./karelLevels":13,"./requiredBlocks":18,"./startBlocks.xml":20,"./tiles":21,"./toolboxes/maze.xml":25}],16:[function(require,module,exports){
+},{"../block_utils":3,"../utils":43,"./karelLevels":14,"./requiredBlocks":19,"./startBlocks.xml":21,"./tiles":22,"./toolboxes/maze.xml":26}],17:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -4468,7 +4810,7 @@ window.mazeMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":11,"./levels":15,"./maze":17,"./requiredBlocks":18,"./skins":19}],17:[function(require,module,exports){
+},{"../appMain":1,"./blocks":12,"./levels":16,"./maze":18,"./requiredBlocks":19,"./skins":20}],18:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -4505,6 +4847,8 @@ var page = require('../templates/page.html');
 var feedback = require('../feedback.js');
 var dom = require('../dom');
 var utils = require('../utils');
+
+var Bee = require('./bee');
 
 var Direction = tiles.Direction;
 var SquareType = tiles.SquareType;
@@ -4890,6 +5234,11 @@ Maze.init = function(config) {
 
   skin = config.skin;
   level = config.level;
+
+  if (config.skinId === 'bee') {
+    Maze.bee = new Bee(Maze, config);
+  }
+
   loadLevel();
 
   Maze.cachedBlockStates = [];
@@ -5026,7 +5375,7 @@ var createDirt = function(row, col) {
  * @param {number} row Row index.
  * @param {number} col Column index.
  */
-var updateDirt = function(row, col) {
+Maze.updateDirt = function(row, col) {
   // Calculate spritesheet index.
   var n = Maze.dirt_[row][col];
   var spriteIndex;
@@ -5050,7 +5399,7 @@ var updateDirt = function(row, col) {
   img.setAttribute('y', y);
 };
 
-var removeDirt = function(row, col) {
+Maze.removeDirt = function(row, col) {
   var index = dirtPositionToIndex(row, col);
   var img = document.getElementById('dirt' + index);
   if (img) {
@@ -5220,15 +5569,19 @@ BlocklyApps.reset = function(first) {
     movePegmanIcon.setAttribute('visibility', 'hidden');
   }
 
+  if (Maze.bee) {
+    Maze.bee.reset();
+  }
+
   // Move the init dirt marker icons into position.
   resetDirt();
   for (var row = 0; row < Maze.ROWS; row++) {
     for (var col = 0; col < Maze.COLS; col++) {
-      removeDirt(row, col);
+      Maze.removeDirt(row, col);
       if (getTile(Maze.dirt_, col, row) !== 0 &&
           getTile(Maze.dirt_, col, row) !== undefined) {
         createDirt(row, col);
-        updateDirt(row, col);
+        Maze.updateDirt(row, col);
       }
     }
   }
@@ -5457,7 +5810,7 @@ Maze.execute = function(stepMode) {
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5513,7 +5866,7 @@ Maze.performStep = function(stepMode) {
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5609,6 +5962,12 @@ function animateAction (action, stepMode) {
       break;
     case 'tile_transparent':
       Maze.setTileTransparent();
+      break;
+    case 'nectar':
+      Maze.bee.animateGetNectar();
+      break;
+    case 'honey':
+      Maze.bee.animateMakeHoney();
       break;
     default:
       // action[0] is null if generated by BlocklyApps.checkTimeout().
@@ -5872,6 +6231,10 @@ Maze.setTileTransparent = function() {
       tileId++;
     }
   }
+
+  if (Maze.bee) {
+    Maze.bee.setTilesTransparent();
+  }
 };
 
 /**
@@ -5944,9 +6307,9 @@ var scheduleDirtChange = function(options) {
     createDirt(row, col);
   }
   if (current === 0) {
-    removeDirt(row, col);
+    Maze.removeDirt(row, col);
   } else {
-    updateDirt(row, col);
+    Maze.updateDirt(row, col);
   }
   BlocklyApps.playAudio(options.sound, {volume: 0.5});
 };
@@ -6046,15 +6409,25 @@ var isDirtCorrect = function() {
 };
 
 Maze.checkSuccess = function() {
-  if (atFinish() && isDirtCorrect()) {
-    // Finished.  Terminate the user's program.
-    BlocklyApps.log.push(['finish', null]);
-    throw true;
+  if (!atFinish()) {
+    return false;
   }
-  return false;
+  if (Maze.bee) {
+    if (!Maze.bee.finished()) {
+      return false;
+    }
+  } else if (!isDirtCorrect()) {
+    return false;
+  }
+
+  // Finished.  Terminate the user's program.
+  BlocklyApps.log.push(['finish', null]);
+  throw true;
 };
 
-},{"../../locale/no_no/common":43,"../../locale/no_no/maze":44,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":27,"../templates/page.html":35,"../timeoutList":40,"../utils":41,"./api":10,"./controls.html":12,"./tiles":21,"./visualization.html":26}],18:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"../../locale/no_no/maze":46,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":29,"../templates/page.html":37,"../timeoutList":42,"../utils":43,"./api":10,"./bee":11,"./controls.html":13,"./tiles":22,"./visualization.html":27}],19:[function(require,module,exports){
+var requiredBlockUtils = require('../required_block_utils');
+
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
 var TURN_LEFT = {'test': 'turnLeft', 'type': 'maze_turn', 'titles': {'DIR': 'turnLeft'}};
 var TURN_RIGHT = {'test': 'turnRight', 'type': 'maze_turn', 'titles': {'DIR': 'turnRight'}};
@@ -6065,6 +6438,11 @@ var IS_PATH_FORWARD = {'test': 'isPathForward', 'type': 'maze_ifElse', 'titles':
 var FOR_LOOP = {'test': 'for', 'type': 'controls_repeat', titles: {TIMES: '???'}};
 
 module.exports = {
+  moveNorth: requiredBlockUtils.simpleBlock('maze_moveNorth'),
+  moveSouth: requiredBlockUtils.simpleBlock('maze_moveSouth'),
+  moveEast: requiredBlockUtils.simpleBlock('maze_moveEast'),
+  moveWest: requiredBlockUtils.simpleBlock('maze_moveWest'),
+  controls_repeat_simplified: requiredBlockUtils.repeatSimpleBlock('???'),
   MOVE_FORWARD: MOVE_FORWARD,
   TURN_LEFT: TURN_LEFT,
   TURN_RIGHT: TURN_RIGHT,
@@ -6075,7 +6453,7 @@ module.exports = {
   FOR_LOOP: FOR_LOOP
 };
 
-},{}],19:[function(require,module,exports){
+},{"../required_block_utils":28}],20:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -6089,6 +6467,15 @@ module.exports = {
 var skinsBase = require('../skins');
 
 var CONFIGS = {
+
+  bee: {
+    look: '#000',
+    transparentTileEnding: true,
+    nonDisappearingPegmanHittingObstacle: true,
+    background: 4,
+    dirtSound: true,
+    pegmanYOffset: -8
+  },
 
   farmer: {
     look: '#000',
@@ -6189,6 +6576,8 @@ exports.load = function(assetUrl, id) {
   skin.graph = config.graph;
   skin.look = config.look;
   skin.dirt = skin.assetUrl('dirt.png');
+  skin.nectar = skin.assetUrl('nectar.png');
+  skin.honey = skin.assetUrl('honey.png');
   if (config.background !== undefined) {
     var index = Math.floor(Math.random() * config.background);
     skin.background = skin.assetUrl('background' + index + '.png');
@@ -6201,7 +6590,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":27}],20:[function(require,module,exports){
+},{"../skins":29}],21:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6222,7 +6611,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],21:[function(require,module,exports){
+},{"ejs":47}],22:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -6285,7 +6674,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":41}],22:[function(require,module,exports){
+},{"../utils":43}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6306,7 +6695,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],23:[function(require,module,exports){
+},{"ejs":47}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6332,7 +6721,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/no_no/common":43,"../../../locale/no_no/maze":44,"ejs":45}],24:[function(require,module,exports){
+},{"../../../locale/no_no/common":45,"../../../locale/no_no/maze":46,"ejs":47}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6366,7 +6755,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/no_no/common":43,"ejs":45}],25:[function(require,module,exports){
+},{"../../../locale/no_no/common":45,"ejs":47}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6387,7 +6776,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],26:[function(require,module,exports){
+},{"ejs":47}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6408,7 +6797,58 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],27:[function(require,module,exports){
+},{"ejs":47}],28:[function(require,module,exports){
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+},{}],29:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -6450,7 +6890,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -6655,7 +7095,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6676,7 +7116,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],30:[function(require,module,exports){
+},{"ejs":47}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6697,7 +7137,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/common":43,"ejs":45}],31:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"ejs":47}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6718,7 +7158,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],32:[function(require,module,exports){
+},{"ejs":47}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6739,7 +7179,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/common":43,"ejs":45}],33:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"ejs":47}],35:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6762,7 +7202,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/common":43,"ejs":45}],34:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"ejs":47}],36:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6783,7 +7223,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/common":43,"ejs":45}],35:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"ejs":47}],37:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6808,7 +7248,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/common":43,"ejs":45}],36:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"ejs":47}],38:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6830,7 +7270,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],37:[function(require,module,exports){
+},{"ejs":47}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6851,7 +7291,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/common":43,"ejs":45}],38:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"ejs":47}],40:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6872,7 +7312,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/no_no/common":43,"ejs":45}],39:[function(require,module,exports){
+},{"../../locale/no_no/common":45,"ejs":47}],41:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6893,7 +7333,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],40:[function(require,module,exports){
+},{"ejs":47}],42:[function(require,module,exports){
 var list = [];
 
 /**
@@ -6911,7 +7351,7 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.shallowCopy = function(source) {
@@ -6921,6 +7361,13 @@ exports.shallowCopy = function(source) {
   }
 
   return result;
+};
+
+/**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
 };
 
 /**
@@ -6986,7 +7433,7 @@ exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
   return blocks;
 };
 
-},{"./xml":42}],42:[function(require,module,exports){
+},{"./xml":44}],44:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -7014,7 +7461,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],43:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.no=function(n){return n===1?"one":"other"}
 exports.blocklyMessage = function(d){return "Blockly"};
 
@@ -7153,7 +7600,7 @@ exports.signup = function(d){return "Registrer deg for intro kurset"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":56}],44:[function(require,module,exports){
+},{"messageformat":58}],46:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.no=function(n){return n===1?"one":"other"}
 exports.avoidCowAndRemove = function(d){return "unngå kua og fjern 1"};
 
@@ -7191,6 +7638,10 @@ exports.heightParameter = function(d){return "høyde"};
 
 exports.holePresent = function(d){return "det er et hull"};
 
+exports.honey = function(d){return "make honey"};
+
+exports.honeyTooltip = function(d){return "Make honey from nectar"};
+
 exports.ifCode = function(d){return "if"};
 
 exports.ifPathAhead = function(d){return "hvis det er sti foran"};
@@ -7210,6 +7661,10 @@ exports.moveNorthTooltip = function(d){return "Move me north one space."};
 exports.moveSouthTooltip = function(d){return "Move me south one space."};
 
 exports.moveWestTooltip = function(d){return "Move me west one space."};
+
+exports.nectar = function(d){return "get nectar"};
+
+exports.nectarTooltip = function(d){return "Get nectar from a flower"};
 
 exports.nextLevel = function(d){return "Gratulerer! Du har fullført denne oppgaven."};
 
@@ -7266,7 +7721,7 @@ exports.whileTooltip = function(d){return "Gjenta disse handlingene inntil måle
 exports.yes = function(d){return "Ja"};
 
 
-},{"messageformat":56}],45:[function(require,module,exports){
+},{"messageformat":58}],47:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7625,7 +8080,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":46,"./utils":47,"fs":48,"path":50}],46:[function(require,module,exports){
+},{"./filters":48,"./utils":49,"fs":50,"path":52}],48:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -7828,7 +8283,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7854,9 +8309,9 @@ exports.escape = function(html){
 };
  
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 
-},{}],49:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7911,7 +8366,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],50:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8139,7 +8594,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":49}],51:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":51}],53:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -8650,7 +9105,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],52:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8736,7 +9191,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8823,13 +9278,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":52,"./encode":53}],55:[function(require,module,exports){
+},{"./decode":54,"./encode":55}],57:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -9462,7 +9917,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":51,"querystring":54}],56:[function(require,module,exports){
+},{"punycode":53,"querystring":56}],58:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -11045,4 +11500,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[16])
+},{}]},{},[17])
