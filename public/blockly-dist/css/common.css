@@ -452,7 +452,7 @@ input[type="radio"] {
   .k1 #again-button {
     text-align: center;
     border: none;
-    background: white url("/blockly/media/common_images/tryagain-arrow-button.png");
+    background: white url("/blockly/media/common_images/tryagain-button-arrow.png");
     width: 204px;
     height: 118px;
     font-size: 27px; }
@@ -470,7 +470,7 @@ input[type="radio"] {
   .k1 #continue-button {
     text-align: center;
     border: none;
-    background: white url("/blockly/media/common_images/next-arrow-button.png");
+    background: white url("/blockly/media/common_images/next-button-arrow.png");
     width: 171px;
     height: 118px;
     font-size: 27px; }
