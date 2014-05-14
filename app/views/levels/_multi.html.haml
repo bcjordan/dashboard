@@ -47,18 +47,28 @@
 :javascript
 
   var selection = "none";   // "none", "wrong", "right"
-  var clickedNext = false;  // avoid multiple simultaneous submissions
+  var buttonEnabled = true;  // avoid multiple simultaneous submissions
 
   function radioChanged(index) 
   {
-    $('.submitButton').css({ opacity: 1.0 });
+    enableButton(true);
     selection = $("#choice_" + index).attr("correct") == "true" ? "right" : "wrong";
   }
 
   $(function() 
   {
-    $('.submitButton').css({ opacity: 0.5 });
+    enableButton(false);
   });
+
+  function enableButton(enable)
+  {
+    buttonEnabled = enable;
+
+    if (enable)
+      $('.submitButton').removeClass("disabled");
+    else
+      $('.submitButton').addClass("disabled");
+  }
 
   function showDialog()
   {
@@ -86,9 +96,9 @@
 
   $('.submitButton').click(function() 
   {
-    if (!clickedNext) 
+    if (buttonEnabled) 
     {
-      clickedNext = true;
+      enableButton(false);
 
       if (selection == "wrong") 
       {
@@ -106,8 +116,10 @@
           testResult: selection == "right" ? 100 : 0,
           onComplete: function() 
           {
-            // reenable button
-            clickedNext = false;
+            if (! nextRedirect)
+            {
+              enableButton(true);
+            }
 
             if (videoInfo) 
             {
@@ -122,8 +134,7 @@
       }
       else
       {
-        // reenable button
-        clickedNext = false;
+        enableButton(true);
       }
     }
   });
