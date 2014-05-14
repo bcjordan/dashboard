@@ -38,6 +38,9 @@ en:
           Assessment Test: Assessment Test
           Assessment Test 2: Assessment Test 2
           'Jigsaw: Learn to drag and drop': 'Jigsaw: Learn to drag and drop'
+          'Maze: Sequence': 'Maze: Sequence'
+          'Maze: Debugging': 'Maze: Debugging'
+          'Artist 1: Intro': 'Artist 1: Intro'
         4-5:
           desc: Custom script 4-5
           The Maze: The Maze
