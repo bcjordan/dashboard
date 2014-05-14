@@ -41,6 +41,8 @@ en:
           'Maze: Sequence': 'Maze: Sequence'
           'Maze: Debugging': 'Maze: Debugging'
           'Artist 1: Intro': 'Artist 1: Intro'
+          'Bee 1: Intro': 'Bee 1: Intro'
+          Multi & Match: Multi & Match
         4-5:
           desc: Custom script 4-5
           The Maze: The Maze
