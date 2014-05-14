@@ -144,6 +144,7 @@ function setupVideoFallback(videoInfo, playerHeight, playerWidth) {
 
   if (!videoInfo['fallback_test_url']) {
     console.log('Need fallback_test_url set.');
+    return;
   }
 
   onURLBlocked(videoInfo['fallback_test_url'], function() {
@@ -157,13 +158,6 @@ function onURLBlocked(base_url, callback) {
       .attr("src", base_url + "?" + Math.random())
       .css("position", "absolute")
       .appendTo("body");
-}
-
-function youTubeAvailabilityEndpointURL(base_url) {
-  if (window.document.URL.toString().indexOf('force_youtube_fallback') >= 0) {
-    return 'http://unreachable-test-subdomain.example.com/favicon.ico'
-  }
-  return base_url + "/favicon.ico";
 }
 
 function addFallbackVideoPlayer(videoInfo, playerHeight, playerWidth) {
@@ -189,13 +183,19 @@ function addFallbackVideoPlayer(videoInfo, playerHeight, playerWidth) {
     var showingErrorMessage = $fallbackPlayer.find('p').length > 0;
     if (showingErrorMessage) {
       $fallbackPlayer.addClass('fallback-video-player-failed');
-      openNotesTab();
+      if (hasNotesTab()) {
+        openNotesTab();
+      }
     }
     // Properly dispose of video.js player instance when hidden
     $fallbackPlayer.parents('.modal').one('hidden.bs.modal', function(){
       videoPlayer.dispose();
     })
   });
+}
+
+function hasNotesTab() {
+  return $('.dash_modal_body a[href="#notes-outer"]').length > 0;
 }
 
 function openNotesTab() {
