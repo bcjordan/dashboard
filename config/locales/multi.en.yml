@@ -18,16 +18,6 @@ en:
         W,W,N: W,W,N
         N,E,E: N,E,E
         E,E,N: E,E,N
-      K-1 multi 3:
-        Maze Multiple Choice Two: Maze Multiple Choice Two
-        /script_assets/matches/images/head.jpg: /script_assets/matches/images/head.jpg
-        This puzzle is all about selecting the correct flowers.: This puzzle is all
-          about selecting the correct flowers.
-        Which flowers are yellow?: Which flowers are yellow?
-        /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
-        /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
-        /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
-        /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
       test-brendan:
         Presidents: Presidents
         This multiple choice is all about the presidents of the United States.: This
@@ -38,3 +28,30 @@ en:
         Martha Washington: Martha Washington
         George Washington: George Washington
         George Jetson: George Jetson
+      K-1 multi 4:
+        Driver and Helper: Driver and Helper
+        /script_assets/multis/driver_helper.jpg: /script_assets/multis/driver_helper.jpg
+        One of these boys is the <b>driver</b>.  And one is the <b>helper</b>.: One
+          of these boys is the <b>driver</b>.  And one is the <b>helper</b>.
+        Which boy is the <large>helper</large>?: Which boy is the <large>helper</large>?
+        /script_assets/multis/helper.jpg: /script_assets/multis/helper.jpg
+        /script_assets/multis/driver.jpg: /script_assets/multis/driver.jpg
+      K-1 multi 5:
+        Driver and Helper: Driver and Helper
+        /script_assets/multis/driver_helper.jpg: /script_assets/multis/driver_helper.jpg
+        One of these boys is the <b>driver</b>.  And one is the <b>helper</b>.: One
+          of these boys is the <b>driver</b>.  And one is the <b>helper</b>.
+        This time, which boy is the <large>driver</large>?: This time, which boy is
+          the <large>driver</large>?
+        /script_assets/multis/helper.jpg: /script_assets/multis/helper.jpg
+        /script_assets/multis/driver.jpg: /script_assets/multis/driver.jpg
+      K-1 multi 3:
+        Maze Multiple Choice Two: Maze Multiple Choice Two
+        /script_assets/matches/images/head.jpg: /script_assets/matches/images/head.jpg
+        This puzzle is all about selecting the correct flowers.: This puzzle is all
+          about selecting the correct flowers.
+        Which flowers are yellow?: Which flowers are yellow?
+        /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
+        /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
+        /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
+        /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
