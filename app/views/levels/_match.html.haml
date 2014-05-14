@@ -11,8 +11,7 @@
 
   - # Shuffle answers until they are different to real answers.
   - if data['answers'].length > 1   # avoid infinite loop
-    - begin newanswers = data['answers'].shuffle end while newanswers == data['answers']
-    - data['answers'] = newanswers
+    - begin shuffled_answers = data['answers'].shuffle end until (shuffled_answers && shuffled_answers != data['answers'])
 
   - height = data['height'] || '20'
   - height += 'px'
@@ -24,11 +23,11 @@
           %li{style: "height: #{height}"}!= match_t(question['text'])
     .column
       %ul#slots.draggablecolumn
-        - data['answers'].each do |answer|
+        - shuffled_answers.each do |answer|
           %li.emptyslot{style: "height: #{height}"}
     .column
       %ul#answers.draggablecolumn
-        - data['answers'].each do |answer|
+        - shuffled_answers.each do |answer|
           %li.answer.answerlist{style: "height: #{height}", originalIndex: answer['index']}!= match_t(answer['text'])
     .clear
     %br/
@@ -92,7 +91,11 @@
   function enableButton(enable)
   {
     buttonEnabled = enable;
-    $('.submitButton').css({ opacity: enable ? 1.0 : 0.5 });
+
+    if (enable)
+      $('.submitButton').removeClass("disabled");
+    else
+      $('.submitButton').addClass("disabled");
   }
 
   $(function() 
@@ -173,9 +176,9 @@
 
       var wrongAnswer = false;
 
-      var elements = $("#slots li")
+      var elements = $("#slots li");
       
-      for (index = 0; index < elements.length; elements++)
+      for (index = 0; index < elements.length; index++)
       {
         value = elements[index];
 
