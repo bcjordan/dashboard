@@ -146,7 +146,7 @@ module LevelsHelper
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
     Hash[%w(
-      start_blocks required_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt
+      start_blocks required_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal
       toolbox_blocks:toolbox
       x:initialX
       y:initialY

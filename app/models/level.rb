@@ -41,6 +41,10 @@ class Level < ActiveRecord::Base
   def self.start_directions
   end
 
+  # Overriden by different level types.
+  def self.step_modes
+  end
+
   def self.custom_levels
     where("user_id IS NOT NULL")
   end
