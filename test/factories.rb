@@ -30,6 +30,8 @@ FactoryGirl.define do
     sequence(:name) { |n| "Level #{n}" }
     sequence(:level_num) {|n| "1_2_#{n}" }
     
+    type "Artist"
+    
     game
     
     trait :blockly do
