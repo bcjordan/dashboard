@@ -37,7 +37,7 @@
     .field
       = f.label :step_mode
       = f.select :step_mode, options_for_select(@level.class.step_modes, @level.step_mode)
-  - if @level.type.try(:constantize) == Karel
+  - if @level.is_a? Karel
     .field
       = f.label :nectar_goal, 'Nectar Goal (bee only)'
       = f.number_field :nectar_goal, :value => @level.nectar_goal
