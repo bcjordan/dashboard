@@ -45,6 +45,9 @@
     = f.collection_select :concept_ids, Concept.cached, :id, :name, { :selected => @level.concept_ids }, { :multiple => true, :name => 'level[concept_ids][]', :style => 'height: 160px' }
     %br/
     (shift-click to select multiple)
+  - if @level.is_a? Artist
+    .field
+      = link_to "Edit Solution Blocks", game_level_edit_blocks_path(@game, @level, :solution_blocks)
   .field
     = link_to "Edit Toolbox Blocks", game_level_edit_blocks_path(@game, @level, :toolbox_blocks)
   .field
