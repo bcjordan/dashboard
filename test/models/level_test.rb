@@ -32,9 +32,9 @@ class LevelTest < ActiveSupport::TestCase
   end
 
   test "parses karel data" do
-    csv = stub(:read => [['100', '101'], ['102', '5']])
+    csv = stub(:read => [['100', '101', '100'], ['102', '5', '-5'], ['100', '100', '100'])
     maze = Karel.parse_maze(csv, 2)
-    assert_equal({'maze' => [[0, 1], [2, 0]], 'initial_dirt' => [[0, 0], [0, 5]], 'final_dirt' => [[0, 0], [0, 0]]}, maze)
+    assert_equal({'maze' => [[0, 1, 0], [2, 1, 1], [0, 0, 0]], 'initial_dirt' => [[0, 0, 0], [0, 5, -5], [0, 0, 0]], 'final_dirt' => [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}, maze)
   end
 
   test "cannot create two custom levels with same name" do
