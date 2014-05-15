@@ -26,11 +26,10 @@
     - else
       = f.label :start_direction, 'Start Direction (in degrees)'
       = f.number_field :start_direction, :in => 0...360, :value => @level.start_direction
-  - if @level.x.present?
+  - if @level.type.constantize == Artist
     .field
       = f.label :x
       = f.number_field :x, :value => @level.x
-  - if @level.y.present?
     .field
       = f.label :y
       = f.number_field :y, :value => @level.y
