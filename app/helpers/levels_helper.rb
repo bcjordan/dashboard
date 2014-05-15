@@ -33,9 +33,6 @@ module LevelsHelper
   end
 
   def set_videos_and_blocks_and_callouts
-    solution = @level.solution_level_source
-    @solution_blocks = solution.data if solution
-
     @videos = @level.videos
 
     seen_videos = session[:videos_seen] || Set.new()

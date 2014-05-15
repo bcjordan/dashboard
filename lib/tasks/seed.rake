@@ -81,7 +81,6 @@ namespace :seed do
       Level.transaction do
         JSON.parse(File.read("config/scripts/custom_levels.json")).each do |row|
           level = Level.where(name: row['name']).first_or_create
-          row['solution_level_source_id'] = (s = row['properties']['solution_blocks']).present? && LevelSource.lookup(level, s).id
           row.delete 'id'
           level.update row
         end
