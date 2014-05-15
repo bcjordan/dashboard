@@ -2207,7 +2207,8 @@ var Bee = function (maze, config) {
   this.maze_ = maze;
   this.skin_ = config.skin;
 
-  this.honeyGoal = config.level.honeyGoal;
+  this.nectarGoal_ = config.level.nectarGoal || 0;
+  this.honeyGoal_ = config.level.honeyGoal || 0;
 
   // Create our own copy to ensure that it's not changing underneath us
   this.initialDirt_ = utils.cloneWithoutFunctions(config.level.initialDirt);
@@ -2226,10 +2227,10 @@ Bee.prototype.reset = function () {
 };
 
 /**
- * Did we both reach our total honey goal, and accomplish any specific hiveGoals
+ * Did we reach our total nectar/honey goals, and accomplish any specific hiveGoals
  */
 Bee.prototype.finished = function () {
-  if (this.honey_ < this.honeyGoal) {
+  if (this.honey_ < this.honeyGoal_ || this.nectar_ < this.nectarGoal_) {
     return false;
   }
 
