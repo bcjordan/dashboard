@@ -153,6 +153,7 @@ class Script < ActiveRecord::Base
       end
       script_level
     end
+    script.stages.each { |stage| stage.delete if stage.script_levels.empty? }  # Remove empty stages.
     script
   end
 

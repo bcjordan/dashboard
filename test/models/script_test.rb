@@ -43,6 +43,18 @@ class ScriptTest < ActiveSupport::TestCase
     assert_not_equal script_level_id, script.script_levels[4].id
   end
 
+  test 'should remove empty stages' do
+    scripts,_ = Script.setup([], [@script_file])
+    assert_equal 2, scripts[0].stages.count
+
+    # Reupload a script of the same name, but lacking the second stage.
+    stage = scripts[0].stages.last
+    script_file_empty_stage = File.join(self.class.fixture_path, "duplicate_scripts", "test.script")
+    scripts,_ = Script.setup([], [script_file_empty_stage])
+    assert_equal 1, scripts[0].stages.count
+    assert_not Stage.exists?(stage)
+  end
+
   test 'should not create two scripts with same name' do
     create(:script, :name => 'script')
     raise = assert_raises ActiveRecord::RecordInvalid do
