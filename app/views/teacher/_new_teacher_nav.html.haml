@@ -1,0 +1,27 @@
+- current ||= nil
+
+%span{ style: 'color: #ffa400;'}
+  Section:
+  - options_select = options_from_collection_for_select(current_user.sections, :id, :name, @section.try(:id))
+  = select_tag('section_id', options_select + "<option value='manage'>#{t 'teacher.sections.manage'}</option>".html_safe, style: 'margin: 0 7px 0px 4px', id: 'section_nav')
+:javascript
+  $(
+    $("#section_nav").change(function() {
+      var section_id = $("#section_nav").val();
+      if (section_id === "manage") {
+        window.location.href = "#{sections_path}";
+      } else { 
+        var section_url = "/sections/" + section_id;
+        window.location.href = section_url;
+      }
+    })
+  );
+
+%br/
+%br/
+
+%span{ style: 'color: #ffa400;'}
+  = link_to_if current != 'report', t('teacher.rollup'), followers_path
+|
+%span{ style: 'color: #ffa400;'}
+  = link_to_if current != 'manage', t('teacher.students.manage'), manage_followers_path
