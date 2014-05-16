@@ -23,18 +23,18 @@ namespace :seed do
   end
 
   SCRIPTS_GLOB = Dir.glob('config/scripts/**/*.script').flatten
-  file 'config/scripts/.seeded' => SCRIPTS_GLOB do |t|
-    scripts_seeded_mtime = File.mtime('config/scripts/.seeded')
-    scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
-    script, custom_i18n = Script.setup([], scripts)
+  SEEDED = 'config/scripts/.seeded'
+
+  file SEEDED => SCRIPTS_GLOB do |t|
+    scripts_seeded_mtime = File.exist?(SEEDED) ? File.mtime(SEEDED) : 0
+    custom_scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
+    default_scripts = Dir.glob("config/scripts/default/*.yml").select { |script| File.mtime(script) > scripts_seeded_mtime }
+    script, custom_i18n = Script.setup(default_scripts, custom_scripts)
     Script.update_i18n(custom_i18n)
     touch t.name
   end
 
-  task scripts: [:environment, :games, :custom_levels, :multis, :matches] do
-    script, custom_i18n = Script.setup(Dir.glob("config/scripts/default/*.yml"), SCRIPTS_GLOB)
-    Script.update_i18n(custom_i18n)
-  end
+  task scripts: [:environment, :games, :custom_levels, SEEDED, :multis, :matches]
 
   # cronjob that detects changes to .multi files
   MULTIS_GLOB = Dir.glob('config/scripts/**/*.multi').flatten
