@@ -23,15 +23,18 @@ namespace :seed do
   end
 
   SCRIPTS_GLOB = Dir.glob('config/scripts/**/*.script').flatten
-  file 'config/scripts/.seeded' => SCRIPTS_GLOB do |t|
-    Rake::Task['seed:scripts'].invoke
+  SEEDED = 'config/scripts/.seeded'
+
+  file SEEDED => SCRIPTS_GLOB do |t|
+    scripts_seeded_mtime = File.exist?(SEEDED) ? File.mtime(SEEDED) : 0
+    custom_scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
+    default_scripts = Dir.glob("config/scripts/default/*.yml").select { |script| File.mtime(script) > scripts_seeded_mtime }
+    script, custom_i18n = Script.setup(default_scripts, custom_scripts)
+    Script.update_i18n(custom_i18n)
     touch t.name
   end
 
-  task scripts: [:environment, :games, :custom_levels, :multis, :matches] do
-    script, custom_i18n = Script.setup(Dir.glob("config/scripts/default/*.yml"), Dir.glob('config/scripts/**/*.script').flatten)
-    Script.update_i18n(custom_i18n)
-  end
+  task scripts: [:environment, :games, :custom_levels, SEEDED, :multis, :matches]
 
   # cronjob that detects changes to .multi files
   MULTIS_GLOB = Dir.glob('config/scripts/**/*.multi').flatten
@@ -45,7 +48,7 @@ namespace :seed do
     Multi.transaction do
       multi_strings = {}
       # Parse each .multi file and setup its model.
-      Dir.glob('config/scripts/**/*.multi').flatten.each do |script|
+      MULTIS_GLOB.each do |script|
         data, i18n = MultiDSL.parse_file(script)
         Multi.setup data
         multi_strings.deep_merge! i18n
@@ -66,7 +69,7 @@ namespace :seed do
     Match.transaction do
       match_strings = {}
       # Parse each .match file and setup its model.
-      Dir.glob('config/scripts/**/*.match').flatten.each do |script|
+      MATCHES_GLOB.each do |script|
         data, i18n = MatchDSL.parse_file(script)
         Match.setup data
         match_strings.deep_merge! i18n

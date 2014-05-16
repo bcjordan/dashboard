@@ -366,8 +366,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -782,6 +782,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -797,6 +798,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -904,6 +910,22 @@ exports.createToolbox = function(blocks) {
 
 exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
+};
+
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
 };
 
 exports.createCategory = function(name, blocks, custom) {
@@ -1389,6 +1411,9 @@ var getFeedbackMessage = function(options) {
       break;
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
+      break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
       break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
@@ -2831,6 +2856,11 @@ exports.install = function(blockly, skin) {
       [[msg.setSpriteHidden(), '"hidden"'],
        [msg.setSpriteRandom(), 'random'],
        [msg.setSpriteWitch(), '"witch"'],
+       [msg.setSpriteCat(), '"cat"'],
+       [msg.setSpriteDinosaur(), '"dinosaur"'],
+       [msg.setSpriteDog(), '"dog"'],
+       [msg.setSpriteOctopus(), '"octopus"'],
+       [msg.setSpritePenguin(), '"penguin"'],
        [msg.setSpriteGreen(), '"green"'],
        [msg.setSpritePurple(), '"purple"'],
        [msg.setSpritePink(), '"pink"'],
@@ -3401,6 +3431,26 @@ exports.load = function(assetUrl, id) {
   };
   skin.underwater = {
     background: skin.assetUrl('background_underwater.png'),
+  };
+  skin.cat = {
+    sprite: skin.assetUrl('cat_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.dinosaur = {
+    sprite: skin.assetUrl('dinosaur_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.dog = {
+    sprite: skin.assetUrl('dog_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.octopus = {
+    sprite: skin.assetUrl('octopus_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.penguin = {
+    sprite: skin.assetUrl('penguin_spritesheet_200px.png'),
+    spriteFlags: 28,
   };
   skin.green = {
     sprite: skin.assetUrl('avatar1.png'),
@@ -4228,7 +4278,8 @@ BlocklyApps.reset = function(first) {
   Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
 
-  var spriteStartingSkins = [ "witch", "green", "purple", "pink", "orange" ];
+  var spriteStartingSkins = [ "witch", "cat", "dinosaur", "dog", "octopus",
+                              "penguin", "green", "purple", "pink", "orange" ];
   var numStartingSkins = spriteStartingSkins.length;
   var skinBias = Studio.spriteStartingImage || 0;
 
@@ -5926,11 +5977,21 @@ exports.setSpriteEmotionSad = function(d){return "a un'emozione di tristezza"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Imposta l'emozione del personaggio"};
 
+exports.setSpriteCat = function(d){return "to a cat image"};
+
+exports.setSpriteDinosaur = function(d){return "to a dinosaur image"};
+
+exports.setSpriteDog = function(d){return "to a dog image"};
+
 exports.setSpriteGreen = function(d){return "a un'immagine verde"};
 
 exports.setSpriteHidden = function(d){return "a un'immagine nascosta"};
 
+exports.setSpriteOctopus = function(d){return "to an octopus image"};
+
 exports.setSpriteOrange = function(d){return "a un'immagine arancione"};
+
+exports.setSpritePenguin = function(d){return "to a penguin image"};
 
 exports.setSpritePink = function(d){return "a un'immagine rosa"};
 

@@ -140,8 +140,9 @@ module LevelsHelper
       level['stepOnly'] = @level.step_mode == 2
     end
 
-    # We are editing required blocks required blocks
-    level['edit_required_blocks'] = (params[:type] == 'required_blocks')
+    # Pass blockly the edit mode: "<start|toolbox|required>_blocks"
+    level['edit_blocks'] = params[:type]
+    level['edit_blocks_success'] = t('builder.success')
 
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
@@ -185,7 +186,7 @@ module LevelsHelper
 
   def string_or_image(prefix, text)
     if ['.jpg', '.png'].include? File.extname(text)
-      "<img src='" + text + "''></img>"
+      "<img src='" + text + "'></img>"
     else
       data_t(prefix + '.' + @level.name, text)
     end

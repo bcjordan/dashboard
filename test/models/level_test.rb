@@ -32,8 +32,8 @@ class LevelTest < ActiveSupport::TestCase
   end
 
   test "parses karel data" do
-    csv = stub(:read => [['100', '101', '100'], ['102', '5', '-5'], ['100', '100', '100'])
-    maze = Karel.parse_maze(csv, 2)
+    csv = stub(:read => [['100', '101', '100'], ['102', '5', '-5'], ['100', '100', '100']])
+    maze = Karel.parse_maze(csv, 3)
     assert_equal({'maze' => [[0, 1, 0], [2, 1, 1], [0, 0, 0]], 'initial_dirt' => [[0, 0, 0], [0, 5, -5], [0, 0, 0]], 'final_dirt' => [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}, maze)
   end
 
@@ -96,5 +96,26 @@ class LevelTest < ActiveSupport::TestCase
 
     assert_equal "block", first_block.name
     assert_equal "controls_repeat_simplified", first_block.attributes["type"].value
+  end
+
+  test "farmer improper mod migration" do
+    farmer = Karel.create(@maze_data.update(name: "heyho"))
+    farmer.properties["maze"] = [[2, 0], [0, 0]]
+    farmer.properties["initial_dirt"] = [[0, 95], [4, 0]]
+    farmer.save!
+    expected_maze = [[2, 1], [1, 0]]
+    expected_dirt = [[0, -5], [4, 0]]
+
+    require File.join(Rails.root, 'db', 'migrate', '20140515223058_fix_farmer_levels')
+    FixFarmerLevels.up
+    farmer.reload
+    assert_equal expected_maze, farmer.properties["maze"]
+    assert_equal expected_dirt, farmer.properties["initial_dirt"]
+  end
+
+  test "include type in json" do
+    maze = Maze.create(@maze_data)
+    maze_from_json = Level.create(JSON.parse(maze.to_json))
+    assert maze_from_json.is_a? Maze
   end
 end
