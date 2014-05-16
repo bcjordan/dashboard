@@ -3,7 +3,7 @@ require 'test_helper'
 class ScriptTest < ActiveSupport::TestCase
   def setup
     @game = create(:game)
-    @script_file = File.join(self.class.fixture_path, "test.script")
+    @script_file = File.join(self.class.fixture_path, "test_fixture.script")
     # Level names match those in 'test.script'
     @levels = (1..5).map { |n| create(:level, :name => "Level #{n}") }
   end
@@ -49,7 +49,7 @@ class ScriptTest < ActiveSupport::TestCase
 
     # Reupload a script of the same name, but lacking the second stage.
     stage = scripts[0].stages.last
-    script_file_empty_stage = File.join(self.class.fixture_path, "duplicate_scripts", "test.script")
+    script_file_empty_stage = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture.script")
     scripts,_ = Script.setup([], [script_file_empty_stage])
     assert_equal 1, scripts[0].stages.count
     assert_not Stage.exists?(stage)
@@ -109,5 +109,19 @@ class ScriptTest < ActiveSupport::TestCase
     second_stage_last_level = create(:script_level, script: script, stage: second_stage, position:2)
 
     assert_equal second_stage_first_level, first_stage_last_level.next_level
+  end
+
+  test 'script_level positions should reset' do
+    scripts,_ = Script.setup([], [@script_file])
+    first = scripts[0].stages[0].script_levels[0]
+    second = scripts[0].stages[0].script_levels[1]
+    assert_equal 1, first.position
+    assert_equal 2, second.position
+    promoted_level = second.level
+    script_file_remove_level = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture.script")
+
+    scripts,_ = Script.setup([], [script_file_remove_level])
+    new_first_script_level = ScriptLevel.where(script: scripts[0], level: promoted_level).first
+    assert_equal 1, new_first_script_level.position
   end
 end
