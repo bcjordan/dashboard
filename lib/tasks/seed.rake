@@ -26,7 +26,7 @@ namespace :seed do
   SEEDED = 'config/scripts/.seeded'
 
   file SEEDED => SCRIPTS_GLOB do |t|
-    scripts_seeded_mtime = File.exist?(SEEDED) ? File.mtime(SEEDED) : 0
+    scripts_seeded_mtime = File.exist?(SEEDED) ? File.mtime(SEEDED) : Time.at(0)
     custom_scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
     default_scripts = Dir.glob("config/scripts/default/*.yml").select { |script| File.mtime(script) > scripts_seeded_mtime }
     script, custom_i18n = Script.setup(default_scripts, custom_scripts)
