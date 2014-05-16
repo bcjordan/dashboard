@@ -2831,6 +2831,11 @@ exports.install = function(blockly, skin) {
       [[msg.setSpriteHidden(), '"hidden"'],
        [msg.setSpriteRandom(), 'random'],
        [msg.setSpriteWitch(), '"witch"'],
+       [msg.setSpriteCat(), '"cat"'],
+       [msg.setSpriteDinosaur(), '"dinosaur"'],
+       [msg.setSpriteDog(), '"dog"'],
+       [msg.setSpriteOctopus(), '"octopus"'],
+       [msg.setSpritePenguin(), '"penguin"'],
        [msg.setSpriteGreen(), '"green"'],
        [msg.setSpritePurple(), '"purple"'],
        [msg.setSpritePink(), '"pink"'],
@@ -3401,6 +3406,26 @@ exports.load = function(assetUrl, id) {
   };
   skin.underwater = {
     background: skin.assetUrl('background_underwater.png'),
+  };
+  skin.cat = {
+    sprite: skin.assetUrl('cat_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.dinosaur = {
+    sprite: skin.assetUrl('dinosaur_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.dog = {
+    sprite: skin.assetUrl('dog_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.octopus = {
+    sprite: skin.assetUrl('octopus_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.penguin = {
+    sprite: skin.assetUrl('penguin_spritesheet_200px.png'),
+    spriteFlags: 28,
   };
   skin.green = {
     sprite: skin.assetUrl('avatar1.png'),
@@ -4228,7 +4253,8 @@ BlocklyApps.reset = function(first) {
   Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
 
-  var spriteStartingSkins = [ "witch", "green", "purple", "pink", "orange" ];
+  var spriteStartingSkins = [ "witch", "cat", "dinosaur", "dog", "octopus",
+                              "penguin", "green", "purple", "pink", "orange" ];
   var numStartingSkins = spriteStartingSkins.length;
   var skinBias = Studio.spriteStartingImage || 0;
 
@@ -5960,11 +5986,21 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
+exports.setSpriteCat = function(d){return "to a cat image"};
+
+exports.setSpriteDinosaur = function(d){return "to a dinosaur image"};
+
+exports.setSpriteDog = function(d){return "to a dog image"};
+
 exports.setSpriteGreen = function(d){return "to a green image"};
 
 exports.setSpriteHidden = function(d){return "to a hidden image"};
 
+exports.setSpriteOctopus = function(d){return "to an octopus image"};
+
 exports.setSpriteOrange = function(d){return "to an orange image"};
+
+exports.setSpritePenguin = function(d){return "to a penguin image"};
 
 exports.setSpritePink = function(d){return "to a pink image"};
 
