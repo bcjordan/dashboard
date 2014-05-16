@@ -1053,7 +1053,7 @@ a.download-video {
     background-color: lightgrey;
     padding-left: 10px;
     padding-right: 10px;
-    width: 200px;
+    width: 220px;
     margin-top:2px;
     margin-bottom:2px;  
   } 
@@ -1191,11 +1191,15 @@ div.gallery_activity {
     margin-left: 20px; 
   }
   .column {
-    width: 240px; 
+    width: 260px; 
     float: left;
   }
   .draggablecolumn {
     cursor: default;
+  }
+  img {
+    height: 100%;
+    width: auto;
   }
 }
 
