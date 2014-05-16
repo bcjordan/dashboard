@@ -33,9 +33,6 @@ module LevelsHelper
   end
 
   def set_videos_and_blocks_and_callouts
-    solution = @level.solution_level_source
-    @solution_blocks = solution.data if solution
-
     @videos = @level.videos
 
     seen_videos = session[:videos_seen] || Set.new()
@@ -143,13 +140,14 @@ module LevelsHelper
       level['stepOnly'] = @level.step_mode == 2
     end
 
-    # We are editing required blocks required blocks
-    level['edit_required_blocks'] = (params[:type] == 'required_blocks')
+    # Pass blockly the edit mode: "<start|toolbox|required>_blocks"
+    level['edit_blocks'] = params[:type]
+    level['edit_blocks_success'] = t('builder.success')
 
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
     Hash[%w(
-      start_blocks required_blocks solution_blocks slider_speed start_direction instructions initial_dirt final_dirt
+      start_blocks required_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal
       toolbox_blocks:toolbox
       x:initialX
       y:initialY
@@ -188,7 +186,7 @@ module LevelsHelper
 
   def string_or_image(prefix, text)
     if ['.jpg', '.png'].include? File.extname(text)
-      "<img src='" + text + "''></img>"
+      "<img src='" + text + "'></img>"
     else
       data_t(prefix + '.' + @level.name, text)
     end

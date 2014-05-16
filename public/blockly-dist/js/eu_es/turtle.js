@@ -366,8 +366,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -782,6 +782,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -797,6 +798,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -904,6 +910,22 @@ exports.createToolbox = function(blocks) {
 
 exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
+};
+
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
 };
 
 exports.createCategory = function(name, blocks, custom) {
@@ -1389,6 +1411,9 @@ var getFeedbackMessage = function(options) {
       break;
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
+      break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
       break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
@@ -5015,6 +5040,7 @@ Turtle.init = function(config) {
     // Create hidden canvases.
     Turtle.ctxAnswer = createCanvas('answer', 400, 400).getContext('2d');
     Turtle.ctxImages = createCanvas('images', 400, 400).getContext('2d');
+    Turtle.ctxPredraw = createCanvas('predraw', 400, 400).getContext('2d');
     Turtle.ctxScratch = createCanvas('scratch', 400, 400).getContext('2d');
     Turtle.ctxFeedback = createCanvas('feedback', 154, 154).getContext('2d');
 
@@ -5027,7 +5053,10 @@ Turtle.init = function(config) {
     // Set their initial contents.
     Turtle.loadTurtle();
     Turtle.drawImages();
-    Turtle.drawAnswer(level.solutionBlocks);
+    Turtle.drawAnswer();
+    if (level.predraw_blocks) {
+      Turtle.drawBlocksOnCanvas(level.predraw_blocks, Turtle.ctxPredraw);
+    }
 
     // Adjust visualization and belowVisualization width.
     var drawAreaWidth = config.getDisplayWidth();
@@ -5046,24 +5075,37 @@ Turtle.init = function(config) {
 /**
  * On startup draw the expected answer and save it to the answer canvas.
  */
-Turtle.drawAnswer = function(blocks) {
-  if (blocks) {
-    var domBlocks = Blockly.Xml.textToDom(blocks);
-    Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, domBlocks);
-    var code = Blockly.Generator.workspaceToCode('JavaScript');
-    Turtle.evalCode(code);
-    Blockly.mainWorkspace.clear();
+Turtle.drawAnswer = function() {
+  if (level.solutionBlocks) {
+    Turtle.drawBlocksOnCanvas(level.solutionBlocks, Turtle.ctxAnswer);
   } else {
-    BlocklyApps.log = level.answer;
+    Turtle.drawLogOnCanvas(level.answer, Turtle.ctxAnswer);
   }
+};
+
+Turtle.drawLogOnCanvas = function(log, canvas) {
+  BlocklyApps.log = log;
+  Turtle.drawCurrentBlocksOnCanvas(canvas);
+};
+
+Turtle.drawBlocksOnCanvas = function(blocks, canvas) {
+  var domBlocks = Blockly.Xml.textToDom(blocks);
+  Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, domBlocks);
+  var code = Blockly.Generator.workspaceToCode('JavaScript');
+  Turtle.evalCode(code);
+  Blockly.mainWorkspace.clear();
+  Turtle.drawCurrentBlocksOnCanvas(canvas);
+};
+
+Turtle.drawCurrentBlocksOnCanvas = function(canvas) {
   BlocklyApps.reset();
   while (BlocklyApps.log.length) {
     var tuple = BlocklyApps.log.shift();
     Turtle.step(tuple[0], tuple.splice(1));
   }
-  Turtle.ctxAnswer.globalCompositeOperation = 'copy';
-  Turtle.ctxAnswer.drawImage(Turtle.ctxScratch.canvas, 0, 0);
-  Turtle.ctxAnswer.globalCompositeOperation = 'source-over';
+  canvas.globalCompositeOperation = 'copy';
+  canvas.drawImage(Turtle.ctxScratch.canvas, 0, 0);
+  canvas.globalCompositeOperation = 'source-over';
 };
 
 /**
@@ -5189,6 +5231,10 @@ Turtle.display = function() {
   // Draw the images layer.
   Turtle.ctxDisplay.globalCompositeOperation = 'source-over';
   Turtle.ctxDisplay.drawImage(Turtle.ctxImages.canvas, 0, 0);
+
+  // Draw the predraw layer.
+  Turtle.ctxDisplay.globalCompositeOperation = 'source-over';
+  Turtle.ctxDisplay.drawImage(Turtle.ctxPredraw.canvas, 0, 0);
 
   // Draw the user layer.
   Turtle.ctxDisplay.globalCompositeOperation = 'source-over';

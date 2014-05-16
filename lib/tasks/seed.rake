@@ -23,14 +23,23 @@ namespace :seed do
   end
 
   SCRIPTS_GLOB = Dir.glob('config/scripts/**/*.script').flatten
-  file 'config/scripts/.seeded' => SCRIPTS_GLOB do |t|
-    Rake::Task['seed:scripts'].invoke
-    touch t.name
+  SEEDED = 'config/scripts/.seeded'
+
+  file SEEDED => SCRIPTS_GLOB do |t|
+    update_scripts
+  end
+
+  def update_scripts
+    scripts_seeded_mtime = (Rails.env == "staging" && File.exist?(SEEDED)) ? File.mtime(SEEDED) : Time.at(0)
+    custom_scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
+    default_scripts = Dir.glob("config/scripts/default/*.yml").select { |script| File.mtime(script) > scripts_seeded_mtime }
+    script, custom_i18n = Script.setup(default_scripts, custom_scripts)
+    Script.update_i18n(custom_i18n)
+    touch SEEDED
   end
 
   task scripts: [:environment, :games, :custom_levels, :multis, :matches] do
-    script, custom_i18n = Script.setup(Dir.glob("config/scripts/default/*.yml"), Dir.glob('config/scripts/**/*.script').flatten)
-    Script.update_i18n(custom_i18n)
+    update_scripts
   end
 
   # cronjob that detects changes to .multi files
@@ -45,7 +54,7 @@ namespace :seed do
     Multi.transaction do
       multi_strings = {}
       # Parse each .multi file and setup its model.
-      Dir.glob('config/scripts/**/*.multi').flatten.each do |script|
+      MULTIS_GLOB.each do |script|
         data, i18n = MultiDSL.parse_file(script)
         Multi.setup data
         multi_strings.deep_merge! i18n
@@ -66,7 +75,7 @@ namespace :seed do
     Match.transaction do
       match_strings = {}
       # Parse each .match file and setup its model.
-      Dir.glob('config/scripts/**/*.match').flatten.each do |script|
+      MATCHES_GLOB.each do |script|
         data, i18n = MatchDSL.parse_file(script)
         Match.setup data
         match_strings.deep_merge! i18n
@@ -77,12 +86,13 @@ namespace :seed do
 
   # Generate the database entry from the custom levels json file
   task custom_levels: :environment do
-    Level.transaction do
-      JSON.parse(File.read("config/scripts/custom_levels.json")).each do |row|
-        level = Level.where(name: row['name']).first_or_create
-        row['solution_level_source_id'] = (s = row['properties']['solution_blocks']).present? && LevelSource.lookup(level, s).id
-        row.delete 'id'
-        level.update row
+    if Rails.env != "staging" || ENV["FORCE_CUSTOM_LEVELS"]
+      Level.transaction do
+        JSON.parse(File.read("config/scripts/custom_levels.json")).each do |row|
+          level = Level.where(name: row['name']).first_or_create
+          row.delete 'id'
+          level.update row
+        end
       end
     end
   end

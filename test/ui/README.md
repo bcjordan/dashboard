@@ -50,12 +50,16 @@ You can now watch your tests run at the [Browserstack automate page](https://www
 
 ## Options
 
-Here are some example command line options...
+Here are some example command line options.  Run `./runner.rb --help` for a full list.
 
 Run with a specific OS version, browser, browser version, and feature:
 
 ```
 ./runner.rb -o 7 -b chrome -v 31 -f features/simpledrag.feature
+
+OR
+
+./runner.rb -c Chrome31Win7 -f features/simpledrag.feature
 ```
 
 Run with a specific domain substituted in place of the default, tunneling from BrowserStack into local machine:

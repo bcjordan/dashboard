@@ -107,3 +107,7 @@ Then(/^"([^"]*)" should be in front of "([^"]*)"$/) do |selector_front, selector
   behind_z_index = @browser.execute_script("return $('#{selector_behind}').css('z-index')").to_i
   front_z_index.should be > behind_z_index
 end
+
+Then(/^I set slider speed to medium/) do
+  @browser.execute_script("Turtle.speedSlider.setValue(0.8)");
+end

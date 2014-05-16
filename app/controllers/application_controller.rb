@@ -39,7 +39,7 @@ class ApplicationController < ActionController::Base
   end
 
   def code_org_root_path
-    Rails.env.production? ? "http://www.code.org" : Rails.env.development? ? "http://localhost:3000" : "http://staging.code.org"
+    Rails.env.production? ? "http://www.code.org" : Rails.env.development? ? request.base_url : "http://staging.code.org"
   end
 
   # when CanCan denies access, send a 403 Forbidden response instead of causing a server error

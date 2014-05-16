@@ -16,6 +16,12 @@ class Level < ActiveRecord::Base
     self.properties  ||= {}
   end
 
+  # https://github.com/rails/rails/issues/3508#issuecomment-29858772
+  # Include type in serialization.
+  def serializable_hash(options=nil)
+    super.merge "type" => type
+  end
+
   def self.builder
     @@level_builder ||= find_by_name('builder')
   end
@@ -41,6 +47,10 @@ class Level < ActiveRecord::Base
   def self.start_directions
   end
 
+  # Overriden by different level types.
+  def self.step_modes
+  end
+
   def self.custom_levels
     where("user_id IS NOT NULL")
   end
@@ -48,7 +58,6 @@ class Level < ActiveRecord::Base
   def write_custom_levels_to_file
     File.open(Rails.root.join("config", "scripts", "custom_levels.json"), 'w+') do |file|
       levels = Level.custom_levels
-      levels.each {|level| level.properties.update(solution_blocks: level.solution_level_source.try(:data))}
       file << levels.to_json
     end
   end

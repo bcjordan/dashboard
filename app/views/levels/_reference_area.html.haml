@@ -26,11 +26,16 @@
       \/
       #{link_to "edit", edit_game_level_path(@game, @level)}
       (
+      - if @level.is_a? Artist
+        = link_to "solution", game_level_edit_blocks_path(@game, @level, :solution_blocks)
+        \/
       #{link_to "toolbox", game_level_edit_blocks_path(@game, @level, :toolbox_blocks)}
       \/
       #{link_to "start", game_level_edit_blocks_path(@game, @level, :start_blocks)}
       \/
       #{link_to "required", game_level_edit_blocks_path(@game, @level, :required_blocks)}
+      \/
+      #{link_to "pre-draw", game_level_edit_blocks_path(@game, @level, :predraw_blocks)}
       )
       \/
       #{link_to "stats", level_stats_path(@level)}

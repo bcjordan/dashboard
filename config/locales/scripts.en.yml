@@ -43,6 +43,8 @@ en:
           'Artist 1: Intro': 'Artist 1: Intro'
           'Bee 1: Intro': 'Bee 1: Intro'
           Multi & Match: Multi & Match
+          'Maze 2: Loops': 'Maze 2: Loops'
+          'Bee 2: Loops': 'Bee 2: Loops'
         4-5:
           desc: Custom script 4-5
           The Maze: The Maze

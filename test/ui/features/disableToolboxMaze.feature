@@ -20,6 +20,7 @@ Scenario: Toolbox in maze (non-category) is disabled while running
   Then I drag block "4" to offset "220, 300"
   Then the workspace has "1" blocks of type "maze_forever"
 
+@no_mobile
 Scenario: Toolbox in maze (non-category) is reenabled after finished running
   Then I press "runButton"
   And I wait to see "#x-close"

@@ -17,6 +17,11 @@ class Maze < Level
     [['Up', 0], ['Right', 1], ['Down', 2], ['Left', 3]]
   end
 
+  # An array of [name, value] pairs where the value is the step mode
+  def self.step_modes
+    [['Run Button Only', 0], ['Run and Step', 1], ['Step Button Only', 2]]
+  end
+
   def self.create_from_level_builder(params, level_params)
     raise ArgumentError.new("Maze file not found") unless params[:maze_source]
     contents = CSV.new(params[:maze_source].read)
