@@ -1062,8 +1062,10 @@ a.download-video {
     margin-left:0px;
     li {
       background-color: lightgrey;
-      text-align: center;
     }
+  }
+  li {
+    text-align: center; 
   }
   #slots {
     list-style-type: none;
