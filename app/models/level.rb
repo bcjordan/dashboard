@@ -16,6 +16,12 @@ class Level < ActiveRecord::Base
     self.properties  ||= {}
   end
 
+  # https://github.com/rails/rails/issues/3508#issuecomment-29858772
+  # Include type in serialization.
+  def serializable_hash(options=nil)
+    super.merge "type" => type
+  end
+
   def self.builder
     @@level_builder ||= find_by_name('builder')
   end

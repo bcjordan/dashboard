@@ -112,4 +112,10 @@ class LevelTest < ActiveSupport::TestCase
     assert_equal expected_maze, farmer.properties["maze"]
     assert_equal expected_dirt, farmer.properties["initial_dirt"]
   end
+
+  test "include type in json" do
+    maze = Maze.create(@maze_data)
+    maze_from_json = Level.create(JSON.parse(maze.to_json))
+    assert maze_from_json.is_a? Maze
+  end
 end
