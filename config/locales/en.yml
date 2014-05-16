@@ -296,6 +296,7 @@ en:
     trynow: 'Try now'
     add_hint_help: 'Please help us to add smart hints to Code.org tutorials'
     20hour_overview: 'This 20-hour course introduces core computer science and programming concepts. The course is designed for use in classrooms for grades K-8, but it is fun to learn at all ages.'
+    test_videos_help: 'Test our new video player at your school'
   gender:
     male: 'Male'
     female: 'Female'

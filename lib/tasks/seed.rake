@@ -77,12 +77,13 @@ namespace :seed do
 
   # Generate the database entry from the custom levels json file
   task custom_levels: :environment do
-    Level.transaction do
-      JSON.parse(File.read("config/scripts/custom_levels.json")).each do |row|
-        level = Level.where(name: row['name']).first_or_create
-        row['solution_level_source_id'] = (s = row['properties']['solution_blocks']).present? && LevelSource.lookup(level, s).id
-        row.delete 'id'
-        level.update row
+    if Rails.env != "staging" || ENV["FORCE_CUSTOM_LEVELS"]
+      Level.transaction do
+        JSON.parse(File.read("config/scripts/custom_levels.json")).each do |row|
+          level = Level.where(name: row['name']).first_or_create
+          row.delete 'id'
+          level.update row
+        end
       end
     end
   end
