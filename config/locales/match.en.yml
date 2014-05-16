@@ -26,6 +26,17 @@ en:
         /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
         /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
         /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
+      K-1 Maze Match 1:
+        Matching: Matching
+        Match the puzzles and blocks: Match the puzzles and blocks
+        /script_assets/matches/images/k-1_maze/q1.png: /script_assets/matches/images/k-1_maze/q1.png
+        /script_assets/matches/images/k-1_maze/q2.png: /script_assets/matches/images/k-1_maze/q2.png
+        /script_assets/matches/images/k-1_maze/q3.png: /script_assets/matches/images/k-1_maze/q3.png
+        /script_assets/matches/images/k-1_maze/q4.png: /script_assets/matches/images/k-1_maze/q4.png
+        /script_assets/matches/images/k-1_maze/a1.png: /script_assets/matches/images/k-1_maze/a1.png
+        /script_assets/matches/images/k-1_maze/a2.png: /script_assets/matches/images/k-1_maze/a2.png
+        /script_assets/matches/images/k-1_maze/a3.png: /script_assets/matches/images/k-1_maze/a3.png
+        /script_assets/matches/images/k-1_maze/a4.png: /script_assets/matches/images/k-1_maze/a4.png
       K-1 matching 1:
         Maze Matching One: Maze Matching One
         Match the algorithm and the puzzle!: Match the algorithm and the puzzle!

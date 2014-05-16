@@ -4,13 +4,15 @@ require 'json'
 require 'yaml'
 require 'optparse'
 require 'ostruct'
+require 'colorize'
 
 $options = OpenStruct.new
+$options.config = nil
 $options.browser = nil
 $options.os_version = nil
 $options.browser_version = nil
 $options.feature = nil
-$options.domain = nil
+$options.domain = 'test.learn.code.org'
 $options.tunnel = nil
 $options.local = nil
 $options.html = nil
@@ -25,6 +27,9 @@ opt_parser = OptionParser.new do |opts|
     Example: runner.rb -r"
   opts.separator ""
   opts.separator "Specific options:"
+  opts.on("-c", "--config BrowserConfigName", String, "Specify the name of one of the configs from ") do |c|
+    $options.config = c
+  end
   opts.on("-b", "--browser BrowserName", String, "Specify a browser") do |b|
     $options.browser = b
   end
@@ -72,10 +77,17 @@ suiteStartTime = Time.now
 suiteSuccessCount = 0
 suiteFailCount = 0
 
-# todo - make sure we do something to make it clear when there are unmatched
-# steps in a feature
 if $options.local
   browsers = [{:browser => "local"}]
+end
+
+if $options.config
+  namedBrowser = browsers.detect {|b| b['name'] == $options.config }
+  if !namedBrowser
+    puts "No config exists with name #{$options.config}"
+    exit
+  end
+  browsers = [namedBrowser]
 end
 
 $logfile = File.open("success.log", "w")
@@ -96,7 +108,6 @@ def log_browser_error(msg)
   $errbrowserfile.puts msg
   puts msg if $options.verbose
 end
-
 
 browsers.each do |browser|
   if $options.browser and browser['browser'] and $options.browser.casecmp(browser['browser']) != 0
@@ -127,7 +138,7 @@ browsers.each do |browser|
   arguments += "#{$options.feature}" if $options.feature
   arguments += " -t ~@no_mobile" if browser['mobile']
   arguments += " -S" # strict mode, so that we fail on undefined steps
-  arguments += " -f html -o output.html" if $options.html
+  arguments += " -f html -o #{browser['name']}_output.html" if $options.html
 
   puts "  Running: cucumber #{arguments}"
 
@@ -147,7 +158,7 @@ browsers.each do |browser|
 
   suiteSuccessCount += 1 unless not succeeded
   suiteFailCount += 1 if not succeeded
-  suiteResultString = succeeded ? "succeeded" : "failed"
+  suiteResultString = succeeded ? "succeeded".green : "failed".red
   testDuration = Time.now - testStartTime
 
   puts "  Result: " + suiteResultString + ".  Duration: " + testDuration.round(2).to_s + " seconds"
