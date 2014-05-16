@@ -366,8 +366,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -782,6 +782,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -797,6 +798,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -1389,6 +1395,9 @@ var getFeedbackMessage = function(options) {
       break;
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
+      break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
       break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
