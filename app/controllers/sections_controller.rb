@@ -32,7 +32,7 @@ class SectionsController < ApplicationController
 
     respond_to do |format|
       if @section.save
-        format.html { redirect_to sections_path, notice: I18n.t('crud.created', model: Section.model_name.human) }
+        format.html { redirect_to sections_followers_path, notice: I18n.t('crud.created', model: Section.model_name.human) }
       else
         format.html { render action: 'new' }
       end
@@ -42,7 +42,7 @@ class SectionsController < ApplicationController
   def update
     respond_to do |format|
       if @section.update(section_params)
-        format.html { redirect_to sections_path, notice: I18n.t('crud.updated', model: Section.model_name.human) }
+        format.html { redirect_to sections_followers_path, notice: I18n.t('crud.updated', model: Section.model_name.human) }
       else
         format.html { render action: 'edit' }
       end
@@ -73,7 +73,7 @@ class SectionsController < ApplicationController
     @section.destroy
     
     respond_to do |format|
-      format.html { redirect_to sections_path, notice: I18n.t('crud.destroyed', model: Section.model_name.human) }
+      format.html { redirect_to sections_followers_path, notice: I18n.t('crud.destroyed', model: Section.model_name.human) }
     end
   end
 
