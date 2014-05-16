@@ -99,4 +99,15 @@ class ScriptTest < ActiveSupport::TestCase
     assert_equal [1, 1, 1, 2, 2, 3, 3], script.script_levels.collect(&:stage).collect(&:position)
     assert_equal [1, 2, 3, 1, 2, 1, 2], script.script_levels.collect(&:position)
   end
+
+  test 'calling next_level on last script_level points to next stage' do
+    script = create(:script, name: 's1')
+    first_stage = create(:stage, script: script, position: 1)
+    first_stage_last_level = create(:script_level, script: script, stage: first_stage, position: 1)
+    second_stage = create(:stage, script: script, position: 2)
+    second_stage_first_level = create(:script_level, script: script, stage: second_stage, position:1)
+    second_stage_last_level = create(:script_level, script: script, stage: second_stage, position:2)
+
+    assert_equal second_stage_first_level, first_stage_last_level.next_level
+  end
 end
