@@ -33,9 +33,6 @@ module LevelsHelper
   end
 
   def set_videos_and_blocks_and_callouts
-    solution = @level.solution_level_source
-    @solution_blocks = solution.data if solution
-
     @videos = @level.videos
 
     seen_videos = session[:videos_seen] || Set.new()
@@ -149,7 +146,7 @@ module LevelsHelper
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
     Hash[%w(
-      start_blocks required_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt
+      start_blocks required_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal
       toolbox_blocks:toolbox
       x:initialX
       y:initialY

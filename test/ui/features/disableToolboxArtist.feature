@@ -7,6 +7,7 @@ Background:
   And I press "x-close"
   Then element "#runButton" is visible
   And element "#resetButton" is hidden
+  Then I set slider speed to medium
 
 Scenario: Toolbox in artist category view is enabled
   Then element "#runButton" is visible

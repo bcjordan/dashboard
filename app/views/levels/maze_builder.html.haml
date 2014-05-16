@@ -13,7 +13,7 @@
   = level_form.label 'Start Direction'
   = level_form.select :start_direction, options_for_select(@level.class.start_directions)
   = level_form.label 'Step options'
-  = level_form.select :step_mode, options_for_select([['Run Button Only', 0], ['Run and Step', 1], ['Step Button Only', 2]])
+  = level_form.select :step_mode, options_for_select(@level.class.step_modes)
   = level_form.label 'Is K1 level?'
   = level_form.check_box :is_k1
   = level_form.submit "Create Level"
