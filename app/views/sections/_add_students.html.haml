@@ -1,4 +1,21 @@
-%h4{ id:'add_students' } Sign up for your students
+:css
+  #add-students-form tr td,
+  #add-students-form tr th {
+    font-size: 20px;
+    height: 30px;
+    padding: 5px;
+  }
+
+  #add-students-form tr.odd {
+    background-color: #cccccc;
+  }
+
+  #add-students-form tr.even {
+    background-color: white;
+  }
+  
+
+%h4{ id:'add_students' }
 
 - if @section.errors.any?
   #error_explanation
@@ -12,19 +29,33 @@
       %th Name
       %th Username
       %th Password
+      %th
     - @section.students.each do |student|
-      = fields_for 'section[students_attributes][]', student, index: nil do |user_f|
-        %tr
+      - if student.new_record?
+        = fields_for 'section[students_attributes][]', student, index: nil do |user_f|
+          %tr{class: cycle('odd', 'even')}
+            %td
+              = user_f.text_field :name
+            %td
+              = user_f.text_field :username
+            %td
+              = user_f.text_field :password
+            %td
+      - else
+        %tr{class: cycle('odd', 'even')}
           %td
-            = user_f.text_field :name
+            = student.name
           %td
-            = user_f.text_field :username
+            = student.username
           %td
-            = user_f.text_field :password
-  = f.submit
+            = link_to "Change Password", ""
+          %td
+            = link_to "Edit", ""
+  = f.submit "Save"
+  = link_to "Cancel", ""
 
 %table{style:"display:none"}
-  %tr{id:"form-row-prototype"}
+  %tr{id:"form-row-prototype", class: cycle('odd', 'even')}
     %td
       %input{class:"input-xlarge", class:"name", name:"section[students_attributes][][name]", placeholder:"eg. John Smith", type:"text"}
     %td

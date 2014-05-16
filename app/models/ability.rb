@@ -30,6 +30,9 @@ class Ability
       can :manage, [LevelSourceHint, FrequentUnsuccessfulLevelSource]
     end
 
+    if user.teacher?
+      can :manage, :teacher
+    end
     #
     # The first argument to `can` is the action you are giving the user 
     # permission to do.

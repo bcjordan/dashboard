@@ -62,9 +62,9 @@ class SectionsController < ApplicationController
 
     respond_to do |format|
       if @section.update(filtered_section_params)
-        format.html { redirect_to sections_path, notice: I18n.t('crud.updated', model: Section.model_name.human) }
+        format.html { redirect_to @section, notice: I18n.t('crud.updated', model: Section.model_name.human) }
       else
-        format.html { render action: 'edit_students' }
+        format.html { render action: 'show' }
       end
     end
   end
@@ -94,6 +94,6 @@ class SectionsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def section_params
-    params.require(:section).permit(:name, :students_attributes => [:name, :username, :password, :provider])
+    params.require(:section).permit(:name, students_attributes: [:name, :username, :password, :provider])
   end
 end

@@ -1,11 +1,7 @@
 - @page_title = @section.name
 
-= render partial: 'shared/teacher_nav', locals: { current: 'manage' }
-
 %h1= @page_title
 
-- if @section.followers.blank?
-  = render partial: 'add_students'
-- else 
-  = render partial: 'student_progress'
+= render partial: 'teacher/new_teacher_nav', locals: { current: 'manage' }
+= render partial: 'add_students'
 

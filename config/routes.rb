@@ -143,6 +143,11 @@ Dashboard::Application.routes.draw do
   get '/api/user_menu', to: 'api#user_menu', as: 'user_menu'
   get '/api/user_hero', to: 'api#user_hero', as: 'user_hero'
 
+  get '/teacher', to: 'teacher#index'
+  scope '/teacher' do
+    resources :sections
+  end
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
