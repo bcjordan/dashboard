@@ -224,7 +224,8 @@ class LevelsControllerTest < ActionController::TestCase
   test "should update level" do
     patch :update, id: @level, game_id: @level.game, level: {  }
     level = assigns(:level)
-    assert_redirected_to game_level_path(level.game, level)
+    # Level update now uses AJAX callback, returns a 200 JSON response instead of redirect
+    assert_response :success
   end
 
   test "should update artist with integer start direction" do
