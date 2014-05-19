@@ -86,7 +86,7 @@ class SectionsController < ApplicationController
       if !current_user.admin? && (!@section.user || (@section.user != current_user))
         # TODO use cancan
         flash[:alert] = I18n.t('crud.access_denied', model: Section.model_name.human)
-        redirect_to sections_path
+        redirect_to sections_followers_path
         return
       end
     end
