@@ -1,0 +1,19 @@
+name 'K-1 Maze Match 1' 
+
+title 'Matching'
+banner 'Match the puzzles and blocks'
+description ''
+height '150'
+
+question "/script_assets/matches/images/k-1_maze/q1.png"
+answer '/script_assets/matches/images/k-1_maze/a1.png'
+
+question "/script_assets/matches/images/k-1_maze/q2.png"
+answer '/script_assets/matches/images/k-1_maze/a2.png'
+
+question "/script_assets/matches/images/k-1_maze/q3.png"
+answer '/script_assets/matches/images/k-1_maze/a3.png'
+
+question "/script_assets/matches/images/k-1_maze/q4.png"
+answer '/script_assets/matches/images/k-1_maze/a4.png'
+

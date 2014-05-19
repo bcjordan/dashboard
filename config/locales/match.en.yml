@@ -21,15 +21,21 @@ en:
         /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
         /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
         /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
-      test-brendan2:
+      K-1 Maze Match 1:
         Matching: Matching
-        Some really easy stuff to match.  Drag it around until you get it.: Some really
-          easy stuff to match.  Drag it around until you get it.
-        What color is the sky?: What color is the sky?
-        What's in the ocean?: What's in the ocean?
-        What's Brent's last name?: What's Brent's last name?
-        Where is Brendan from?: Where is Brendan from?
-        blue: blue
-        salt: salt
-        Van Minnen: Van Minnen
-        Sydney: Sydney
+        Match the puzzles and blocks: Match the puzzles and blocks
+        /script_assets/matches/images/k-1_maze/q1.png: /script_assets/matches/images/k-1_maze/q1.png
+        /script_assets/matches/images/k-1_maze/q2.png: /script_assets/matches/images/k-1_maze/q2.png
+        /script_assets/matches/images/k-1_maze/q3.png: /script_assets/matches/images/k-1_maze/q3.png
+        /script_assets/matches/images/k-1_maze/q4.png: /script_assets/matches/images/k-1_maze/q4.png
+        /script_assets/matches/images/k-1_maze/a1.png: /script_assets/matches/images/k-1_maze/a1.png
+        /script_assets/matches/images/k-1_maze/a2.png: /script_assets/matches/images/k-1_maze/a2.png
+        /script_assets/matches/images/k-1_maze/a3.png: /script_assets/matches/images/k-1_maze/a3.png
+        /script_assets/matches/images/k-1_maze/a4.png: /script_assets/matches/images/k-1_maze/a4.png
+      K-1 matching 1:
+        Maze Matching One: Maze Matching One
+        Match the algorithm and the puzzle!: Match the algorithm and the puzzle!
+        W, W, N: W, W, N
+        E: E
+        S, S: S, S
+        S, E, S: S, E, S

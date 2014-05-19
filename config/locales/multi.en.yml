@@ -10,6 +10,15 @@ en:
         E,S: E,S
         W,S: W,S
         W,N: W,N
+      K-1 Maze Multiple Choice 1:
+        Maze: Maze
+        Solve the puzzle: Solve the puzzle
+        /script_assets/multis/K-1/K-1_Maze/prompt.png: /script_assets/multis/K-1/K-1_Maze/prompt.png
+        Pick the best answer: Pick the best answer
+        /script_assets/multis/K-1/K-1_Maze/a2.png: /script_assets/multis/K-1/K-1_Maze/a2.png
+        /script_assets/multis/K-1/K-1_Maze/b2.png: /script_assets/multis/K-1/K-1_Maze/b2.png
+        /script_assets/multis/K-1/K-1_Maze/c2.png: /script_assets/multis/K-1/K-1_Maze/c2.png
+        /script_assets/multis/K-1/K-1_Maze/d2.png: /script_assets/multis/K-1/K-1_Maze/d2.png
       K-1 multi 2:
         Maze Multiple Choice Two: Maze Multiple Choice Two
         Choose the best answer.: Choose the best answer.

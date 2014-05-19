@@ -6,6 +6,41 @@ class UserTest < ActiveSupport::TestCase
   setup do
     @good_data = { email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester'}
   end
+
+  test "log in with password with pepper" do
+    assert Devise.pepper
+
+    user = User.create! email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester'
+
+    # if password is already peppered we don't need to change the hashed pw
+    assert_no_change('user.reload.encrypted_password') do
+      assert user.valid_password?("foosbars")
+      assert !user.valid_password?("foosbarsasdasds")
+    end
+  end
+
+  test "logging in with password created without pepper saves new password" do
+    a_pepper = "x" * 30
+
+    Devise.stubs(:pepper).returns(nil)
+
+    # create the user without the pepper
+    user = User.create! email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester'
+    
+    Devise.stubs(:pepper).returns(a_pepper)
+
+    # update pw with new hashed pw
+    assert_change('user.reload.encrypted_password') do
+      assert user.valid_password?("foosbars")
+      assert !user.valid_password?("foosbarsasdasds")
+    end
+
+    # doesn't change second time
+    assert_no_change('user.reload.encrypted_password') do
+      assert user.valid_password?("foosbars")
+      assert !user.valid_password?("foosbarsasdasds")
+    end
+  end
   
   test "cannot create user with invalid email" do
     user = User.create(@good_data.merge({email: 'foo@bar'}))

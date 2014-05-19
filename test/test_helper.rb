@@ -41,6 +41,44 @@ class ActiveSupport::TestCase
     end
   end
 
+
+  # Based on assert_difference http://api.rubyonrails.org/classes/ActiveSupport/Testing/Assertions.html#method-i-assert_difference
+  # just checks using not_equal instead of a numeric difference so you can compare non-numeric things
+  def assert_change(expressions, message = nil, &block)
+    expressions = Array(expressions)
+    
+    exps = expressions.map { |e|
+      e.respond_to?(:call) ? e : lambda { eval(e, block.binding) }
+    }
+    before = exps.map { |e| e.call }
+    
+    yield
+
+    expressions.zip(exps).each_with_index do |(code, e), i|
+      error  = "#{code.inspect} didn't change"
+      error  = "#{message}.\n#{error}" if message
+      assert_not_equal(before[i], e.call, error)
+    end
+  end
+
+  # Based on assert_difference http://api.rubyonrails.org/classes/ActiveSupport/Testing/Assertions.html#method-i-assert_difference
+  # just checks using equal instead of a numeric difference so you can compare non-numeric things
+  def assert_no_change(expressions, message = nil, &block)
+    expressions = Array(expressions)
+    
+    exps = expressions.map { |e|
+      e.respond_to?(:call) ? e : lambda { eval(e, block.binding) }
+    }
+    before = exps.map { |e| e.call }
+    
+    yield
+
+    expressions.zip(exps).each_with_index do |(code, e), i|
+      error  = "#{code.inspect} didn't change"
+      error  = "#{message}.\n#{error}" if message
+      assert_equal(before[i], e.call, error)
+    end
+  end
 end
 
 

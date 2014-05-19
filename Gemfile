@@ -31,6 +31,7 @@ group :test do
   gem 'selenium-webdriver'
   gem 'rspec'
   gem 'chromedriver-helper'
+  gem 'colorize'
 end
 
 group :doc do
