@@ -3177,6 +3177,7 @@ module.exports = {
       [0, 1, 0, 0, 0, 0, 1, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
+    'spriteStartingImage': 2,
     'toolbox':
       tb(blockOfType('studio_move') +
          defaultSayBlock()),
@@ -3203,7 +3204,7 @@ module.exports = {
       [0, 0, 0, 0, 1, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
-    'spriteStartingImage': 1,
+    'spriteStartingImage': 3,
     'timeoutFailureTick': 200,
     'toolbox':
       tb(blockOfType('studio_moveDistance') +
@@ -3235,6 +3236,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
+    'spriteStartingImage': 2,
     'toolbox':
       tb(blockOfType('studio_moveDistance') +
          blockOfType('studio_move') +
@@ -4275,8 +4277,8 @@ BlocklyApps.reset = function(first) {
   // Reset the Globals object used to contain program variables:
   Studio.Globals = [];
 
-  var spriteStartingSkins = [ "witch", "cat", "dinosaur", "dog", "octopus",
-                              "penguin" ];
+  var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
+                              "witch" ];
   var numStartingSkins = spriteStartingSkins.length;
   var skinBias = Studio.spriteStartingImage || 0;
 
