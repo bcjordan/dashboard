@@ -11,3 +11,6 @@
 # if you're sharing your code publicly.
 Dashboard::Application.config.secret_key_base = Deploy.config['dashboard_secret_key_base']
 
+unless Rails.env.production?
+  Dashboard::Application.config.secret_key_base ||= "not a secure secret key!"
+end
