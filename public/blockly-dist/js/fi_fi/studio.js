@@ -2872,11 +2872,7 @@ exports.install = function(blockly, skin) {
        [msg.setSpriteDinosaur(), '"dinosaur"'],
        [msg.setSpriteDog(), '"dog"'],
        [msg.setSpriteOctopus(), '"octopus"'],
-       [msg.setSpritePenguin(), '"penguin"'],
-       [msg.setSpriteGreen(), '"green"'],
-       [msg.setSpritePurple(), '"purple"'],
-       [msg.setSpritePink(), '"pink"'],
-       [msg.setSpriteOrange(), '"orange"']];
+       [msg.setSpritePenguin(), '"penguin"']];
 
   generator.studio_setSprite = function() {
     return generateSetterCode({
@@ -3008,8 +3004,6 @@ exports.install = function(blockly, skin) {
       name: 'wait'});
   };
 
-  delete blockly.Blocks.procedures_defreturn;
-  delete blockly.Blocks.procedures_ifreturn;
 };
 
 },{"../../locale/fi_fi/studio":35,"../codegen":6,"./tiles":19}],13:[function(require,module,exports){
@@ -3384,7 +3378,8 @@ module.exports = {
                           blockOfType('math_number') +
                           blockOfType('math_change') +
                           blockOfType('math_arithmetic')) +
-         createCategory(msg.catVariables(), '', 'VARIABLE')),
+         createCategory(msg.catVariables(), '', 'VARIABLE') +
+         createCategory(msg.catProcedures(), '', 'PROCEDURE')),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
@@ -3464,22 +3459,6 @@ exports.load = function(assetUrl, id) {
   skin.penguin = {
     sprite: skin.assetUrl('penguin_spritesheet_200px.png'),
     spriteFlags: 28,
-  };
-  skin.green = {
-    sprite: skin.assetUrl('avatar1.png'),
-    spriteFlags: 0,
-  };
-  skin.purple = {
-    sprite: skin.assetUrl('avatar2.png'),
-    spriteFlags: 0,
-  };
-  skin.orange = {
-    sprite: skin.assetUrl('avatar3.png'),
-    spriteFlags: 0,
-  };
-  skin.pink = {
-    sprite: skin.assetUrl('avatar4.png'),
-    spriteFlags: 0,
   };
 
   // Images
@@ -4297,7 +4276,7 @@ BlocklyApps.reset = function(first) {
   Studio.Globals = [];
 
   var spriteStartingSkins = [ "witch", "cat", "dinosaur", "dog", "octopus",
-                              "penguin", "green", "purple", "pink", "orange" ];
+                              "penguin" ];
   var numStartingSkins = spriteStartingSkins.length;
   var skinBias = Studio.spriteStartingImage || 0;
 
@@ -4485,9 +4464,22 @@ var registerHandlersWithSpriteParams =
   }
 };
 
+//
+// Generates code with user-generated function definitions and evals that code
+// so these can be called from event handlers. This should be called for each
+// block type that defines functions.
+//
+
+var defineProcedures = function (blockType) {
+  var code = Blockly.Generator.workspaceToCode('JavaScript', blockType);
+  try { codegen.evalWith(code, {
+                         BlocklyApps: BlocklyApps,
+                         Studio: api,
+                         Globals: Studio.Globals } ); } catch (e) { }
+};
 
 /**
- * Execute the user's code.  Heaven help us...
+ * Execute the story
  */
 Studio.execute = function() {
   BlocklyApps.log = [];
@@ -4534,6 +4526,11 @@ Studio.execute = function() {
   BlocklyApps.playAudio('start', {volume: 0.5});
 
   BlocklyApps.reset(false);
+
+  // Define any top-level procedures the user may have created
+  // (must be after reset(), which resets the Studio.Globals namespace)
+  defineProcedures('procedures_defreturn');
+  defineProcedures('procedures_defnoreturn');
 
   // Set event handlers and start the onTick timer
   Studio.eventHandlers = handlers;
@@ -6002,19 +5999,11 @@ exports.setSpriteDinosaur = function(d){return "to a dinosaur image"};
 
 exports.setSpriteDog = function(d){return "to a dog image"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
-
 exports.setSpriteHidden = function(d){return "to a hidden image"};
 
 exports.setSpriteOctopus = function(d){return "to an octopus image"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
-
 exports.setSpritePenguin = function(d){return "to a penguin image"};
-
-exports.setSpritePink = function(d){return "to a pink image"};
-
-exports.setSpritePurple = function(d){return "to a purple image"};
 
 exports.setSpriteRandom = function(d){return "to a random image"};
 
