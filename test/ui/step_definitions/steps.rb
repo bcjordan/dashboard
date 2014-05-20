@@ -57,6 +57,10 @@ When /^I press "([^"]*)"$/ do |button|
   @button.click
 end
 
+When /^I press "([^"]*)" using jQuery$/ do |button|
+  @browser.execute_script("$('#" + button + "').click()");
+end
+
 When /^I press a button with xpath "([^"]*)"$/ do |xpath|
   @button = @browser.find_element(:xpath, xpath)
   @button.click

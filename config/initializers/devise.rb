@@ -3,6 +3,10 @@
 Devise.setup do |config|
   config.secret_key = Deploy.config['dashboard_devise_secret']
 
+  unless Rails.env.production?
+    config.secret_key ||= "not a secure secret key!"
+  end
+
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class with default "from" parameter.
@@ -95,6 +99,9 @@ Devise.setup do |config|
 
   # Setup a pepper to generate the encrypted password.
   config.pepper = Deploy.config['dashboard_devise_pepper']
+  unless Rails.env.production?
+    config.pepper ||= "not a pepper!"
+  end
 
   # ==> Configuration for :confirmable
   # A period that the user is allowed to access the website even without

@@ -166,6 +166,14 @@ BlocklyApps.init = function(config) {
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
 
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
+
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
     console.log('Attempt!');
@@ -314,12 +322,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -2230,6 +2241,9 @@ BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
 //The number of blocks to show as feedback.
 BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = 1;
 
+// Never bump neighbors for Jigsaw
+Blockly.BUMP_UNCONNECTED = false;
+
 function useLargeNotches() {
   Blockly.BlockSvg.NOTCH_WIDTH = 50;
 
@@ -2361,6 +2375,7 @@ Jigsaw.init = function(config) {
   config.concreteBlocks = true;
 
   config.enableShowCode = false;
+  config.enableShowBlockCount = false;
 
   BlocklyApps.init(config);
 
@@ -2482,7 +2497,7 @@ var jigsawBlock = function (type, x, y, child, childType) {
   if (childType === 'statement') {
     childAttr = " name='child'";
   }
-  return '<block type="' + type + '" deletable="true"' +
+  return '<block type="' + type + '" deletable="false"' +
     ' x="' + x + '"' +
     ' y="' + y + '">' +
     (child ? '<' + childType + childAttr + '>' + child + '</' + childType + '>' : '') +
