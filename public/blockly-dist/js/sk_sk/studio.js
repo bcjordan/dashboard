@@ -386,11 +386,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -3350,6 +3351,8 @@ module.exports = {
     ],
     'toolbox':
       tb(createCategory(msg.catActions(),
+                          blockOfType('studio_setSprite') +
+                          blockOfType('studio_setBackground') +
                           blockOfType('studio_move') +
                           blockOfType('studio_moveDistance') +
                           blockOfType('studio_stop') +
@@ -3359,9 +3362,7 @@ module.exports = {
                           defaultSayBlock() +
                           blockOfType('studio_setSpritePosition') +
                           blockOfType('studio_setSpriteSpeed') +
-                          blockOfType('studio_setSpriteEmotion') +
-                          blockOfType('studio_setBackground') +
-                          blockOfType('studio_setSprite')) +
+                          blockOfType('studio_setSpriteEmotion')) +
          createCategory(msg.catEvents(),
                           blockOfType('studio_whenGameStarts') +
                           blockOfType('studio_whenLeft') +
@@ -3381,6 +3382,7 @@ module.exports = {
                           blockOfType('logic_boolean')) +
          createCategory(msg.catMath(),
                           blockOfType('math_number') +
+                          blockOfType('math_change') +
                           blockOfType('math_arithmetic')) +
          createCategory(msg.catVariables(), '', 'VARIABLE')),
     'startBlocks':
@@ -3942,7 +3944,7 @@ var callHandler = function (name) {
         (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
       handler.cmdQueue = [];
       Studio.currentCmdQueue = handler.cmdQueue;
-      try { handler.func(BlocklyApps, api); } catch (e) { }
+      try { handler.func(BlocklyApps, api, Studio.Globals); } catch (e) { }
       Studio.currentCmdQueue = null;
     }
   });
@@ -4194,6 +4196,7 @@ Studio.init = function(config) {
   config.makeImage = BlocklyApps.assetUrl('media/promo.png');
 
   config.enableShowCode = false;
+  config.varsInGlobals = true;
   config.enableShowBlockCount = false;
 
   config.preventExtraTopLevelBlocks = true;
@@ -4289,6 +4292,9 @@ BlocklyApps.reset = function(first) {
   // Reset currentCmdQueue and sayComplete count:
   Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
+
+  // Reset the Globals object used to contain program variables:
+  Studio.Globals = [];
 
   var spriteStartingSkins = [ "witch", "cat", "dinosaur", "dog", "octopus",
                               "penguin", "green", "purple", "pink", "orange" ];
@@ -4439,7 +4445,8 @@ var registerHandlers =
       if (code) {
         var func = codegen.functionFromCode(code, {
                                             BlocklyApps: BlocklyApps,
-                                            Studio: api } );
+                                            Studio: api,
+                                            Globals: Studio.Globals } );
         var eventName = eventNameBase;
         if (nameParam1) {
           eventName += '-' + matchParam1Val;
