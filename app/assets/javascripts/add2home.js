@@ -300,7 +300,7 @@ var addToHome = (function (w) {
 			isSessionActive = true;
 			close();
 		} catch (exc) {
-			console.log('Caught exception in sessionStorage.setItem: ' + exc);
+			console.log('Caught exception in sessionStorage.setItem: ', exc);
 		}
 	}
 
