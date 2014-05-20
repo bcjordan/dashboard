@@ -94,7 +94,11 @@ function showVideo(options) {
     }
     // Remember which tab is selected.
     var selected = tab.parents('.ui-tabs').tabs('option', 'active');
-    window.sessionStorage.setItem('lastTab', selected);
+    try {
+      window.sessionStorage.setItem('lastTab', selected);
+    } catch (exc) {
+      console.log('Caught exception in sessionStorage.setItem: ' + exc);
+    }
   };
 
   var lastTab = window.sessionStorage.getItem('lastTab');
