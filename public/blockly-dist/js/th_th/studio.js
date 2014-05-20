@@ -4601,6 +4601,10 @@ frameDirTable[Direction.NORTHWEST]  = 4;
 frameDirTable[Direction.WEST]       = 5;
 frameDirTable[Direction.SOUTHWEST]  = 6;
 
+var ANIM_RATE = 6;
+var ANIM_OFFSET = 7; // Each sprite animates at a slightly different time
+var ANIM_AFTER_NUM_NORMAL_FRAMES = 8;
+
 var spriteFrameNumber = function (index) {
   var sprite = Studio.sprite[index];
   var showThisAnimFrame = 0;
@@ -4610,7 +4614,11 @@ var spriteFrameNumber = function (index) {
   }
   if ((sprite.flags & SpriteFlags.ANIMATION) &&
       Studio.tickCount &&
-      Math.round(Studio.tickCount / 20) % 2) {
+      (1 ===
+       Math.round((Studio.tickCount + index * ANIM_OFFSET) / ANIM_RATE) %
+                  ANIM_AFTER_NUM_NORMAL_FRAMES)) {
+    // we only support two-frame animation for now, the 2nd frame is only up
+    // for 1/8th of the time (since it is a blink of the eyes)
     showThisAnimFrame = sprite.firstAnimFrameNum;
   }
   if (sprite.emotion !== Emotions.NORMAL &&
