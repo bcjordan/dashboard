@@ -24,7 +24,7 @@
   - @sections.each do |section|
     %tr.manage-tr
       %td.manage-td
-        = link_to section.try(:name), section
+        = section.try(:name)
         (
         = link_to("rename", edit_section_path(section.id))
         ,

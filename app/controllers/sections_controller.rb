@@ -10,6 +10,18 @@ class SectionsController < ApplicationController
   end
   
   def show
+    if @section.followers.empty?
+      redirect_to edit_students_section_path(@section)
+    end
+
+    script = Script.twenty_hour_script
+
+    @section_map = { @section => @section.students } # include { student_user: [{ user_trophies: [:concept, :trophy] }, :user_levels] }])
+
+    @all_script_levels = script.script_levels.includes({ level: :game })
+    @all_concepts = Concept.cached
+
+    @all_games = Game.where(['id in (select game_id from levels l inner join script_levels sl on sl.level_id = l.id where sl.script_id = ?)', script.id])
   end
 
   def new
@@ -24,6 +36,27 @@ class SectionsController < ApplicationController
       where(section: @section).
       order('users.name').
       includes([:student_user, :section])
+  end
+
+  def update_students
+    filtered_section_params = section_params
+
+    # remove blank form rows
+    filtered_section_params[:students_attributes].reject! {|student| student.values.all?(&:blank?)}
+
+    # add provider::manual so email is not required
+    filtered_section_params[:students_attributes].each do |student|
+      student[:provider] = User::PROVIDER_MANUAL
+    end
+
+    respond_to do |format|
+      if @section.update(filtered_section_params)
+        format.html { redirect_to edit_students_section_path(@section),
+            notice: I18n.t('crud.updated', model: Section.model_name.human) }
+      else
+        format.html { render action: 'edit_students' }
+      end
+    end
   end
 
   def create
@@ -49,25 +82,6 @@ class SectionsController < ApplicationController
     end
   end
 
-  def update_students
-    filtered_section_params = section_params
-
-    # remove blank form rows
-    filtered_section_params[:students_attributes].reject! {|student| student.values.all?(&:blank?)}
-
-    # add provider::manual so email is not required
-    filtered_section_params[:students_attributes].each do |student|
-      student[:provider] = User::PROVIDER_MANUAL
-    end
-
-    respond_to do |format|
-      if @section.update(filtered_section_params)
-        format.html { redirect_to @section, notice: I18n.t('crud.updated', model: Section.model_name.human) }
-      else
-        format.html { render action: 'show' }
-      end
-    end
-  end
 
   def destroy
     @section.destroy
