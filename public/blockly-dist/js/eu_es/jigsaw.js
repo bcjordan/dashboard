@@ -386,11 +386,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
