@@ -132,10 +132,8 @@
     }
     else {
       togglePopup();
-      if (isShowingPopup()) {
-        if (trophiesClicked === true) {
-          jumpToTrophies();
-        }
+      if (isShowingPopup() && trophiesClicked === true) {
+        jumpToTrophies();
       }
     }
     return false;
