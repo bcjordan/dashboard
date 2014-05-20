@@ -14,7 +14,8 @@ Scenario: Toolbox in maze (non-category) is enabled
   Then the workspace has "1" blocks of type "maze_forever"
 
 Scenario: Toolbox in maze (non-category) is disabled while running
-  Then I press "runButton"
+  Then I slow down execution speed
+  And I press "runButton"
   Then element "#runButton" is hidden
   And element "#resetButton" is visible
   Then I drag block "4" to offset "220, 300"
@@ -25,7 +26,7 @@ Scenario: Toolbox in maze (non-category) is reenabled after finished running
   Then I press "runButton"
   And I wait to see "#x-close"
   Then element "#feedback-dialog" is visible
-  Then I press "again-button"
+  Then I press "again-button" using jQuery
   Then element "#feedback-dialog" is hidden
   Then I drag block "4" to offset "220, 300"
   Then the workspace has "2" blocks of type "maze_forever"

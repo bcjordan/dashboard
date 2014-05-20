@@ -166,6 +166,14 @@ BlocklyApps.init = function(config) {
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
 
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
+
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
     console.log('Attempt!');
@@ -314,12 +322,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -375,11 +386,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -3339,6 +3351,8 @@ module.exports = {
     ],
     'toolbox':
       tb(createCategory(msg.catActions(),
+                          blockOfType('studio_setSprite') +
+                          blockOfType('studio_setBackground') +
                           blockOfType('studio_move') +
                           blockOfType('studio_moveDistance') +
                           blockOfType('studio_stop') +
@@ -3348,9 +3362,7 @@ module.exports = {
                           defaultSayBlock() +
                           blockOfType('studio_setSpritePosition') +
                           blockOfType('studio_setSpriteSpeed') +
-                          blockOfType('studio_setSpriteEmotion') +
-                          blockOfType('studio_setBackground') +
-                          blockOfType('studio_setSprite')) +
+                          blockOfType('studio_setSpriteEmotion')) +
          createCategory(msg.catEvents(),
                           blockOfType('studio_whenGameStarts') +
                           blockOfType('studio_whenLeft') +
@@ -3370,6 +3382,7 @@ module.exports = {
                           blockOfType('logic_boolean')) +
          createCategory(msg.catMath(),
                           blockOfType('math_number') +
+                          blockOfType('math_change') +
                           blockOfType('math_arithmetic')) +
          createCategory(msg.catVariables(), '', 'VARIABLE')),
     'startBlocks':
@@ -3705,14 +3718,14 @@ var drawMap = function() {
       spriteClipRect.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteClip.appendChild(spriteClipRect);
       svg.appendChild(spriteClip);
-      
+
       // Add sprite (not setting href attribute or width until displaySprite).
       var spriteIcon = document.createElementNS(Blockly.SVG_NS, 'image');
       spriteIcon.setAttribute('id', 'sprite' + i);
       spriteIcon.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteIcon.setAttribute('clip-path', 'url(#spriteClipPath' + i + ')');
       svg.appendChild(spriteIcon);
-      
+
       dom.addMouseDownTouchEvent(spriteIcon,
                                  delegate(this,
                                           Studio.onSpriteClicked,
@@ -3722,7 +3735,7 @@ var drawMap = function() {
       var spriteSpeechBubble = document.createElementNS(Blockly.SVG_NS, 'g');
       spriteSpeechBubble.setAttribute('id', 'speechBubble' + i);
       spriteSpeechBubble.setAttribute('visibility', 'hidden');
-      
+
       var speechRect = document.createElementNS(Blockly.SVG_NS, 'path');
       speechRect.setAttribute('id', 'speechBubblePath' + i);
       speechRect.setAttribute('class', 'studio-speech-bubble-path');
@@ -3730,13 +3743,13 @@ var drawMap = function() {
       var speechText = document.createElementNS(Blockly.SVG_NS, 'text');
       speechText.setAttribute('id', 'speechBubbleText' + i);
       speechText.setAttribute('class', 'studio-speech-bubble');
-      
+
       spriteSpeechBubble.appendChild(speechRect);
       spriteSpeechBubble.appendChild(speechText);
       svg.appendChild(spriteSpeechBubble);
     }
   }
-  
+
   if (Studio.sprite0Finish_) {
     for (i = 0; i < Studio.sprite0FinishCount; i++) {
       // Add finish markers.
@@ -3782,7 +3795,7 @@ var delegate = function(scope, func, data)
 
 var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
   var totalDistance = 0;
-  
+
   Studio.eventHandlers.forEach(function (handler) {
     var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
@@ -3931,7 +3944,7 @@ var callHandler = function (name) {
         (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
       handler.cmdQueue = [];
       Studio.currentCmdQueue = handler.cmdQueue;
-      try { handler.func(BlocklyApps, api); } catch (e) { }
+      try { handler.func(BlocklyApps, api, Studio.Globals); } catch (e) { }
       Studio.currentCmdQueue = null;
     }
   });
@@ -3951,7 +3964,7 @@ Studio.onTick = function() {
   for (var i = 0; i < Studio.spriteCount; i++) {
     Studio.executeQueue('whenSpriteClicked-' + i);
   }
-  
+
   // Run key event handlers for any keys that are down:
   for (var key in Keycodes) {
     if (Studio.keyState[Keycodes[key]] &&
@@ -3972,7 +3985,7 @@ Studio.onTick = function() {
       }
     }
   }
-  
+
   for (var btn in ArrowIds) {
     if (Studio.btnState[ArrowIds[btn]] &&
         Studio.btnState[ArrowIds[btn]] == ButtonState.DOWN) {
@@ -3992,12 +4005,12 @@ Studio.onTick = function() {
       }
     }
   }
-  
+
   Studio.executeQueue('whenLeft');
   Studio.executeQueue('whenUp');
   Studio.executeQueue('whenRight');
   Studio.executeQueue('whenDown');
-  
+
   // Check for collisions (note that we use the positions they are about
   // to attain with queued moves - this allows the moves to be canceled before
   // the actual movements take place):
@@ -4022,14 +4035,14 @@ Studio.onTick = function() {
       Studio.executeQueue('whenSpriteCollided-' + i + '-' + j);
     }
   }
-  
+
   for (i = 0; i < Studio.spriteCount; i++) {
     performQueuedMoves(i);
 
     // Display sprite:
     Studio.displaySprite(i);
   }
-  
+
   if (checkFinished()) {
     Studio.onPuzzleComplete();
   }
@@ -4038,7 +4051,7 @@ Studio.onTick = function() {
 Studio.onKey = function(e) {
   // Store the most recent event type per-key
   Studio.keyState[e.keyCode] = e.type;
-  
+
   // If we are actively running our tick loop, suppress default event handling
   if (Studio.intervalId &&
       e.keyCode >= Keycodes.LEFT && e.keyCode <= Keycodes.DOWN) {
@@ -4096,7 +4109,7 @@ Studio.init = function(config) {
   level = config.level;
   onSharePage = config.share;
   loadLevel();
-  
+
   window.addEventListener("keydown", Studio.onKey, false);
   window.addEventListener("keyup", Studio.onKey, false);
 
@@ -4146,7 +4159,7 @@ Studio.init = function(config) {
                                           ArrowIds[btn]));
     }
     document.addEventListener('mouseup', Studio.onMouseUp, false);
-  
+
     /**
      * The richness of block colours, regardless of the hue.
      * MOOC blocks should be brighter (target audience is younger).
@@ -4156,7 +4169,7 @@ Studio.init = function(config) {
     Blockly.HSV_SATURATION = 0.6;
 
     Blockly.SNAP_RADIUS *= Studio.scale.snapRadius;
-    
+
     drawMap();
   };
 
@@ -4183,13 +4196,15 @@ Studio.init = function(config) {
   config.makeImage = BlocklyApps.assetUrl('media/promo.png');
 
   config.enableShowCode = false;
+  config.varsInGlobals = true;
+  config.enableShowBlockCount = false;
 
   config.preventExtraTopLevelBlocks = true;
 
   Studio.sprite0FinishCount = 0;
   Studio.spriteCount = 0;
   Studio.sprite = [];
-  
+
   // Locate the start and finish squares.
   for (var y = 0; y < Studio.ROWS; y++) {
     for (var x = 0; x < Studio.COLS; x++) {
@@ -4209,10 +4224,10 @@ Studio.init = function(config) {
       }
     }
   }
-  
+
   // Update the sprite count in the blocks:
   blocks.setSpriteCount(Blockly, Studio.spriteCount);
-    
+
   BlocklyApps.init(config);
 
   if (!onSharePage) {
@@ -4265,7 +4280,7 @@ BlocklyApps.reset = function(first) {
     var softButtonsCell = document.getElementById('soft-buttons');
     softButtonsCell.className = 'soft-buttons-' + softButtonCount;
   }
-  
+
   // Reset the score.
   Studio.playerScore = 0;
   Studio.opponentScore = 0;
@@ -4273,10 +4288,13 @@ BlocklyApps.reset = function(first) {
 
   // Reset configurable variables
   Studio.setBackground({'value': 'cave'});
-  
+
   // Reset currentCmdQueue and sayComplete count:
   Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
+
+  // Reset the Globals object used to contain program variables:
+  Studio.Globals = [];
 
   var spriteStartingSkins = [ "witch", "cat", "dinosaur", "dog", "octopus",
                               "penguin", "green", "purple", "pink", "orange" ];
@@ -4293,7 +4311,7 @@ BlocklyApps.reset = function(first) {
     Studio.sprite[i].dir = Direction.NONE;
     Studio.sprite[i].displayDir = Direction.SOUTH;
     Studio.sprite[i].emotion = Emotions.NORMAL;
-    
+
     Studio.setSprite({
         'index': i,
         'value': Studio.spritesHiddenToStart ?
@@ -4350,12 +4368,12 @@ BlocklyApps.runButtonClick = function() {
   BlocklyApps.reset(false);
   BlocklyApps.attempts++;
   Studio.execute();
-  
+
   if (level.freePlay && !onSharePage) {
     var shareCell = document.getElementById('share-cell');
     shareCell.className = 'share-cell-enabled';
   }
-  
+
   if (level.showZeroZeroScore) {
     Studio.displayScore();
   }
@@ -4427,7 +4445,8 @@ var registerHandlers =
       if (code) {
         var func = codegen.functionFromCode(code, {
                                             BlocklyApps: BlocklyApps,
-                                            Studio: api } );
+                                            Studio: api,
+                                            Globals: Studio.Globals } );
         var eventName = eventNameBase;
         if (nameParam1) {
           eventName += '-' + matchParam1Val;
@@ -4515,7 +4534,7 @@ Studio.execute = function() {
   BlocklyApps.playAudio('start', {volume: 0.5});
 
   BlocklyApps.reset(false);
-  
+
   // Set event handlers and start the onTick timer
   Studio.eventHandlers = handlers;
   Studio.tickCount = 0;
@@ -4533,7 +4552,7 @@ Studio.onPuzzleComplete = function() {
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
   BlocklyApps.levelComplete = (Studio.result == ResultType.SUCCESS);
-  
+
   // If the current level is a free play, always return the free play
   // result type
   if (level.freePlay) {
@@ -4547,22 +4566,22 @@ Studio.onPuzzleComplete = function() {
   } else {
     BlocklyApps.playAudio('failure', {volume : 0.5});
   }
-  
+
   if (level.editCode) {
     Studio.testResults = BlocklyApps.levelComplete ?
       BlocklyApps.TestResults.ALL_PASS :
       BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL;
   }
-  
+
   if (level.failForOther1Star && !BlocklyApps.levelComplete) {
     Studio.testResults = BlocklyApps.TestResults.OTHER_1_STAR_FAIL;
   }
-  
+
   var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
   var textBlocks = Blockly.Xml.domToText(xml);
-  
+
   Studio.waitingForReport = true;
-  
+
   // Report result to server.
   BlocklyApps.report({
                      app: 'studio',
@@ -4635,7 +4654,7 @@ var updateSpeechBubblePath = function (element) {
 Studio.displaySprite = function(i) {
   var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
   var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
-  
+
   var xOffset = Studio.SPRITE_WIDTH * spriteFrameNumber(i);
 
   var spriteIcon = document.getElementById('sprite' + i);
@@ -4643,7 +4662,7 @@ Studio.displaySprite = function(i) {
 
   var xCoordPrev = spriteClipRect.getAttribute('x');
   var yCoordPrev = spriteClipRect.getAttribute('y');
-  
+
   var dirPrev = Studio.sprite[i].dir;
   if (dirPrev === Direction.NONE) {
     // direction not yet set, start at SOUTH (forward facing)
@@ -4662,7 +4681,7 @@ Studio.displaySprite = function(i) {
       Studio.sprite[i].dir |= Direction.SOUTH;
     }
   }
-  
+
   if (Studio.sprite[i].dir !== Studio.sprite[i].displayDir) {
     // Every other frame, assign a new displayDir from state table
     // (only one turn at a time):
@@ -4671,10 +4690,10 @@ Studio.displaySprite = function(i) {
           NextTurn[Studio.sprite[i].displayDir][Studio.sprite[i].dir];
     }
   }
-  
+
   spriteIcon.setAttribute('x', xCoord - xOffset);
   spriteIcon.setAttribute('y', yCoord);
-  
+
   spriteClipRect.setAttribute('x', xCoord);
   spriteClipRect.setAttribute('y', yCoord);
 
@@ -4698,11 +4717,11 @@ Studio.displaySprite = function(i) {
   }
   speechBubblePath.setAttribute('onTop', nowOnTop);
   speechBubblePath.setAttribute('onRight', nowOnRight);
-  
+
   if (wasOnTop !== nowOnTop || wasOnRight !== nowOnRight) {
     updateSpeechBubblePath(speechBubblePath);
   }
-  
+
   speechBubble.setAttribute('transform',
                             'translate(' + xSpeech + ',' + ySpeech + ')');
 };
@@ -4851,7 +4870,7 @@ Studio.setSprite = function (opts) {
   Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
   Studio.sprite[opts.index].flags |= (opts.value !== 'hidden') ?
                                       skinTheme(opts.value).spriteFlags : 0;
-  
+
   var element = document.getElementById('sprite' + opts.index);
   element.setAttribute('visibility',
                        (opts.value === 'hidden') ? 'hidden' : 'visible');
@@ -4936,7 +4955,7 @@ Studio.saySprite = function (opts) {
 
     speechBubblePath.setAttribute('height', bblHeight);
     updateSpeechBubblePath(speechBubblePath);
-    
+
     // displaySprite will reposition the bubble
     Studio.displaySprite(opts.spriteIndex);
     speechBubble.setAttribute('visibility', 'visible');
@@ -5039,7 +5058,7 @@ Studio.moveDistance = function (opts) {
     opts.started = true;
     opts.queuedDistance = opts.distance / Studio.SQUARE_SIZE;
   }
-  
+
   return (0 === opts.queuedDistance);
 };
 
@@ -5089,7 +5108,7 @@ var checkFinished = function () {
     Studio.result = ResultType.SUCCESS;
     return true;
   }
-  
+
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
     Studio.result = ResultType.FAILURE;
@@ -5100,12 +5119,12 @@ var checkFinished = function () {
     Studio.result = ResultType.SUCCESS;
     return true;
   }
-  
+
   if (Studio.timedOut()) {
     Studio.result = ResultType.FAILURE;
     return true;
   }
-  
+
   return false;
 };
 
