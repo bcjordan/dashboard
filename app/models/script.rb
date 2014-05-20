@@ -121,6 +121,8 @@ class Script < ActiveRecord::Base
   def self.add_script(options, data, custom=false)
     script = fetch_script(options)
     chapter = 0; game_chapter = Hash.new(0)
+    # Clear positions in case script levels are deleted.
+    script.script_levels.each { |script_level| script_level.update(position: nil) }
     script.script_levels = data.map do |row|
       row.symbolize_keys!
 
@@ -153,6 +155,7 @@ class Script < ActiveRecord::Base
       end
       script_level
     end
+    script.stages.each { |stage| stage.delete if stage.script_levels.empty? }  # Remove empty stages.
     script
   end
 

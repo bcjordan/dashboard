@@ -4,17 +4,17 @@
   /* our top browsers by analytics */
 
   {
-    "name": "Chrome31Win7",
+    "name": "Chrome33Win7",
     "browser": "chrome",
-    "browser_version": "31",
+    "browser_version": "33",
     "device": null,
     "os": "Windows",
     "os_version": "7"
   },
   {
-    "name": "Chrome31XP",
+    "name": "Chrome34XP",
     "browser": "chrome",
-    "browser_version": "31",
+    "browser_version": "34",
     "device": null,
     "os": "Windows",
     "os_version": "XP"
