@@ -78,7 +78,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":35}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":11,"./utils":36}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -680,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -740,19 +725,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
  * @type {?boolean}
  */
 BlocklyApps.levelComplete = null;
-
-/**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
 
 /**
  * The number of attempts (how many times the run button has been pressed)
@@ -916,7 +888,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/ru_ru/common":37,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":12,"./templates/buttons.html":14,"./templates/instructions.html":16,"./templates/learn.html":17,"./templates/makeYourOwn.html":18,"./utils":35,"./xml":36}],3:[function(require,module,exports){
+},{"../locale/ru_ru/common":38,"./builder":5,"./dom":7,"./feedback.js":9,"./slider":13,"./templates/buttons.html":15,"./templates/instructions.html":17,"./templates/learn.html":18,"./templates/makeYourOwn.html":19,"./utils":36,"./xml":37}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -1003,7 +975,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":36}],4:[function(require,module,exports){
+},{"./xml":37}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1065,10 +1037,10 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":13,"./utils.js":35,"url":49}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":14,"./utils.js":36,"url":50}],6:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -1076,6 +1048,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -1220,6 +1193,45 @@ exports.isMobile = function() {
 };
 
 },{}],8:[function(require,module,exports){
+var ExecutionInfo = function (options) {
+  options = options || {};
+  this.terminated_ = false;
+  this.terminationValue_ = null;
+  this.log = [];
+  this.ticks = options.ticks || Infinity;
+};
+
+module.exports = ExecutionInfo;
+
+ExecutionInfo.prototype.terminateWithValue = function (value) {
+  this.terminated_ = true;
+  this.terminationValue_ = value;
+};
+
+ExecutionInfo.prototype.isTerminated = function () {
+  return this.terminated_;
+};
+
+ExecutionInfo.prototype.terminationValue = function () {
+  return this.terminationValue_;
+};
+
+/**
+ * If the user has executed too many actions, we're probably in an infinite
+ * loop.  Sadly I wasn't able to solve the Halting Problem.
+ * @param {?string} opt_id ID of loop block to highlight.
+ * @throws {Infinity} Throws an error to terminate the user's program.
+ */
+ExecutionInfo.prototype.checkTimeout = function(opt_id) {
+  if (opt_id) {
+    this.log.push([null, opt_id]);
+  }
+  if (this.ticks-- < 0) {
+    this.terminateWithValue(Infinity);
+  }
+};
+
+},{}],9:[function(require,module,exports){
 var trophy = require('./templates/trophy.html');
 var utils = require('./utils');
 var readonly = require('./templates/readonly.html');
@@ -1959,7 +1971,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/ru_ru/common":37,"./codegen":6,"./dom":7,"./templates/buttons.html":14,"./templates/code.html":15,"./templates/readonly.html":20,"./templates/sharing.html":21,"./templates/showCode.html":22,"./templates/trophy.html":23,"./utils":35}],9:[function(require,module,exports){
+},{"../locale/ru_ru/common":38,"./codegen":6,"./dom":7,"./templates/buttons.html":15,"./templates/code.html":16,"./templates/readonly.html":21,"./templates/sharing.html":22,"./templates/showCode.html":23,"./templates/trophy.html":24,"./utils":36}],10:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -2018,7 +2030,7 @@ exports.define = function(name) {
   };
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var xml = require('./xml');
 var blockUtils = require('./block_utils');
 var utils = require('./utils');
@@ -2138,7 +2150,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":35,"./xml":36}],11:[function(require,module,exports){
+},{"./block_utils":3,"./utils":36,"./xml":37}],12:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -2180,7 +2192,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -2385,7 +2397,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2406,7 +2418,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],14:[function(require,module,exports){
+},{"ejs":40}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2427,7 +2439,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":37,"ejs":39}],15:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"ejs":40}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2448,7 +2460,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],16:[function(require,module,exports){
+},{"ejs":40}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2469,7 +2481,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":37,"ejs":39}],17:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"ejs":40}],18:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2492,7 +2504,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":37,"ejs":39}],18:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"ejs":40}],19:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2513,7 +2525,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":37,"ejs":39}],19:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"ejs":40}],20:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2538,7 +2550,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":37,"ejs":39}],20:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"ejs":40}],21:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2560,7 +2572,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],21:[function(require,module,exports){
+},{"ejs":40}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2581,7 +2593,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":37,"ejs":39}],22:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"ejs":40}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2602,7 +2614,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":37,"ejs":39}],23:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"ejs":40}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2623,7 +2635,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],24:[function(require,module,exports){
+},{"ejs":40}],25:[function(require,module,exports){
 /**
  * Blockly Demo: Turtle Graphics
  *
@@ -2651,6 +2663,7 @@ return buf.join('');
 
 var api = require('./api');
 var BlocklyApps = require('../base');
+var ExecutionInfo = require('../executionInfo');
 
 var setRandomVisibleColour = function() {
   var num = Math.floor(Math.random() * Math.pow(2, 24));
@@ -2717,8 +2730,7 @@ var drawHouse = function(length) {
  * Warning: Has side effects to BlocklyApps.
  */
 exports.answer = function(page, level) {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = Infinity;
+  api.executionInfo = new ExecutionInfo({ticks: Infinity});
   var count, sideIdx, len;
   if (page == 1) {
     switch (level) {
@@ -2971,93 +2983,95 @@ exports.answer = function(page, level) {
     }
   }
   BlocklyApps.reset();
-  return BlocklyApps.log;
+  return api.executionInfo.log;
 };
 
-},{"../base":2,"./api":25}],25:[function(require,module,exports){
+},{"../base":2,"../executionInfo":8,"./api":26}],26:[function(require,module,exports){
 var BlocklyApps = require('../base');
 
+exports.executionInfo = null;
+
 exports.moveForward = function(distance, id) {
-  BlocklyApps.log.push(['FD', distance, id]);
+  this.executionInfo.log.push(['FD', distance, id]);
 };
 
 exports.moveBackward = function(distance, id) {
-  BlocklyApps.log.push(['FD', -distance, id]);
+  this.executionInfo.log.push(['FD', -distance, id]);
 };
 
 exports.moveUp = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 0, id]);
+  this.executionInfo.log.push(['MV', distance, 0, id]);
 };
 
 exports.moveDown = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 180, id]);
+  this.executionInfo.log.push(['MV', distance, 180, id]);
 };
 
 exports.moveLeft = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 270, id]);
+  this.executionInfo.log.push(['MV', distance, 270, id]);
 };
 
 exports.moveRight = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 90, id]);
+  this.executionInfo.log.push(['MV', distance, 90, id]);
 };
 
 exports.jumpUp = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 0, id]);
+  this.executionInfo.log.push(['JD', distance, 0, id]);
 };
 
 exports.jumpDown = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 180, id]);
+  this.executionInfo.log.push(['JD', distance, 180, id]);
 };
 
 exports.jumpLeft = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 270, id]);
+  this.executionInfo.log.push(['JD', distance, 270, id]);
 };
 
 exports.jumpRight = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 90, id]);
+  this.executionInfo.log.push(['JD', distance, 90, id]);
 };
 
 exports.jumpForward = function(distance, id) {
-  BlocklyApps.log.push(['JF', distance, id]);
+  this.executionInfo.log.push(['JF', distance, id]);
 };
 
 exports.jumpBackward = function(distance, id) {
-  BlocklyApps.log.push(['JF', -distance, id]);
+  this.executionInfo.log.push(['JF', -distance, id]);
 };
 
 exports.turnRight = function(angle, id) {
-  BlocklyApps.log.push(['RT', angle, id]);
+  this.executionInfo.log.push(['RT', angle, id]);
 };
 
 exports.turnLeft = function(angle, id) {
-  BlocklyApps.log.push(['RT', -angle, id]);
+  this.executionInfo.log.push(['RT', -angle, id]);
 };
 
 exports.penUp = function(id) {
-  BlocklyApps.log.push(['PU', id]);
+  this.executionInfo.log.push(['PU', id]);
 };
 
 exports.penDown = function(id) {
-  BlocklyApps.log.push(['PD', id]);
+  this.executionInfo.log.push(['PD', id]);
 };
 
 exports.penWidth = function(width, id) {
-  BlocklyApps.log.push(['PW', Math.max(width, 0), id]);
+  this.executionInfo.log.push(['PW', Math.max(width, 0), id]);
 };
 
 exports.penColour = function(colour, id) {
-  BlocklyApps.log.push(['PC', colour, id]);
+  this.executionInfo.log.push(['PC', colour, id]);
 };
 
 exports.hideTurtle = function(id) {
-  BlocklyApps.log.push(['HT', id]);
+  this.executionInfo.log.push(['HT', id]);
 };
 
 exports.showTurtle = function(id) {
-  BlocklyApps.log.push(['ST', id]);
+  this.executionInfo.log.push(['ST', id]);
 };
 
-},{"../base":2}],26:[function(require,module,exports){
+},{"../base":2}],27:[function(require,module,exports){
 /**
  * Blockly Demo: Turtle Graphics
  *
@@ -3742,7 +3756,7 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/ru_ru/common":37,"../../locale/ru_ru/turtle":38,"./core":28}],27:[function(require,module,exports){
+},{"../../locale/ru_ru/common":38,"../../locale/ru_ru/turtle":39,"./core":29}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3763,7 +3777,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],28:[function(require,module,exports){
+},{"ejs":40}],29:[function(require,module,exports){
 // Create a limited colour palette to avoid overwhelming new users
 // and to make colour checking easier.  These definitions cannot be
 // moved to blocks.js, which is loaded later, since they are used in
@@ -3784,7 +3798,7 @@ exports.Colours = {
   PLUM: '#843179'
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var levelBase = require('../level_base');
 var Colours = require('./core').Colours;
 var answer = require('./answers').answer;
@@ -4616,7 +4630,7 @@ module.exports = {
   }
 };
 
-},{"../../locale/ru_ru/turtle":38,"../block_utils":3,"../level_base":9,"./answers":24,"./core":28,"./requiredBlocks":31,"./startBlocks.xml":32,"./toolbox.xml":33}],30:[function(require,module,exports){
+},{"../../locale/ru_ru/turtle":39,"../block_utils":3,"../level_base":10,"./answers":25,"./core":29,"./requiredBlocks":32,"./startBlocks.xml":33,"./toolbox.xml":34}],31:[function(require,module,exports){
 var appMain = require('../appMain');
 window.Turtle = require('./turtle');
 var blocks = require('./blocks');
@@ -4629,7 +4643,7 @@ window.turtleMain = function(options) {
   appMain(window.Turtle, levels, options);
 };
 
-},{"../appMain":1,"../skins":11,"./blocks":26,"./levels":29,"./turtle":34}],31:[function(require,module,exports){
+},{"../appMain":1,"../skins":12,"./blocks":27,"./levels":30,"./turtle":35}],32:[function(require,module,exports){
 /**
  * Sets BlocklyApp constants that depend on the page and level.
  * This encapsulates many functions used for BlocklyApps.REQUIRED_BLOCKS.
@@ -4821,7 +4835,7 @@ module.exports = {
   defineWithArg: defineWithArg,
 };
 
-},{"../required_block_utils":10}],32:[function(require,module,exports){
+},{"../required_block_utils":11}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4888,7 +4902,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/turtle":38,"ejs":39}],33:[function(require,module,exports){
+},{"../../locale/ru_ru/turtle":39,"ejs":40}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5013,7 +5027,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/turtle":38,"ejs":39}],34:[function(require,module,exports){
+},{"../../locale/ru_ru/turtle":39,"ejs":40}],35:[function(require,module,exports){
 /**
  * Blockly Demo: Turtle Graphics
  *
@@ -5053,6 +5067,7 @@ var Colours = require('./core').Colours;
 var codegen = require('../codegen');
 var api = require('./api');
 var page = require('../templates/page.html');
+var ExecutionInfo = require('../executionInfo');
 
 var level;
 var skin;
@@ -5175,8 +5190,14 @@ Turtle.drawAnswer = function() {
 };
 
 Turtle.drawLogOnCanvas = function(log, canvas) {
-  BlocklyApps.log = log;
-  Turtle.drawCurrentBlocksOnCanvas(canvas);
+  BlocklyApps.reset();
+  while (log.length) {
+    var tuple = log.shift();
+    Turtle.step(tuple[0], tuple.splice(1));
+  }
+  canvas.globalCompositeOperation = 'copy';
+  canvas.drawImage(Turtle.ctxScratch.canvas, 0, 0);
+  canvas.globalCompositeOperation = 'source-over';
 };
 
 Turtle.drawBlocksOnCanvas = function(blocks, canvas) {
@@ -5189,14 +5210,7 @@ Turtle.drawBlocksOnCanvas = function(blocks, canvas) {
 };
 
 Turtle.drawCurrentBlocksOnCanvas = function(canvas) {
-  BlocklyApps.reset();
-  while (BlocklyApps.log.length) {
-    var tuple = BlocklyApps.log.shift();
-    Turtle.step(tuple[0], tuple.splice(1));
-  }
-  canvas.globalCompositeOperation = 'copy';
-  canvas.drawImage(Turtle.ctxScratch.canvas, 0, 0);
-  canvas.globalCompositeOperation = 'source-over';
+  Turtle.drawLogOnCanvas(api.executionInfo.log);
 };
 
 /**
@@ -5368,13 +5382,12 @@ Turtle.evalCode = function(code) {
  * Execute the user's code.  Heaven help us...
  */
 Turtle.execute = function() {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 1000000;
+  api.executionInfo = new ExecutionInfo({ticks: 1000000});
 
   Turtle.code = Blockly.Generator.workspaceToCode('JavaScript');
   Turtle.evalCode(Turtle.code);
 
-  // BlocklyApps.log now contains a transcript of all the user's actions.
+  // BlocklyApps.executionInfo.log now contains a transcript of all the user's actions.
   // Reset the graphic and animate the transcript.
   BlocklyApps.reset();
   BlocklyApps.playAudio('start', {volume : 0.5, loop : true});
@@ -5391,7 +5404,7 @@ Turtle.animate = function() {
   // All tasks should be complete now.  Clean up the PID list.
   Turtle.pid = 0;
 
-  var tuple = BlocklyApps.log.shift();
+  var tuple = api.executionInfo.log.shift();
   if (!tuple) {
     document.getElementById('spinner').style.visibility = 'hidden';
     Blockly.mainWorkspace.highlightBlock(null);
@@ -5796,7 +5809,7 @@ var getFeedbackImage = function() {
       feedbackCanvas.toDataURL("image/png").split(',')[1]);
 };
 
-},{"../../locale/ru_ru/turtle":38,"../base":2,"../codegen":6,"../skins":11,"../templates/page.html":19,"./api":25,"./controls.html":27,"./core":28,"./levels":29}],35:[function(require,module,exports){
+},{"../../locale/ru_ru/turtle":39,"../base":2,"../codegen":6,"../executionInfo":8,"../skins":12,"../templates/page.html":20,"./api":26,"./controls.html":28,"./core":29,"./levels":30}],36:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -5856,7 +5869,39 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],36:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],37:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -5884,7 +5929,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ru = function (n) {
   if ((n % 10) == 1 && (n % 100) != 11) {
     return 'one';
@@ -6036,7 +6081,7 @@ exports.signup = function(d){return "Зарегистрируйтесь на в�
 exports.hintHeader = function(d){return "Подсказка:"};
 
 
-},{"messageformat":50}],38:[function(require,module,exports){
+},{"messageformat":51}],39:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ru = function (n) {
   if ((n % 10) == 1 && (n % 100) != 11) {
     return 'one';
@@ -6164,7 +6209,7 @@ exports.widthTooltip = function(d){return "Изменяет ширину кар�
 exports.wrongColour = function(d){return "Неправильный цвет картинки. Для этой головоломки он должен быть %1."};
 
 
-},{"messageformat":50}],39:[function(require,module,exports){
+},{"messageformat":51}],40:[function(require,module,exports){
 
 /*!
  * EJS
@@ -6523,7 +6568,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":40,"./utils":41,"fs":42,"path":44}],40:[function(require,module,exports){
+},{"./filters":41,"./utils":42,"fs":43,"path":45}],41:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -6726,7 +6771,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 
 /*!
  * EJS
@@ -6752,9 +6797,9 @@ exports.escape = function(html){
 };
  
 
-},{}],42:[function(require,module,exports){
-
 },{}],43:[function(require,module,exports){
+
+},{}],44:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6809,7 +6854,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7037,7 +7082,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":43}],45:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":44}],46:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -7548,7 +7593,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7634,7 +7679,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7721,13 +7766,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":46,"./encode":47}],49:[function(require,module,exports){
+},{"./decode":47,"./encode":48}],50:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -8360,7 +8405,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":45,"querystring":48}],50:[function(require,module,exports){
+},{"punycode":46,"querystring":49}],51:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -9943,4 +9988,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[30])
+},{}]},{},[31])

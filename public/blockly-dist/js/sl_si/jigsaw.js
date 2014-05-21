@@ -680,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -740,19 +725,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
  * @type {?boolean}
  */
 BlocklyApps.levelComplete = null;
-
-/**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
 
 /**
  * The number of attempts (how many times the run button has been pressed)
@@ -1066,9 +1038,9 @@ exports.builderForm = function(onAttemptCallback) {
 };
 
 },{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":18,"./utils.js":29,"url":43}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -1076,6 +1048,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -3637,6 +3610,38 @@ exports.range = function(start, end) {
     ints.push(i);
   }
   return ints;
+};
+
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
 };
 
 },{}],30:[function(require,module,exports){
