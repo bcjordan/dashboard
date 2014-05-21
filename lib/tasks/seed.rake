@@ -22,7 +22,7 @@ namespace :seed do
     Game.setup
   end
 
-  SCRIPTS_GLOB = Dir.glob('config/scripts/**/*.script').flatten
+  SCRIPTS_GLOB = Dir.glob('config/scripts/**/*.script').sort.flatten
   SEEDED = 'config/scripts/.seeded'
 
   file SEEDED => SCRIPTS_GLOB do |t|
@@ -32,7 +32,7 @@ namespace :seed do
   def update_scripts
     scripts_seeded_mtime = (Rails.env == "staging" && File.exist?(SEEDED)) ? File.mtime(SEEDED) : Time.at(0)
     custom_scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
-    default_scripts = Dir.glob("config/scripts/default/*.yml").select { |script| File.mtime(script) > scripts_seeded_mtime }
+    default_scripts = Dir.glob("config/scripts/default/*.yml").sort.select { |script| File.mtime(script) > scripts_seeded_mtime }
     script, custom_i18n = Script.setup(default_scripts, custom_scripts)
     Script.update_i18n(custom_i18n)
     touch SEEDED
@@ -43,7 +43,7 @@ namespace :seed do
   end
 
   # cronjob that detects changes to .multi files
-  MULTIS_GLOB = Dir.glob('config/scripts/**/*.multi').flatten
+  MULTIS_GLOB = Dir.glob('config/scripts/**/*.multi').sort.flatten
   file 'config/scripts/.multis_seeded' => MULTIS_GLOB do |t|
     Rake::Task['seed:multis'].invoke
     touch t.name
@@ -64,7 +64,7 @@ namespace :seed do
   end
 
   # cronjob that detects changes to .match files
-  MATCHES_GLOB = Dir.glob('config/scripts/**/*.match').flatten
+  MATCHES_GLOB = Dir.glob('config/scripts/**/*.match').sort.flatten
   file 'config/scripts/.matches_seeded' => MATCHES_GLOB do |t|
     Rake::Task['seed:matches'].invoke
     touch t.name
