@@ -1042,16 +1042,24 @@ exports.builderForm = function(onAttemptCallback) {
 
 },{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":32,"./utils.js":44,"url":58}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
-var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
+
+var LOOP_HIGHLIGHT = 'loopHighlight();\n';
+var LOOP_HIGHLIGHT_RE =
+    new RegExp(LOOP_HIGHLIGHT.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
- * Returns javascript code to call a timeout check with an optional block id.
+ * Returns javascript code to call a timeout check
  */
-exports.loopTrap = function(blockId) {
-  var args = (blockId ? "'block_id_" + blockId + "'" : '');
- return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+exports.loopTrap = function() {
+  return INFINITE_LOOP_TRAP;
+};
 
+exports.loopHighlight = function (apiName, blockId) {
+  var args = "'block_id_" + blockId + "'";
+  if (blockId === undefined) {
+    args = "%1";
+  }
+  return apiName + '.' + LOOP_HIGHLIGHT.replace('()', '(' + args + ')');
 };
 
 /**
@@ -1064,7 +1072,9 @@ exports.strip = function(code) {
     // Strip out serial numbers.
     .replace(/(,\s*)?'block_id_\d+'\)/g, ')')
     // Remove timeouts.
-    .replace(INFINITE_LOOP_TRAP_RE, '')
+    .replace(INFINITE_LOOP_TRAP, '')
+    // Strip out loop highlight
+    .replace(LOOP_HIGHLIGHT_RE, '')
     // Strip out class namespaces.
     .replace(/(BlocklyApps|Maze|Turtle)\./g, '')
     // Strip out particular helper functions.
@@ -1196,12 +1206,17 @@ exports.isMobile = function() {
 };
 
 },{}],8:[function(require,module,exports){
+/**
+ * Stores information about a current Maze execution.  Execution consists of a
+ * series of steps, where each step may contain one or more actions.
+ */
 var ExecutionInfo = function (options) {
   options = options || {};
   this.terminated_ = false;
   this.terminationValue_ = null;
-  this.log = [];
+  this.steps_ = [];
   this.ticks = options.ticks || Infinity;
+  this.collection_ = null;
 };
 
 module.exports = ExecutionInfo;
@@ -1219,16 +1234,64 @@ ExecutionInfo.prototype.terminationValue = function () {
   return this.terminationValue_;
 };
 
+ExecutionInfo.prototype.queueAction = function (command, blockId) {
+  var action = {command: command, blockId: blockId};
+  if (this.collection_) {
+    this.collection_.push(action);
+  } else {
+    // single action step (most common case)
+    this.steps_.push([action]);
+  }
+};
+
+ExecutionInfo.prototype.dequeueStep = function () {
+  return this.steps_.shift();
+};
+
+
+/**
+ * If we have no steps left, or our only remaining step is a single finish action
+ * we're done executing, and if we're in step mode won't want to wait around
+ * for another step press.
+ */
+ExecutionInfo.prototype.onLastStep = function () {
+  if (this.steps_.length === 0) {
+    return true;
+  }
+
+  if (this.steps_.length === 1) {
+    var step = this.steps_[0];
+    if (step.length === 1 && step[0].command === 'finish') {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Collect all actions queued up between now and the call to stopCollecting,
+ * and put them in a single step
+ */
+ExecutionInfo.prototype.collectActions = function () {
+  if (this.collection_) {
+    throw new Error("Already collecting");
+  }
+  this.collection_ = [];
+};
+
+ExecutionInfo.prototype.stopCollecting = function () {
+  if (!this.collection_) {
+    throw new Error("Not currently collecting");
+  }
+  this.steps_.push(this.collection_);
+  this.collection_ = null;
+};
+
 /**
  * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
+ * loop.  Set termination value to Infinity
  */
-ExecutionInfo.prototype.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    this.log.push([null, opt_id]);
-  }
+ExecutionInfo.prototype.checkTimeout = function() {
   if (this.ticks-- < 0) {
     this.terminateWithValue(Infinity);
   }
@@ -2083,7 +2146,7 @@ var isPath = function(direction, id) {
       break;
   }
   if (id) {
-    Maze.executionInfo.log.push([command, id]);
+    Maze.executionInfo.queueAction(command, id);
   }
   return square !== SquareType.WALL &&
         square !== SquareType.OBSTACLE &&
@@ -2099,7 +2162,7 @@ var isPath = function(direction, id) {
  */
 var move = function(direction, id) {
   if (!isPath(direction, null)) {
-    Maze.executionInfo.log.push(['fail_' + (direction ? 'backward' : 'forward'), id]);
+    Maze.executionInfo.queueAction('fail_' + (direction ? 'backward' : 'forward'), id);
     Maze.executionInfo.terminateWithValue(false);
     return;
   }
@@ -2124,7 +2187,7 @@ var move = function(direction, id) {
       command = 'west';
       break;
   }
-  Maze.executionInfo.log.push([command, id]);
+  Maze.executionInfo.queueAction(command, id);
   Maze.checkSuccess();
 };
 
@@ -2137,11 +2200,11 @@ var turn = function(direction, id) {
   if (direction == TurnDirection.RIGHT) {
     // Right turn (clockwise).
     Maze.pegmanD += TurnDirection.RIGHT;
-    Maze.executionInfo.log.push(['right', id]);
+    Maze.executionInfo.queueAction('right', id);
   } else {
     // Left turn (counterclockwise).
     Maze.pegmanD += TurnDirection.LEFT;
-    Maze.executionInfo.log.push(['left', id]);
+    Maze.executionInfo.queueAction('left', id);
   }
   Maze.pegmanD = tiles.constrainDirection4(Maze.pegmanD);
 };
@@ -2185,8 +2248,10 @@ function isTurnAround(direction, newDirection) {
 }
 
 function moveAbsoluteDirection(direction, id) {
+  Maze.executionInfo.collectActions();
   turnTo(direction, id);
   move(MoveDirection.FORWARD, id);
+  Maze.executionInfo.stopCollecting();
 }
 
 exports.moveForward = API_FUNCTION(function(id) {
@@ -2259,14 +2324,14 @@ exports.currentPositionNotClear = API_FUNCTION(function(id) {
 });
 
 exports.fill = API_FUNCTION(function(id) {
-  Maze.executionInfo.log.push(['putdown', id]);
+  Maze.executionInfo.queueAction('putdown', id);
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   Maze.dirt_[y][x] = Maze.dirt_[y][x] + 1;
 });
 
 exports.dig = API_FUNCTION(function(id) {
-  Maze.executionInfo.log.push(['pickup', id]);
+  Maze.executionInfo.queueAction('pickup', id);
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   Maze.dirt_[y][x] = Maze.dirt_[y][x] - 1;
@@ -2274,6 +2339,11 @@ exports.dig = API_FUNCTION(function(id) {
 
 exports.notFinished = API_FUNCTION(function() {
   return !Maze.checkSuccess();
+});
+
+// The code for this API should get stripped when showing code
+exports.loopHighlight = API_FUNCTION(function (id) {
+  Maze.executionInfo.queueAction('null', id);
 });
 
 exports.nectar = API_FUNCTION(function(id) {
@@ -2398,7 +2468,7 @@ Bee.prototype.getNectar = function (id) {
     return;
   }
 
-  this.maze_.executionInfo.log.push(['nectar', id]);
+  this.maze_.executionInfo.queueAction('nectar', id);
   this.nectar_ += 1;
 };
 
@@ -2411,7 +2481,7 @@ Bee.prototype.makeHoney = function (id) {
     return;
   }
 
-  this.maze_.executionInfo.log.push(['honey', id]);
+  this.maze_.executionInfo.queueAction('honey', id);
   this.makeHoneyAt(row, col);
 };
 
@@ -2859,7 +2929,7 @@ exports.install = function(blockly, skin) {
     var argument = 'Maze.' + this.getTitleValue('DIR') +
       '(\'block_id_' + this.id + '\')';
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + branch;
     return 'while (' + argument + ') {\n' + branch + '}\n';
   };
 
@@ -2885,7 +2955,7 @@ exports.install = function(blockly, skin) {
   generator.maze_untilBlocked = function() {
     var argument = 'Maze.isPathForward' + '(\'block_id_' + this.id + '\')';
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + branch;
     return 'while (' + argument + ') {\n' + branch + '}\n';
   };
 
@@ -2907,7 +2977,7 @@ exports.install = function(blockly, skin) {
   generator.maze_forever = function() {
     // Generate JavaScript for do forever loop.
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + codegen.loopHighlight('Maze', this.id) + branch;
     return 'while (Maze.notFinished()) {\n' + branch + '}\n';
   };
 
@@ -2929,7 +2999,7 @@ exports.install = function(blockly, skin) {
     var argument = 'Maze.' + this.getTitleValue('DIR') +
         '(\'block_id_' + this.id + '\')';
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + branch;
     return 'while (' + argument + ') {\n' + branch + '}\n';
   };
 
@@ -4948,14 +5018,10 @@ var skin;
  */
 var stepSpeed;
 
-/**
- * Actions in Maze.executionInfo.log are a tuple in the form [command, block_id]
- */
-var ACTION_COMMAND = 0;
-var ACTION_BLOCK_ID = 1;
-
 //TODO: Make configurable.
 BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
+
+Blockly.JavaScript.INFINITE_LOOP_TRAP = codegen.loopHighlight("Maze");
 
 var getTile = function(map, x, y) {
   if (map && map[y]) {
@@ -5811,14 +5877,17 @@ Maze.execute = function(stepMode) {
     }
   }
 
-  // todo - update comment
-  // Try running the user's code.  There are four possible outcomes:
-  // 1. If pegman reaches the finish [SUCCESS], true is thrown.
+  // Try running the user's code.  There are a few possible outcomes:
+  // 1. If pegman reaches the finish [SUCCESS], executionInfo's termination
+  //    value is set to true.
   // 2. If the program is terminated due to running too long [TIMEOUT],
-  //    false is thrown.
-  // 3. If another error occurs [ERROR], that error is thrown.
-  // 4. If the program ended normally but without solving the maze [FAILURE],
-  //    no error or exception is thrown.
+  //    the termination value is set to Infinity
+  // 3. If the program terminated because of hitting a wall/obstacle, the
+  //    termination value is set to false and the ResultType is ERROR
+  // 4. If the program finishes without meeting success condition, we have no
+  //    termination value and set ResultType to FAILURE
+  // 5. The only other time we should fail should be if an exception is thrown
+  //    during execution, in which case we set ResultType to ERROR.
   // The animation should be fast if execution was successful, slow otherwise
   // to help the user see the mistake.
   BlocklyApps.playAudio('start', {volume: 0.5});
@@ -5830,7 +5899,7 @@ Maze.execute = function(stepMode) {
     });
     if (!Maze.executionInfo.isTerminated() && !Maze.checkSuccess()) {
       // If did not finish, shedule a failure.
-      Maze.executionInfo.log.push(['finish', null]);
+      Maze.executionInfo.queueAction('finish', null);
       Maze.result = ResultType.FAILURE;
       stepSpeed = 150;
     } else {
@@ -5893,7 +5962,7 @@ Maze.execute = function(stepMode) {
     onComplete: Maze.onReportComplete
   });
 
-  // Maze.executionInfo.log now contains a transcript of all the user's actions.
+  // Maze. now contains a transcript of all the user's actions.
   // Reset the maze and animate the transcript.
   BlocklyApps.reset(false);
   Maze.animating_ = true;
@@ -5951,12 +6020,8 @@ Maze.performStep = function(stepMode) {
   // running/stepping will turn it off
   Blockly.mainWorkspace.traceOn(true);
 
-  var action;
-  // get action with non-null command
-  do {
-    action = Maze.executionInfo.log.shift();
-  } while (action && action[ACTION_COMMAND] === null);
-  if (!action) {
+  var step = Maze.executionInfo.dequeueStep();
+  if (!step) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
     Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
@@ -5965,13 +6030,14 @@ Maze.performStep = function(stepMode) {
     return;
   }
 
-  animateAction(action, stepMode);
+  for (var i = 0; i < step.length; i++) {
+    animateAction(step[i], stepMode);
+  }
 
   var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
-    if (Maze.executionInfo.log.length === 0 || Maze.executionInfo.log.length === 1 &&
-      Maze.executionInfo.log[0][ACTION_COMMAND] === "finish") {
+    if (Maze.executionInfo.onLastStep()) {
       var stepButton = document.getElementById('stepButton');
       stepButton.style.display = 'none';
       finishSteps = true;
@@ -5989,9 +6055,9 @@ Maze.performStep = function(stepMode) {
  * Animates a single action
  */
 function animateAction (action, stepMode) {
-  BlocklyApps.highlight(action[ACTION_BLOCK_ID], stepMode);
+  BlocklyApps.highlight(action.blockId, stepMode);
 
-  switch (action[ACTION_COMMAND]) {
+  switch (action.command) {
     case 'north':
       Maze.animatedMove(Direction.NORTH);
       break;
@@ -6340,7 +6406,7 @@ Maze.scheduleDance = function(sound) {
 
   // Setting the tiles to be transparent
   if (sound && skin.transparentTileEnding) {
-    Maze.executionInfo.log.push(['tile_transparent', null]);
+    Maze.executionInfo.queueAction('tile_transparent', null);
   }
 
   // If sound == true, play the goal animation, else reset it
@@ -6514,7 +6580,7 @@ Maze.checkSuccess = function() {
   }
 
   // Finished.  Terminate the user's program.
-  Maze.executionInfo.log.push(['finish', null]);
+  Maze.executionInfo.queueAction('finish', null);
   Maze.executionInfo.terminateWithValue(true);
   return true;
 };

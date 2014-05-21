@@ -3811,16 +3811,24 @@ exports.builderForm = function(onAttemptCallback) {
 
 },{"./dom.js":16,"./feedback.js":17,"./templates/builder.html":21,"./utils.js":33,"url":47}],15:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
-var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
+
+var LOOP_HIGHLIGHT = 'loopHighlight();\n';
+var LOOP_HIGHLIGHT_RE =
+    new RegExp(LOOP_HIGHLIGHT.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
- * Returns javascript code to call a timeout check with an optional block id.
+ * Returns javascript code to call a timeout check
  */
-exports.loopTrap = function(blockId) {
-  var args = (blockId ? "'block_id_" + blockId + "'" : '');
- return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+exports.loopTrap = function() {
+  return INFINITE_LOOP_TRAP;
+};
 
+exports.loopHighlight = function (apiName, blockId) {
+  var args = "'block_id_" + blockId + "'";
+  if (blockId === undefined) {
+    args = "%1";
+  }
+  return apiName + '.' + LOOP_HIGHLIGHT.replace('()', '(' + args + ')');
 };
 
 /**
@@ -3833,7 +3841,9 @@ exports.strip = function(code) {
     // Strip out serial numbers.
     .replace(/(,\s*)?'block_id_\d+'\)/g, ')')
     // Remove timeouts.
-    .replace(INFINITE_LOOP_TRAP_RE, '')
+    .replace(INFINITE_LOOP_TRAP, '')
+    // Strip out loop highlight
+    .replace(LOOP_HIGHLIGHT_RE, '')
     // Strip out class namespaces.
     .replace(/(BlocklyApps|Maze|Turtle)\./g, '')
     // Strip out particular helper functions.
