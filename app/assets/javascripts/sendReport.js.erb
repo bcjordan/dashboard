@@ -1,12 +1,12 @@
 var nextRedirect;
 var previousLevelRedirect;
-var lastReport;
+var lastAjax;
 var sendReport = function(report) {
   var reportParams = jQuery.extend(true, {}, report);
   delete reportParams['fallbackResponse'];
   delete reportParams['onComplete'];
 
-  var selfReport = jQuery.ajax({
+  var thisAjax = jQuery.ajax({
     type: 'POST',
     url: report.callback,
     contentType: 'application/x-www-form-urlencoded',
@@ -16,20 +16,27 @@ var sendReport = function(report) {
       xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
     },
     success: function (response) {
-      if (selfReport != lastReport) {
+      if (thisAjax !== lastAjax) {
         return;
       }
       reportComplete(report, response);
     },
     error: function (xhr, textStatus, thrownError) {
-      if (selfReport != lastReport) {
+      if (thisAjax !== lastAjax) {
         return;
       }
       reportComplete(report, getFallbackResponse(report));
     }
   });
-  
-  lastReport = selfReport;
+
+  lastAjax = thisAjax;
+};
+
+var cancelReport = function() {
+  if (lastAjax) {
+    lastAjax.abort();
+  }
+  lastAjax = null;
 };
 
 function getFallbackResponse(report) {
@@ -37,7 +44,7 @@ function getFallbackResponse(report) {
 }
 
 function reportComplete(report, response) {
-  lastReport = null;
+  lastAjax = null;
   nextRedirect = response['redirect'];
   previousLevelRedirect = response['previous_level'];
   videoInfo = response['video_info'];
