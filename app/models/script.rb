@@ -151,6 +151,7 @@ class Script < ActiveRecord::Base
       # Set/create Stage containing custom ScriptLevel
       if stage
         script_level.update(stage: Stage.where(name: stage, script: script).first_or_create)
+        script_level.insert_at(0)
         script_level.move_to_bottom
       end
       script_level

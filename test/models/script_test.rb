@@ -124,4 +124,23 @@ class ScriptTest < ActiveSupport::TestCase
     new_first_script_level = ScriptLevel.where(script: scripts[0], level: promoted_level).first
     assert_equal 1, new_first_script_level.position
   end
+
+  test 'script import is idempotent w.r.t. positions and count' do
+    scripts,_ = Script.setup([], [@script_file])
+    original_count = ScriptLevel.count
+    first = scripts[0].stages[0].script_levels[0]
+    second = scripts[0].stages[0].script_levels[1]
+    third = scripts[0].stages[0].script_levels[2]
+    assert_equal 1, first.position
+    assert_equal 2, second.position
+    assert_equal 3, third.position
+    scripts,_ = Script.setup([], [@script_file])
+    first = scripts[0].stages[0].script_levels[0]
+    second = scripts[0].stages[0].script_levels[1]
+    third = scripts[0].stages[0].script_levels[2]
+    assert_equal 1, first.position
+    assert_equal 2, second.position
+    assert_equal 3, third.position
+    assert_equal original_count, ScriptLevel.count
+  end
 end
