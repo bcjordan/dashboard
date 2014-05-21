@@ -108,11 +108,13 @@ Then(/^"([^"]*)" should be in front of "([^"]*)"$/) do |selector_front, selector
   front_z_index.should be > behind_z_index
 end
 
+# Note: only works for levels other than the current one
 Then(/^check that level (\d+) on this stage is done$/) do |level|
   undone = @browser.execute_script("return $('a[href$=\"level/#{level}\"].other_level').hasClass('level_undone')")
   !undone
 end
 
+# Note: only works for levels other than the current one
 Then(/^check that level (\d+) on this stage is not done$/) do |level|
   undone = @browser.execute_script("return $('a[href$=\"level/#{level}\"].other_level').hasClass('level_undone')")
   undone
