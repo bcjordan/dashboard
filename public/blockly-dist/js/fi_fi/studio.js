@@ -3808,7 +3808,8 @@ var drawMap = function() {
   visualization.style.width = Studio.MAZE_WIDTH + 'px';
   var belowVisualization = document.getElementById('belowVisualization');
   belowVisualization.style.width = Studio.MAZE_WIDTH + 'px';
-  if (Studio.minWorkspaceHeight > Studio.MAZE_HEIGHT) {
+  if (!BlocklyApps.noPadding &&
+      (Studio.minWorkspaceHeight > Studio.MAZE_HEIGHT)) {
     belowVisualization.style.minHeight =
       (Studio.minWorkspaceHeight - Studio.MAZE_HEIGHT) + 'px';
   }
