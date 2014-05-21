@@ -11,6 +11,14 @@ class Game < ActiveRecord::Base
     @@game_custom_maze ||= find_by_name("CustomMaze")
   end
 
+  def supports_sharing?
+    app == 'turtle' || app == 'flappy' || app == 'bounce' || app == 'studio'
+  end
+
+  def share_mobile_fullscreen?
+    app == 'flappy' || app == 'bounce' || app == 'studio'
+  end
+
   def self.setup
     transaction do
       # Format: name:app:intro_video

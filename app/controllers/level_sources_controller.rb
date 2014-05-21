@@ -40,7 +40,7 @@ class LevelSourcesController < ApplicationController
     @full_width = true
     @hide_source = hide_source
     @share = true
-    @no_padding = @share && phone? && (@game.app == "flappy" || @game.app == "bounce")
+    @no_padding = @share && phone? && @game.share_mobile_fullscreen?
     @callouts = []
   end
 end
