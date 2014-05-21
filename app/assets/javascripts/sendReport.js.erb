@@ -2,15 +2,21 @@ var nextRedirect;
 var previousLevelRedirect;
 var lastAjax;
 var sendReport = function(report) {
-  var reportParams = jQuery.extend(true, {}, report);
-  delete reportParams['fallbackResponse'];
-  delete reportParams['onComplete'];
+  // jQuery can do this implicitly, but when url-encoding it, jQuery calls a method that
+  // shows the result dialog immediately
+  var queryItems = [];
+  for (var key in report) {
+    if (report.hasOwnProperty(key)) {
+      queryItems.push(key + '=' + report[key]);
+    }
+  }
+  var queryString = queryItems.join('&');
 
   var thisAjax = jQuery.ajax({
     type: 'POST',
     url: report.callback,
     contentType: 'application/x-www-form-urlencoded',
-    data: reportParams,
+    data: queryString,
     dataType: 'json',
     beforeSend: function(xhr) {
       xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
