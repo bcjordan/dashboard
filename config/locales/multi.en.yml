@@ -2,14 +2,6 @@
 en:
   data:
     multi:
-      K-1 multi 1:
-        Maze Multiple Choice One: Maze Multiple Choice One
-        Choose the best answer.: Choose the best answer.
-        Which blocks work?: Which blocks work?
-        E,N: E,N
-        E,S: E,S
-        W,S: W,S
-        W,N: W,N
       K-1 Maze Multiple Choice 1:
         Maze: Maze
         Solve the puzzle: Solve the puzzle
@@ -19,6 +11,14 @@ en:
         /script_assets/multis/K-1/K-1_Maze/b2.png: /script_assets/multis/K-1/K-1_Maze/b2.png
         /script_assets/multis/K-1/K-1_Maze/c2.png: /script_assets/multis/K-1/K-1_Maze/c2.png
         /script_assets/multis/K-1/K-1_Maze/d2.png: /script_assets/multis/K-1/K-1_Maze/d2.png
+      K-1 multi 1:
+        Maze Multiple Choice One: Maze Multiple Choice One
+        Choose the best answer.: Choose the best answer.
+        Which blocks work?: Which blocks work?
+        E,N: E,N
+        E,S: E,S
+        W,S: W,S
+        W,N: W,N
       K-1 multi 2:
         Maze Multiple Choice Two: Maze Multiple Choice Two
         Choose the best answer.: Choose the best answer.
