@@ -119,3 +119,15 @@ end
 Then(/^I slow down execution speed$/) do
   @browser.execute_script("Maze.scale.stepSpeed = 5;");
 end
+
+# Note: only works for levels other than the current one
+Then(/^check that level (\d+) on this stage is done$/) do |level|
+  undone = @browser.execute_script("return $('a[href$=\"level/#{level}\"].other_level').hasClass('level_undone')")
+  !undone
+end
+
+# Note: only works for levels other than the current one
+Then(/^check that level (\d+) on this stage is not done$/) do |level|
+  undone = @browser.execute_script("return $('a[href$=\"level/#{level}\"].other_level').hasClass('level_undone')")
+  undone
+end
