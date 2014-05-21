@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -33,6 +35,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -71,7 +78,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":18,"./utils":32}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -159,6 +166,14 @@ BlocklyApps.init = function(config) {
 
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
+
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
 
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
@@ -308,12 +323,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -360,8 +378,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -369,11 +387,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -661,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -723,19 +727,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -776,6 +767,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -791,6 +783,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -848,6 +845,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -890,7 +888,9 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/fa_ir/common":33,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":19,"./templates/buttons.html":21,"./templates/instructions.html":23,"./templates/learn.html":24,"./templates/makeYourOwn.html":25,"./utils":31,"./xml":32}],3:[function(require,module,exports){
+},{"../locale/fa_ir/common":34,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":20,"./templates/buttons.html":22,"./templates/instructions.html":24,"./templates/learn.html":25,"./templates/makeYourOwn.html":26,"./utils":32,"./xml":33}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -899,13 +899,83 @@ exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
 };
 
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
+};
+
 exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
+};
+
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":33}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -967,10 +1037,10 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":20,"./utils.js":31,"url":45}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":21,"./utils.js":32,"url":46}],6:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -978,6 +1048,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -1348,6 +1419,9 @@ var getFeedbackMessage = function(options) {
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
       break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
+      break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
     case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
@@ -1706,17 +1780,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -1823,6 +1895,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -1856,7 +1932,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/fa_ir/common":33,"./codegen":6,"./dom":7,"./templates/buttons.html":21,"./templates/code.html":22,"./templates/readonly.html":27,"./templates/sharing.html":28,"./templates/showCode.html":29,"./templates/trophy.html":30,"./utils":31}],9:[function(require,module,exports){
+},{"../locale/fa_ir/common":34,"./codegen":6,"./dom":7,"./templates/buttons.html":22,"./templates/code.html":23,"./templates/readonly.html":28,"./templates/sharing.html":29,"./templates/showCode.html":30,"./templates/trophy.html":31,"./utils":32}],9:[function(require,module,exports){
 exports.FlapHeight = {
   VERY_SMALL: -6,
   SMALL: -8,
@@ -2453,7 +2529,7 @@ exports.install = function(blockly, skin) {
   delete blockly.Blocks.procedures_ifreturn;
 };
 
-},{"../../locale/fa_ir/flappy":34}],11:[function(require,module,exports){
+},{"../../locale/fa_ir/flappy":35}],11:[function(require,module,exports){
 module.exports = {
   WORKSPACE_BUFFER: 20,
   WORKSPACE_COL_WIDTH: 210,
@@ -2484,7 +2560,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/flappy":34,"ejs":35}],13:[function(require,module,exports){
+},{"../../locale/fa_ir/flappy":35,"ejs":36}],13:[function(require,module,exports){
 /**
  * Blockly App: Flappy
  *
@@ -3025,12 +3101,13 @@ Flappy.init = function(config) {
 
   // for flappy show make your own button if on share page
   config.makeYourOwn = config.share;
-  
+
   config.makeString = commonMsg.makeYourOwnFlappy();
   config.makeUrl = "http://code.org/flappy";
   config.makeImage = BlocklyApps.assetUrl('media/flappy_promo.png');
 
   config.enableShowCode = false;
+  config.enableShowBlockCount = false;
 
   config.preventExtraTopLevelBlocks = true;
 
@@ -3214,8 +3291,6 @@ Flappy.onReportComplete = function(response) {
  * Execute the user's code.  Heaven help us...
  */
 Flappy.execute = function() {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 100; //TODO: Set higher for some levels
   Flappy.result = ResultType.UNSET;
   Flappy.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Flappy.waitingForReport = false;
@@ -3510,7 +3585,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/fa_ir/common":33,"../../locale/fa_ir/flappy":34,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":18,"../templates/page.html":26,"./api":9,"./constants":11,"./controls.html":12,"./visualization.html":17}],14:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"../../locale/fa_ir/flappy":35,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":19,"../templates/page.html":27,"./api":9,"./constants":11,"./controls.html":12,"./visualization.html":17}],14:[function(require,module,exports){
 /*jshint multistr: true */
 
 // todo - i think our prepoluated code counts as LOCs
@@ -4101,7 +4176,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":18}],17:[function(require,module,exports){
+},{"../skins":19}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4122,7 +4197,127 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],18:[function(require,module,exports){
+},{"ejs":36}],18:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":32,"./xml":33}],19:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -4164,7 +4359,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -4369,7 +4564,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4390,7 +4585,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],21:[function(require,module,exports){
+},{"ejs":36}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4411,7 +4606,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/common":33,"ejs":35}],22:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"ejs":36}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4432,7 +4627,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],23:[function(require,module,exports){
+},{"ejs":36}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4453,7 +4648,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/common":33,"ejs":35}],24:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"ejs":36}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4476,7 +4671,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/common":33,"ejs":35}],25:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"ejs":36}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4497,7 +4692,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/common":33,"ejs":35}],26:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"ejs":36}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4522,7 +4717,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/common":33,"ejs":35}],27:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"ejs":36}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4544,7 +4739,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],28:[function(require,module,exports){
+},{"ejs":36}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4565,7 +4760,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/common":33,"ejs":35}],29:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"ejs":36}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4586,7 +4781,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fa_ir/common":33,"ejs":35}],30:[function(require,module,exports){
+},{"../../locale/fa_ir/common":34,"ejs":36}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4607,7 +4802,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],31:[function(require,module,exports){
+},{"ejs":36}],32:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -4615,6 +4810,13 @@ exports.shallowCopy = function(source) {
   }
 
   return result;
+};
+
+/**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
 };
 
 /**
@@ -4660,14 +4862,46 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],32:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],33:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();
@@ -4688,7 +4922,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fa=function(n){return "other"}
 exports.blocklyMessage = function(d){return "بلاکلی"};
 
@@ -4718,13 +4952,13 @@ exports.dialogCancel = function(d){return "لغو"};
 
 exports.dialogOK = function(d){return "Ok"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "شمال"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "جنوب"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "شرق"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "غرب"};
 
 exports.emptyBlocksErrorMsg = function(d){return "بلوک های \"تکرار\" (Repeat) یا \"شرطی\" (If)  برای کار کردن، نیاز به بلوکهای دیگری در داخل خود دارند. مطمئن شوید که بلوک داخلی، به درستی درون بلوک اصلی قرار گرفته است."};
 
@@ -4734,7 +4968,7 @@ exports.finalStage = function(d){return "تبریک می‌گوییم! شما م
 
 exports.finalStageTrophies = function(d){return "تبریک می‌گوییم! شما مرحله‌ی آخر را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
 
-exports.generatedCodeInfo = function(d){return "بلوک‌های برنامه‌ی شما همچنین می‌توانند در جاوا اسکریپت که فراگیرترین زبان برنامه نویسی در جهان است، به نمایش درآیند:"};
+exports.generatedCodeInfo = function(d){return "دانشگاههای برتر نیز کدنویسی بر اساس بلوک ها را آموزش می دهند (مثل "+v(d,"berkeleyLink")+" و "+v(d,"harvardLink")+"). اما در پشت پرده، بلوک هایی که شما سر هم کرده اید را می توان به زبان جاوا اسکریپت نشان داد، که پر استفاده ترین زبان کدنویسی در دنیاست:"};
 
 exports.hashError = function(d){return "با عرض پوزش، '%1' با هیچ کدام از برنامه‌های ذخیره شده مطابقت ندارد."};
 
@@ -4742,7 +4976,7 @@ exports.help = function(d){return "راهنما"};
 
 exports.hintTitle = function(d){return "راهنمایی:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "پرش"};
 
 exports.levelIncompleteError = function(d){return "شما همه‌ی بلوک‌های مورد نیاز را بکار بردید، ولی نه به روش درست."};
 
@@ -4756,9 +4990,9 @@ exports.nextLevel = function(d){return "تبریک ! شما پازل "+v(d,"puzz
 
 exports.nextLevelTrophies = function(d){return "تبریک می‌گوییم! شما معمای "+v(d,"puzzleNumber")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
 
-exports.nextStage = function(d){return "تبریک می‌گوییم! شما مرحله‌ی "+v(d,"stageNumber")+" را به پایان رساندید."};
+exports.nextStage = function(d){return "تبریک! شما "+v(d,"stageName")+" را به پایان رساندید."};
 
-exports.nextStageTrophies = function(d){return "تبریک می‌گوییم! شما مرحله‌ی "+v(d,"stageNumber")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"یک جایزه","other":n(d,"numTrophies")+" جایزه"})+" شدید."};
+exports.nextStageTrophies = function(d){return "تبریک! شما مرحله‌ی "+v(d,"stageName")+" را به پایان رساندید و برنده‌ی "+p(d,"numTrophies",0,"fa",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+" شدید."};
 
 exports.numBlocksNeeded = function(d){return "تبریک می‌گوییم! شما معمای "+v(d,"puzzleNumber")+" را به پایان رساندید. (اگرچه می‌توانستید تنها "+p(d,"numBlocks",0,"fa",{"one":"یک بلوک","other":n(d,"numBlocks")+" بلوک"})+" بکار ببرید.)"};
 
@@ -4798,9 +5032,9 @@ exports.tryAgain = function(d){return "دوباره تلاش کنید"};
 
 exports.backToPreviousLevel = function(d){return "برگرد به سطح قبلی"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "ذخیره در گالری شما"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "در گالری شما ذخیره شد!"};
 
 exports.typeCode = function(d){return "در زیر این دستورات کد جاوا اسکریپتِ خودت رو بنویس."};
 
@@ -4824,10 +5058,10 @@ exports.tryHOC = function(d){return "ساعتِ کد نویسی را امتحا�
 
 exports.signup = function(d){return "برای دوره‌ی مقدماتی نام نویسی کنید"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "نکته اینجاست:"};
 
 
-},{"messageformat":46}],34:[function(require,module,exports){
+},{"messageformat":47}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fa=function(n){return "other"}
 exports.continue = function(d){return "ادامه"};
 
@@ -4931,17 +5165,17 @@ exports.setGapVeryLarge = function(d){return "تنظیم یک فاصله خیل�
 
 exports.setGapHeightTooltip = function(d){return "Sets the vertical gap in an obstacle"};
 
-exports.setGravityRandom = function(d){return "set gravity random"};
+exports.setGravityRandom = function(d){return "تنظیم جاذبه اتفاقی"};
 
-exports.setGravityVeryLow = function(d){return "set gravity very low"};
+exports.setGravityVeryLow = function(d){return " تنظیم جاذبه به خیلی کم"};
 
-exports.setGravityLow = function(d){return "set gravity low"};
+exports.setGravityLow = function(d){return " تنظیم جاذبه به کم"};
 
-exports.setGravityNormal = function(d){return "set gravity normal"};
+exports.setGravityNormal = function(d){return " تنظیم جاذبه به معمولی"};
 
-exports.setGravityHigh = function(d){return "set gravity high"};
+exports.setGravityHigh = function(d){return " تنظیم جاذبه به زیاد"};
 
-exports.setGravityVeryHigh = function(d){return "set gravity very high"};
+exports.setGravityVeryHigh = function(d){return " تنظیم جاذبه به خیلی زیاد"};
 
 exports.setGravityTooltip = function(d){return "Sets the level's gravity"};
 
@@ -4979,19 +5213,19 @@ exports.setObstacleTooltip = function(d){return "Sets the obstacle image"};
 
 exports.setPlayerRandom = function(d){return "set player Random"};
 
-exports.setPlayerFlappy = function(d){return "set player Yellow Bird"};
+exports.setPlayerFlappy = function(d){return "بازیکن را به پرنده زرد تنظیم کن"};
 
-exports.setPlayerRedBird = function(d){return "set player Red Bird"};
+exports.setPlayerRedBird = function(d){return "بازیکن را به پرنده قرمز تنظیم کن"};
 
-exports.setPlayerSciFi = function(d){return "set player Spaceship"};
+exports.setPlayerSciFi = function(d){return "بازیکن را به سفینه فضایی تنظیم کن"};
 
-exports.setPlayerUnderwater = function(d){return "set player Fish"};
+exports.setPlayerUnderwater = function(d){return "بازیکن را به ماهی تنظیم کن"};
 
-exports.setPlayerCave = function(d){return "set player Bat"};
+exports.setPlayerCave = function(d){return "بازیکن را به خفاش تنظیم کن"};
 
-exports.setPlayerSanta = function(d){return "set player Santa"};
+exports.setPlayerSanta = function(d){return "بازیکن را به سانتا تنظیم کن"};
 
-exports.setPlayerShark = function(d){return "set player Shark"};
+exports.setPlayerShark = function(d){return "بازیکن را به کوسه تنظیم کن"};
 
 exports.setPlayerEaster = function(d){return "set player Easter Bunny"};
 
@@ -5009,15 +5243,15 @@ exports.setPlayerTurkey = function(d){return "set player Turkey"};
 
 exports.setPlayerTooltip = function(d){return "Sets the player image"};
 
-exports.setScore = function(d){return "set score"};
+exports.setScore = function(d){return "تنظیم امتیاز"};
 
 exports.setScoreTooltip = function(d){return "Sets the player's score"};
 
-exports.setSpeed = function(d){return "set speed"};
+exports.setSpeed = function(d){return "تنظیم سرعت"};
 
 exports.setSpeedTooltip = function(d){return "Sets the levels speed"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "به اشتراک گذاری"};
 
 exports.shareFlappyTwitter = function(d){return "Check out the Flappy game I made. I wrote it myself with @codeorg"};
 
@@ -5058,7 +5292,7 @@ exports.whenRunButtonClickTooltip = function(d){return "اجرای اقداما�
 exports.yes = function(d){return "بله"};
 
 
-},{"messageformat":46}],35:[function(require,module,exports){
+},{"messageformat":47}],36:[function(require,module,exports){
 
 /*!
  * EJS
@@ -5417,7 +5651,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":36,"./utils":37,"fs":38,"path":40}],36:[function(require,module,exports){
+},{"./filters":37,"./utils":38,"fs":39,"path":41}],37:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -5620,7 +5854,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 
 /*!
  * EJS
@@ -5646,9 +5880,9 @@ exports.escape = function(html){
 };
  
 
-},{}],38:[function(require,module,exports){
-
 },{}],39:[function(require,module,exports){
+
+},{}],40:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -5703,7 +5937,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5931,7 +6165,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":39}],41:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":40}],42:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -6442,7 +6676,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6528,7 +6762,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6615,13 +6849,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":42,"./encode":43}],45:[function(require,module,exports){
+},{"./decode":43,"./encode":44}],46:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -7254,7 +7488,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":41,"querystring":44}],46:[function(require,module,exports){
+},{"punycode":42,"querystring":45}],47:[function(require,module,exports){
 /**
  * messageformat.js
  *

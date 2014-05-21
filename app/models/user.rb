@@ -271,4 +271,27 @@ SQL
     
     name.split.first # 'first name'
   end
+
+  # override the default devise password to support old and new style hashed passwords
+  # based on Devise::Models::DatabaseAuthenticatable#valid_password?
+  # https://github.com/plataformatec/devise/blob/master/lib/devise/models/database_authenticatable.rb#L46
+  def valid_password?(password)
+    return false if encrypted_password.blank?
+    bcrypt   = ::BCrypt::Password.new(encrypted_password)
+    # check with the pepper
+    spicy_password = ::BCrypt::Engine.hash_secret("#{password}#{self.class.pepper}", bcrypt.salt)
+    if Devise.secure_compare(spicy_password, encrypted_password)
+      return true
+    end
+
+    # check without the pepper
+    mild_password = ::BCrypt::Engine.hash_secret(password, bcrypt.salt)
+    if Devise.secure_compare(mild_password, encrypted_password)
+      # save the spicy password
+      self.update_attribute(:encrypted_password, spicy_password)
+      return true
+    end
+
+    return false
+  end
 end

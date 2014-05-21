@@ -20,7 +20,9 @@
             |
             %a{:href=>'http://codecurriculum.tumblr.com/', :target=>'_blank'} #{t('home.teacher_read_blog')}
 
-          = link_to t('home.add_hint_help'), @_controller.code_org_root_path + "/hints"
+          %p= link_to t('home.add_hint_help'), @_controller.code_org_root_path + "/hints"
+
+          %p= link_to t('home.test_videos_help'), test_videos_path
 
           %form#printcertificatesform{:action=>"http://code.org/certificates", :method=>"POST"}
             %input{:type=>'hidden', :name=>'course', :value=>'20hours'}

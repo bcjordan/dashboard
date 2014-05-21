@@ -50,4 +50,41 @@ class ScriptTest < ActiveSupport::TestCase
     end
     assert_equal 'Validation failed: Name has already been taken', raise.message
   end
+
+  test 'stages are in order' do
+    script = create(:script, name: 's1')
+    create(:stage, script: script)
+    last = create(:stage, script: script)
+    create(:stage, script: script)
+
+    last.move_to_bottom
+
+    script.stages
+
+    assert_equal [1, 2, 3], script.stages.collect(&:position)
+  end
+
+  test 'script_levels are in order' do
+    script = create(:script, name: 's1')
+    s1 = create(:stage, script: script, position: 1)
+    last = create(:script_level, script:script, stage:s1, chapter:3)
+    second = create(:script_level, script:script, stage:s1, chapter:2)
+    create(:script_level, script:script, stage:s1, chapter:1)
+    second.move_to_bottom
+    last.move_to_bottom
+
+    s2 = create(:stage, script: script, position: 2)
+    create(:script_level, script:script, stage:s2, chapter:4)
+    create(:script_level, script:script, stage:s2, chapter:5)
+
+    s3 = create(:stage, script: script, position: 3)
+    last = create(:script_level, script:script, stage:s3, chapter:7)
+    create(:script_level, script:script, stage:s3, chapter:6)
+    last.move_to_bottom
+
+    assert_equal [1, 2, 3], script.stages.collect(&:position)
+
+    assert_equal [1, 1, 1, 2, 2, 3, 3], script.script_levels.collect(&:stage).collect(&:position)
+    assert_equal [1, 2, 3, 1, 2, 1, 2], script.script_levels.collect(&:position)
+  end
 end

@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -33,6 +35,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -71,7 +78,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":9,"./utils":33}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -159,6 +166,14 @@ BlocklyApps.init = function(config) {
 
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
+
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
 
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
@@ -308,12 +323,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -360,8 +378,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -369,11 +387,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -661,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -723,19 +727,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -776,6 +767,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -791,6 +783,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -848,6 +845,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -890,7 +888,9 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/bg_bg/common":34,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":10,"./templates/buttons.html":22,"./templates/instructions.html":24,"./templates/learn.html":25,"./templates/makeYourOwn.html":26,"./utils":32,"./xml":33}],3:[function(require,module,exports){
+},{"../locale/bg_bg/common":35,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":11,"./templates/buttons.html":23,"./templates/instructions.html":25,"./templates/learn.html":26,"./templates/makeYourOwn.html":27,"./utils":33,"./xml":34}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -899,13 +899,83 @@ exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
 };
 
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
+};
+
 exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
+};
+
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":34}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -967,10 +1037,10 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":21,"./utils.js":32,"url":46}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":22,"./utils.js":33,"url":47}],6:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -978,6 +1048,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -1348,6 +1419,9 @@ var getFeedbackMessage = function(options) {
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
       break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
+      break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
     case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
@@ -1706,17 +1780,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -1823,6 +1895,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -1856,7 +1932,127 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/bg_bg/common":34,"./codegen":6,"./dom":7,"./templates/buttons.html":22,"./templates/code.html":23,"./templates/readonly.html":28,"./templates/sharing.html":29,"./templates/showCode.html":30,"./templates/trophy.html":31,"./utils":32}],9:[function(require,module,exports){
+},{"../locale/bg_bg/common":35,"./codegen":6,"./dom":7,"./templates/buttons.html":23,"./templates/code.html":24,"./templates/readonly.html":29,"./templates/sharing.html":30,"./templates/showCode.html":31,"./templates/trophy.html":32,"./utils":33}],9:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":33,"./xml":34}],10:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -1898,7 +2094,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -2103,7 +2299,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var tiles = require('./tiles');
 var xFromPosition = tiles.xFromPosition;
 var yFromPosition = tiles.yFromPosition;
@@ -2178,7 +2374,11 @@ exports.incrementScore = function(id, player) {
   Studio.queueCmd(id, 'incrementScore', {'player': player});
 };
 
-},{"./tiles":19}],12:[function(require,module,exports){
+exports.wait = function(id, value) {
+  Studio.queueCmd(id, 'wait', {'value': value});
+};
+
+},{"./tiles":20}],13:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -2785,15 +2985,16 @@ exports.install = function(blockly, skin) {
       [[msg.setSpriteHidden(), '"hidden"'],
        [msg.setSpriteRandom(), 'random'],
        [msg.setSpriteWitch(), '"witch"'],
-       [msg.setSpriteGreen(), '"green"'],
-       [msg.setSpritePurple(), '"purple"'],
-       [msg.setSpritePink(), '"pink"'],
-       [msg.setSpriteOrange(), '"orange"']];
+       [msg.setSpriteCat(), '"cat"'],
+       [msg.setSpriteDinosaur(), '"dinosaur"'],
+       [msg.setSpriteDog(), '"dog"'],
+       [msg.setSpriteOctopus(), '"octopus"'],
+       [msg.setSpritePenguin(), '"penguin"']];
 
   generator.studio_setSprite = function() {
     return generateSetterCode({
       ctx: this,
-      random: 2,
+      random: 1,
       extraParams: (this.getTitleValue('SPRITE') || '0'),
       name: 'setSprite'});
   };
@@ -2888,11 +3089,41 @@ exports.install = function(blockly, skin) {
                blockly.JavaScript.quote_(this.getTitleValue('TEXT')) + ');\n';
   };
   
-  delete blockly.Blocks.procedures_defreturn;
-  delete blockly.Blocks.procedures_ifreturn;
+  blockly.Blocks.studio_wait = {
+    helpUrl: '',
+    init: function() {
+      var dropdown = new blockly.FieldDropdown(this.VALUES);
+      dropdown.setValue(this.VALUES[2][1]);  // default to half second
+
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+        .appendTitle(dropdown, 'VALUE');
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.waitTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_wait.VALUES =
+      [[msg.waitForClick(), '0'],
+       [msg.waitForRandom(), 'random'],
+       [msg.waitForHalfSecond(), '500'],
+       [msg.waitFor1Second(), '1000'],
+       [msg.waitFor2Seconds(), '2000'],
+       [msg.waitFor5Seconds(), '5000'],
+       [msg.waitFor10Seconds(), '10000']];
+
+  generator.studio_wait = function() {
+    return generateSetterCode({
+      ctx: this,
+      random: 1,
+      name: 'wait'});
+  };
+
 };
 
-},{"../../locale/bg_bg/studio":35,"../codegen":6,"./tiles":19}],13:[function(require,module,exports){
+},{"../../locale/bg_bg/studio":36,"../codegen":6,"./tiles":20}],14:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2913,7 +3144,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/studio":35,"ejs":36}],14:[function(require,module,exports){
+},{"../../locale/bg_bg/studio":36,"ejs":37}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2934,7 +3165,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/studio":35,"ejs":36}],15:[function(require,module,exports){
+},{"../../locale/bg_bg/studio":36,"ejs":37}],16:[function(require,module,exports){
 /*jshint multistr: true */
 
 var msg = require('../../locale/bg_bg/studio');
@@ -3063,6 +3294,7 @@ module.exports = {
       [0, 1, 0, 0, 0, 0, 1, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
+    'spriteStartingImage': 2,
     'toolbox':
       tb(blockOfType('studio_move') +
          defaultSayBlock()),
@@ -3089,7 +3321,7 @@ module.exports = {
       [0, 0, 0, 0, 1, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
-    'spriteStartingImage': 1,
+    'spriteStartingImage': 3,
     'timeoutFailureTick': 200,
     'toolbox':
       tb(blockOfType('studio_moveDistance') +
@@ -3121,6 +3353,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
+    'spriteStartingImage': 2,
     'toolbox':
       tb(blockOfType('studio_moveDistance') +
          blockOfType('studio_move') +
@@ -3167,7 +3400,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 800,
+    'minWorkspaceHeight': 1200,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3181,26 +3414,28 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'toolbox':
-      tb(blockOfType('studio_whenSpriteClicked') +
+      tb(blockOfType('studio_setSprite') +
+         blockOfType('studio_setBackground') +
+         blockOfType('studio_whenGameStarts') +
+         blockOfType('studio_whenLeft') +
+         blockOfType('studio_whenRight') +
+         blockOfType('studio_whenUp') +
+         blockOfType('studio_whenDown') +
+         blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
          blockOfType('studio_repeatForever') +
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_stop') +
+         blockOfType('studio_wait') +
          blockOfType('studio_playSound') +
          blockOfType('studio_incrementScore') +
          defaultSayBlock() +
          blockOfType('studio_setSpritePosition') +
          blockOfType('studio_setSpriteSpeed') +
-         blockOfType('studio_setSpriteEmotion') +
-         blockOfType('studio_setBackground') +
-         blockOfType('studio_setSprite')),
+         blockOfType('studio_setSpriteEmotion')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
   '100': {
     'requiredBlocks': [
@@ -3214,7 +3449,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 800,
+    'minWorkspaceHeight': 900,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3229,23 +3464,29 @@ module.exports = {
     ],
     'toolbox':
       tb(createCategory(msg.catActions(),
+                          blockOfType('studio_setSprite') +
+                          blockOfType('studio_setBackground') +
                           blockOfType('studio_move') +
                           blockOfType('studio_moveDistance') +
                           blockOfType('studio_stop') +
+                          blockOfType('studio_wait') +
                           blockOfType('studio_playSound') +
                           blockOfType('studio_incrementScore') +
                           defaultSayBlock() +
                           blockOfType('studio_setSpritePosition') +
                           blockOfType('studio_setSpriteSpeed') +
-                          blockOfType('studio_setSpriteEmotion') +
-                          blockOfType('studio_setBackground') +
-                          blockOfType('studio_setSprite')) +
+                          blockOfType('studio_setSpriteEmotion')) +
          createCategory(msg.catEvents(),
+                          blockOfType('studio_whenGameStarts') +
+                          blockOfType('studio_whenLeft') +
+                          blockOfType('studio_whenRight') +
+                          blockOfType('studio_whenUp') +
+                          blockOfType('studio_whenDown') +
                           blockOfType('studio_whenSpriteClicked') +
-                          blockOfType('studio_whenSpriteCollided') +
-                          blockOfType('studio_repeatForever')) +
+                          blockOfType('studio_whenSpriteCollided')) +
          createCategory(msg.catControl(),
-                          blockOfType('controls_repeat')) +
+                          blockOfType('controls_repeat') +
+                          blockOfType('studio_repeatForever')) +
          createCategory(msg.catLogic(),
                           blockOfType('controls_if') +
                           blockOfType('logic_compare') +
@@ -3254,18 +3495,16 @@ module.exports = {
                           blockOfType('logic_boolean')) +
          createCategory(msg.catMath(),
                           blockOfType('math_number') +
+                          blockOfType('math_change') +
                           blockOfType('math_arithmetic')) +
-         createCategory(msg.catVariables(), '', 'VARIABLE')),
+         createCategory(msg.catVariables(), '', 'VARIABLE') +
+         createCategory(msg.catProcedures(), '', 'PROCEDURE')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
-      <block type="studio_whenLeft" deletable="false" x="20" y="120"></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="200"></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="280"></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="360"></block>'
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
 };
 
-},{"../../locale/bg_bg/studio":35,"../block_utils":3,"./tiles":19}],16:[function(require,module,exports){
+},{"../../locale/bg_bg/studio":36,"../block_utils":3,"./tiles":20}],17:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Studio = require('./studio');
@@ -3283,7 +3522,7 @@ window.studioMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":12,"./levels":15,"./skins":17,"./studio":18}],17:[function(require,module,exports){
+},{"../appMain":1,"./blocks":13,"./levels":16,"./skins":18,"./studio":19}],18:[function(require,module,exports){
 /**
  * Load Skin for Studio.
  */
@@ -3320,21 +3559,25 @@ exports.load = function(assetUrl, id) {
   skin.underwater = {
     background: skin.assetUrl('background_underwater.png'),
   };
-  skin.green = {
-    sprite: skin.assetUrl('avatar1.png'),
-    spriteFlags: 0,
+  skin.cat = {
+    sprite: skin.assetUrl('cat_spritesheet_200px.png'),
+    spriteFlags: 28,
   };
-  skin.purple = {
-    sprite: skin.assetUrl('avatar2.png'),
-    spriteFlags: 0,
+  skin.dinosaur = {
+    sprite: skin.assetUrl('dinosaur_spritesheet_200px.png'),
+    spriteFlags: 28,
   };
-  skin.orange = {
-    sprite: skin.assetUrl('avatar3.png'),
-    spriteFlags: 0,
+  skin.dog = {
+    sprite: skin.assetUrl('dog_spritesheet_200px.png'),
+    spriteFlags: 28,
   };
-  skin.pink = {
-    sprite: skin.assetUrl('avatar4.png'),
-    spriteFlags: 0,
+  skin.octopus = {
+    sprite: skin.assetUrl('octopus_spritesheet_200px.png'),
+    spriteFlags: 28,
+  };
+  skin.penguin = {
+    sprite: skin.assetUrl('penguin_spritesheet_200px.png'),
+    spriteFlags: 28,
   };
 
   // Images
@@ -3382,7 +3625,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":9}],18:[function(require,module,exports){
+},{"../skins":10}],19:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -3530,12 +3773,16 @@ var drawMap = function() {
   svg.setAttribute('width', Studio.MAZE_WIDTH);
   svg.setAttribute('height', Studio.MAZE_HEIGHT);
 
+  // Attach click handler.
+  dom.addMouseDownTouchEvent(svg, Studio.onSvgClicked);
+
   // Adjust visualization and belowVisualization width.
   var visualization = document.getElementById('visualization');
   visualization.style.width = Studio.MAZE_WIDTH + 'px';
   var belowVisualization = document.getElementById('belowVisualization');
   belowVisualization.style.width = Studio.MAZE_WIDTH + 'px';
-  if (Studio.minWorkspaceHeight > Studio.MAZE_HEIGHT) {
+  if (!BlocklyApps.noPadding &&
+      (Studio.minWorkspaceHeight > Studio.MAZE_HEIGHT)) {
     belowVisualization.style.minHeight =
       (Studio.minWorkspaceHeight - Studio.MAZE_HEIGHT) + 'px';
   }
@@ -3570,14 +3817,14 @@ var drawMap = function() {
       spriteClipRect.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteClip.appendChild(spriteClipRect);
       svg.appendChild(spriteClip);
-      
+
       // Add sprite (not setting href attribute or width until displaySprite).
       var spriteIcon = document.createElementNS(Blockly.SVG_NS, 'image');
       spriteIcon.setAttribute('id', 'sprite' + i);
       spriteIcon.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteIcon.setAttribute('clip-path', 'url(#spriteClipPath' + i + ')');
       svg.appendChild(spriteIcon);
-      
+
       dom.addMouseDownTouchEvent(spriteIcon,
                                  delegate(this,
                                           Studio.onSpriteClicked,
@@ -3587,7 +3834,7 @@ var drawMap = function() {
       var spriteSpeechBubble = document.createElementNS(Blockly.SVG_NS, 'g');
       spriteSpeechBubble.setAttribute('id', 'speechBubble' + i);
       spriteSpeechBubble.setAttribute('visibility', 'hidden');
-      
+
       var speechRect = document.createElementNS(Blockly.SVG_NS, 'path');
       speechRect.setAttribute('id', 'speechBubblePath' + i);
       speechRect.setAttribute('class', 'studio-speech-bubble-path');
@@ -3595,13 +3842,13 @@ var drawMap = function() {
       var speechText = document.createElementNS(Blockly.SVG_NS, 'text');
       speechText.setAttribute('id', 'speechBubbleText' + i);
       speechText.setAttribute('class', 'studio-speech-bubble');
-      
+
       spriteSpeechBubble.appendChild(speechRect);
       spriteSpeechBubble.appendChild(speechText);
       svg.appendChild(spriteSpeechBubble);
     }
   }
-  
+
   if (Studio.sprite0Finish_) {
     for (i = 0; i < Studio.sprite0FinishCount; i++) {
       // Add finish markers.
@@ -3647,10 +3894,9 @@ var delegate = function(scope, func, data)
 
 var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
   var totalDistance = 0;
-  
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-    
+
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var scaleFactor;
       var distThisMove = Math.min(cmd.opts.queuedDistance,
@@ -3677,16 +3923,15 @@ var calcMoveDistanceFromQueues = function (index, yAxis, modifyQueues) {
       }
       totalDistance += distThisMove * scaleFactor;
     }
-  }
+  });
 
   return totalDistance;
 };
 
 
 var cancelQueuedMovements = function (index, yAxis) {
-  for (var handler in Studio.cmdQueues) {
-    var cmd = Studio.cmdQueues[handler] ? Studio.cmdQueues[handler][0] : null;
-
+  Studio.eventHandlers.forEach(function (handler) {
+    var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
     if (cmd && cmd.name === 'moveDistance' && cmd.opts.spriteIndex === index) {
       var dir = cmd.opts.dir;
       if (yAxis && (dir === Direction.NORTH || dir === Direction.SOUTH)) {
@@ -3695,7 +3940,7 @@ var cancelQueuedMovements = function (index, yAxis) {
         cmd.opts.queuedDistance = 0;
       }
     }
-  }
+  });
 };
 
 //
@@ -3786,79 +4031,85 @@ var setSpeechText = function(svgText, text) {
   return SPEECH_BUBBLE_HEIGHT - linesLessThanMax * SPEECH_BUBBLE_LINE_HEIGHT;
 };
 
-var callHandler = function (func, name) {
-  if (func) {
-    Studio.currentHandler = name;
-    Studio.cmdQueues[name] = [];
-    try { func(BlocklyApps, api); } catch (e) { }
-    Studio.currentHandler = null;
-  }
+//
+// Execute the code for all of the event handlers that match an event name
+//
+
+var callHandler = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    // Note: we skip executing the code if we have not completed executing
+    // the cmdQueue on this handler (checking for non-zero length)
+    if (handler.name === name &&
+        (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
+      handler.cmdQueue = [];
+      Studio.currentCmdQueue = handler.cmdQueue;
+      try { handler.func(BlocklyApps, api, Studio.Globals); } catch (e) { }
+      Studio.currentCmdQueue = null;
+    }
+  });
 };
 
 Studio.onTick = function() {
   Studio.tickCount++;
 
   if (Studio.tickCount === 1) {
-    callHandler(Studio.whenGameStarts, 'whenGameStarts');
+    callHandler('whenGameStarts');
   }
   Studio.executeQueue('whenGameStarts');
 
-  if (!Studio.cmdQueues.repeatForever ||
-      (0 === Studio.cmdQueues.repeatForever.length)) {
-    callHandler(Studio.repeatForever, 'repeatForever');
-  }
+  callHandler('repeatForever');
   Studio.executeQueue('repeatForever');
 
   for (var i = 0; i < Studio.spriteCount; i++) {
-    Studio.executeQueue('whenSpriteClicked' + i);
+    Studio.executeQueue('whenSpriteClicked-' + i);
   }
-  
+
   // Run key event handlers for any keys that are down:
   for (var key in Keycodes) {
     if (Studio.keyState[Keycodes[key]] &&
         Studio.keyState[Keycodes[key]] == "keydown") {
       switch (Keycodes[key]) {
         case Keycodes.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case Keycodes.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case Keycodes.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case Keycodes.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
   }
-  
+
   for (var btn in ArrowIds) {
     if (Studio.btnState[ArrowIds[btn]] &&
         Studio.btnState[ArrowIds[btn]] == ButtonState.DOWN) {
       switch (ArrowIds[btn]) {
         case ArrowIds.LEFT:
-          callHandler(Studio.whenLeft, 'whenLeft');
+          callHandler('whenLeft');
           break;
         case ArrowIds.UP:
-          callHandler(Studio.whenUp, 'whenUp');
+          callHandler('whenUp');
           break;
         case ArrowIds.RIGHT:
-          callHandler(Studio.whenRight, 'whenRight');
+          callHandler('whenRight');
           break;
         case ArrowIds.DOWN:
-          callHandler(Studio.whenDown, 'whenDown');
+          callHandler('whenDown');
           break;
       }
     }
   }
-  
+
   Studio.executeQueue('whenLeft');
   Studio.executeQueue('whenUp');
   Studio.executeQueue('whenRight');
   Studio.executeQueue('whenDown');
-  
+
   // Check for collisions (note that we use the positions they are about
   // to attain with queued moves - this allows the moves to be canceled before
   // the actual movements take place):
@@ -3875,8 +4126,7 @@ Studio.onTick = function() {
                            tiles.SPRITE_COLLIDE_DISTANCE)) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
           Studio.sprite[i].collisionMask |= Math.pow(2, j);
-          callHandler(Studio.whenSpriteCollided[i][j],
-                      'whenSpriteCollided-' + i + '-' + j);
+          callHandler('whenSpriteCollided-' + i + '-' + j);
         }
       } else {
           Studio.sprite[i].collisionMask &= ~(Math.pow(2, j));
@@ -3884,14 +4134,14 @@ Studio.onTick = function() {
       Studio.executeQueue('whenSpriteCollided-' + i + '-' + j);
     }
   }
-  
+
   for (i = 0; i < Studio.spriteCount; i++) {
     performQueuedMoves(i);
 
     // Display sprite:
     Studio.displaySprite(i);
   }
-  
+
   if (checkFinished()) {
     Studio.onPuzzleComplete();
   }
@@ -3900,7 +4150,7 @@ Studio.onTick = function() {
 Studio.onKey = function(e) {
   // Store the most recent event type per-key
   Studio.keyState[e.keyCode] = e.type;
-  
+
   // If we are actively running our tick loop, suppress default event handling
   if (Studio.intervalId &&
       e.keyCode >= Keycodes.LEFT && e.keyCode <= Keycodes.DOWN) {
@@ -3917,8 +4167,24 @@ Studio.onArrowButtonDown = function(e, idBtn) {
 Studio.onSpriteClicked = function(e, spriteIndex) {
   // If we are "running", call the event handler if registered.
   if (Studio.intervalId) {
-    callHandler(Studio.whenSpriteClicked[spriteIndex],
-                'whenSpriteClicked' + spriteIndex);
+    callHandler('whenSpriteClicked-' + spriteIndex);
+  }
+  e.preventDefault();  // Stop normal events.
+};
+
+Studio.onSvgClicked = function(e) {
+  // If we are "running", check the cmdQueues.
+  if (Studio.intervalId) {
+    // Check the first command in all of the cmdQueues to see if there is a
+    // pending "wait for click" command
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
+      if (cmd && cmd.name === 'wait' &&
+          cmd.opts.waitForClick && !cmd.opts.waitComplete) {
+        cmd.opts.waitComplete = true;
+      }
+    });
   }
   e.preventDefault();  // Stop normal events.
 };
@@ -3942,7 +4208,7 @@ Studio.init = function(config) {
   level = config.level;
   onSharePage = config.share;
   loadLevel();
-  
+
   window.addEventListener("keydown", Studio.onKey, false);
   window.addEventListener("keyup", Studio.onKey, false);
 
@@ -3992,7 +4258,7 @@ Studio.init = function(config) {
                                           ArrowIds[btn]));
     }
     document.addEventListener('mouseup', Studio.onMouseUp, false);
-  
+
     /**
      * The richness of block colours, regardless of the hue.
      * MOOC blocks should be brighter (target audience is younger).
@@ -4002,7 +4268,7 @@ Studio.init = function(config) {
     Blockly.HSV_SATURATION = 0.6;
 
     Blockly.SNAP_RADIUS *= Studio.scale.snapRadius;
-    
+
     drawMap();
   };
 
@@ -4029,13 +4295,15 @@ Studio.init = function(config) {
   config.makeImage = BlocklyApps.assetUrl('media/promo.png');
 
   config.enableShowCode = false;
+  config.varsInGlobals = true;
+  config.enableShowBlockCount = false;
 
   config.preventExtraTopLevelBlocks = true;
 
   Studio.sprite0FinishCount = 0;
   Studio.spriteCount = 0;
   Studio.sprite = [];
-  
+
   // Locate the start and finish squares.
   for (var y = 0; y < Studio.ROWS; y++) {
     for (var x = 0; x < Studio.COLS; x++) {
@@ -4055,10 +4323,10 @@ Studio.init = function(config) {
       }
     }
   }
-  
+
   // Update the sprite count in the blocks:
   blocks.setSpriteCount(Blockly, Studio.spriteCount);
-    
+
   BlocklyApps.init(config);
 
   if (!onSharePage) {
@@ -4071,14 +4339,19 @@ Studio.init = function(config) {
  * Clear the event handlers and stop the onTick timer.
  */
 Studio.clearEventHandlersKillTickLoop = function() {
-  Studio.whenDown = null;
-  Studio.whenLeft = null;
-  Studio.whenRight = null;
-  Studio.whenUp = null;
-  Studio.repeatForever = null;
-  Studio.whenGameStarts = null;
-  Studio.whenSpriteClicked = [];
-  Studio.whenSpriteCollided = [];
+  if (Studio.eventHandlers) {
+    // Check the first command in all of the cmdQueues and clear the timeout
+    // if there is a pending wait command
+    Studio.eventHandlers.forEach(function (handler) {
+      var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
+
+      if (cmd && cmd.name === 'wait' &&
+          cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
+        window.clearTimeout(cmd.opts.waitTimeout);
+      }
+    });
+  }
+  Studio.eventHandlers = [];
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
@@ -4106,7 +4379,7 @@ BlocklyApps.reset = function(first) {
     var softButtonsCell = document.getElementById('soft-buttons');
     softButtonsCell.className = 'soft-buttons-' + softButtonCount;
   }
-  
+
   // Reset the score.
   Studio.playerScore = 0;
   Studio.opponentScore = 0;
@@ -4114,13 +4387,16 @@ BlocklyApps.reset = function(first) {
 
   // Reset configurable variables
   Studio.setBackground({'value': 'cave'});
-  
-  // Reset the currentHandler, queues, and complete counts:
-  Studio.currentHandler = null;
-  Studio.cmdQueues = [];
+
+  // Reset currentCmdQueue and sayComplete count:
+  Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
 
-  var spriteStartingSkins = [ "witch", "green", "purple", "pink", "orange" ];
+  // Reset the Globals object used to contain program variables:
+  Studio.Globals = [];
+
+  var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
+                              "witch" ];
   var numStartingSkins = spriteStartingSkins.length;
   var skinBias = Studio.spriteStartingImage || 0;
 
@@ -4134,7 +4410,7 @@ BlocklyApps.reset = function(first) {
     Studio.sprite[i].dir = Direction.NONE;
     Studio.sprite[i].displayDir = Direction.SOUTH;
     Studio.sprite[i].emotion = Emotions.NORMAL;
-    
+
     Studio.setSprite({
         'index': i,
         'value': Studio.spritesHiddenToStart ?
@@ -4191,12 +4467,12 @@ BlocklyApps.runButtonClick = function() {
   BlocklyApps.reset(false);
   BlocklyApps.attempts++;
   Studio.execute();
-  
+
   if (level.freePlay && !onSharePage) {
     var shareCell = document.getElementById('share-cell');
     shareCell.className = 'share-cell-enabled';
   }
-  
+
   if (level.showZeroZeroScore) {
     Studio.displayScore();
   }
@@ -4248,12 +4524,84 @@ Studio.onReportComplete = function(response) {
   displayFeedback();
 };
 
+var registerEventHandler = function (handlers, name, func) {
+  handlers.push({'name': name, 'func': func});
+};
+
+var registerHandlers =
+      function (handlers, blockName, eventNameBase,
+                nameParam1, matchParam1Val,
+                nameParam2, matchParam2Val) {
+  var blocks = Blockly.mainWorkspace.getTopBlocks();
+  for (var x = 0; blocks[x]; x++) {
+    var block = blocks[x];
+    if (block.type === blockName &&
+        (!nameParam1 ||
+         matchParam1Val === parseInt(block.getTitleValue(nameParam1), 10)) &&
+        (!nameParam2 ||
+         matchParam2Val === parseInt(block.getTitleValue(nameParam2), 10))) {
+      var code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
+      if (code) {
+        var func = codegen.functionFromCode(code, {
+                                            BlocklyApps: BlocklyApps,
+                                            Studio: api,
+                                            Globals: Studio.Globals } );
+        var eventName = eventNameBase;
+        if (nameParam1) {
+          eventName += '-' + matchParam1Val;
+        }
+        if (nameParam2) {
+          eventName += '-' + matchParam2Val;
+        }
+        registerEventHandler(handlers, eventName, func);
+      }
+    }
+  }
+};
+
+var registerHandlersWithSpriteParam =
+      function (handlers, blockName, eventNameBase, blockParam) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    registerHandlers(handlers, blockName, eventNameBase, blockParam, i);
+  }
+};
+
+var registerHandlersWithSpriteParams =
+      function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
+  for (var i = 0; i < Studio.spriteCount; i++) {
+    for (var j = 0; j < Studio.spriteCount; j++) {
+      if (i === j) {
+        continue;
+      }
+      registerHandlers(handlers,
+                       blockName,
+                       eventNameBase,
+                       blockParam1,
+                       i,
+                       blockParam2,
+                       j);
+    }
+  }
+};
+
+//
+// Generates code with user-generated function definitions and evals that code
+// so these can be called from event handlers. This should be called for each
+// block type that defines functions.
+//
+
+var defineProcedures = function (blockType) {
+  var code = Blockly.Generator.workspaceToCode('JavaScript', blockType);
+  try { codegen.evalWith(code, {
+                         BlocklyApps: BlocklyApps,
+                         Studio: api,
+                         Globals: Studio.Globals } ); } catch (e) { }
+};
+
 /**
- * Execute the user's code.  Heaven help us...
+ * Execute the story
  */
 Studio.execute = function() {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 100; //TODO: Set higher for some levels
   var code;
   Studio.result = ResultType.UNSET;
   Studio.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
@@ -4275,109 +4623,35 @@ Studio.execute = function() {
       }
     }
   }
-  
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenLeft');
-  var whenLeftFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenRight');
-  var whenRightFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
+  var handlers = [];
+  registerHandlers(handlers, 'studio_whenLeft', 'whenLeft');
+  registerHandlers(handlers, 'studio_whenRight', 'whenRight');
+  registerHandlers(handlers, 'studio_whenUp', 'whenUp');
+  registerHandlers(handlers, 'studio_whenDown', 'whenDown');
+  registerHandlers(handlers, 'studio_repeatForever', 'repeatForever');
+  registerHandlers(handlers, 'studio_whenGameStarts', 'whenGameStarts');
+  registerHandlersWithSpriteParam(handlers,
+                                  'studio_whenSpriteClicked',
+                                  'whenSpriteClicked',
+                                  'SPRITE');
+  registerHandlersWithSpriteParams(handlers,
+                                   'studio_whenSpriteCollided',
+                                   'whenSpriteCollided',
+                                   'SPRITE1',
+                                   'SPRITE2');
 
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenUp');
-  var whenUpFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenDown');
-  var whenDownFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_repeatForever');
-  var repeatForeverFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  code = Blockly.Generator.workspaceToCode(
-                                    'JavaScript',
-                                    'studio_whenGameStarts');
-  var whenGameStartsFunc = codegen.functionFromCode(
-                                     code, {
-                                      BlocklyApps: BlocklyApps,
-                                      Studio: api } );
-
-  var x;
-  var block;
-  var blocks = Blockly.mainWorkspace.getTopBlocks(true);
-
-  var whenSpriteClickedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    for (x = 0; blocks[x]; x++) {
-      block = blocks[x];
-      if (block.type == 'studio_whenSpriteClicked' &&
-          i == parseInt(block.getTitleValue('SPRITE'), 10)) {
-        code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-        whenSpriteClickedFunc[i] = codegen.functionFromCode(
-                                           code, {
-                                            BlocklyApps: BlocklyApps,
-                                            Studio: api } );
-      }
-    }
-  }
-
-  var whenSpriteCollidedFunc = [];
-  for (i = 0; i < Studio.spriteCount; i++) {
-    whenSpriteCollidedFunc[i] = [];
-    for (var j = 0; j < Studio.spriteCount; j++) {
-      if (i == j) {
-        continue;
-      }
-      for (x = 0; blocks[x]; x++) {
-        block = blocks[x];
-        if (block.type == 'studio_whenSpriteCollided' &&
-            i == parseInt(block.getTitleValue('SPRITE1'), 10) &&
-            j == parseInt(block.getTitleValue('SPRITE2'), 10)) {
-          code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
-          whenSpriteCollidedFunc[i][j] = codegen.functionFromCode(
-                                             code, {
-                                              BlocklyApps: BlocklyApps,
-                                              Studio: api } );
-        }
-      }
-    }
-  }
-  
   BlocklyApps.playAudio('start', {volume: 0.5});
 
   BlocklyApps.reset(false);
-  
+
+  // Define any top-level procedures the user may have created
+  // (must be after reset(), which resets the Studio.Globals namespace)
+  defineProcedures('procedures_defreturn');
+  defineProcedures('procedures_defnoreturn');
+
   // Set event handlers and start the onTick timer
-  Studio.whenLeft = whenLeftFunc;
-  Studio.whenRight = whenRightFunc;
-  Studio.whenUp = whenUpFunc;
-  Studio.whenDown = whenDownFunc;
-  Studio.repeatForever = repeatForeverFunc;
-  Studio.whenGameStarts = whenGameStartsFunc;
-  Studio.whenSpriteClicked = whenSpriteClickedFunc;
-  Studio.whenSpriteCollided = whenSpriteCollidedFunc;
+  Studio.eventHandlers = handlers;
   Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
@@ -4393,7 +4667,7 @@ Studio.onPuzzleComplete = function() {
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
   BlocklyApps.levelComplete = (Studio.result == ResultType.SUCCESS);
-  
+
   // If the current level is a free play, always return the free play
   // result type
   if (level.freePlay) {
@@ -4407,22 +4681,22 @@ Studio.onPuzzleComplete = function() {
   } else {
     BlocklyApps.playAudio('failure', {volume : 0.5});
   }
-  
+
   if (level.editCode) {
     Studio.testResults = BlocklyApps.levelComplete ?
       BlocklyApps.TestResults.ALL_PASS :
       BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL;
   }
-  
+
   if (level.failForOther1Star && !BlocklyApps.levelComplete) {
     Studio.testResults = BlocklyApps.TestResults.OTHER_1_STAR_FAIL;
   }
-  
+
   var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
   var textBlocks = Blockly.Xml.domToText(xml);
-  
+
   Studio.waitingForReport = true;
-  
+
   // Report result to server.
   BlocklyApps.report({
                      app: 'studio',
@@ -4443,6 +4717,10 @@ frameDirTable[Direction.NORTHWEST]  = 4;
 frameDirTable[Direction.WEST]       = 5;
 frameDirTable[Direction.SOUTHWEST]  = 6;
 
+var ANIM_RATE = 6;
+var ANIM_OFFSET = 7; // Each sprite animates at a slightly different time
+var ANIM_AFTER_NUM_NORMAL_FRAMES = 8;
+
 var spriteFrameNumber = function (index) {
   var sprite = Studio.sprite[index];
   var showThisAnimFrame = 0;
@@ -4452,7 +4730,11 @@ var spriteFrameNumber = function (index) {
   }
   if ((sprite.flags & SpriteFlags.ANIMATION) &&
       Studio.tickCount &&
-      Math.round(Studio.tickCount / 20) % 2) {
+      (1 ===
+       Math.round((Studio.tickCount + index * ANIM_OFFSET) / ANIM_RATE) %
+                  ANIM_AFTER_NUM_NORMAL_FRAMES)) {
+    // we only support two-frame animation for now, the 2nd frame is only up
+    // for 1/8th of the time (since it is a blink of the eyes)
     showThisAnimFrame = sprite.firstAnimFrameNum;
   }
   if (sprite.emotion !== Emotions.NORMAL &&
@@ -4495,7 +4777,7 @@ var updateSpeechBubblePath = function (element) {
 Studio.displaySprite = function(i) {
   var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
   var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
-  
+
   var xOffset = Studio.SPRITE_WIDTH * spriteFrameNumber(i);
 
   var spriteIcon = document.getElementById('sprite' + i);
@@ -4503,7 +4785,7 @@ Studio.displaySprite = function(i) {
 
   var xCoordPrev = spriteClipRect.getAttribute('x');
   var yCoordPrev = spriteClipRect.getAttribute('y');
-  
+
   var dirPrev = Studio.sprite[i].dir;
   if (dirPrev === Direction.NONE) {
     // direction not yet set, start at SOUTH (forward facing)
@@ -4522,7 +4804,7 @@ Studio.displaySprite = function(i) {
       Studio.sprite[i].dir |= Direction.SOUTH;
     }
   }
-  
+
   if (Studio.sprite[i].dir !== Studio.sprite[i].displayDir) {
     // Every other frame, assign a new displayDir from state table
     // (only one turn at a time):
@@ -4531,10 +4813,10 @@ Studio.displaySprite = function(i) {
           NextTurn[Studio.sprite[i].displayDir][Studio.sprite[i].dir];
     }
   }
-  
+
   spriteIcon.setAttribute('x', xCoord - xOffset);
   spriteIcon.setAttribute('y', yCoord);
-  
+
   spriteClipRect.setAttribute('x', xCoord);
   spriteClipRect.setAttribute('y', yCoord);
 
@@ -4558,11 +4840,11 @@ Studio.displaySprite = function(i) {
   }
   speechBubblePath.setAttribute('onTop', nowOnTop);
   speechBubblePath.setAttribute('onRight', nowOnRight);
-  
+
   if (wasOnTop !== nowOnTop || wasOnRight !== nowOnRight) {
     updateSpeechBubblePath(speechBubblePath);
   }
-  
+
   speechBubble.setAttribute('transform',
                             'translate(' + xSpeech + ',' + ySpeech + ')');
 };
@@ -4589,24 +4871,22 @@ Studio.queueCmd = function (id, name, opts) {
       'name': name,
       'opts': opts,
   };
-  Studio.cmdQueues[Studio.currentHandler].push(cmd);
+  Studio.currentCmdQueue.push(cmd);
 };
 
-Studio.executeQueue = function (handler) {
-  var cmdQueue = Studio.cmdQueues[handler];
-  if (cmdQueue) {
-    for (var cmd = cmdQueue[0]; cmd; cmd = cmdQueue[0]) {
-      if (Studio.callCmd(cmd)) {
-        // Command executed immediately, remove from queue and continue
-        cmdQueue.shift();
-      } else {
-        // This command has more work to do, leave it in the queue, return false
-        return false;
+Studio.executeQueue = function (name) {
+  Studio.eventHandlers.forEach(function (handler) {
+    if (handler.name === name && handler.cmdQueue) {
+      for (var cmd = handler.cmdQueue[0]; cmd; cmd = handler.cmdQueue[0]) {
+        if (Studio.callCmd(cmd)) {
+          // Command executed immediately, remove from queue and continue
+          handler.cmdQueue.shift();
+        } else {
+          break;
+        }
       }
     }
-  }
-  // All commands completed, return true
-  return true;
+  });
 };
 
 //
@@ -4629,7 +4909,9 @@ Studio.callCmd = function (cmd) {
       Studio.setSprite(cmd.opts);
       break;
     case 'saySprite':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.saySprite(cmd.opts);
     case 'setSpriteEmotion':
       BlocklyApps.highlight(cmd.id);
@@ -4652,7 +4934,9 @@ Studio.callCmd = function (cmd) {
       Studio.moveSingle(cmd.opts);
       break;
     case 'moveDistance':
-      BlocklyApps.highlight(cmd.id);
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
       return Studio.moveDistance(cmd.opts);
     case 'stop':
       BlocklyApps.highlight(cmd.id);
@@ -4662,6 +4946,11 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       Studio.incrementScore(cmd.opts);
       break;
+    case 'wait':
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
+      return Studio.wait(cmd.opts);
   }
   return true;
 };
@@ -4704,7 +4993,7 @@ Studio.setSprite = function (opts) {
   Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
   Studio.sprite[opts.index].flags |= (opts.value !== 'hidden') ?
                                       skinTheme(opts.value).spriteFlags : 0;
-  
+
   var element = document.getElementById('sprite' + opts.index);
   element.setAttribute('visibility',
                        (opts.value === 'hidden') ? 'hidden' : 'visible');
@@ -4777,8 +5066,8 @@ Studio.hideSpeechBubble = function (opts) {
 };
 
 Studio.saySprite = function (opts) {
-  if (!opts.sayStarted) {
-    opts.sayStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
     var bblHeight = setSpeechText(bblText, opts.text);
@@ -4789,7 +5078,7 @@ Studio.saySprite = function (opts) {
 
     speechBubblePath.setAttribute('height', bblHeight);
     updateSpeechBubblePath(speechBubblePath);
-    
+
     // displaySprite will reposition the bubble
     Studio.displaySprite(opts.spriteIndex);
     speechBubble.setAttribute('visibility', 'visible');
@@ -4801,6 +5090,28 @@ Studio.saySprite = function (opts) {
   }
 
   return opts.sayComplete;
+};
+
+var onWaitComplete = function (opts) {
+  opts.waitComplete = true;
+};
+
+Studio.wait = function (opts) {
+  if (!opts.started) {
+    opts.started = true;
+
+    // opts.value is the number of milliseconds to wait - or zero which means
+    // "wait for click"
+    if (0 === opts.value) {
+      opts.waitForClick = true;
+    } else {
+      opts.waitTimeout = window.setTimeout(
+        delegate(this, onWaitComplete, opts),
+        opts.value);
+    }
+  }
+
+  return opts.waitComplete;
 };
 
 Studio.stop = function (opts) {
@@ -4866,11 +5177,11 @@ Studio.moveSingle = function (opts) {
 };
 
 Studio.moveDistance = function (opts) {
-  if (!opts.moveStarted) {
-    opts.moveStarted = true;
+  if (!opts.started) {
+    opts.started = true;
     opts.queuedDistance = opts.distance / Studio.SQUARE_SIZE;
   }
-  
+
   return (0 === opts.queuedDistance);
 };
 
@@ -4920,7 +5231,7 @@ var checkFinished = function () {
     Studio.result = ResultType.SUCCESS;
     return true;
   }
-  
+
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
     Studio.result = ResultType.FAILURE;
@@ -4931,16 +5242,16 @@ var checkFinished = function () {
     Studio.result = ResultType.SUCCESS;
     return true;
   }
-  
+
   if (Studio.timedOut()) {
     Studio.result = ResultType.FAILURE;
     return true;
   }
-  
+
   return false;
 };
 
-},{"../../locale/bg_bg/common":34,"../../locale/bg_bg/studio":35,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":9,"../templates/page.html":27,"./api":11,"./blocks":12,"./controls.html":13,"./extraControlRows.html":14,"./tiles":19,"./visualization.html":20}],19:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"../../locale/bg_bg/studio":36,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":10,"../templates/page.html":28,"./api":12,"./blocks":13,"./controls.html":14,"./extraControlRows.html":15,"./tiles":20,"./visualization.html":21}],20:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
@@ -5106,7 +5417,7 @@ exports.SquareType = {
   SPRITESTART: 16,
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5127,7 +5438,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],21:[function(require,module,exports){
+},{"ejs":37}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5148,7 +5459,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],22:[function(require,module,exports){
+},{"ejs":37}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5169,7 +5480,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":34,"ejs":36}],23:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"ejs":37}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5190,7 +5501,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],24:[function(require,module,exports){
+},{"ejs":37}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5211,7 +5522,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":34,"ejs":36}],25:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"ejs":37}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5234,7 +5545,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":34,"ejs":36}],26:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"ejs":37}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5255,7 +5566,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":34,"ejs":36}],27:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"ejs":37}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5280,7 +5591,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":34,"ejs":36}],28:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"ejs":37}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5302,7 +5613,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],29:[function(require,module,exports){
+},{"ejs":37}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5323,7 +5634,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":34,"ejs":36}],30:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"ejs":37}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5344,7 +5655,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":34,"ejs":36}],31:[function(require,module,exports){
+},{"../../locale/bg_bg/common":35,"ejs":37}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5365,7 +5676,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],32:[function(require,module,exports){
+},{"ejs":37}],33:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -5373,6 +5684,13 @@ exports.shallowCopy = function(source) {
   }
 
   return result;
+};
+
+/**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
 };
 
 /**
@@ -5418,14 +5736,46 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],33:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],34:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();
@@ -5446,7 +5796,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bg=function(n){return n===1?"one":"other"}
 exports.blocklyMessage = function(d){return "Блокли"};
 
@@ -5476,13 +5826,13 @@ exports.dialogCancel = function(d){return "Отказ"};
 
 exports.dialogOK = function(d){return "OK"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "север"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "юг"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "изток"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "запад"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоковете \"Повтори\" и \"или\" трябва да съдържат други блокове в себе си, за да работят. Уверете се, че вътрешния блок се вписва правилно във външния блок."};
 
@@ -5492,7 +5842,7 @@ exports.finalStage = function(d){return "Поздравления! Вие зав
 
 exports.finalStageTrophies = function(d){return "Поздравления! Вие завършихте последния етап и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоковете за вашата програма също могат да бъдат представени в JavaScript, най-широко приетия език за програмиране:"};
+exports.generatedCodeInfo = function(d){return "Дори най-добрите университети учат блок базирано програмиране(напр., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Но под капака, блокове представляват кодове, написани на JavaScript, в света най-широко използваниятhttps://crowdin.net/translate/codeorg/43/enus-bg# за програмиране език:"};
 
 exports.hashError = function(d){return "За съжаление '%1' не съответства на нито една запазена програма."};
 
@@ -5500,7 +5850,7 @@ exports.help = function(d){return "Помощ"};
 
 exports.hintTitle = function(d){return "Подсказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "скок"};
 
 exports.levelIncompleteError = function(d){return "Използвате всички необходими видове блокове, но не по правилния начин."};
 
@@ -5514,9 +5864,9 @@ exports.nextLevel = function(d){return "Поздравления! Приключ
 
 exports.nextLevelTrophies = function(d){return "Поздравления! Завършихте пъзел "+v(d,"puzzleNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.nextStage = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Поздравления! Вие завършихте "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageName")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравления! Приключихте пъзел "+v(d,"puzzleNumber")+". (Въпреки това, можехте да използвате само "+p(d,"numBlocks",0,"bg",{"one":"1 блок","other":n(d,"numBlocks")+" блокове"})+".)"};
 
@@ -5556,9 +5906,9 @@ exports.tryAgain = function(d){return "Опитайте отново"};
 
 exports.backToPreviousLevel = function(d){return "Обратно към предишното ниво"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Запазване на вашата галерия"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Запазете вашата галерия!"};
 
 exports.typeCode = function(d){return "Въведете вашия JavaScript код под тези инструкции."};
 
@@ -5582,94 +5932,94 @@ exports.tryHOC = function(d){return "Опитайте Часа на Кодира
 
 exports.signup = function(d){return "Регистрация във встъпителния курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ето един съвет:"};
 
 
-},{"messageformat":47}],35:[function(require,module,exports){
+},{"messageformat":48}],36:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bg=function(n){return n===1?"one":"other"}
-exports.catActions = function(d){return "Actions"};
+exports.catActions = function(d){return "Действия"};
 
-exports.catControl = function(d){return "Loops"};
+exports.catControl = function(d){return "Повторения"};
 
-exports.catEvents = function(d){return "Events"};
+exports.catEvents = function(d){return "Събития"};
 
-exports.catLogic = function(d){return "Logic"};
+exports.catLogic = function(d){return "Логика"};
 
-exports.catMath = function(d){return "Math"};
+exports.catMath = function(d){return "Математика"};
 
-exports.catProcedures = function(d){return "Functions"};
+exports.catProcedures = function(d){return "Функции"};
 
-exports.catVariables = function(d){return "Variables"};
+exports.catVariables = function(d){return "Променливи"};
 
-exports.continue = function(d){return "продължи"};
+exports.continue = function(d){return "Напред"};
 
-exports.defaultSayText = function(d){return "type here"};
+exports.defaultSayText = function(d){return "Въведете тук"};
 
 exports.finalLevel = function(d){return "Поздравления! Вие решихте последния пъзел."};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
+exports.incrementOpponentScore = function(d){return "резултат на противника в точки"};
 
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
+exports.incrementScoreTooltip = function(d){return "Добавете блок за резултат на играча или противника."};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "резултат в точки"};
 
-exports.makeYourOwn = function(d){return "Make Your Own Story"};
+exports.makeYourOwn = function(d){return "Създайте своя собствена история"};
 
-exports.moveDirectionDown = function(d){return "down"};
+exports.moveDirectionDown = function(d){return "надолу"};
 
-exports.moveDirectionLeft = function(d){return "left"};
+exports.moveDirectionLeft = function(d){return "ляво"};
 
-exports.moveDirectionRight = function(d){return "right"};
+exports.moveDirectionRight = function(d){return "дясно"};
 
-exports.moveDirectionUp = function(d){return "up"};
+exports.moveDirectionUp = function(d){return "нагоре"};
 
-exports.moveDirectionRandom = function(d){return "random"};
+exports.moveDirectionRandom = function(d){return "случаен"};
 
-exports.moveDistance25 = function(d){return "25 pixels"};
+exports.moveDistance25 = function(d){return "25 пиксела"};
 
-exports.moveDistance50 = function(d){return "50 pixels"};
+exports.moveDistance50 = function(d){return "50 пиксела"};
 
-exports.moveDistance100 = function(d){return "100 pixels"};
+exports.moveDistance100 = function(d){return "100 пиксела"};
 
-exports.moveDistance200 = function(d){return "200 pixels"};
+exports.moveDistance200 = function(d){return "200 пиксела"};
 
-exports.moveDistance400 = function(d){return "400 pixels"};
+exports.moveDistance400 = function(d){return "400 пиксела"};
 
-exports.moveDistanceRandom = function(d){return "random pixels"};
+exports.moveDistanceRandom = function(d){return "случаен брой пиксела"};
 
-exports.moveDistanceTooltip = function(d){return "Move a character a specific distance in the specified direction."};
+exports.moveDistanceTooltip = function(d){return "Преместете актьорът на определена дистанция в определената посока."};
 
-exports.moveSprite = function(d){return "move"};
+exports.moveSprite = function(d){return "Премести"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
+exports.moveSprite1 = function(d){return "Премести актьор 1"};
 
-exports.moveSprite2 = function(d){return "move character 2"};
+exports.moveSprite2 = function(d){return "Премести актьор 2"};
 
-exports.moveSprite3 = function(d){return "move character 3"};
+exports.moveSprite3 = function(d){return "Премести актьор 3"};
 
-exports.moveSprite4 = function(d){return "move character 4"};
+exports.moveSprite4 = function(d){return "Премести актьор 4"};
 
-exports.moveSprite5 = function(d){return "move character 5"};
+exports.moveSprite5 = function(d){return "Премести актьор 5"};
 
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSprite6 = function(d){return "Премести актьор 6"};
 
-exports.moveDown = function(d){return "move down"};
+exports.moveDown = function(d){return "Премести надолу"};
 
-exports.moveDownTooltip = function(d){return "Move the paddle down."};
+exports.moveDownTooltip = function(d){return "Премести един актьор надолу."};
 
-exports.moveLeft = function(d){return "move left"};
+exports.moveLeft = function(d){return "движение наляво"};
 
-exports.moveLeftTooltip = function(d){return "Move the paddle to the left."};
+exports.moveLeftTooltip = function(d){return "Преместете актьор в ляво."};
 
-exports.moveRight = function(d){return "move right"};
+exports.moveRight = function(d){return "Преместване надясно"};
 
-exports.moveRightTooltip = function(d){return "Move the paddle to the right."};
+exports.moveRightTooltip = function(d){return "Премести актьор в дясно."};
 
-exports.moveUp = function(d){return "move up"};
+exports.moveUp = function(d){return "Премести нагоре"};
 
-exports.moveUpTooltip = function(d){return "Move the paddle up."};
+exports.moveUpTooltip = function(d){return "Един актьор се предвижва нагоре."};
 
-exports.moveTooltip = function(d){return "Move a character."};
+exports.moveTooltip = function(d){return "Преместете актьор."};
 
 exports.nextLevel = function(d){return "Поздравления! Вие завършихте този пъзел."};
 
@@ -5677,242 +6027,260 @@ exports.no = function(d){return "Не"};
 
 exports.numBlocksNeeded = function(d){return "Този пъзел може да бъде решен с %1 блока."};
 
-exports.oneTopBlock = function(d){return "За този пъзел, трябва да съедините заедно всички блокове в бялото работно поле."};
+exports.oneTopBlock = function(d){return "За този пъзел, трябва да съединиш заедно всички блокове в бялото работно поле."};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "възпроизвеждане на звук на болка"};
 
-exports.playSoundGoal1 = function(d){return "play goal 1 sound"};
+exports.playSoundGoal1 = function(d){return "възпроизвеждане звук  1 гол"};
 
-exports.playSoundGoal2 = function(d){return "play goal 2 sound"};
+exports.playSoundGoal2 = function(d){return "възпроизвеждане звук  2 гол"};
 
-exports.playSoundHit = function(d){return "play hit sound"};
+exports.playSoundHit = function(d){return "възпроизвеждане на звук за игра"};
 
-exports.playSoundLosePoint = function(d){return "play lose point sound"};
+exports.playSoundLosePoint = function(d){return "пусни звук за загуба на точка"};
 
-exports.playSoundLosePoint2 = function(d){return "play lose point 2 sound"};
+exports.playSoundLosePoint2 = function(d){return "пусни звук 2 за загуба на точка"};
 
-exports.playSoundRetro = function(d){return "play retro sound"};
+exports.playSoundRetro = function(d){return "възпроизвеждане ретро звук"};
 
-exports.playSoundRubber = function(d){return "play rubber sound"};
+exports.playSoundRubber = function(d){return "възпроизвеждане на звук на ластик"};
 
-exports.playSoundSlap = function(d){return "play slap sound"};
+exports.playSoundSlap = function(d){return "възпроизвеждане на звук от шамар"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Възпроизвеждане на избраният звук."};
 
-exports.playSoundWinPoint = function(d){return "play win point sound"};
+exports.playSoundWinPoint = function(d){return "възпроизвеждане на звук на победа точка"};
 
-exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
+exports.playSoundWinPoint2 = function(d){return "възпроизвеждане на звук 2 на победа точка"};
 
-exports.playSoundWood = function(d){return "play wood sound"};
+exports.playSoundWood = function(d){return "възпроизвеждане звук от дърво"};
 
-exports.positionTopLeft = function(d){return "to the top left position"};
+exports.positionTopLeft = function(d){return "позиция горе в ляво"};
 
-exports.positionTopCenter = function(d){return "to the top center position"};
+exports.positionTopCenter = function(d){return "позиция в центъра"};
 
-exports.positionTopRight = function(d){return "to the top right position"};
+exports.positionTopRight = function(d){return "към позиция горе в дясно"};
 
-exports.positionMiddleLeft = function(d){return "to the middle left position"};
+exports.positionMiddleLeft = function(d){return "към положение от средната в ляво"};
 
-exports.positionMiddleCenter = function(d){return "to the middle center position"};
+exports.positionMiddleCenter = function(d){return "в позиция център"};
 
-exports.positionMiddleRight = function(d){return "to the middle right position"};
+exports.positionMiddleRight = function(d){return "в позиция десен център"};
 
-exports.positionBottomLeft = function(d){return "to the bottom left position"};
+exports.positionBottomLeft = function(d){return "в позиция долен ляв"};
 
-exports.positionBottomCenter = function(d){return "to the bottom center position"};
+exports.positionBottomCenter = function(d){return "в дъното център позиция"};
 
-exports.positionBottomRight = function(d){return "to the bottom right position"};
+exports.positionBottomRight = function(d){return "в долния десен ъгъл позиция"};
 
-exports.positionRandom = function(d){return "to the random position"};
+exports.positionRandom = function(d){return "на случайна позиция"};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
+exports.reinfFeedbackMsg = function(d){return "Може да натиснете бутона \"Опитай отново\", за да се върнете да играете играта си."};
 
-exports.repeatForever = function(d){return "repeat forever"};
+exports.repeatForever = function(d){return "Повторение завинаги"};
 
-exports.repeatDo = function(d){return "do"};
+exports.repeatDo = function(d){return "направи"};
 
-exports.repeatForeverTooltip = function(d){return "Execute the actions in this block repeatedly while the story is running."};
+exports.repeatForeverTooltip = function(d){return "Изпълни действията в този блок многократно, докато историята се изпълнява."};
 
-exports.saySprite = function(d){return "say"};
+exports.saySprite = function(d){return "казвам"};
 
-exports.saySprite1 = function(d){return "character 1 say"};
+exports.saySprite1 = function(d){return "актьор 1 казва"};
 
-exports.saySprite2 = function(d){return "character 2 say"};
+exports.saySprite2 = function(d){return "актьор 2 казва"};
 
-exports.saySprite3 = function(d){return "character 3 say"};
+exports.saySprite3 = function(d){return "актьор 3 казва"};
 
-exports.saySprite4 = function(d){return "character 4 say"};
+exports.saySprite4 = function(d){return "Актьорът 4 казва"};
 
-exports.saySprite5 = function(d){return "character 5 say"};
+exports.saySprite5 = function(d){return "актьор 5 казва"};
 
-exports.saySprite6 = function(d){return "character 6 say"};
+exports.saySprite6 = function(d){return "актьор 6 казва"};
 
-exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
+exports.saySpriteTooltip = function(d){return "Запълни балончето за реч със съответния текст на определен актьор."};
 
-exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+exports.scoreText = function(d){return "Резултат: "+v(d,"playerScore")+": "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "set random scene"};
+exports.setBackgroundRandom = function(d){return "Задайте произволен фон"};
 
-exports.setBackgroundBlack = function(d){return "set black background"};
+exports.setBackgroundBlack = function(d){return "Задаване на черен фон"};
 
-exports.setBackgroundCave = function(d){return "set cave background"};
+exports.setBackgroundCave = function(d){return "Задаване на фон пещера"};
 
-exports.setBackgroundCloudy = function(d){return "set cloudy background"};
+exports.setBackgroundCloudy = function(d){return "Задаване на мътен фон"};
 
-exports.setBackgroundHardcourt = function(d){return "set hardcourt scene"};
+exports.setBackgroundHardcourt = function(d){return "комплект hardcourt фон"};
 
-exports.setBackgroundNight = function(d){return "set night background"};
+exports.setBackgroundNight = function(d){return "Задаване на фон нощ"};
 
-exports.setBackgroundUnderwater = function(d){return "set underwater background"};
+exports.setBackgroundUnderwater = function(d){return "Задайте подводен фон"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Задаване на фоновото изображение"};
 
-exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
+exports.setSpriteEmotionAngry = function(d){return "ядосана емоция"};
 
-exports.setSpriteEmotionHappy = function(d){return "to a happy emotion"};
+exports.setSpriteEmotionHappy = function(d){return "щастлива емоция"};
 
-exports.setSpriteEmotionNormal = function(d){return "to a normal emotion"};
+exports.setSpriteEmotionNormal = function(d){return "нормална емоция"};
 
-exports.setSpriteEmotionRandom = function(d){return "to a random emotion"};
+exports.setSpriteEmotionRandom = function(d){return "случайна емоция"};
 
-exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
+exports.setSpriteEmotionSad = function(d){return "тъжна емоция"};
 
-exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
+exports.setSpriteEmotionTooltip = function(d){return "Задава емоция на актьора"};
 
-exports.setSpriteGreen = function(d){return "to a green image"};
+exports.setSpriteCat = function(d){return "to a cat image"};
 
-exports.setSpriteHidden = function(d){return "to a hidden image"};
+exports.setSpriteDinosaur = function(d){return "to a dinosaur image"};
 
-exports.setSpriteOrange = function(d){return "to an orange image"};
+exports.setSpriteDog = function(d){return "to a dog image"};
 
-exports.setSpritePink = function(d){return "to a pink image"};
+exports.setSpriteHidden = function(d){return "за скрит образ"};
 
-exports.setSpritePurple = function(d){return "to a purple image"};
+exports.setSpriteOctopus = function(d){return "to an octopus image"};
 
-exports.setSpriteRandom = function(d){return "to a random image"};
+exports.setSpritePenguin = function(d){return "to a penguin image"};
 
-exports.setSpriteWitch = function(d){return "to a witch image"};
+exports.setSpriteRandom = function(d){return "случайно изображение"};
 
-exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor to the specified location."};
+exports.setSpriteWitch = function(d){return "към образа на вещица"};
 
-exports.setSpriteTooltip = function(d){return "Sets the character image"};
+exports.setSpritePositionTooltip = function(d){return "Веднага предвижи актьор към указаното местоположение."};
 
-exports.setSpriteSpeedRandom = function(d){return "to a random speed"};
+exports.setSpriteTooltip = function(d){return "Задава изображение на актьора"};
 
-exports.setSpriteSpeedVerySlow = function(d){return "to a very slow speed"};
+exports.setSpriteSpeedRandom = function(d){return "на случайна скорост"};
 
-exports.setSpriteSpeedSlow = function(d){return "to a slow speed"};
+exports.setSpriteSpeedVerySlow = function(d){return "на много бавна скорост"};
 
-exports.setSpriteSpeedNormal = function(d){return "to a normal speed"};
+exports.setSpriteSpeedSlow = function(d){return "на бавна скорост"};
 
-exports.setSpriteSpeedFast = function(d){return "to a fast speed"};
+exports.setSpriteSpeedNormal = function(d){return "за нормална скорост"};
 
-exports.setSpriteSpeedVeryFast = function(d){return "to a very fast speed"};
+exports.setSpriteSpeedFast = function(d){return "на бърза скорост"};
 
-exports.setSpriteSpeedTooltip = function(d){return "Sets the speed of a character"};
+exports.setSpriteSpeedVeryFast = function(d){return "до много бърза скорост"};
 
-exports.share = function(d){return "Share"};
+exports.setSpriteSpeedTooltip = function(d){return "Задава скоростта на актьор"};
 
-exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
+exports.share = function(d){return "Сподели"};
 
-exports.shareGame = function(d){return "Share your story:"};
+exports.shareStudioTwitter = function(d){return "Вижте историята, която направих. Аз сам е написал с @codeorg"};
 
-exports.setSprite = function(d){return "set"};
+exports.shareGame = function(d){return "Споделете вашето мнение:"};
 
-exports.setSprite1 = function(d){return "set character 1"};
+exports.setSprite = function(d){return "задай"};
 
-exports.setSprite2 = function(d){return "set character 2"};
+exports.setSprite1 = function(d){return "Задайте актьор 1"};
 
-exports.setSprite3 = function(d){return "set character 3"};
+exports.setSprite2 = function(d){return "Задайте актьор 2"};
 
-exports.setSprite4 = function(d){return "set character 4"};
+exports.setSprite3 = function(d){return "Задайте актьор 3"};
 
-exports.setSprite5 = function(d){return "set character 5"};
+exports.setSprite4 = function(d){return "Задайте актьор 4"};
 
-exports.setSprite6 = function(d){return "set character 6"};
+exports.setSprite5 = function(d){return "Задайте актьор 5"};
 
-exports.stopSprite = function(d){return "stop"};
+exports.setSprite6 = function(d){return "Задайте актьор 6"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
+exports.stopSprite = function(d){return "Стоп"};
 
-exports.stopSprite2 = function(d){return "stop actor 2"};
+exports.stopSprite1 = function(d){return "Спри актьор 1"};
 
-exports.stopSprite3 = function(d){return "stop actor 3"};
+exports.stopSprite2 = function(d){return "Спри актьор 2"};
 
-exports.stopSprite4 = function(d){return "stop actor 4"};
+exports.stopSprite3 = function(d){return "Спри актьор 3"};
 
-exports.stopSprite5 = function(d){return "stop actor 5"};
+exports.stopSprite4 = function(d){return "Спри актьор 4"};
 
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSprite5 = function(d){return "Спри актьор 5"};
 
-exports.stopTooltip = function(d){return "Stops an actor's movement."};
+exports.stopSprite6 = function(d){return "Спри актьор 6"};
 
-exports.whenDown = function(d){return "when Down arrow"};
+exports.stopTooltip = function(d){return "Спира движението на актьора."};
 
-exports.whenDownTooltip = function(d){return "Execute the actions below when the Down arrow button is pressed."};
+exports.waitForClick = function(d){return "wait for click"};
 
-exports.whenGameStarts = function(d){return "when game starts"};
+exports.waitForRandom = function(d){return "wait for random"};
 
-exports.whenGameStartsTooltip = function(d){return "Execute the actions below when the game starts."};
+exports.waitForHalfSecond = function(d){return "wait for a half second"};
 
-exports.whenLeft = function(d){return "when Left arrow"};
+exports.waitFor1Second = function(d){return "wait for 1 second"};
 
-exports.whenLeftTooltip = function(d){return "Execute the actions below when the Left arrow button is pressed."};
+exports.waitFor2Seconds = function(d){return "wait for 2 seconds"};
 
-exports.whenRight = function(d){return "when Right arrow"};
+exports.waitFor5Seconds = function(d){return "wait for 5 seconds"};
 
-exports.whenRightTooltip = function(d){return "Execute the actions below when the Right arrow button is pressed."};
+exports.waitFor10Seconds = function(d){return "wait for 10 seconds"};
 
-exports.whenSpriteClicked = function(d){return "when actor clicked"};
+exports.waitTooltip = function(d){return "Waits for a specified amount of time or until a click occurs."};
 
-exports.whenSpriteClicked1 = function(d){return "when character 1 clicked"};
+exports.whenDown = function(d){return "Когато стрелката надолу"};
 
-exports.whenSpriteClicked2 = function(d){return "when character 2 clicked"};
+exports.whenDownTooltip = function(d){return "Изпълнява действията по-долу когато се натисне стрелка надолу."};
 
-exports.whenSpriteClicked3 = function(d){return "when character 3 clicked"};
+exports.whenGameStarts = function(d){return "Когато историята започва"};
 
-exports.whenSpriteClicked4 = function(d){return "when character 4 clicked"};
+exports.whenGameStartsTooltip = function(d){return "Изпълни действията по-долу когато историята започва."};
 
-exports.whenSpriteClicked5 = function(d){return "when character 5 clicked"};
+exports.whenLeft = function(d){return "когато стрелка наляво "};
 
-exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
+exports.whenLeftTooltip = function(d){return "Изпълни действията по-долу когато се натисне клавиша стрелка наляво."};
 
-exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
+exports.whenRight = function(d){return "Когато стрелка надясно"};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
+exports.whenRightTooltip = function(d){return "Изпълни действията по-долу когато се натисне клавиша стрелка надясно."};
 
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
+exports.whenSpriteClicked = function(d){return "Когато кликне актьор"};
 
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
+exports.whenSpriteClicked1 = function(d){return "Когато кликне актьор 1"};
 
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
+exports.whenSpriteClicked2 = function(d){return "Когато кликне актьор 2"};
 
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
+exports.whenSpriteClicked3 = function(d){return "Когато кликне актьор 3"};
 
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteClicked4 = function(d){return "Когато кликне актьор 4"};
 
-exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
+exports.whenSpriteClicked5 = function(d){return "Когато кликне актьор 5"};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
+exports.whenSpriteClicked6 = function(d){return "Когато кликне актьор 6"};
 
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
+exports.whenSpriteClickedTooltip = function(d){return "Изпълни действията по-долу когато се кликне върху актьор."};
 
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
+exports.whenSpriteCollided1 = function(d){return "Когато актьор 1"};
 
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
+exports.whenSpriteCollided2 = function(d){return "Когато актьор 2"};
 
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
+exports.whenSpriteCollided3 = function(d){return "Когато актьор 3"};
 
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollided4 = function(d){return "Когато актьор 4"};
 
-exports.whenUp = function(d){return "when Up arrow"};
+exports.whenSpriteCollided5 = function(d){return "Когато актьор 5"};
 
-exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
+exports.whenSpriteCollided6 = function(d){return "Когато актьор 6"};
+
+exports.whenSpriteCollidedTooltip = function(d){return "Изпълни действията по-долу когато актьор докосва друг актьор."};
+
+exports.whenSpriteCollidedWith1 = function(d){return "докосва актьор 1"};
+
+exports.whenSpriteCollidedWith2 = function(d){return "докосва актьор 2"};
+
+exports.whenSpriteCollidedWith3 = function(d){return "докосва актьор 3"};
+
+exports.whenSpriteCollidedWith4 = function(d){return "докосва актьор 4"};
+
+exports.whenSpriteCollidedWith5 = function(d){return "докосва актьор 5"};
+
+exports.whenSpriteCollidedWith6 = function(d){return "докосва актьор 6"};
+
+exports.whenUp = function(d){return "Когато стрелка нагоре"};
+
+exports.whenUpTooltip = function(d){return "Изпълнява действията по-долу когато се натисне стрелка нагоре."};
 
 exports.yes = function(d){return "Да"};
 
 
-},{"messageformat":47}],36:[function(require,module,exports){
+},{"messageformat":48}],37:[function(require,module,exports){
 
 /*!
  * EJS
@@ -6271,7 +6639,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":37,"./utils":38,"fs":39,"path":41}],37:[function(require,module,exports){
+},{"./filters":38,"./utils":39,"fs":40,"path":42}],38:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -6474,7 +6842,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 
 /*!
  * EJS
@@ -6500,9 +6868,9 @@ exports.escape = function(html){
 };
  
 
-},{}],39:[function(require,module,exports){
-
 },{}],40:[function(require,module,exports){
+
+},{}],41:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6557,7 +6925,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6785,7 +7153,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":40}],42:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":41}],43:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -7296,7 +7664,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7382,7 +7750,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7469,13 +7837,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":43,"./encode":44}],46:[function(require,module,exports){
+},{"./decode":44,"./encode":45}],47:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -8108,7 +8476,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":42,"querystring":45}],47:[function(require,module,exports){
+},{"punycode":43,"querystring":46}],48:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -9691,4 +10059,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[16])
+},{}]},{},[17])

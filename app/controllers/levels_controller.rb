@@ -43,7 +43,7 @@ class LevelsController < ApplicationController
     authorize! :manage, :level
     @level = Level.find(params[:level_id])
     @start_blocks = @level.properties[params[:type]].presence || @level[params[:type]]
-    @toolbox_blocks = @level.complete_toolbox  # Provide complete toolbox for editing start/toolbox blocks.
+    @toolbox_blocks = @level.complete_toolbox(params[:type])  # Provide complete toolbox for editing start/toolbox blocks.
     @game = @level.game
     @full_width = true
     @callback = game_level_update_blocks_path @game, @level, params[:type]
@@ -140,6 +140,6 @@ class LevelsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def level_params
-      params[:level].permit([:name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, :is_k1, {concept_ids: []}])
+      params[:level].permit([:name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, :is_k1, :nectar_goal, :honey_goal, {concept_ids: []}])
     end
 end

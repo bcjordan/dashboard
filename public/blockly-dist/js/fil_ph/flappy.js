@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -33,6 +35,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -71,7 +78,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":18,"./utils":32}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -159,6 +166,14 @@ BlocklyApps.init = function(config) {
 
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
+
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
 
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
@@ -308,12 +323,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -360,8 +378,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -369,11 +387,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -661,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -723,19 +727,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -776,6 +767,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -791,6 +783,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -848,6 +845,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -890,7 +888,9 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/fil_ph/common":33,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":19,"./templates/buttons.html":21,"./templates/instructions.html":23,"./templates/learn.html":24,"./templates/makeYourOwn.html":25,"./utils":31,"./xml":32}],3:[function(require,module,exports){
+},{"../locale/fil_ph/common":34,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":20,"./templates/buttons.html":22,"./templates/instructions.html":24,"./templates/learn.html":25,"./templates/makeYourOwn.html":26,"./utils":32,"./xml":33}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -899,13 +899,83 @@ exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
 };
 
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
+};
+
 exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
+};
+
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":33}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -967,10 +1037,10 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":20,"./utils.js":31,"url":45}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":21,"./utils.js":32,"url":46}],6:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -978,6 +1048,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -1348,6 +1419,9 @@ var getFeedbackMessage = function(options) {
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
       break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
+      break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
     case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
@@ -1706,17 +1780,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -1823,6 +1895,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -1856,7 +1932,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/fil_ph/common":33,"./codegen":6,"./dom":7,"./templates/buttons.html":21,"./templates/code.html":22,"./templates/readonly.html":27,"./templates/sharing.html":28,"./templates/showCode.html":29,"./templates/trophy.html":30,"./utils":31}],9:[function(require,module,exports){
+},{"../locale/fil_ph/common":34,"./codegen":6,"./dom":7,"./templates/buttons.html":22,"./templates/code.html":23,"./templates/readonly.html":28,"./templates/sharing.html":29,"./templates/showCode.html":30,"./templates/trophy.html":31,"./utils":32}],9:[function(require,module,exports){
 exports.FlapHeight = {
   VERY_SMALL: -6,
   SMALL: -8,
@@ -2453,7 +2529,7 @@ exports.install = function(blockly, skin) {
   delete blockly.Blocks.procedures_ifreturn;
 };
 
-},{"../../locale/fil_ph/flappy":34}],11:[function(require,module,exports){
+},{"../../locale/fil_ph/flappy":35}],11:[function(require,module,exports){
 module.exports = {
   WORKSPACE_BUFFER: 20,
   WORKSPACE_COL_WIDTH: 210,
@@ -2484,7 +2560,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/flappy":34,"ejs":35}],13:[function(require,module,exports){
+},{"../../locale/fil_ph/flappy":35,"ejs":36}],13:[function(require,module,exports){
 /**
  * Blockly App: Flappy
  *
@@ -3025,12 +3101,13 @@ Flappy.init = function(config) {
 
   // for flappy show make your own button if on share page
   config.makeYourOwn = config.share;
-  
+
   config.makeString = commonMsg.makeYourOwnFlappy();
   config.makeUrl = "http://code.org/flappy";
   config.makeImage = BlocklyApps.assetUrl('media/flappy_promo.png');
 
   config.enableShowCode = false;
+  config.enableShowBlockCount = false;
 
   config.preventExtraTopLevelBlocks = true;
 
@@ -3214,8 +3291,6 @@ Flappy.onReportComplete = function(response) {
  * Execute the user's code.  Heaven help us...
  */
 Flappy.execute = function() {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 100; //TODO: Set higher for some levels
   Flappy.result = ResultType.UNSET;
   Flappy.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Flappy.waitingForReport = false;
@@ -3510,7 +3585,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/fil_ph/common":33,"../../locale/fil_ph/flappy":34,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":18,"../templates/page.html":26,"./api":9,"./constants":11,"./controls.html":12,"./visualization.html":17}],14:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"../../locale/fil_ph/flappy":35,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":19,"../templates/page.html":27,"./api":9,"./constants":11,"./controls.html":12,"./visualization.html":17}],14:[function(require,module,exports){
 /*jshint multistr: true */
 
 // todo - i think our prepoluated code counts as LOCs
@@ -4101,7 +4176,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":18}],17:[function(require,module,exports){
+},{"../skins":19}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4122,7 +4197,127 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],18:[function(require,module,exports){
+},{"ejs":36}],18:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":32,"./xml":33}],19:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -4164,7 +4359,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -4369,7 +4564,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4390,7 +4585,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],21:[function(require,module,exports){
+},{"ejs":36}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4411,7 +4606,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/common":33,"ejs":35}],22:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"ejs":36}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4432,7 +4627,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],23:[function(require,module,exports){
+},{"ejs":36}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4453,7 +4648,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/common":33,"ejs":35}],24:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"ejs":36}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4476,7 +4671,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/common":33,"ejs":35}],25:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"ejs":36}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4497,7 +4692,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/common":33,"ejs":35}],26:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"ejs":36}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4522,7 +4717,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/common":33,"ejs":35}],27:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"ejs":36}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4544,7 +4739,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],28:[function(require,module,exports){
+},{"ejs":36}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4565,7 +4760,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/common":33,"ejs":35}],29:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"ejs":36}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4586,7 +4781,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fil_ph/common":33,"ejs":35}],30:[function(require,module,exports){
+},{"../../locale/fil_ph/common":34,"ejs":36}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4607,7 +4802,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":35}],31:[function(require,module,exports){
+},{"ejs":36}],32:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -4615,6 +4810,13 @@ exports.shallowCopy = function(source) {
   }
 
   return result;
+};
+
+/**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
 };
 
 /**
@@ -4660,14 +4862,46 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],32:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],33:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();
@@ -4688,7 +4922,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fil=function(n){return n===0||n==1?"one":"other"}
 exports.blocklyMessage = function(d){return "Blockly"};
 
@@ -4734,43 +4968,43 @@ exports.finalStage = function(d){return "Maligayang pagbati! Natapos mo na ang p
 
 exports.finalStageTrophies = function(d){return "Maligayang pagbati! Nakumpleto mo na ang pinakahuling stage at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.generatedCodeInfo = function(d){return "The blocks for your program can also be represented in JavaScript, the world's most widely adopted programming language:"};
+exports.generatedCodeInfo = function(d){return "Kahit ang mga nangungunang mga unibersidad ay nagtuturo ng block-based na coding (eg, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Ngunit sa ilalim nito, ang mga bloke na iyong binuo ay maaari ring ipakita sa JavaScript, pinaka-tinatanggap na mga wika coding ng mundo:"};
 
-exports.hashError = function(d){return "Sorry, '%1' doesn't correspond with any saved program."};
+exports.hashError = function(d){return "Pasensya, '%1' ay walang katumbas sa mga na save na program."};
 
 exports.help = function(d){return "Tulong"};
 
 exports.hintTitle = function(d){return "Pahiwatig:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "talon"};
 
-exports.levelIncompleteError = function(d){return "You are using all of the necessary types of blocks but not in the right way."};
+exports.levelIncompleteError = function(d){return "Ginagamit mo ang lahat ng kinakailangang mga uri ng mga bloke ngunit hindi sa tamang paraan."};
 
 exports.listVariable = function(d){return "list"};
 
 exports.makeYourOwnFlappy = function(d){return "Gumawa Ng Sarili Mong Flappy Game"};
 
-exports.missingBlocksErrorMsg = function(d){return "Try one or more of the blocks below to solve this puzzle."};
+exports.missingBlocksErrorMsg = function(d){return "Subukan ang isa o higit pa sa mga bloke sa ibaba upang malutas itong palaisipan."};
 
-exports.nextLevel = function(d){return "Congratulations! You completed Puzzle "+v(d,"puzzleNumber")+"."};
+exports.nextLevel = function(d){return "Maligayang bati! Natapos mo ang Puzzle "+v(d,"puzzleNumber")+"."};
 
-exports.nextLevelTrophies = function(d){return "Congratulations! You completed Puzzle "+v(d,"puzzleNumber")+" and won "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextLevelTrophies = function(d){return "Maligayang bati! Nakumpleto mo ang Puzzle "+v(d,"puzzleNumber")+" at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.nextStage = function(d){return "Congratulations! You completed Stage "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Maligayang bati! Nakumpleto mo ang "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Congratulations! You completed Stage "+v(d,"stageNumber")+" and won "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextStageTrophies = function(d){return "Maligayang bati! Natapos mo ang "+v(d,"stageName")+" at nanalo ng "+p(d,"numTrophies",0,"fil",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
-exports.numBlocksNeeded = function(d){return "Congratulations! You completed Puzzle "+v(d,"puzzleNumber")+". (However, you could have used only "+p(d,"numBlocks",0,"fil",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
+exports.numBlocksNeeded = function(d){return "Maligayang bati! Nakumpleto mo ang Puzzle "+v(d,"puzzleNumber")+". (Subalit, maaari mo sanang gamitin lamang ang "+p(d,"numBlocks",0,"fil",{"one":"1 block","other":n(d,"numBlocks")+" blocks"})+".)"};
 
 exports.numLinesOfCodeWritten = function(d){return "You just wrote "+p(d,"numLines",0,"fil",{"one":"1 line","other":n(d,"numLines")+" lines"})+" of code!"};
 
-exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" of "+v(d,"stage_total")};
+exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" ng "+v(d,"stage_total")};
 
 exports.resetProgram = function(d){return "Ulitin"};
 
 exports.runProgram = function(d){return "Run Program"};
 
-exports.runTooltip = function(d){return "Run the program defined by the blocks in the workspace."};
+exports.runTooltip = function(d){return "Patakbuhin ang program na tinutukoy ng mga block sa workspace."};
 
 exports.showCodeHeader = function(d){return "Ipakita ang Code"};
 
@@ -4780,13 +5014,13 @@ exports.subtitle = function(d){return "isang visual programming na environment"}
 
 exports.textVariable = function(d){return "text"};
 
-exports.tooFewBlocksMsg = function(d){return "You are using all of the necessary types of blocks, but try using more  of these types of blocks to complete this puzzle."};
+exports.tooFewBlocksMsg = function(d){return "Ginagamit mo ang lahat na posibleng klase ng bloke, ngunit subukan mong gamitin ang iba pang mga uri ng mga block upang makumpleto ang puzzle na ito."};
 
-exports.tooManyBlocksMsg = function(d){return "This puzzle can be solved with <x id='START_SPAN'/><x id='END_SPAN'/> blocks."};
+exports.tooManyBlocksMsg = function(d){return "Ang puzzle na ito ay maaaring malutas gamit ang <x id='START_SPAN'/><x id='END_SPAN'/> na mga block."};
 
-exports.tooMuchWork = function(d){return "You made me do a lot of work!  Could you try repeating fewer times?"};
+exports.tooMuchWork = function(d){return "Pinagawa mo ako ng naparaming trabaho! Maaari mo ba na ulitin ng mas kaunting mga beses?"};
 
-exports.flappySpecificFail = function(d){return "Your code looks good - it will flap with each click. But you need to click many times to flap to the target."};
+exports.flappySpecificFail = function(d){return "Ang iyong code ay mukhang maganda - ito ay lilipad sa isang click lamang. Ngunit kailangan mo ito i-click ng maraming beses hanggang sa iyong target."};
 
 exports.toolboxHeader = function(d){return "Mga block"};
 
@@ -4794,271 +5028,271 @@ exports.openWorkspace = function(d){return "Kung Paano Ito Gumagana"};
 
 exports.totalNumLinesOfCodeWritten = function(d){return "All-time total: "+p(d,"numLines",0,"fil",{"one":"1 line","other":n(d,"numLines")+" lines"})+" of code."};
 
-exports.tryAgain = function(d){return "Try again"};
+exports.tryAgain = function(d){return "Subukang muli"};
 
-exports.backToPreviousLevel = function(d){return "Back to previous level"};
+exports.backToPreviousLevel = function(d){return "Bumalik sa nakaraang level"};
 
 exports.saveToGallery = function(d){return "I-save sa iyong gallery"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "I-save sa iyong gallery!"};
 
 exports.typeCode = function(d){return "I-type ang iyong JavaScript code pagkatapos nitong mga instruction."};
 
-exports.typeFuncs = function(d){return "Available functions:%1"};
+exports.typeFuncs = function(d){return "Magagamit na mga function:%1"};
 
-exports.typeHint = function(d){return "Note that the parentheses and semicolons are required."};
+exports.typeHint = function(d){return "Tandaan na ang mga panaklong at semicolons ay kinakailangan."};
 
-exports.workspaceHeader = function(d){return "Assemble your blocks here: "};
+exports.workspaceHeader = function(d){return "I-assemble ang iyong mga bloke dito: "};
 
 exports.infinity = function(d){return "Walang katapusan"};
 
 exports.rotateText = function(d){return "Paikutin ang iyong device."};
 
-exports.orientationLock = function(d){return "Turn off orientation lock in device settings."};
+exports.orientationLock = function(d){return "I-off ang orientation ng lock sa mga setting ng device."};
 
-exports.wantToLearn = function(d){return "Want to learn to code?"};
+exports.wantToLearn = function(d){return "Gusto mo matuto mag-code?"};
 
 exports.watchVideo = function(d){return "Panoorin ang Video"};
 
 exports.tryHOC = function(d){return "Subukan ang Hour of Code"};
 
-exports.signup = function(d){return "Sign up for the intro course"};
+exports.signup = function(d){return "Mag-sign up para sa intro ng kurso"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Narito ang isang tip:"};
 
 
-},{"messageformat":46}],34:[function(require,module,exports){
+},{"messageformat":47}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fil=function(n){return n===0||n==1?"one":"other"}
-exports.continue = function(d){return "Continue"};
+exports.continue = function(d){return "Magpatuloy"};
 
-exports.doCode = function(d){return "do"};
+exports.doCode = function(d){return "gawin"};
 
-exports.elseCode = function(d){return "else"};
+exports.elseCode = function(d){return "kung hindi"};
 
-exports.endGame = function(d){return "end game"};
+exports.endGame = function(d){return "tapusin ang laro"};
 
-exports.endGameTooltip = function(d){return "Ends the game."};
+exports.endGameTooltip = function(d){return "Nagtatapos ng laro."};
 
-exports.finalLevel = function(d){return "Congratulations! You have solved the final puzzle."};
+exports.finalLevel = function(d){return "Maligayang pagbati! Nalutas mo na ang pinakahuling puzzle."};
 
 exports.flap = function(d){return "flap"};
 
-exports.flapRandom = function(d){return "flap a random amount"};
+exports.flapRandom = function(d){return "mag-flap ng random na amount"};
 
-exports.flapVerySmall = function(d){return "flap a very small amount"};
+exports.flapVerySmall = function(d){return "mag-flap ng napakaliit na amount"};
 
-exports.flapSmall = function(d){return "flap a small amount"};
+exports.flapSmall = function(d){return "mag-flap ng maliit na amount"};
 
-exports.flapNormal = function(d){return "flap a normal amount"};
+exports.flapNormal = function(d){return "mag-flap ng normal na amount"};
 
-exports.flapLarge = function(d){return "flap a large amount"};
+exports.flapLarge = function(d){return "mag-flap ng malaki na amount"};
 
-exports.flapVeryLarge = function(d){return "flap a very large amount"};
+exports.flapVeryLarge = function(d){return "mag-flap ng napakalaking amount"};
 
-exports.flapTooltip = function(d){return "Fly Flappy upwards."};
+exports.flapTooltip = function(d){return "Paliparin ang Flappy pataas."};
 
-exports.incrementPlayerScore = function(d){return "increment player score"};
+exports.incrementPlayerScore = function(d){return "mag-score ng puntos"};
 
-exports.incrementPlayerScoreTooltip = function(d){return "Add one to the current player score."};
+exports.incrementPlayerScoreTooltip = function(d){return "Magdagdag ng isa sa kasalukuyang score ng manlalaro."};
 
-exports.nextLevel = function(d){return "Congratulations! You have completed this puzzle."};
+exports.nextLevel = function(d){return "Maligayang pagbati! Natapos mo ang puzzle na ito."};
 
-exports.no = function(d){return "No"};
+exports.no = function(d){return "Hindi"};
 
-exports.numBlocksNeeded = function(d){return "This puzzle can be solved with %1 blocks."};
+exports.numBlocksNeeded = function(d){return "Ang puzzle na ito ay maaaring malutas sa %1 na mga block."};
 
-exports.oneTopBlock = function(d){return "For this puzzle, you need to stack together all of the blocks in the white workspace."};
+exports.oneTopBlock = function(d){return "Para sa puzzle na ito, kailangan mo isalansan lahat ang mga block sa puting workspace."};
 
-exports.playSoundRandom = function(d){return "play random sound"};
+exports.playSoundRandom = function(d){return "magpatugtog ng random na tunog"};
 
-exports.playSoundBounce = function(d){return "play bounce sound"};
+exports.playSoundBounce = function(d){return "magpatugtog ng bounce na tunog"};
 
-exports.playSoundCrunch = function(d){return "play crunch sound"};
+exports.playSoundCrunch = function(d){return "magpatugtog ng crunch na tunog"};
 
-exports.playSoundDie = function(d){return "play sad sound"};
+exports.playSoundDie = function(d){return "magpatugtog ng malungkot na tunog"};
 
-exports.playSoundHit = function(d){return "play smash sound"};
+exports.playSoundHit = function(d){return "magpatugtog ng smash na tunog"};
 
-exports.playSoundPoint = function(d){return "play point sound"};
+exports.playSoundPoint = function(d){return "magpatugtog ng point na tunog"};
 
-exports.playSoundSwoosh = function(d){return "play swoosh sound"};
+exports.playSoundSwoosh = function(d){return "magpatugtog ng swoosh na tunog"};
 
-exports.playSoundWing = function(d){return "play wing sound"};
+exports.playSoundWing = function(d){return "magpatugtog ng wing na tunog"};
 
-exports.playSoundJet = function(d){return "play jet sound"};
+exports.playSoundJet = function(d){return "magpatugtog ng jet na tunog"};
 
-exports.playSoundCrash = function(d){return "play crash sound"};
+exports.playSoundCrash = function(d){return "magpatugtog ng crash na tunog"};
 
-exports.playSoundJingle = function(d){return "play jingle sound"};
+exports.playSoundJingle = function(d){return "magpatugtog ng jingle na tunog"};
 
-exports.playSoundSplash = function(d){return "play splash sound"};
+exports.playSoundSplash = function(d){return "magpatugtog ng splash na tunog"};
 
-exports.playSoundLaser = function(d){return "play laser sound"};
+exports.playSoundLaser = function(d){return "magpatugtog ng laser na tunog"};
 
-exports.playSoundTooltip = function(d){return "Play a sound."};
+exports.playSoundTooltip = function(d){return "Magpatugtog ng napiling tunog."};
 
-exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your game."};
+exports.reinfFeedbackMsg = function(d){return "Maaarin mo pindutin ang \"Subukan muli\" na button upang bumalik sa paglalaro."};
 
-exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+exports.scoreText = function(d){return "Puntos: "+v(d,"playerScore")};
 
-exports.setBackgroundRandom = function(d){return "set scene Random"};
+exports.setBackgroundRandom = function(d){return "ilagay ang scene sa Random"};
 
-exports.setBackgroundFlappy = function(d){return "set scene City (day)"};
+exports.setBackgroundFlappy = function(d){return "ilagay ang scene sa Siyudad (umaga)"};
 
-exports.setBackgroundNight = function(d){return "set scene City (night)"};
+exports.setBackgroundNight = function(d){return "ilagay ang scene sa Siyudad (gabi)"};
 
-exports.setBackgroundSciFi = function(d){return "set scene Sci-Fi"};
+exports.setBackgroundSciFi = function(d){return "ilagay ang scene sa Sci-Fi"};
 
-exports.setBackgroundUnderwater = function(d){return "set scene Underwater"};
+exports.setBackgroundUnderwater = function(d){return "ilagay ang scene sa Ilalim ng dagat"};
 
-exports.setBackgroundCave = function(d){return "set scene Cave"};
+exports.setBackgroundCave = function(d){return "ilagay ang scene sa Kuweba"};
 
-exports.setBackgroundSanta = function(d){return "set scene Santa"};
+exports.setBackgroundSanta = function(d){return "ilagay ang scene sa Santa"};
 
-exports.setBackgroundTooltip = function(d){return "Sets the background image"};
+exports.setBackgroundTooltip = function(d){return "Nilalagay ang imahe ng background"};
 
-exports.setGapRandom = function(d){return "set a random gap"};
+exports.setGapRandom = function(d){return "maglagay ng random na gap"};
 
-exports.setGapVerySmall = function(d){return "set a very small gap"};
+exports.setGapVerySmall = function(d){return "maglagay ng napakaliit na gap"};
 
-exports.setGapSmall = function(d){return "set a small gap"};
+exports.setGapSmall = function(d){return "maglagay ng maliit na gap"};
 
-exports.setGapNormal = function(d){return "set a normal gap"};
+exports.setGapNormal = function(d){return "maglagay ng normal na gap"};
 
-exports.setGapLarge = function(d){return "set a large gap"};
+exports.setGapLarge = function(d){return "maglagay ng malaki na gap"};
 
-exports.setGapVeryLarge = function(d){return "set a very large gap"};
+exports.setGapVeryLarge = function(d){return "maglagay ng napakalaking gap"};
 
-exports.setGapHeightTooltip = function(d){return "Sets the vertical gap in an obstacle"};
+exports.setGapHeightTooltip = function(d){return "Nilalagay ang vertical na gap sa isang obstacle"};
 
-exports.setGravityRandom = function(d){return "set gravity random"};
+exports.setGravityRandom = function(d){return "ilagay ang gravity sa random"};
 
-exports.setGravityVeryLow = function(d){return "set gravity very low"};
+exports.setGravityVeryLow = function(d){return "ilagay ang gravity sa napakababa"};
 
-exports.setGravityLow = function(d){return "set gravity low"};
+exports.setGravityLow = function(d){return "ilagay ang gravity sa mababa"};
 
-exports.setGravityNormal = function(d){return "set gravity normal"};
+exports.setGravityNormal = function(d){return "ilagay ang gravity sa normal"};
 
-exports.setGravityHigh = function(d){return "set gravity high"};
+exports.setGravityHigh = function(d){return "ilagay ang gravity sa mataas"};
 
-exports.setGravityVeryHigh = function(d){return "set gravity very high"};
+exports.setGravityVeryHigh = function(d){return "ilagay ang gravity sa pinakamataas"};
 
-exports.setGravityTooltip = function(d){return "Sets the level's gravity"};
+exports.setGravityTooltip = function(d){return "Nilalagay ang level ng gravity"};
 
-exports.setGroundRandom = function(d){return "set ground Random"};
+exports.setGroundRandom = function(d){return "ilagay ang ground sa Random"};
 
-exports.setGroundFlappy = function(d){return "set ground Ground"};
+exports.setGroundFlappy = function(d){return "ilagay ang ground sa Ground"};
 
-exports.setGroundSciFi = function(d){return "set ground Sci-Fi"};
+exports.setGroundSciFi = function(d){return "ilagay ang ground sa Sci-Fi"};
 
-exports.setGroundUnderwater = function(d){return "set ground Underwater"};
+exports.setGroundUnderwater = function(d){return "ilagay ang ground sa Underwater"};
 
-exports.setGroundCave = function(d){return "set ground Cave"};
+exports.setGroundCave = function(d){return "ilagay ang ground sa Cave"};
 
-exports.setGroundSanta = function(d){return "set ground Santa"};
+exports.setGroundSanta = function(d){return "ilagay ang ground sa Santa"};
 
-exports.setGroundLava = function(d){return "set ground Lava"};
+exports.setGroundLava = function(d){return "ilagay ang ground sa Lava"};
 
-exports.setGroundTooltip = function(d){return "Sets the ground image"};
+exports.setGroundTooltip = function(d){return "Nilalagay ang imahe ng ground"};
 
-exports.setObstacleRandom = function(d){return "set obstacle Random"};
+exports.setObstacleRandom = function(d){return "ilagay ang obstacle sa Random"};
 
-exports.setObstacleFlappy = function(d){return "set obstacle Pipe"};
+exports.setObstacleFlappy = function(d){return "ilagay ang obstacle sa Pipe"};
 
-exports.setObstacleSciFi = function(d){return "set obstacle Sci-Fi"};
+exports.setObstacleSciFi = function(d){return "ilagay ang obstacle sa Sci-Fi"};
 
-exports.setObstacleUnderwater = function(d){return "set obstacle Plant"};
+exports.setObstacleUnderwater = function(d){return "ilagay ang obstacle sa Paint"};
 
-exports.setObstacleCave = function(d){return "set obstacle Cave"};
+exports.setObstacleCave = function(d){return "ilagay ang obstacle sa Cave"};
 
-exports.setObstacleSanta = function(d){return "set obstacle Chimney"};
+exports.setObstacleSanta = function(d){return "ilagay ang obstacle sa Chimney"};
 
-exports.setObstacleLaser = function(d){return "set obstacle Laser"};
+exports.setObstacleLaser = function(d){return "ilagay ang obstacle sa Laser"};
 
-exports.setObstacleTooltip = function(d){return "Sets the obstacle image"};
+exports.setObstacleTooltip = function(d){return "Nilalagay ang imahe ng obstacle"};
 
-exports.setPlayerRandom = function(d){return "set player Random"};
+exports.setPlayerRandom = function(d){return "ilagay ang player sa Random"};
 
-exports.setPlayerFlappy = function(d){return "set player Yellow Bird"};
+exports.setPlayerFlappy = function(d){return "ilagay ang player sa Yellow Bird"};
 
-exports.setPlayerRedBird = function(d){return "set player Red Bird"};
+exports.setPlayerRedBird = function(d){return "ilagay ang player sa Pulang Ibon"};
 
-exports.setPlayerSciFi = function(d){return "set player Spaceship"};
+exports.setPlayerSciFi = function(d){return "ilagay ang player sa Spaceship"};
 
-exports.setPlayerUnderwater = function(d){return "set player Fish"};
+exports.setPlayerUnderwater = function(d){return "ilagay ang player sa Isda"};
 
-exports.setPlayerCave = function(d){return "set player Bat"};
+exports.setPlayerCave = function(d){return "ilagay ang player sa Paniki"};
 
-exports.setPlayerSanta = function(d){return "set player Santa"};
+exports.setPlayerSanta = function(d){return "ilagay ang player sa Santa"};
 
-exports.setPlayerShark = function(d){return "set player Shark"};
+exports.setPlayerShark = function(d){return "ilagay ang player sa Shark"};
 
-exports.setPlayerEaster = function(d){return "set player Easter Bunny"};
+exports.setPlayerEaster = function(d){return "ilagay ang player sa Easter Bunny"};
 
-exports.setPlayerBatman = function(d){return "set player Bat guy"};
+exports.setPlayerBatman = function(d){return "ilagay ang player sa Bat guy"};
 
-exports.setPlayerSubmarine = function(d){return "set player Submarine"};
+exports.setPlayerSubmarine = function(d){return "ilagay ang player sa Submarine"};
 
-exports.setPlayerUnicorn = function(d){return "set player Unicorn"};
+exports.setPlayerUnicorn = function(d){return "ilagay ang player sa Unicorn"};
 
-exports.setPlayerFairy = function(d){return "set player Fairy"};
+exports.setPlayerFairy = function(d){return "ilagay ang player sa Fairy"};
 
-exports.setPlayerSuperman = function(d){return "set player Flappyman"};
+exports.setPlayerSuperman = function(d){return "ilagay ang player sa Flappyman"};
 
-exports.setPlayerTurkey = function(d){return "set player Turkey"};
+exports.setPlayerTurkey = function(d){return "ilagay ang player sa Turkey"};
 
-exports.setPlayerTooltip = function(d){return "Sets the player image"};
+exports.setPlayerTooltip = function(d){return "Nilalagay ang imahe ng manlalaro"};
 
-exports.setScore = function(d){return "set score"};
+exports.setScore = function(d){return "ilagay ang puntos"};
 
-exports.setScoreTooltip = function(d){return "Sets the player's score"};
+exports.setScoreTooltip = function(d){return "Nilalagay ang puntos ng manlalaro"};
 
-exports.setSpeed = function(d){return "set speed"};
+exports.setSpeed = function(d){return "ilagay ang bilis"};
 
-exports.setSpeedTooltip = function(d){return "Sets the levels speed"};
+exports.setSpeedTooltip = function(d){return "Nilalagay ang bilis ng level"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Ibahagi"};
 
-exports.shareFlappyTwitter = function(d){return "Check out the Flappy game I made. I wrote it myself with @codeorg"};
+exports.shareFlappyTwitter = function(d){return "Tingnan ang larong Bounce na ginawa ko. Ako mismo ang nagsulat nito sa @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Ibahagi ang iyong laro:"};
 
-exports.speedRandom = function(d){return "set speed random"};
+exports.speedRandom = function(d){return "ilagay ang bilis sa random"};
 
-exports.speedVerySlow = function(d){return "set speed very slow"};
+exports.speedVerySlow = function(d){return "ilagay ang bilis sa napakabagal"};
 
-exports.speedSlow = function(d){return "set speed slow"};
+exports.speedSlow = function(d){return "ilagay ang bilis sa mabagal"};
 
-exports.speedNormal = function(d){return "set speed normal"};
+exports.speedNormal = function(d){return "ilagay ang bilis sa normal"};
 
-exports.speedFast = function(d){return "set speed fast"};
+exports.speedFast = function(d){return "ilagay ang bilis sa mabilis"};
 
-exports.speedVeryFast = function(d){return "set speed very fast"};
+exports.speedVeryFast = function(d){return "ilagay ang bilis sa napakabilis"};
 
-exports.whenClick = function(d){return "when click"};
+exports.whenClick = function(d){return "kapag pinipindot"};
 
-exports.whenClickTooltip = function(d){return "Execute the actions below when a click event occurs."};
+exports.whenClickTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag naganap ang isang kaganapan sa pag-click."};
 
-exports.whenCollideGround = function(d){return "when hit the ground"};
+exports.whenCollideGround = function(d){return "kapag tinamaan ang lupa"};
 
-exports.whenCollideGroundTooltip = function(d){return "Execute the actions below when Flappy hits the ground."};
+exports.whenCollideGroundTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag tinamaan ng Flappy ang lupa."};
 
-exports.whenCollideObstacle = function(d){return "when hit an obstacle"};
+exports.whenCollideObstacle = function(d){return "kapag tinamaan ang obstacle"};
 
-exports.whenCollideObstacleTooltip = function(d){return "Execute the actions below when Flappy hits an obstacle."};
+exports.whenCollideObstacleTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag may tinamaan ang Flappy na obstacle."};
 
-exports.whenEnterObstacle = function(d){return "when pass obstacle"};
+exports.whenEnterObstacle = function(d){return "kapag dinadaanan ang obstacle"};
 
-exports.whenEnterObstacleTooltip = function(d){return "Execute the actions below when Flappy enters an obstacle."};
+exports.whenEnterObstacleTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag may tinamaan ang Flappy na obstacle."};
 
-exports.whenRunButtonClick = function(d){return "when Run is clicked"};
+exports.whenRunButtonClick = function(d){return "kapag nagsimula ang laro"};
 
-exports.whenRunButtonClickTooltip = function(d){return "Execute the actions below when the run button is pressed."};
+exports.whenRunButtonClickTooltip = function(d){return "Ipatupad ang mga aksyon sa ibaba kapag nagsisimula ang laro."};
 
-exports.yes = function(d){return "Yes"};
+exports.yes = function(d){return "Oo"};
 
 
-},{"messageformat":46}],35:[function(require,module,exports){
+},{"messageformat":47}],36:[function(require,module,exports){
 
 /*!
  * EJS
@@ -5417,7 +5651,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":36,"./utils":37,"fs":38,"path":40}],36:[function(require,module,exports){
+},{"./filters":37,"./utils":38,"fs":39,"path":41}],37:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -5620,7 +5854,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 
 /*!
  * EJS
@@ -5646,9 +5880,9 @@ exports.escape = function(html){
 };
  
 
-},{}],38:[function(require,module,exports){
-
 },{}],39:[function(require,module,exports){
+
+},{}],40:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -5703,7 +5937,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5931,7 +6165,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":39}],41:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":40}],42:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -6442,7 +6676,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6528,7 +6762,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6615,13 +6849,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":42,"./encode":43}],45:[function(require,module,exports){
+},{"./decode":43,"./encode":44}],46:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -7254,7 +7488,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":41,"querystring":44}],46:[function(require,module,exports){
+},{"punycode":42,"querystring":45}],47:[function(require,module,exports){
 /**
  * messageformat.js
  *

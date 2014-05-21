@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -33,6 +35,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -71,7 +78,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":11,"./utils":36}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -159,6 +166,14 @@ BlocklyApps.init = function(config) {
 
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
+
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
 
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
@@ -308,12 +323,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -360,8 +378,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -369,11 +387,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -661,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -723,19 +727,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -776,6 +767,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -791,6 +783,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -848,6 +845,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -890,7 +888,9 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/fi_fi/common":36,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":11,"./templates/buttons.html":13,"./templates/instructions.html":15,"./templates/learn.html":16,"./templates/makeYourOwn.html":17,"./utils":34,"./xml":35}],3:[function(require,module,exports){
+},{"../locale/fi_fi/common":38,"./builder":5,"./dom":7,"./feedback.js":9,"./slider":13,"./templates/buttons.html":15,"./templates/instructions.html":17,"./templates/learn.html":18,"./templates/makeYourOwn.html":19,"./utils":36,"./xml":37}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -899,13 +899,83 @@ exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
 };
 
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
+};
+
 exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
+};
+
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":37}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -967,10 +1037,10 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":12,"./utils.js":34,"url":48}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":14,"./utils.js":36,"url":50}],6:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -978,6 +1048,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -1122,6 +1193,45 @@ exports.isMobile = function() {
 };
 
 },{}],8:[function(require,module,exports){
+var ExecutionInfo = function (options) {
+  options = options || {};
+  this.terminated_ = false;
+  this.terminationValue_ = null;
+  this.log = [];
+  this.ticks = options.ticks || Infinity;
+};
+
+module.exports = ExecutionInfo;
+
+ExecutionInfo.prototype.terminateWithValue = function (value) {
+  this.terminated_ = true;
+  this.terminationValue_ = value;
+};
+
+ExecutionInfo.prototype.isTerminated = function () {
+  return this.terminated_;
+};
+
+ExecutionInfo.prototype.terminationValue = function () {
+  return this.terminationValue_;
+};
+
+/**
+ * If the user has executed too many actions, we're probably in an infinite
+ * loop.  Sadly I wasn't able to solve the Halting Problem.
+ * @param {?string} opt_id ID of loop block to highlight.
+ * @throws {Infinity} Throws an error to terminate the user's program.
+ */
+ExecutionInfo.prototype.checkTimeout = function(opt_id) {
+  if (opt_id) {
+    this.log.push([null, opt_id]);
+  }
+  if (this.ticks-- < 0) {
+    this.terminateWithValue(Infinity);
+  }
+};
+
+},{}],9:[function(require,module,exports){
 var trophy = require('./templates/trophy.html');
 var utils = require('./utils');
 var readonly = require('./templates/readonly.html');
@@ -1347,6 +1457,9 @@ var getFeedbackMessage = function(options) {
       break;
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
+      break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
       break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
@@ -1706,17 +1819,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -1823,6 +1934,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -1856,7 +1971,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/fi_fi/common":36,"./codegen":6,"./dom":7,"./templates/buttons.html":13,"./templates/code.html":14,"./templates/readonly.html":19,"./templates/sharing.html":20,"./templates/showCode.html":21,"./templates/trophy.html":22,"./utils":34}],9:[function(require,module,exports){
+},{"../locale/fi_fi/common":38,"./codegen":6,"./dom":7,"./templates/buttons.html":15,"./templates/code.html":16,"./templates/readonly.html":21,"./templates/sharing.html":22,"./templates/showCode.html":23,"./templates/trophy.html":24,"./utils":36}],10:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -1915,7 +2030,127 @@ exports.define = function(name) {
   };
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":36,"./xml":37}],12:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -1957,7 +2192,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -2162,7 +2397,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2183,7 +2418,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],13:[function(require,module,exports){
+},{"ejs":40}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2204,7 +2439,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/common":36,"ejs":38}],14:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"ejs":40}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2225,7 +2460,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],15:[function(require,module,exports){
+},{"ejs":40}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2246,7 +2481,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/common":36,"ejs":38}],16:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"ejs":40}],18:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2269,7 +2504,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/common":36,"ejs":38}],17:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"ejs":40}],19:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2290,7 +2525,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/common":36,"ejs":38}],18:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"ejs":40}],20:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2315,7 +2550,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/common":36,"ejs":38}],19:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"ejs":40}],21:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2337,7 +2572,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],20:[function(require,module,exports){
+},{"ejs":40}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2358,7 +2593,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/common":36,"ejs":38}],21:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"ejs":40}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2379,7 +2614,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/common":36,"ejs":38}],22:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"ejs":40}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2400,7 +2635,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],23:[function(require,module,exports){
+},{"ejs":40}],25:[function(require,module,exports){
 /**
  * Blockly Demo: Turtle Graphics
  *
@@ -2428,6 +2663,7 @@ return buf.join('');
 
 var api = require('./api');
 var BlocklyApps = require('../base');
+var ExecutionInfo = require('../executionInfo');
 
 var setRandomVisibleColour = function() {
   var num = Math.floor(Math.random() * Math.pow(2, 24));
@@ -2494,8 +2730,7 @@ var drawHouse = function(length) {
  * Warning: Has side effects to BlocklyApps.
  */
 exports.answer = function(page, level) {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = Infinity;
+  api.executionInfo = new ExecutionInfo({ticks: Infinity});
   var count, sideIdx, len;
   if (page == 1) {
     switch (level) {
@@ -2748,93 +2983,95 @@ exports.answer = function(page, level) {
     }
   }
   BlocklyApps.reset();
-  return BlocklyApps.log;
+  return api.executionInfo.log;
 };
 
-},{"../base":2,"./api":24}],24:[function(require,module,exports){
+},{"../base":2,"../executionInfo":8,"./api":26}],26:[function(require,module,exports){
 var BlocklyApps = require('../base');
 
+exports.executionInfo = null;
+
 exports.moveForward = function(distance, id) {
-  BlocklyApps.log.push(['FD', distance, id]);
+  this.executionInfo.log.push(['FD', distance, id]);
 };
 
 exports.moveBackward = function(distance, id) {
-  BlocklyApps.log.push(['FD', -distance, id]);
+  this.executionInfo.log.push(['FD', -distance, id]);
 };
 
 exports.moveUp = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 0, id]);
+  this.executionInfo.log.push(['MV', distance, 0, id]);
 };
 
 exports.moveDown = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 180, id]);
+  this.executionInfo.log.push(['MV', distance, 180, id]);
 };
 
 exports.moveLeft = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 270, id]);
+  this.executionInfo.log.push(['MV', distance, 270, id]);
 };
 
 exports.moveRight = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 90, id]);
+  this.executionInfo.log.push(['MV', distance, 90, id]);
 };
 
 exports.jumpUp = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 0, id]);
+  this.executionInfo.log.push(['JD', distance, 0, id]);
 };
 
 exports.jumpDown = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 180, id]);
+  this.executionInfo.log.push(['JD', distance, 180, id]);
 };
 
 exports.jumpLeft = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 270, id]);
+  this.executionInfo.log.push(['JD', distance, 270, id]);
 };
 
 exports.jumpRight = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 90, id]);
+  this.executionInfo.log.push(['JD', distance, 90, id]);
 };
 
 exports.jumpForward = function(distance, id) {
-  BlocklyApps.log.push(['JF', distance, id]);
+  this.executionInfo.log.push(['JF', distance, id]);
 };
 
 exports.jumpBackward = function(distance, id) {
-  BlocklyApps.log.push(['JF', -distance, id]);
+  this.executionInfo.log.push(['JF', -distance, id]);
 };
 
 exports.turnRight = function(angle, id) {
-  BlocklyApps.log.push(['RT', angle, id]);
+  this.executionInfo.log.push(['RT', angle, id]);
 };
 
 exports.turnLeft = function(angle, id) {
-  BlocklyApps.log.push(['RT', -angle, id]);
+  this.executionInfo.log.push(['RT', -angle, id]);
 };
 
 exports.penUp = function(id) {
-  BlocklyApps.log.push(['PU', id]);
+  this.executionInfo.log.push(['PU', id]);
 };
 
 exports.penDown = function(id) {
-  BlocklyApps.log.push(['PD', id]);
+  this.executionInfo.log.push(['PD', id]);
 };
 
 exports.penWidth = function(width, id) {
-  BlocklyApps.log.push(['PW', Math.max(width, 0), id]);
+  this.executionInfo.log.push(['PW', Math.max(width, 0), id]);
 };
 
 exports.penColour = function(colour, id) {
-  BlocklyApps.log.push(['PC', colour, id]);
+  this.executionInfo.log.push(['PC', colour, id]);
 };
 
 exports.hideTurtle = function(id) {
-  BlocklyApps.log.push(['HT', id]);
+  this.executionInfo.log.push(['HT', id]);
 };
 
 exports.showTurtle = function(id) {
-  BlocklyApps.log.push(['ST', id]);
+  this.executionInfo.log.push(['ST', id]);
 };
 
-},{"../base":2}],25:[function(require,module,exports){
+},{"../base":2}],27:[function(require,module,exports){
 /**
  * Blockly Demo: Turtle Graphics
  *
@@ -3279,7 +3516,7 @@ exports.install = function(blockly, skin) {
 
   var SimpleMove = {
     DEFAULT_MOVE_LENGTH: 50,
-    SHORT_MOVE_LENGTH: 25,
+    SHORT_MOVE_LENGTH: 50,
     LONG_MOVE_LENGTH: 100,
     DIRECTION_CONFIGS: {
       left: { title: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
@@ -3292,8 +3529,8 @@ exports.install = function(blockly, skin) {
       jump_down: { title: commonMsg.jump() + " "  + commonMsg.directionSouthLetter(), moveFunction: 'jumpDown', image: skin.downJumpArrow, tooltip: msg.jumpSouthTooltip() }
     },
     LENGTHS: [
-      [skin.shortLineDraw, "SHORT_MOVE_LENGTH"],
-      [skin.longLineDraw, "LONG_MOVE_LENGTH"]
+      [skin.longLineDraw, "LONG_MOVE_LENGTH"],
+      [skin.shortLineDraw, "SHORT_MOVE_LENGTH"]
     ],
     generateBlocksForAllDirections: function() {
       SimpleMove.generateBlocksForDirection("up");
@@ -3519,7 +3756,7 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/fi_fi/common":36,"../../locale/fi_fi/turtle":37,"./core":27}],26:[function(require,module,exports){
+},{"../../locale/fi_fi/common":38,"../../locale/fi_fi/turtle":39,"./core":29}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3540,7 +3777,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],27:[function(require,module,exports){
+},{"ejs":40}],29:[function(require,module,exports){
 // Create a limited colour palette to avoid overwhelming new users
 // and to make colour checking easier.  These definitions cannot be
 // moved to blocks.js, which is loaded later, since they are used in
@@ -3561,7 +3798,7 @@ exports.Colours = {
   PLUM: '#843179'
 };
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var levelBase = require('../level_base');
 var Colours = require('./core').Colours;
 var answer = require('./answers').answer;
@@ -4393,7 +4630,7 @@ module.exports = {
   }
 };
 
-},{"../../locale/fi_fi/turtle":37,"../block_utils":3,"../level_base":9,"./answers":23,"./core":27,"./requiredBlocks":30,"./startBlocks.xml":31,"./toolbox.xml":32}],29:[function(require,module,exports){
+},{"../../locale/fi_fi/turtle":39,"../block_utils":3,"../level_base":10,"./answers":25,"./core":29,"./requiredBlocks":32,"./startBlocks.xml":33,"./toolbox.xml":34}],31:[function(require,module,exports){
 var appMain = require('../appMain');
 window.Turtle = require('./turtle');
 var blocks = require('./blocks');
@@ -4406,69 +4643,27 @@ window.turtleMain = function(options) {
   appMain(window.Turtle, levels, options);
 };
 
-},{"../appMain":1,"../skins":10,"./blocks":25,"./levels":28,"./turtle":33}],30:[function(require,module,exports){
+},{"../appMain":1,"../skins":12,"./blocks":27,"./levels":30,"./turtle":35}],32:[function(require,module,exports){
 /**
  * Sets BlocklyApp constants that depend on the page and level.
  * This encapsulates many functions used for BlocklyApps.REQUIRED_BLOCKS.
  * In the future, some of these may be moved to common.js.
  */
 
-// The internal functions are used within BlocklyApps.REQUIRED_BLOCKS.
-// I've included jsdoc for some that I think would be good candidates
-// for moving to common.js.
-
-/**
- * Create the textual XML for a math_number block.
- * @param {number|string} number The numeric amount, expressed as a
- *     number or string.  Non-numeric strings may also be specified,
- *     such as '???'.
- * @return {string} The textual representation of a math_number block.
- */
-var makeMathNumber = function(number) {
-    return '<block type="math_number"><title name="NUM">' +
-          number + '</title></block>';
-};
-
-/**
- * Generate a required blocks dictionary for a simple block that does not
- * have any parameters or values.
- * @param {string} block_type The block type.
- * @return {Object} A required blocks dictionary able to check for and
- *     generate the specified block.
- */
-var simpleBlock = function(block_type) {
-  return {test: function(block) {return block.type == block_type; },
-          type: block_type};
-};
-
-/**
- * Generate a required blocks dictionary for a repeat loop.  This does not
- * test for the specified repeat count but includes it in the suggested block.
- * @param {number|string} count The suggested repeat count.
- * @return {Object} A required blocks dictionary able to check for and
- *     generate the specified block.
- */
-var repeat = function(count) {
-  // This checks for a controls_repeat block rather than looking for 'for',
-  // since the latter may be generated by Turtle 2's draw_a_square.
-  return {test: function(block) {return block.type == 'controls_repeat';},
-          type: 'controls_repeat', titles: {'TIMES': count}};
-};
-
-// The remaining internal functions are specific to Turtle.
+var requiredBlockUtils = require('../required_block_utils');
 
 // This tests for and creates a draw_a_square block on page 2.
 function drawASquare(number) {
   return {test: 'draw_a_square',
           type: 'draw_a_square',
-          values: {'VALUE': makeMathNumber(number)}};
+          values: {'VALUE': requiredBlockUtils.makeMathNumber(number)}};
 }
 
 // This tests for and creates a draw_a_snowman block on page 2.
 function drawASnowman(number) {
   return {test: 'draw_a_snowman',
           type: 'draw_a_snowman',
-          values: {'VALUE': makeMathNumber(number)}};
+          values: {'VALUE': requiredBlockUtils.makeMathNumber(number)}};
 }
 
 // This tests for and creates the limited "move forward" block used on the
@@ -4532,7 +4727,7 @@ var turnRight = function(degrees) {
       },
     type: 'draw_turn',
     titles: {'DIR': 'turnRight'},
-    values: {'VALUE': makeMathNumber(degrees)}
+    values: {'VALUE': requiredBlockUtils.makeMathNumber(degrees)}
   };
 };
 
@@ -4547,7 +4742,7 @@ var turnLeft = function(degrees) {
       },
     type: 'draw_turn',
     titles: {'DIR': 'turnLeft'},
-    values: {'VALUE': makeMathNumber(degrees)}
+    values: {'VALUE': requiredBlockUtils.makeMathNumber(degrees)}
   };
 };
 
@@ -4556,7 +4751,7 @@ var turnLeft = function(degrees) {
 var move = function(distance) {
   return {test: function(block) {return block.type == 'draw_move'; },
           type: 'draw_move',
-          values: {'VALUE': makeMathNumber(distance)}};
+          values: {'VALUE': requiredBlockUtils.makeMathNumber(distance)}};
 };
 
 // This tests for and creates a draw_turn_by_constant_restricted block.
@@ -4577,7 +4772,7 @@ var drawTurn = function() {
       return block.type == 'draw_turn';
     },
     type: 'draw_turn',
-    values: {'VALUE': makeMathNumber('???')}
+    values: {'VALUE': requiredBlockUtils.makeMathNumber('???')}
   };
 };
 
@@ -4619,9 +4814,9 @@ var defineWithArg = function(func_name, arg_name) {
 };
 
 module.exports = {
-  makeMathNumber: makeMathNumber,
-  simpleBlock: simpleBlock,
-  repeat: repeat,
+  makeMathNumber: requiredBlockUtils.makeMathNumber,
+  simpleBlock: requiredBlockUtils.simpleBlock,
+  repeat: requiredBlockUtils.repeat,
   drawASquare: drawASquare,
   drawASnowman: drawASnowman,
   MOVE_FORWARD_INLINE: MOVE_FORWARD_INLINE,
@@ -4637,9 +4832,10 @@ module.exports = {
   drawTurn: drawTurn,
   SET_COLOUR_PICKER: SET_COLOUR_PICKER,
   SET_COLOUR_RANDOM: SET_COLOUR_RANDOM,
-  defineWithArg: defineWithArg
+  defineWithArg: defineWithArg,
 };
-},{}],31:[function(require,module,exports){
+
+},{"../required_block_utils":11}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4698,7 +4894,7 @@ var spiral = function(i) {; buf.push('  ');50; if (i <= 60) {; buf.push('    <bl
       length: (level >= 7 ? 0 : 100)
     })), '  ');288; }; buf.push('  ');288; if (level == 7) {; buf.push('    ');288; //  Define "draw a house".
 ; buf.push('    <block type="procedures_defnoreturn" x="20" y="200">\n      <mutation>\n        ');290; if (level == 11) { ; buf.push('<arg name="', escape((290,  msg.lengthParameter() )), '"></arg>');290; }; buf.push('      </mutation>\n      <title name="NAME">', escape((291,  msg.drawAHouse() )), '</title>\n      <statement name="STACK">\n        <block type="procedures_callnoreturn" inline="false">\n          <mutation name="', escape((294,  msg.drawASquare() )), '">\n            <arg name="', escape((295,  msg.lengthParameter() )), '"/>\n          </mutation>\n          <value name="ARG0">\n            <block type="math_number">\n              <title name="NUM">100</title>\n            </block>\n          </value>\n          <next>\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="math_number">\n                  <title name="NUM">100</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">30</title>\n                    </block>\n                  </value>\n                  <next>\n                    <block type="procedures_callnoreturn" inline="false">\n                      <mutation name="', escape((320,  msg.drawATriangle() )), '">\n                        <arg name="', escape((321,  msg.lengthParameter() )), '"></arg>\n                      </mutation>\n                      <value name="ARG0">\n                        <block type="math_number">\n                          <title name="NUM">100</title>\n                        </block>\n                      </value>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');337; } // End of region in which "draw a square" is defined.
-; buf.push('');337; } else if (page == 4) {; buf.push('  ');337; if (level == 2) {; buf.push('    <block type="draw_colour" inline="true" x="70" y="70" editable="false" deletable="false" movable="false">\n      <value name="COLOUR">\n        <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n      </value>\n      <next>\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">3</title>\n          <statement name="DO">\n            <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n              <title name="DIR">moveForward</title>\n              <title name="VALUE">100</title>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">120</title>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_colour" inline="true" x="70" y="230" editable="false" deletable="false" movable="false">\n              <value name="COLOUR">\n                <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n              </value>\n              <next>\n                <block type="controls_repeat" editable="false" deletable="false" movable="false">\n                  <title name="TIMES">3</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">100</title>\n                      <next>\n                        <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">120</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </next>\n    </block>\n  ');383; } else if (level == 3) {; buf.push('    <block type="draw_colour" inline="true" x="70" y="70" editable="false" deletable="false" movable="false">\n      <value name="COLOUR">\n        <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n      </value>\n      <next>\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">3</title>\n          <statement name="DO">\n            <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n              <title name="DIR">moveForward</title>\n              <title name="VALUE">100</title>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">120</title>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </next>\n    </block>\n  ');405; } else if (level == 4) {; buf.push('    <block type="controls_repeat" x="70" y="70">\n      <title name="TIMES">???</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n          <value name="COLOUR">\n            <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n          </value>\n          <next>\n            <block type="controls_repeat" editable="false" deletable="false" movable="false">\n              <title name="TIMES">3</title>\n              <statement name="DO">\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">100</title>\n                  <next>\n                    <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">turnRight</title>\n                      <title name="VALUE">120</title>\n                    </block>\n                  </next>\n                </block>\n              </statement>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">36</title>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');438; } else if (level == 5) {; buf.push('    <block type="controls_repeat" x="70" y="70" editable="false" deletable="false" movable="false">\n      <title name="TIMES">36</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n          <value name="COLOUR">\n            <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n          </value>\n          <next>\n            <block type="controls_repeat" editable="false" deletable="false" movable="false">\n              <title name="TIMES">3</title>\n              <statement name="DO">\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">100</title>\n                  <next>\n                    <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">turnRight</title>\n                      <title name="VALUE">120</title>\n                    </block>\n                  </next>\n                </block>\n              </statement>\n              <next>\n                <block type="draw_turn_by_constant">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">???</title>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');471; } else if (level == 7) {; buf.push('    <block type="draw_colour" inline="true" x="70" y="70" editable="false" deletable="false" movable="false">\n      <value name="COLOUR">\n        <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n      </value>\n      <next>\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">4</title>\n          <statement name="DO">\n            <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n              <title name="DIR">moveForward</title>\n              <title name="VALUE">20</title>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">90</title>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </next>\n    </block>\n  ');493; } else if (level == 8) {; buf.push('    <block type="controls_repeat" x="70" y="70" editable="false" deletable="false" movable="false">\n      <title name="TIMES">10</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n          <value name="COLOUR">\n            <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n          </value>\n          <next>\n            <block type="controls_repeat" editable="false" deletable="false" movable="false">\n              <title name="TIMES">4</title>\n              <statement name="DO">\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">20</title>\n                  <next>\n                    <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">turnRight</title>\n                      <title name="VALUE">90</title>\n                    </block>\n                  </next>\n                </block>\n              </statement>\n              <next>\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">20</title>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');526; } else if (level == 9) {; buf.push('    <block type="controls_repeat" x="70" y="70" editable="false" deletable="false" movable="false">\n      <title name="TIMES">4</title>\n      <statement name="DO">\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n              <value name="COLOUR">\n                <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n              </value>\n              <next>\n                <block type="controls_repeat" editable="false" deletable="false" movable="false">\n                  <title name="TIMES">4</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                      <next>\n                        <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">90</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                  <next>\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_turn_by_constant">\n              <title name="DIR">turnRight</title>\n              <title name="VALUE">???</title>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');570; } else if (level == 10) {; buf.push('    <block type="controls_repeat" x="70" y="70">\n      <title name="TIMES">???</title>\n      <statement name="DO">\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n              <value name="COLOUR">\n                <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n              </value>\n              <next>\n                <block type="controls_repeat" editable="false" deletable="false" movable="false">\n                  <title name="TIMES">4</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                      <next>\n                        <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">90</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                  <next>\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n              <title name="DIR">turnRight</title>\n              <title name="VALUE">80</title>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');614; } else if (level == 11) {; buf.push('    <block type="controls_repeat" x="70" y="70">\n      <title name="TIMES">???</title>\n      <statement name="DO">\n        <block type="controls_repeat">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true">\n              <value name="COLOUR">\n                <block type="colour_random"></block>\n              </value>\n              <next>\n                <block type="controls_repeat">\n                  <title name="TIMES">4</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                      <next>\n                        <block type="draw_turn_by_constant">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">90</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                  <next>\n                    <block type="draw_move_by_constant">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_turn_by_constant">\n              <title name="DIR">turnRight</title>\n              <title name="VALUE">???</title>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');658; }; buf.push('');658; } else if (page == 5) {; buf.push('  ');658; if (level == 1) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="70">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">200</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">counter</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">90</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');702; } else if (level == 2) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="70">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">300</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">counter</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">121</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');746; } else if (level == 3) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="70">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">300</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">counter</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">134</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');790; } else if (level == 4) {; buf.push('    <block type="controls_repeat" x="70" y="20">\n      <title name="TIMES">10</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="procedures_callnoreturn" inline="false">\n              <mutation name="', escape((799,  msg.drawACircle() )), '">\n                <arg name="step"></arg>\n              </mutation>\n              <value name="ARG0">\n                <block type="math_number">\n                  <title name="NUM">6</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">36</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n    <block type="procedures_defnoreturn" x="70" y="200">\n      <mutation>\n        <arg name="step"></arg>\n      </mutation>\n      <title name="NAME">', escape((826,  msg.drawACircle() )), '</title>\n      <statement name="STACK">\n        <block type="controls_repeat">\n          <title name="TIMES">60</title>\n          <statement name="DO">\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">step</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">6</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n  ');853; } else if (level == 5) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="20">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">4</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">8</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">4</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="controls_repeat">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true">\n              <value name="COLOUR">\n                <block type="colour_random"></block>\n              </value>\n              <next>\n                <block type="procedures_callnoreturn" inline="false">\n                  <mutation name="', escape((879,  msg.drawACircle() )), '">\n                    <arg name="step"></arg>\n                  </mutation>\n                  <value name="ARG0">\n                    <block type="variables_get">\n                      <title name="VAR">counter</title>\n                    </block>\n                  </value>\n                  <next>\n                    <block type="draw_turn" inline="true">\n                      <title name="DIR">turnRight</title>\n                      <value name="VALUE">\n                        <block type="math_number">\n                          <title name="NUM">36</title>\n                        </block>\n                      </value>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n    <block type="procedures_defnoreturn" x="70" y="300">\n      <mutation>\n        <arg name="step"></arg>\n      </mutation>\n      <title name="NAME">', escape((908,  msg.drawACircle() )), '</title>\n      <statement name="STACK">\n        <block type="controls_repeat">\n          <title name="TIMES">60</title>\n          <statement name="DO">\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">step</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">6</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n  ');935; } else if (level == 6) {; buf.push('    <block type="procedures_callnoreturn" inline="false" x="70" y="20">\n      <mutation name="', escape((936,  msg.drawATree() )), '">\n        <arg name="depth"></arg>\n        <arg name="branches"></arg>\n      </mutation>\n      <value name="ARG0">\n        <block type="math_number">\n          <title name="NUM">9</title>\n        </block>\n      </value>\n      <value name="ARG1">\n        <block type="math_number">\n          <title name="NUM">2</title>\n        </block>\n      </value>\n    </block>\n    <block type="procedures_defnoreturn" x="70" y="150">\n      <mutation>\n        <arg name="depth"></arg>\n        <arg name="branches"></arg>\n      </mutation>\n      <title name="NAME">', escape((956,  msg.drawATree() )), '</title>\n      <statement name="STACK">\n        <block type="controls_if" inline="false">\n          <value name="IF0">\n            <block type="logic_compare" inline="true">\n              <title name="OP">GT</title>\n              <value name="A">\n                <block type="variables_get">\n                  <title name="VAR">depth</title>\n                </block>\n              </value>\n              <value name="B">\n                <block type="math_number">\n                  <title name="NUM">0</title>\n                </block>\n              </value>\n            </block>\n          </value>\n          <statement name="DO0">\n            <block type="draw_colour" inline="true">\n              <value name="COLOUR">\n                <block type="colour_random"></block>\n              </value>\n              <next>\n                <block type="draw_pen">\n                  <title name="PEN">penDown</title>\n                  <next>\n                    <block type="draw_move" inline="true">\n                      <title name="DIR">moveForward</title>\n                      <value name="VALUE">\n                        <block type="math_arithmetic" inline="true">\n                          <title name="OP">MULTIPLY</title>\n                          <value name="A">\n                            <block type="math_number">\n                              <title name="NUM">7</title>\n                            </block>\n                          </value>\n                          <value name="B">\n                            <block type="variables_get">\n                              <title name="VAR">depth</title>\n                            </block>\n                          </value>\n                        </block>\n                      </value>\n                      <next>\n                        <block type="draw_turn" inline="true">\n                          <title name="DIR">turnLeft</title>\n                          <value name="VALUE">\n                            <block type="math_number">\n                              <title name="NUM">130</title>\n                            </block>\n                          </value>\n                          <next>\n                            <block type="controls_repeat_ext" inline="true">\n                              <value name="TIMES">\n                                <block type="variables_get">\n                                  <title name="VAR">branches</title>\n                                </block>\n                              </value>\n                              <statement name="DO">\n                                <block type="draw_turn" inline="true">\n                                  <title name="DIR">turnRight</title>\n                                  <value name="VALUE">\n                                    <block type="math_arithmetic" inline="true">\n                                      <title name="OP">DIVIDE</title>\n                                      <value name="A">\n                                        <block type="math_number">\n                                          <title name="NUM">180</title>\n                                        </block>\n                                      </value>\n                                      <value name="B">\n                                        <block type="variables_get">\n                                          <title name="VAR">branches</title>\n                                        </block>\n                                      </value>\n                                    </block>\n                                  </value>\n                                  <next>\n                                    <block type="procedures_callnoreturn" inline="false">\n                                      <mutation name="', escape((1035,  msg.drawATree() )), '">\n                                        <arg name="depth"></arg>\n                                        <arg name="branches"></arg>\n                                      </mutation>\n                                      <value name="ARG0">\n                                        <block type="math_arithmetic" inline="true">\n                                          <title name="OP">MINUS</title>\n                                          <value name="A">\n                                            <block type="variables_get">\n                                              <title name="VAR">depth</title>\n                                            </block>\n                                          </value>\n                                          <value name="B">\n                                            <block type="math_number">\n                                              <title name="NUM">1</title>\n                                            </block>\n                                          </value>\n                                        </block>\n                                      </value>\n                                      <value name="ARG1">\n                                        <block type="variables_get">\n                                          <title name="VAR">branches</title>\n                                        </block>\n                                      </value>\n                                    </block>\n                                  </next>\n                                </block>\n                              </statement>\n                              <next>\n                                <block type="draw_turn" inline="true">\n                                  <title name="DIR">turnLeft</title>\n                                  <value name="VALUE">\n                                    <block type="math_number">\n                                      <title name="NUM">50</title>\n                                    </block>\n                                  </value>\n                                  <next>\n                                    <block type="draw_pen">\n                                      <title name="PEN">penUp</title>\n                                      <next>\n                                        <block type="draw_move" inline="true">\n                                          <title name="DIR">moveBackward</title>\n                                          <value name="VALUE">\n                                            <block type="math_arithmetic" inline="true">\n                                              <title name="OP">MULTIPLY</title>\n                                              <value name="A">\n                                                <block type="math_number">\n                                                  <title name="NUM">7</title>\n                                                </block>\n                                              </value>\n                                              <value name="B">\n                                                <block type="variables_get">\n                                                  <title name="VAR">depth</title>\n                                                </block>\n                                              </value>\n                                            </block>\n                                          </value>\n                                        </block>\n                                      </next>\n                                    </block>\n                                  </next>\n                                </block>\n                              </next>\n                            </block>\n                          </next>\n                        </block>\n                      </next>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n  ');1111; }; buf.push('');1111; }; buf.push(''); })();
+; buf.push('');337; } else if (page == 4) {; buf.push('  ');337; if (level == 2) {; buf.push('    <block type="draw_colour" inline="true" x="70" y="70" editable="false" deletable="false" movable="true">\n      <value name="COLOUR">\n        <block type="colour_random" editable="false" deletable="false" movable="true"></block>\n      </value>\n      <next>\n        <block type="controls_repeat" editable="false" deletable="false" movable="true">\n          <title name="TIMES">3</title>\n          <statement name="DO">\n            <block type="draw_move_by_constant" editable="false" deletable="false" movable="true">\n              <title name="DIR">moveForward</title>\n              <title name="VALUE">100</title>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="true">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">120</title>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_colour" inline="true" x="70" y="230" editable="false" deletable="false" movable="true">\n              <value name="COLOUR">\n                <block type="colour_random" editable="false" deletable="false" movable="true"></block>\n              </value>\n              <next>\n                <block type="controls_repeat" editable="false" deletable="false" movable="true">\n                  <title name="TIMES">3</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="true">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">100</title>\n                      <next>\n                        <block type="draw_turn_by_constant" editable="false" deletable="false" movable="true">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">120</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </next>\n    </block>\n  ');383; } else if (level == 3) {; buf.push('    <block type="draw_colour" inline="true" x="70" y="70" editable="false" deletable="false" movable="false">\n      <value name="COLOUR">\n        <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n      </value>\n      <next>\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">3</title>\n          <statement name="DO">\n            <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n              <title name="DIR">moveForward</title>\n              <title name="VALUE">100</title>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">120</title>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </next>\n    </block>\n  ');405; } else if (level == 4) {; buf.push('    <block type="controls_repeat" x="70" y="70">\n      <title name="TIMES">???</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n          <value name="COLOUR">\n            <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n          </value>\n          <next>\n            <block type="controls_repeat" editable="false" deletable="false" movable="false">\n              <title name="TIMES">3</title>\n              <statement name="DO">\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">100</title>\n                  <next>\n                    <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">turnRight</title>\n                      <title name="VALUE">120</title>\n                    </block>\n                  </next>\n                </block>\n              </statement>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">36</title>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');438; } else if (level == 5) {; buf.push('    <block type="controls_repeat" x="70" y="70" editable="false" deletable="false" movable="false">\n      <title name="TIMES">36</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n          <value name="COLOUR">\n            <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n          </value>\n          <next>\n            <block type="controls_repeat" editable="false" deletable="false" movable="false">\n              <title name="TIMES">3</title>\n              <statement name="DO">\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">100</title>\n                  <next>\n                    <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">turnRight</title>\n                      <title name="VALUE">120</title>\n                    </block>\n                  </next>\n                </block>\n              </statement>\n              <next>\n                <block type="draw_turn_by_constant">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">???</title>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');471; } else if (level == 7) {; buf.push('    <block type="draw_colour" inline="true" x="70" y="70" editable="false" deletable="false" movable="false">\n      <value name="COLOUR">\n        <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n      </value>\n      <next>\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">4</title>\n          <statement name="DO">\n            <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n              <title name="DIR">moveForward</title>\n              <title name="VALUE">20</title>\n              <next>\n                <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">turnRight</title>\n                  <title name="VALUE">90</title>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </next>\n    </block>\n  ');493; } else if (level == 8) {; buf.push('    <block type="controls_repeat" x="70" y="70" editable="false" deletable="false" movable="false">\n      <title name="TIMES">10</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n          <value name="COLOUR">\n            <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n          </value>\n          <next>\n            <block type="controls_repeat" editable="false" deletable="false" movable="false">\n              <title name="TIMES">4</title>\n              <statement name="DO">\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">20</title>\n                  <next>\n                    <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">turnRight</title>\n                      <title name="VALUE">90</title>\n                    </block>\n                  </next>\n                </block>\n              </statement>\n              <next>\n                <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                  <title name="DIR">moveForward</title>\n                  <title name="VALUE">20</title>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');526; } else if (level == 9) {; buf.push('    <block type="controls_repeat" x="70" y="70" editable="false" deletable="false" movable="false">\n      <title name="TIMES">4</title>\n      <statement name="DO">\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n              <value name="COLOUR">\n                <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n              </value>\n              <next>\n                <block type="controls_repeat" editable="false" deletable="false" movable="false">\n                  <title name="TIMES">4</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                      <next>\n                        <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">90</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                  <next>\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_turn_by_constant">\n              <title name="DIR">turnRight</title>\n              <title name="VALUE">???</title>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');570; } else if (level == 10) {; buf.push('    <block type="controls_repeat" x="70" y="70">\n      <title name="TIMES">???</title>\n      <statement name="DO">\n        <block type="controls_repeat" editable="false" deletable="false" movable="false">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true" editable="false" deletable="false" movable="false">\n              <value name="COLOUR">\n                <block type="colour_random" editable="false" deletable="false" movable="false"></block>\n              </value>\n              <next>\n                <block type="controls_repeat" editable="false" deletable="false" movable="false">\n                  <title name="TIMES">4</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                      <next>\n                        <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">90</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                  <next>\n                    <block type="draw_move_by_constant" editable="false" deletable="false" movable="false">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_turn_by_constant" editable="false" deletable="false" movable="false">\n              <title name="DIR">turnRight</title>\n              <title name="VALUE">80</title>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');614; } else if (level == 11) {; buf.push('    <block type="controls_repeat" x="70" y="70">\n      <title name="TIMES">???</title>\n      <statement name="DO">\n        <block type="controls_repeat">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true">\n              <value name="COLOUR">\n                <block type="colour_random"></block>\n              </value>\n              <next>\n                <block type="controls_repeat">\n                  <title name="TIMES">4</title>\n                  <statement name="DO">\n                    <block type="draw_move_by_constant">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                      <next>\n                        <block type="draw_turn_by_constant">\n                          <title name="DIR">turnRight</title>\n                          <title name="VALUE">90</title>\n                        </block>\n                      </next>\n                    </block>\n                  </statement>\n                  <next>\n                    <block type="draw_move_by_constant">\n                      <title name="DIR">moveForward</title>\n                      <title name="VALUE">20</title>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n          <next>\n            <block type="draw_turn_by_constant">\n              <title name="DIR">turnRight</title>\n              <title name="VALUE">???</title>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');658; }; buf.push('');658; } else if (page == 5) {; buf.push('  ');658; if (level == 1) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="70">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">200</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">counter</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">90</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');702; } else if (level == 2) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="70">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">300</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">counter</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">121</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');746; } else if (level == 3) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="70">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">300</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">1</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">counter</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">134</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n  ');790; } else if (level == 4) {; buf.push('    <block type="controls_repeat" x="70" y="20">\n      <title name="TIMES">10</title>\n      <statement name="DO">\n        <block type="draw_colour" inline="true">\n          <value name="COLOUR">\n            <block type="colour_random"></block>\n          </value>\n          <next>\n            <block type="procedures_callnoreturn" inline="false">\n              <mutation name="', escape((799,  msg.drawACircle() )), '">\n                <arg name="step"></arg>\n              </mutation>\n              <value name="ARG0">\n                <block type="math_number">\n                  <title name="NUM">6</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">36</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </next>\n        </block>\n      </statement>\n    </block>\n    <block type="procedures_defnoreturn" x="70" y="200">\n      <mutation>\n        <arg name="step"></arg>\n      </mutation>\n      <title name="NAME">', escape((826,  msg.drawACircle() )), '</title>\n      <statement name="STACK">\n        <block type="controls_repeat">\n          <title name="TIMES">60</title>\n          <statement name="DO">\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">step</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">6</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n  ');853; } else if (level == 5) {; buf.push('    <block type="controls_for_counter" inline="true" x="70" y="20">\n      <value name="FROM">\n        <block type="math_number">\n          <title name="NUM">4</title>\n        </block>\n      </value>\n      <value name="TO">\n        <block type="math_number">\n          <title name="NUM">8</title>\n        </block>\n      </value>\n      <value name="BY">\n        <block type="math_number">\n          <title name="NUM">4</title>\n        </block>\n      </value>\n      <statement name="DO">\n        <block type="controls_repeat">\n          <title name="TIMES">10</title>\n          <statement name="DO">\n            <block type="draw_colour" inline="true">\n              <value name="COLOUR">\n                <block type="colour_random"></block>\n              </value>\n              <next>\n                <block type="procedures_callnoreturn" inline="false">\n                  <mutation name="', escape((879,  msg.drawACircle() )), '">\n                    <arg name="step"></arg>\n                  </mutation>\n                  <value name="ARG0">\n                    <block type="variables_get">\n                      <title name="VAR">counter</title>\n                    </block>\n                  </value>\n                  <next>\n                    <block type="draw_turn" inline="true">\n                      <title name="DIR">turnRight</title>\n                      <value name="VALUE">\n                        <block type="math_number">\n                          <title name="NUM">36</title>\n                        </block>\n                      </value>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n    <block type="procedures_defnoreturn" x="70" y="300">\n      <mutation>\n        <arg name="step"></arg>\n      </mutation>\n      <title name="NAME">', escape((908,  msg.drawACircle() )), '</title>\n      <statement name="STACK">\n        <block type="controls_repeat">\n          <title name="TIMES">60</title>\n          <statement name="DO">\n            <block type="draw_move" inline="true">\n              <title name="DIR">moveForward</title>\n              <value name="VALUE">\n                <block type="variables_get">\n                  <title name="VAR">step</title>\n                </block>\n              </value>\n              <next>\n                <block type="draw_turn" inline="true">\n                  <title name="DIR">turnRight</title>\n                  <value name="VALUE">\n                    <block type="math_number">\n                      <title name="NUM">6</title>\n                    </block>\n                  </value>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n  ');935; } else if (level == 6) {; buf.push('    <block type="procedures_callnoreturn" inline="false" x="70" y="20">\n      <mutation name="', escape((936,  msg.drawATree() )), '">\n        <arg name="depth"></arg>\n        <arg name="branches"></arg>\n      </mutation>\n      <value name="ARG0">\n        <block type="math_number">\n          <title name="NUM">9</title>\n        </block>\n      </value>\n      <value name="ARG1">\n        <block type="math_number">\n          <title name="NUM">2</title>\n        </block>\n      </value>\n    </block>\n    <block type="procedures_defnoreturn" x="70" y="150">\n      <mutation>\n        <arg name="depth"></arg>\n        <arg name="branches"></arg>\n      </mutation>\n      <title name="NAME">', escape((956,  msg.drawATree() )), '</title>\n      <statement name="STACK">\n        <block type="controls_if" inline="false">\n          <value name="IF0">\n            <block type="logic_compare" inline="true">\n              <title name="OP">GT</title>\n              <value name="A">\n                <block type="variables_get">\n                  <title name="VAR">depth</title>\n                </block>\n              </value>\n              <value name="B">\n                <block type="math_number">\n                  <title name="NUM">0</title>\n                </block>\n              </value>\n            </block>\n          </value>\n          <statement name="DO0">\n            <block type="draw_colour" inline="true">\n              <value name="COLOUR">\n                <block type="colour_random"></block>\n              </value>\n              <next>\n                <block type="draw_pen">\n                  <title name="PEN">penDown</title>\n                  <next>\n                    <block type="draw_move" inline="true">\n                      <title name="DIR">moveForward</title>\n                      <value name="VALUE">\n                        <block type="math_arithmetic" inline="true">\n                          <title name="OP">MULTIPLY</title>\n                          <value name="A">\n                            <block type="math_number">\n                              <title name="NUM">7</title>\n                            </block>\n                          </value>\n                          <value name="B">\n                            <block type="variables_get">\n                              <title name="VAR">depth</title>\n                            </block>\n                          </value>\n                        </block>\n                      </value>\n                      <next>\n                        <block type="draw_turn" inline="true">\n                          <title name="DIR">turnLeft</title>\n                          <value name="VALUE">\n                            <block type="math_number">\n                              <title name="NUM">130</title>\n                            </block>\n                          </value>\n                          <next>\n                            <block type="controls_repeat_ext" inline="true">\n                              <value name="TIMES">\n                                <block type="variables_get">\n                                  <title name="VAR">branches</title>\n                                </block>\n                              </value>\n                              <statement name="DO">\n                                <block type="draw_turn" inline="true">\n                                  <title name="DIR">turnRight</title>\n                                  <value name="VALUE">\n                                    <block type="math_arithmetic" inline="true">\n                                      <title name="OP">DIVIDE</title>\n                                      <value name="A">\n                                        <block type="math_number">\n                                          <title name="NUM">180</title>\n                                        </block>\n                                      </value>\n                                      <value name="B">\n                                        <block type="variables_get">\n                                          <title name="VAR">branches</title>\n                                        </block>\n                                      </value>\n                                    </block>\n                                  </value>\n                                  <next>\n                                    <block type="procedures_callnoreturn" inline="false">\n                                      <mutation name="', escape((1035,  msg.drawATree() )), '">\n                                        <arg name="depth"></arg>\n                                        <arg name="branches"></arg>\n                                      </mutation>\n                                      <value name="ARG0">\n                                        <block type="math_arithmetic" inline="true">\n                                          <title name="OP">MINUS</title>\n                                          <value name="A">\n                                            <block type="variables_get">\n                                              <title name="VAR">depth</title>\n                                            </block>\n                                          </value>\n                                          <value name="B">\n                                            <block type="math_number">\n                                              <title name="NUM">1</title>\n                                            </block>\n                                          </value>\n                                        </block>\n                                      </value>\n                                      <value name="ARG1">\n                                        <block type="variables_get">\n                                          <title name="VAR">branches</title>\n                                        </block>\n                                      </value>\n                                    </block>\n                                  </next>\n                                </block>\n                              </statement>\n                              <next>\n                                <block type="draw_turn" inline="true">\n                                  <title name="DIR">turnLeft</title>\n                                  <value name="VALUE">\n                                    <block type="math_number">\n                                      <title name="NUM">50</title>\n                                    </block>\n                                  </value>\n                                  <next>\n                                    <block type="draw_pen">\n                                      <title name="PEN">penUp</title>\n                                      <next>\n                                        <block type="draw_move" inline="true">\n                                          <title name="DIR">moveBackward</title>\n                                          <value name="VALUE">\n                                            <block type="math_arithmetic" inline="true">\n                                              <title name="OP">MULTIPLY</title>\n                                              <value name="A">\n                                                <block type="math_number">\n                                                  <title name="NUM">7</title>\n                                                </block>\n                                              </value>\n                                              <value name="B">\n                                                <block type="variables_get">\n                                                  <title name="VAR">depth</title>\n                                                </block>\n                                              </value>\n                                            </block>\n                                          </value>\n                                        </block>\n                                      </next>\n                                    </block>\n                                  </next>\n                                </block>\n                              </next>\n                            </block>\n                          </next>\n                        </block>\n                      </next>\n                    </block>\n                  </next>\n                </block>\n              </next>\n            </block>\n          </statement>\n        </block>\n      </statement>\n    </block>\n  ');1111; }; buf.push('');1111; }; buf.push(''); })();
 } 
 return buf.join('');
 };
@@ -4706,7 +4902,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/turtle":37,"ejs":38}],32:[function(require,module,exports){
+},{"../../locale/fi_fi/turtle":39,"ejs":40}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4831,7 +5027,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fi_fi/turtle":37,"ejs":38}],33:[function(require,module,exports){
+},{"../../locale/fi_fi/turtle":39,"ejs":40}],35:[function(require,module,exports){
 /**
  * Blockly Demo: Turtle Graphics
  *
@@ -4871,6 +5067,7 @@ var Colours = require('./core').Colours;
 var codegen = require('../codegen');
 var api = require('./api');
 var page = require('../templates/page.html');
+var ExecutionInfo = require('../executionInfo');
 
 var level;
 var skin;
@@ -4949,6 +5146,7 @@ Turtle.init = function(config) {
     // Create hidden canvases.
     Turtle.ctxAnswer = createCanvas('answer', 400, 400).getContext('2d');
     Turtle.ctxImages = createCanvas('images', 400, 400).getContext('2d');
+    Turtle.ctxPredraw = createCanvas('predraw', 400, 400).getContext('2d');
     Turtle.ctxScratch = createCanvas('scratch', 400, 400).getContext('2d');
     Turtle.ctxFeedback = createCanvas('feedback', 154, 154).getContext('2d');
 
@@ -4961,7 +5159,10 @@ Turtle.init = function(config) {
     // Set their initial contents.
     Turtle.loadTurtle();
     Turtle.drawImages();
-    Turtle.drawAnswer(level.solutionBlocks);
+    Turtle.drawAnswer();
+    if (level.predraw_blocks) {
+      Turtle.drawBlocksOnCanvas(level.predraw_blocks, Turtle.ctxPredraw);
+    }
 
     // Adjust visualization and belowVisualization width.
     var drawAreaWidth = config.getDisplayWidth();
@@ -4980,24 +5181,36 @@ Turtle.init = function(config) {
 /**
  * On startup draw the expected answer and save it to the answer canvas.
  */
-Turtle.drawAnswer = function(blocks) {
-  if (blocks) {
-    var domBlocks = Blockly.Xml.textToDom(blocks);
-    Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, domBlocks);
-    var code = Blockly.Generator.workspaceToCode('JavaScript');
-    Turtle.evalCode(code);
-    Blockly.mainWorkspace.clear();
+Turtle.drawAnswer = function() {
+  if (level.solutionBlocks) {
+    Turtle.drawBlocksOnCanvas(level.solutionBlocks, Turtle.ctxAnswer);
   } else {
-    BlocklyApps.log = level.answer;
+    Turtle.drawLogOnCanvas(level.answer, Turtle.ctxAnswer);
   }
+};
+
+Turtle.drawLogOnCanvas = function(log, canvas) {
   BlocklyApps.reset();
-  while (BlocklyApps.log.length) {
-    var tuple = BlocklyApps.log.shift();
+  while (log.length) {
+    var tuple = log.shift();
     Turtle.step(tuple[0], tuple.splice(1));
   }
-  Turtle.ctxAnswer.globalCompositeOperation = 'copy';
-  Turtle.ctxAnswer.drawImage(Turtle.ctxScratch.canvas, 0, 0);
-  Turtle.ctxAnswer.globalCompositeOperation = 'source-over';
+  canvas.globalCompositeOperation = 'copy';
+  canvas.drawImage(Turtle.ctxScratch.canvas, 0, 0);
+  canvas.globalCompositeOperation = 'source-over';
+};
+
+Turtle.drawBlocksOnCanvas = function(blocks, canvas) {
+  var domBlocks = Blockly.Xml.textToDom(blocks);
+  Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, domBlocks);
+  var code = Blockly.Generator.workspaceToCode('JavaScript');
+  Turtle.evalCode(code);
+  Blockly.mainWorkspace.clear();
+  Turtle.drawCurrentBlocksOnCanvas(canvas);
+};
+
+Turtle.drawCurrentBlocksOnCanvas = function(canvas) {
+  Turtle.drawLogOnCanvas(api.executionInfo.log, canvas);
 };
 
 /**
@@ -5124,6 +5337,10 @@ Turtle.display = function() {
   Turtle.ctxDisplay.globalCompositeOperation = 'source-over';
   Turtle.ctxDisplay.drawImage(Turtle.ctxImages.canvas, 0, 0);
 
+  // Draw the predraw layer.
+  Turtle.ctxDisplay.globalCompositeOperation = 'source-over';
+  Turtle.ctxDisplay.drawImage(Turtle.ctxPredraw.canvas, 0, 0);
+
   // Draw the user layer.
   Turtle.ctxDisplay.globalCompositeOperation = 'source-over';
   Turtle.ctxDisplay.drawImage(Turtle.ctxScratch.canvas, 0, 0);
@@ -5165,20 +5382,19 @@ Turtle.evalCode = function(code) {
  * Execute the user's code.  Heaven help us...
  */
 Turtle.execute = function() {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 1000000;
+  api.executionInfo = new ExecutionInfo({ticks: 1000000});
 
   Turtle.code = Blockly.Generator.workspaceToCode('JavaScript');
   Turtle.evalCode(Turtle.code);
 
-  // BlocklyApps.log now contains a transcript of all the user's actions.
+  // BlocklyApps.executionInfo.log now contains a transcript of all the user's actions.
   // Reset the graphic and animate the transcript.
   BlocklyApps.reset();
   BlocklyApps.playAudio('start', {volume : 0.5, loop : true});
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 };
 
 /**
@@ -5188,7 +5404,7 @@ Turtle.animate = function() {
   // All tasks should be complete now.  Clean up the PID list.
   Turtle.pid = 0;
 
-  var tuple = BlocklyApps.log.shift();
+  var tuple = api.executionInfo.log.shift();
   if (!tuple) {
     document.getElementById('spinner').style.visibility = 'hidden';
     Blockly.mainWorkspace.highlightBlock(null);
@@ -5579,7 +5795,7 @@ Turtle.checkAnswer = function() {
   BlocklyApps.report(reportData);
 
   // reenable toolbox
-  // Blockly.mainWorkspace.setEnableToolbox(true);
+  Blockly.mainWorkspace.setEnableToolbox(true);
 
   // The call to displayFeedback() will happen later in onReportComplete()
 };
@@ -5593,7 +5809,7 @@ var getFeedbackImage = function() {
       feedbackCanvas.toDataURL("image/png").split(',')[1]);
 };
 
-},{"../../locale/fi_fi/turtle":37,"../base":2,"../codegen":6,"../skins":10,"../templates/page.html":18,"./api":24,"./controls.html":26,"./core":27,"./levels":28}],34:[function(require,module,exports){
+},{"../../locale/fi_fi/turtle":39,"../base":2,"../codegen":6,"../executionInfo":8,"../skins":12,"../templates/page.html":20,"./api":26,"./controls.html":28,"./core":29,"./levels":30}],36:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -5601,6 +5817,13 @@ exports.shallowCopy = function(source) {
   }
 
   return result;
+};
+
+/**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
 };
 
 /**
@@ -5646,14 +5869,46 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],35:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],37:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();
@@ -5674,7 +5929,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fi=function(n){return n===1?"one":"other"}
 exports.blocklyMessage = function(d){return "Blockly"};
 
@@ -5813,7 +6068,7 @@ exports.signup = function(d){return "Rekisteröidy johdantokurssille"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":49}],37:[function(require,module,exports){
+},{"messageformat":51}],39:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fi=function(n){return n===1?"one":"other"}
 exports.blocksUsed = function(d){return "Lohkoja käytetty: %1"};
 
@@ -5928,7 +6183,7 @@ exports.widthTooltip = function(d){return "Muuttaa kynän paksuutta."};
 exports.wrongColour = function(d){return "Kuvasi on väärän värinen. Tässä pulmassa sen pitää olla %1."};
 
 
-},{"messageformat":49}],38:[function(require,module,exports){
+},{"messageformat":51}],40:[function(require,module,exports){
 
 /*!
  * EJS
@@ -6287,7 +6542,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":39,"./utils":40,"fs":41,"path":43}],39:[function(require,module,exports){
+},{"./filters":41,"./utils":42,"fs":43,"path":45}],41:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -6490,7 +6745,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 
 /*!
  * EJS
@@ -6516,9 +6771,9 @@ exports.escape = function(html){
 };
  
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 
-},{}],42:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6573,7 +6828,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],43:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6801,7 +7056,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":42}],44:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":44}],46:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -7312,7 +7567,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7398,7 +7653,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7485,13 +7740,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":45,"./encode":46}],48:[function(require,module,exports){
+},{"./decode":47,"./encode":48}],50:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -8124,7 +8379,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":44,"querystring":47}],49:[function(require,module,exports){
+},{"punycode":46,"querystring":49}],51:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -9707,4 +9962,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[29])
+},{}]},{},[31])

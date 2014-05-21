@@ -1,4 +1,4 @@
-- Options: { id: 4, name: '2014 Levels', trophies: false, hidden: true }
+- Options: { id: 4, name: 'events', trophies: false, hidden: true }
 - TSV: |
     Game	Name	Level	Skin	Concepts	Url
     Bounce	Level1	1	bounce
@@ -18,3 +18,4 @@
     Studio	Level5	5	studio
     Studio	Level6	6	studio
     Studio	Level99	99	studio
+    Studio	Level100	100	studio

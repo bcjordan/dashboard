@@ -1053,7 +1053,7 @@ a.download-video {
     background-color: lightgrey;
     padding-left: 10px;
     padding-right: 10px;
-    width: 200px;
+    width: 220px;
     margin-top:2px;
     margin-bottom:2px;  
   } 
@@ -1063,6 +1063,9 @@ a.download-video {
     li {
       background-color: lightgrey;
     }
+  }
+  li {
+    text-align: center; 
   }
   #slots {
     list-style-type: none;
@@ -1163,8 +1166,24 @@ div.gallery_activity {
   .mainblock {
     margin-left: 20px;
   }
-  label {
-    display: inline;
+  .item {
+    padding: 25px;
+    float: left;
+  }
+  input {
+    margin-top: 0px;
+    margin-right: 20px;
+  }
+  .item-radio {
+    display: inline-block;
+    float: left;
+  }
+  .item-label {
+    display: inline-block;
+    float: left;
+  }
+  img {
+    max-height: 100%;
   }
 }
 
@@ -1175,11 +1194,15 @@ div.gallery_activity {
     margin-left: 20px; 
   }
   .column {
-    width: 240px; 
+    width: 260px; 
     float: left;
   }
   .draggablecolumn {
     cursor: default;
+  }
+  img {
+    height: 100%;
+    width: auto;
   }
 }
 

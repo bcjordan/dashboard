@@ -21,6 +21,10 @@
 
 <% environment.context_class.instance_eval { include ApplicationHelper } %>
 
+// Prevent callstack exceptions when opening multiple dialogs
+// http://stackoverflow.com/a/15856139/2506748
+$.fn.modal.Constructor.prototype.enforceFocus = function () {};
+
 var KEY_ESCAPE = 27;
 
 // Prevent escape from canceling page loads.
@@ -46,6 +50,13 @@ function getShowNotes(key, container) {
   });
 }
 
+function createVideo(options) {
+  return $('<iframe id="video"/>').addClass('video-player').attr({
+    src: options.src,
+    scrolling: 'no'
+  });
+}
+
 // Options include:
 //   src - the url to the video
 //   key - an uid.
@@ -61,10 +72,7 @@ function showVideo(options) {
   content.find('.video-name').text(options.name);
   body.append(content);
 
-  var video = $('<iframe id="video"/>').addClass('video-player').attr({
-    src: options.src,
-    scrolling: 'no'
-  });
+  var video = createVideo(options);
   body.append(video);
 
   var notesDiv = $('<div id="notes-outer"><div id="notes"/></div>');
@@ -86,7 +94,11 @@ function showVideo(options) {
     }
     // Remember which tab is selected.
     var selected = tab.parents('.ui-tabs').tabs('option', 'active');
-    window.sessionStorage.setItem('lastTab', selected);
+    try {
+      window.sessionStorage.setItem('lastTab', selected);
+    } catch (exc) {
+      console.log('Caught exception in sessionStorage.setItem: ', exc);
+    }
   };
 
   var lastTab = window.sessionStorage.getItem('lastTab');
@@ -102,7 +114,7 @@ function showVideo(options) {
                           .attr('href', options.download);
   var nav = $('.ui-tabs-nav');
   nav.append(download);
-  
+
   // Resize modal to fit constraining dimension.
   var height = $(window).height() * widthRatio,
       width = $(window).width() * heightRatio;
@@ -125,7 +137,7 @@ function showVideo(options) {
 
   var divHeight = $div.innerHeight() - nav.outerHeight();
   $(video).height(divHeight);
-  
+
   notesDiv.height(divHeight);
 
   dialog.show();
@@ -134,24 +146,32 @@ function showVideo(options) {
 }
 
 function setupVideoFallback(videoInfo, playerHeight, playerWidth) {
+  if (!videoInfo['enable_fallback']) {
+    return;
+  }
+
   onYouTubeBlocked(function() {
     addFallbackVideoPlayer(videoInfo, playerHeight, playerWidth);
   });
 }
 
 function onYouTubeBlocked(callback) {
-  $("<img width=0 height=0>")
-      .on("error", callback)
-      .attr("src", youTubeAvailabilityEndpointURL() + "?" + Math.random())
-      .css("position", "absolute")
-      .appendTo("body");
+  onURLBlocked(youTubeAvailabilityEndpointURL(), callback);
 }
 
 function youTubeAvailabilityEndpointURL() {
   if (window.document.URL.toString().indexOf('force_youtube_fallback') >= 0) {
     return 'http://unreachable-test-subdomain.example.com/favicon.ico'
   }
-  return "<%= youtube_base_url %>/favicon.ico";
+  return "https://www.youtube.com/favicon.ico";
+}
+
+function onURLBlocked(base_url, callback) {
+  $("<img width=0 height=0>")
+      .on("error", callback)
+      .attr("src", base_url + "?" + Math.random())
+      .css("position", "absolute")
+      .appendTo("body");
 }
 
 function addFallbackVideoPlayer(videoInfo, playerHeight, playerWidth) {
@@ -177,13 +197,19 @@ function addFallbackVideoPlayer(videoInfo, playerHeight, playerWidth) {
     var showingErrorMessage = $fallbackPlayer.find('p').length > 0;
     if (showingErrorMessage) {
       $fallbackPlayer.addClass('fallback-video-player-failed');
-      openNotesTab();
+      if (hasNotesTab()) {
+        openNotesTab();
+      }
     }
     // Properly dispose of video.js player instance when hidden
     $fallbackPlayer.parents('.modal').one('hidden.bs.modal', function(){
       videoPlayer.dispose();
     })
   });
+}
+
+function hasNotesTab() {
+  return $('.dash_modal_body a[href="#notes-outer"]').length > 0;
 }
 
 function openNotesTab() {

@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -33,6 +35,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -71,7 +78,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":29,"./utils":44}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -159,6 +166,14 @@ BlocklyApps.init = function(config) {
 
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
+
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
 
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
@@ -308,12 +323,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -360,8 +378,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -369,11 +387,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -661,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -723,19 +727,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -776,6 +767,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -791,6 +783,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -848,6 +845,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -890,7 +888,9 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/bg_bg/common":43,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":28,"./templates/buttons.html":30,"./templates/instructions.html":32,"./templates/learn.html":33,"./templates/makeYourOwn.html":34,"./utils":41,"./xml":42}],3:[function(require,module,exports){
+},{"../locale/bg_bg/common":46,"./builder":5,"./dom":7,"./feedback.js":9,"./slider":31,"./templates/buttons.html":33,"./templates/instructions.html":35,"./templates/learn.html":36,"./templates/makeYourOwn.html":37,"./utils":44,"./xml":45}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -899,13 +899,83 @@ exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
 };
 
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
+};
+
 exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
+};
+
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":45}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -967,10 +1037,10 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":29,"./utils.js":41,"url":55}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":32,"./utils.js":44,"url":58}],6:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -978,6 +1048,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -1122,6 +1193,45 @@ exports.isMobile = function() {
 };
 
 },{}],8:[function(require,module,exports){
+var ExecutionInfo = function (options) {
+  options = options || {};
+  this.terminated_ = false;
+  this.terminationValue_ = null;
+  this.log = [];
+  this.ticks = options.ticks || Infinity;
+};
+
+module.exports = ExecutionInfo;
+
+ExecutionInfo.prototype.terminateWithValue = function (value) {
+  this.terminated_ = true;
+  this.terminationValue_ = value;
+};
+
+ExecutionInfo.prototype.isTerminated = function () {
+  return this.terminated_;
+};
+
+ExecutionInfo.prototype.terminationValue = function () {
+  return this.terminationValue_;
+};
+
+/**
+ * If the user has executed too many actions, we're probably in an infinite
+ * loop.  Sadly I wasn't able to solve the Halting Problem.
+ * @param {?string} opt_id ID of loop block to highlight.
+ * @throws {Infinity} Throws an error to terminate the user's program.
+ */
+ExecutionInfo.prototype.checkTimeout = function(opt_id) {
+  if (opt_id) {
+    this.log.push([null, opt_id]);
+  }
+  if (this.ticks-- < 0) {
+    this.terminateWithValue(Infinity);
+  }
+};
+
+},{}],9:[function(require,module,exports){
 var trophy = require('./templates/trophy.html');
 var utils = require('./utils');
 var readonly = require('./templates/readonly.html');
@@ -1347,6 +1457,9 @@ var getFeedbackMessage = function(options) {
       break;
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
+      break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
       break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
@@ -1706,17 +1819,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -1823,6 +1934,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -1856,7 +1971,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/bg_bg/common":43,"./codegen":6,"./dom":7,"./templates/buttons.html":30,"./templates/code.html":31,"./templates/readonly.html":36,"./templates/sharing.html":37,"./templates/showCode.html":38,"./templates/trophy.html":39,"./utils":41}],9:[function(require,module,exports){
+},{"../locale/bg_bg/common":46,"./codegen":6,"./dom":7,"./templates/buttons.html":33,"./templates/code.html":34,"./templates/readonly.html":39,"./templates/sharing.html":40,"./templates/showCode.html":41,"./templates/trophy.html":42,"./utils":44}],10:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -1915,15 +2030,22 @@ exports.define = function(name) {
   };
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var tiles = require('./tiles');
 var Direction = tiles.Direction;
 var MoveDirection = tiles.MoveDirection;
 var TurnDirection = tiles.TurnDirection;
 var SquareType = tiles.SquareType;
+var utils = require('../utils');
 
-//TODO: This file should be void of logic like turtle/api.js
-// Mentions of `Maze.` is bad.
+/**
+ * Only call API functions if we haven't yet terminated execution
+ */
+var API_FUNCTION = function (fn) {
+  return utils.executeIfConditional(function () {
+    return !Maze.executionInfo.isTerminated();
+  }, fn);
+};
 
 /**
  * Is there a path next to pegman?
@@ -1958,7 +2080,7 @@ var isPath = function(direction, id) {
       break;
   }
   if (id) {
-    BlocklyApps.log.push([command, id]);
+    Maze.executionInfo.log.push([command, id]);
   }
   return square !== SquareType.WALL &&
         square !== SquareType.OBSTACLE &&
@@ -1974,8 +2096,9 @@ var isPath = function(direction, id) {
  */
 var move = function(direction, id) {
   if (!isPath(direction, null)) {
-    BlocklyApps.log.push(['fail_' + (direction ? 'backward' : 'forward'), id]);
-    throw false;
+    Maze.executionInfo.log.push(['fail_' + (direction ? 'backward' : 'forward'), id]);
+    Maze.executionInfo.terminateWithValue(false);
+    return;
   }
   // If moving backward, flip the effective direction.
   var effectiveDirection = Maze.pegmanD + direction;
@@ -1998,7 +2121,7 @@ var move = function(direction, id) {
       command = 'west';
       break;
   }
-  BlocklyApps.log.push([command, id]);
+  Maze.executionInfo.log.push([command, id]);
   Maze.checkSuccess();
 };
 
@@ -2011,11 +2134,11 @@ var turn = function(direction, id) {
   if (direction == TurnDirection.RIGHT) {
     // Right turn (clockwise).
     Maze.pegmanD += TurnDirection.RIGHT;
-    BlocklyApps.log.push(['right', id]);
+    Maze.executionInfo.log.push(['right', id]);
   } else {
     // Left turn (counterclockwise).
     Maze.pegmanD += TurnDirection.LEFT;
-    BlocklyApps.log.push(['left', id]);
+    Maze.executionInfo.log.push(['left', id]);
   }
   Maze.pegmanD = tiles.constrainDirection4(Maze.pegmanD);
 };
@@ -2063,94 +2186,364 @@ function moveAbsoluteDirection(direction, id) {
   move(MoveDirection.FORWARD, id);
 }
 
-exports.moveForward = function(id) {
+exports.moveForward = API_FUNCTION(function(id) {
   move(MoveDirection.FORWARD, id);
-};
+});
 
-exports.moveBackward = function(id) {
+exports.moveBackward = API_FUNCTION(function(id) {
   move(MoveDirection.BACKWARD, id);
-};
+});
 
-exports.moveNorth = function(id) {
+exports.moveNorth = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.NORTH, id);
-};
+});
 
-exports.moveSouth = function(id) {
+exports.moveSouth = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.SOUTH, id);
-};
+});
 
-exports.moveEast = function(id) {
+exports.moveEast = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.EAST, id);
-};
+});
 
-exports.moveWest = function(id) {
+exports.moveWest = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.WEST, id);
-};
+});
 
-exports.turnLeft = function(id) {
+exports.turnLeft = API_FUNCTION(function(id) {
   turn(TurnDirection.LEFT, id);
-};
+});
 
-exports.turnRight = function(id) {
+exports.turnRight = API_FUNCTION(function(id) {
   turn(TurnDirection.RIGHT, id);
-};
+});
 
-exports.isPathForward = function(id) {
+exports.isPathForward = API_FUNCTION(function(id) {
   return isPath(MoveDirection.FORWARD, id);
-};
-exports.noPathForward = function(id) {
+});
+exports.noPathForward = API_FUNCTION(function(id) {
   return !isPath(MoveDirection.FORWARD, id);
-};
+});
 
-exports.isPathRight = function(id) {
+exports.isPathRight = API_FUNCTION(function(id) {
   return isPath(MoveDirection.RIGHT, id);
-};
+});
 
-exports.isPathBackward = function(id) {
+exports.isPathBackward = API_FUNCTION(function(id) {
   return isPath(MoveDirection.BACKWARD, id);
-};
+});
 
-exports.isPathLeft = function(id) {
+exports.isPathLeft = API_FUNCTION(function(id) {
   return isPath(MoveDirection.LEFT, id);
-};
+});
 
-exports.pilePresent = function(id) {
+exports.pilePresent = API_FUNCTION(function(id) {
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   return Maze.dirt_[y][x] > 0;
-};
+});
 
-exports.holePresent = function(id) {
+exports.holePresent = API_FUNCTION(function(id) {
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   return Maze.dirt_[y][x] < 0;
-};
+});
 
-exports.currentPositionNotClear = function(id) {
+exports.currentPositionNotClear = API_FUNCTION(function(id) {
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   return Maze.dirt_[y][x] !== 0;
-};
+});
 
-exports.fill = function(id) {
-  BlocklyApps.log.push(['putdown', id]);
+exports.fill = API_FUNCTION(function(id) {
+  Maze.executionInfo.log.push(['putdown', id]);
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   Maze.dirt_[y][x] = Maze.dirt_[y][x] + 1;
-};
+});
 
-exports.dig = function(id) {
-  BlocklyApps.log.push(['pickup', id]);
+exports.dig = API_FUNCTION(function(id) {
+  Maze.executionInfo.log.push(['pickup', id]);
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   Maze.dirt_[y][x] = Maze.dirt_[y][x] - 1;
-};
+});
 
-exports.notFinished = function() {
+exports.notFinished = API_FUNCTION(function() {
   return !Maze.checkSuccess();
+});
+
+exports.nectar = API_FUNCTION(function(id) {
+  Maze.bee.getNectar(id);
+});
+
+exports.honey = API_FUNCTION(function(id) {
+  Maze.bee.makeHoney(id);
+});
+
+},{"../utils":44,"./tiles":23}],12:[function(require,module,exports){
+var utils = require('../utils');
+
+var Bee = function (maze, config) {
+  this.maze_ = maze;
+  this.skin_ = config.skin;
+
+  this.nectarGoal_ = config.level.nectarGoal || 0;
+  this.honeyGoal_ = config.level.honeyGoal || 0;
+
+  // Create our own copy to ensure that it's not changing underneath us
+  this.initialDirt_ = utils.cloneWithoutFunctions(config.level.initialDirt);
+
+  this.honeyImages_ = [];
+  this.nectarImages_ = [];
 };
 
-},{"./tiles":21}],11:[function(require,module,exports){
+module.exports = Bee;
+
+Bee.prototype.reset = function () {
+  this.honey_ = 0;
+  this.nectar_ = 0;
+  this.updateNectarImages_();
+  this.updateHoneyImages_();
+};
+
+/**
+ * Did we reach our total nectar/honey goals, and accomplish any specific hiveGoals
+ */
+Bee.prototype.finished = function () {
+  if (this.honey_ < this.honeyGoal_ || this.nectar_ < this.nectarGoal_) {
+    return false;
+  }
+
+  for (var row = 0; row < this.initialDirt_.length; row++) {
+    for (var col = 0; col < this.initialDirt_[row].length; col++) {
+      // If any of our hives still have non infinite capactiy, we haven't hit
+      // the hiveGoal
+      var capacity = this.hiveRemainingCapacity(row, col);
+      if (this.isHive(row, col) && capacity > 0 && capacity < Infinity) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Each cell of initialDirt is below zero if it's a hive.  If a hive has no hive
+ * specific goal, it is represented as -1.  If a hive does have a goal, it is
+ * represented as -(1 + hiveGoal).
+ */
+Bee.prototype.isHive = function (row, col) {
+  return this.initialDirt_[row][col] < 0;
+};
+
+/**
+ * See isHive comment.
+ */
+Bee.prototype.hiveGoal = function (row, col) {
+  var val = this.initialDirt_[row][col];
+  if (val >= -1) {
+    return 0;
+  }
+
+  return Math.abs(val) - 1;
+};
+
+
+/**
+ * How much more honey can the hive at (row, col) produce before it hits the goal
+ */
+Bee.prototype.hiveRemainingCapacity = function (row, col) {
+  if (!this.isHive(row, col)) {
+    return 0;
+  }
+
+  var currentVal = this.maze_.dirt_[row][col];
+  var initialVal = this.initialDirt_[row][col];
+  // If we started at -1, we have no hiveGoal and have infinite capacity
+  if (currentVal === -1 && initialVal === -1) {
+    return Infinity;
+  }
+
+  // Otherwise our capacity is how many more until we get to -1
+  return Math.abs(currentVal + 1);
+};
+
+/**
+ * Update model to represent made honey.  Does no validation
+ */
+Bee.prototype.makeHoneyAt = function (row, col) {
+  var capacity = this.hiveRemainingCapacity(row, col);
+  if (capacity > 0 && capacity !== Infinity) {
+    this.maze_.dirt_[row][col] += 1; // update progress towards goal
+  }
+
+  this.nectar_ -= 1;
+  this.honey_ += 1;
+};
+
+// API
+
+Bee.prototype.getNectar = function (id) {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  // Nectar is positive.  Make sure we have it.
+  if (this.maze_.dirt_[row][col] <= 0) {
+    this.maze_.executionInfo.terminateWithValue(false);
+    return;
+  }
+
+  this.maze_.executionInfo.log.push(['nectar', id]);
+  this.nectar_ += 1;
+};
+
+Bee.prototype.makeHoney = function (id) {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  if (this.nectar_ === 0 || this.hiveRemainingCapacity(row, col) === 0) {
+    this.maze_.executionInfo.terminateWithValue(false);
+    return;
+  }
+
+  this.maze_.executionInfo.log.push(['honey', id]);
+  this.makeHoneyAt(row, col);
+};
+
+// ANIMATIONS
+
+Bee.prototype.animateGetNectar = function () {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  if (this.maze_.dirt_[row][col] <= 0) {
+    throw new Error("Shouldn't be able to end up with a nectar animation if " +
+      "there was no nectar to be had");
+  }
+
+  this.maze_.dirt_[row][col] -= 1;
+  // todo - i have an improvement for how updateDirt works on a different branch
+  if (this.maze_.dirt_[row][col] === 0) {
+    this.maze_.removeDirt(row, col);
+  } else {
+    this.maze_.updateDirt(row, col);
+  }
+
+  this.nectar_ += 1;
+
+  this.updateNectarImages_();
+
+  // play a sound?
+};
+
+Bee.prototype.updateNectarImages_ = function () {
+  var self = this;
+
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.nectarImages_.length; i < this.nectar_; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'nectarClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 0);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.nectarImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.nectarImages_[i].setAttribute('id', 'nectar' + (i + 1));
+    this.nectarImages_[i].setAttribute('width', 50);
+    this.nectarImages_[i].setAttribute('height', 50);
+    this.nectarImages_[i].setAttribute('x', i * 50);
+    this.nectarImages_[i].setAttribute('y', 0);
+    this.nectarImages_[i].setAttribute('clip-path', 'url(#nectarClip' + (i + 1) + ')');
+    this.nectarImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.skin_.nectar);
+    svg.insertBefore(this.nectarImages_[i], pegmanElement);
+  }
+
+  this.nectarImages_.forEach(function (image, index) {
+    image.setAttribute('display', index < self.nectar_ ? 'block' : 'none');
+  });
+};
+
+
+Bee.prototype.animateMakeHoney = function () {
+  var col = this.maze_.pegmanX;
+  var row = this.maze_.pegmanY;
+
+  if (this.nectar_ === 0 || !this.isHive(row, col)) {
+    throw new Error("Shouldn't be able to end up with a honey animation if " +
+      "we arent at a hive or dont have nectar");
+  }
+
+  this.makeHoneyAt(row, col);
+
+  this.maze_.updateDirt(row, col);
+
+  this.updateNectarImages_();
+  this.updateHoneyImages_();
+};
+
+Bee.prototype.updateHoneyImages_ = function () {
+  var self = this;
+
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.honeyImages_.length; i < this.honey_; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'honeyClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 50);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.honeyImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.honeyImages_[i].setAttribute('id', 'honey' + (i + 1));
+    this.honeyImages_[i].setAttribute('width', 50);
+    this.honeyImages_[i].setAttribute('height', 50);
+    this.honeyImages_[i].setAttribute('x', i * 50);
+    this.honeyImages_[i].setAttribute('y', 50);
+    this.honeyImages_[i].setAttribute('clip-path', 'url(#honeyClip' + (i + 1) + ')');
+    this.honeyImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.skin_.honey);
+    svg.insertBefore(this.honeyImages_[i], pegmanElement);
+  }
+
+  this.honeyImages_.forEach(function (image, index) {
+    image.setAttribute('display', index < self.honey_ ? 'block' : 'none');
+  });
+};
+
+/**
+ * When successfully completing a level, maze gradually fades out paths.  It
+ * assumes all dirt is at 0. For now we'll just set all dirt to 0 so that hives
+ * get hidden.  There may be a better long term approach.
+ */
+Bee.prototype.setTilesTransparent = function () {
+  for (var row = 0; row < this.initialDirt_.length; row++) {
+    for (var col = 0; col < this.initialDirt_[row].length; col++) {
+      if (this.isHive(row, col)) {
+        this.maze_.removeDirt(row, col);
+      }
+    }
+  }
+};
+
+},{"../utils":44}],13:[function(require,module,exports){
 /**
  * Blockly Demo: Maze
  *
@@ -2178,30 +2571,13 @@ exports.notFinished = function() {
 
 var msg = require('../../locale/bg_bg/maze');
 var codegen = require('../codegen');
+var blockUtils = require('../block_utils');
 
 // Install extensions to Blockly's language and JavaScript generator.
 exports.install = function(blockly, skin) {
 
   var generator = blockly.Generator.get('JavaScript');
   blockly.JavaScript = generator;
-
-  blockly.Blocks.maze_moveForward = {
-    // Block for moving forward.
-    helpUrl: 'http://code.google.com/p/blockly/wiki/Move',
-    init: function() {
-      this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(msg.moveForward());
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setTooltip(msg.moveForwardTooltip());
-    }
-  };
-
-  generator.maze_moveForward = function() {
-    // Generate JavaScript for moving forward.
-    return 'Maze.moveForward(\'block_id_' + this.id + '\');\n';
-  };
 
   var SimpleMove = {
     DIRECTION_CONFIGS: {
@@ -2244,41 +2620,48 @@ exports.install = function(blockly, skin) {
 
   SimpleMove.generateBlocksForAllDirections();
 
-  blockly.Blocks.maze_fill = {
-    // Block for putting dirt on to a tile.
+  // Block for moving forward.
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_moveForward',
+    helpUrl: 'http://code.google.com/p/blockly/wiki/Move',
+    title: msg.moveForward(),
+    tooltip: msg.moveForwardTooltip(),
+    functionName: 'Maze.moveForward'
+  });
+
+  // Block for putting dirt on to a tile.
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_fill',
     helpUrl: 'http://code.google.com/p/blockly/wiki/PutDown',
-    init: function() {
-      this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(msg.fill());
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setTooltip(msg.fillTooltip());
-    }
-  };
+    title: msg.fill(),
+    tooltip: msg.fillTooltip(),
+    functionName: 'Maze.fill'
+  });
 
-  generator.maze_fill = function() {
-    // Generate JavaScript for putting dirt on to a tile.
-    return 'Maze.fill(\'block_id_' + this.id + '\');\n';
-  };
-
-  blockly.Blocks.maze_dig = {
-    // Block for putting for removing dirt from a tile.
+  // Block for putting for removing dirt from a tile.
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_dig',
     helpUrl: 'http://code.google.com/p/blockly/wiki/PickUp',
-    init: function() {
-      this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(msg.dig());
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setTooltip(msg.digTooltip());
-    }
-  };
+    title: msg.dig(),
+    tooltip: msg.digTooltip(),
+    functionName: 'Maze.dig'
+  });
 
-  generator.maze_dig = function() {
-    // Generate JavaScript for removing dirt from a tile.
-    return 'Maze.dig(\'block_id_' + this.id + '\');\n';
-  };
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_nectar',
+    helpUrl: '',
+    title: msg.nectar(),
+    tooltip: msg.nectarTooltip(),
+    functionName: 'Maze.nectar'
+  });
+
+  blockUtils.generateSimpleBlock(blockly, generator, {
+    name: 'maze_honey',
+    helpUrl: '',
+    title: msg.honey(),
+    tooltip: msg.honeyTooltip(),
+    functionName: 'Maze.honey'
+  });
 
   blockly.Blocks.maze_turn = {
     // Block for turning left or right.
@@ -2558,7 +2941,7 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/bg_bg/maze":44,"../codegen":6}],12:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":47,"../block_utils":3,"../codegen":6}],14:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2579,10 +2962,13 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/maze":44,"ejs":45}],13:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":47,"ejs":48}],15:[function(require,module,exports){
+/*jshint multistr: true */
+
 var levelBase = require('../level_base');
 var Direction = require('./tiles').Direction;
 var msg = require('../../locale/bg_bg/maze');
+var blockUtils = require('../block_utils');
 
 //TODO: Fix hacky level-number-dependent toolbox.
 var toolbox = function(page, level) {
@@ -3777,10 +4163,49 @@ module.exports = {
       [ 0, 0, 0, 0, 0, 0, 0, 0 ],
       [ 0, 0, 0, 0, 0, 0, 0, 0 ]
     ]
+  },
+
+  'bee_1': {
+    'toolbox': blockUtils.createToolbox('\
+      <block type="maze_moveForward"></block>\
+      <block type="maze_turn"><title name="DIR">turnLeft</title></block>\
+      <block type="maze_turn"><title name="DIR">turnRight</title></block>\
+      <block type="maze_nectar"></block>\
+      <block type="maze_honey"></block>'
+    ),
+    'startBlocks': startBlocks(1, 1),
+    'requiredBlocks': [
+    ],
+    'scale': {
+      'snapRadius': 2.0
+    },
+    honeyGoal: 2,
+    step: true,
+    'map': [
+      [ 0, 0, 0, 0, 0, 1, 1, 1 ],
+      [ 0, 1, 1, 0, 0, 1, 1, 1 ],
+      [ 0, 0, 0, 0, 0, 1, 1, 1 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 2, 1, 1, 1, 1, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 1, 1, 0, 0, 0, 0 ],
+      [ 0, 0, 1, 1, 0, 0, 0, 0 ]
+    ],
+    'startDirection': Direction.EAST,
+    'initialDirt': [
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, -1, 2, -1, -2, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    ]
   }
 };
 
-},{"../../locale/bg_bg/maze":44,"../level_base":9,"./karelStartBlocks.xml":14,"./tiles":21,"./toolboxes/karel1.xml":22,"./toolboxes/karel2.xml":23,"./toolboxes/karel3.xml":24}],14:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":47,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":16,"./tiles":23,"./toolboxes/karel1.xml":24,"./toolboxes/karel2.xml":25,"./toolboxes/karel3.xml":26}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3812,7 +4237,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/maze":44,"ejs":45}],15:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":47,"ejs":48}],17:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
 var reqBlocks = require('./requiredBlocks');
@@ -4442,7 +4867,7 @@ cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
 cloneWithStep('karel_2_9', true, false);
 
-},{"../block_utils":3,"../utils":41,"./karelLevels":13,"./requiredBlocks":18,"./startBlocks.xml":20,"./tiles":21,"./toolboxes/maze.xml":25}],16:[function(require,module,exports){
+},{"../block_utils":3,"../utils":44,"./karelLevels":15,"./requiredBlocks":20,"./startBlocks.xml":22,"./tiles":23,"./toolboxes/maze.xml":27}],18:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -4456,11 +4881,12 @@ var skins = require('./skins');
 window.mazeMain = function(options) {
   options.skinsModule = skins;
   options.blocksModule = blocks;
+
   appMain(window.Maze, levels, options);
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":11,"./levels":15,"./maze":17,"./skins":19}],17:[function(require,module,exports){
+},{"../appMain":1,"./blocks":13,"./levels":17,"./maze":19,"./skins":21}],19:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -4498,6 +4924,10 @@ var feedback = require('../feedback.js');
 var dom = require('../dom');
 var utils = require('../utils');
 
+var Bee = require('./bee');
+
+var ExecutionInfo = require('../executionInfo');
+
 var Direction = tiles.Direction;
 var SquareType = tiles.SquareType;
 var TurnDirection = tiles.TurnDirection;
@@ -4516,7 +4946,7 @@ var skin;
 var stepSpeed;
 
 /**
- * Actions in BlocklyApps.log are a tuple in the form [command, block_id]
+ * Actions in Maze.executionInfo.log are a tuple in the form [command, block_id]
  */
 var ACTION_COMMAND = 0;
 var ACTION_BLOCK_ID = 1;
@@ -4882,6 +5312,11 @@ Maze.init = function(config) {
 
   skin = config.skin;
   level = config.level;
+
+  if (config.skinId === 'bee') {
+    Maze.bee = new Bee(Maze, config);
+  }
+
   loadLevel();
 
   Maze.cachedBlockStates = [];
@@ -4893,13 +5328,13 @@ Maze.init = function(config) {
       visualization: require('./visualization.html')(),
       controls: require('./controls.html')({
         assetUrl: BlocklyApps.assetUrl,
-        showStepButton: level.step
+        showStepButton: level.step && !level.edit_blocks
       }),
       blockUsed: undefined,
       idealBlockNumber: undefined,
       blockCounterClass: 'block-counter-default',
     },
-    hideRunButton: level.stepOnly
+    hideRunButton: level.stepOnly && !level.edit_blocks
   });
 
   config.loadAudio = function() {
@@ -5018,7 +5453,7 @@ var createDirt = function(row, col) {
  * @param {number} row Row index.
  * @param {number} col Column index.
  */
-var updateDirt = function(row, col) {
+Maze.updateDirt = function(row, col) {
   // Calculate spritesheet index.
   var n = Maze.dirt_[row][col];
   var spriteIndex;
@@ -5042,7 +5477,7 @@ var updateDirt = function(row, col) {
   img.setAttribute('y', y);
 };
 
-var removeDirt = function(row, col) {
+Maze.removeDirt = function(row, col) {
   var index = dirtPositionToIndex(row, col);
   var img = document.getElementById('dirt' + index);
   if (img) {
@@ -5212,15 +5647,19 @@ BlocklyApps.reset = function(first) {
     movePegmanIcon.setAttribute('visibility', 'hidden');
   }
 
+  if (Maze.bee) {
+    Maze.bee.reset();
+  }
+
   // Move the init dirt marker icons into position.
   resetDirt();
   for (var row = 0; row < Maze.ROWS; row++) {
     for (var col = 0; col < Maze.COLS; col++) {
-      removeDirt(row, col);
+      Maze.removeDirt(row, col);
       if (getTile(Maze.dirt_, col, row) !== 0 &&
           getTile(Maze.dirt_, col, row) !== undefined) {
         createDirt(row, col);
-        updateDirt(row, col);
+        Maze.updateDirt(row, col);
       }
     }
   }
@@ -5348,8 +5787,8 @@ Maze.onReportComplete = function(response) {
  * Execute the user's code.  Heaven help us...
  */
 Maze.execute = function(stepMode) {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 100; //TODO: Set higher for some levels
+
+  Maze.executionInfo = new ExecutionInfo({ticks: 100});
   var code = Blockly.Generator.workspaceToCode('JavaScript');
   Maze.result = ResultType.UNSET;
   Maze.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
@@ -5372,6 +5811,7 @@ Maze.execute = function(stepMode) {
     }
   }
 
+  // todo - update comment
   // Try running the user's code.  There are four possible outcomes:
   // 1. If pegman reaches the finish [SUCCESS], true is thrown.
   // 2. If the program is terminated due to running too long [TIMEOUT],
@@ -5385,31 +5825,41 @@ Maze.execute = function(stepMode) {
   try {
     codegen.evalWith(code, {
       BlocklyApps: BlocklyApps,
-      Maze: api
+      Maze: api,
+      executionInfo: Maze.executionInfo
     });
-    Maze.checkSuccess();
-    // If did not finish, shedule a failure.
-    BlocklyApps.log.push(['finish', null]);
-    Maze.result = ResultType.FAILURE;
-    stepSpeed = 150;
-  } catch (e) {
-    // A boolean is thrown for normal termination. XXX Except when it isn't...
-    // Abnormal termination is a user error.
-    if (e === Infinity) {
-      Maze.result = ResultType.TIMEOUT;
-      stepSpeed = 0;  // Go infinitely fast so program ends quickly.
-    } else if (e === true) {
-      Maze.result = ResultType.SUCCESS;
-      stepSpeed = 100;
-    } else if (e === false) {
-      Maze.result = ResultType.ERROR;
+    if (!Maze.executionInfo.isTerminated() && !Maze.checkSuccess()) {
+      // If did not finish, shedule a failure.
+      Maze.executionInfo.log.push(['finish', null]);
+      Maze.result = ResultType.FAILURE;
       stepSpeed = 150;
     } else {
-      // Syntax error, can't happen.
-      Maze.result = ResultType.ERROR;
-      window.alert(e);
-      return;
+      switch (Maze.executionInfo.terminationValue()) {
+        case Infinity:
+          // Detected an infinite loop.  Animate what we have as quickly as
+          // possible
+          // todo - add a unit test
+          Maze.result = ResultType.TIMEOUT;
+          stepSpeed = 0;
+          break;
+        case true:
+          Maze.result = ResultType.SUCCESS;
+          stepSpeed = 100;
+          break;
+        case false:
+          Maze.result = ResultType.ERROR;
+          stepSpeed = 150;
+          break;
+        default:
+          Maze.result = ResultType.ERROR;
+          break;
+      }
     }
+  } catch (e) {
+    // Syntax error, can't happen.
+    Maze.result = ResultType.ERROR;
+    console.error("Unexpected exception: " + e + "\n" + e.stack);
+    return;
   }
 
   // If we know they succeeded, mark levelComplete true
@@ -5443,13 +5893,13 @@ Maze.execute = function(stepMode) {
     onComplete: Maze.onReportComplete
   });
 
-  // BlocklyApps.log now contains a transcript of all the user's actions.
+  // Maze.executionInfo.log now contains a transcript of all the user's actions.
   // Reset the maze and animate the transcript.
   BlocklyApps.reset(false);
   Maze.animating_ = true;
 
   // Disable toolbox while running
-  // Blockly.mainWorkspace.setEnableToolbox(false);
+  Blockly.mainWorkspace.setEnableToolbox(false);
 
   if (stepMode) {
     if (Maze.cachedBlockStates.length !== 0) {
@@ -5501,11 +5951,15 @@ Maze.performStep = function(stepMode) {
   // running/stepping will turn it off
   Blockly.mainWorkspace.traceOn(true);
 
-  var action = BlocklyApps.log.shift();
+  var action;
+  // get action with non-null command
+  do {
+    action = Maze.executionInfo.log.shift();
+  } while (action && action[ACTION_COMMAND] === null);
   if (!action) {
     BlocklyApps.clearHighlighting();
     Maze.animating_ = false;
-    // Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
+    Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
       Maze.result === ResultType.TIMEOUT ? 0 : 1000);
     return;
@@ -5516,8 +5970,8 @@ Maze.performStep = function(stepMode) {
   var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
-    if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
-      BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
+    if (Maze.executionInfo.log.length === 0 || Maze.executionInfo.log.length === 1 &&
+      Maze.executionInfo.log[0][ACTION_COMMAND] === "finish") {
       var stepButton = document.getElementById('stepButton');
       stepButton.style.display = 'none';
       finishSteps = true;
@@ -5601,6 +6055,12 @@ function animateAction (action, stepMode) {
       break;
     case 'tile_transparent':
       Maze.setTileTransparent();
+      break;
+    case 'nectar':
+      Maze.bee.animateGetNectar();
+      break;
+    case 'honey':
+      Maze.bee.animateMakeHoney();
       break;
     default:
       // action[0] is null if generated by BlocklyApps.checkTimeout().
@@ -5864,6 +6324,10 @@ Maze.setTileTransparent = function() {
       tileId++;
     }
   }
+
+  if (Maze.bee) {
+    Maze.bee.setTilesTransparent();
+  }
 };
 
 /**
@@ -5876,7 +6340,7 @@ Maze.scheduleDance = function(sound) {
 
   // Setting the tiles to be transparent
   if (sound && skin.transparentTileEnding) {
-    BlocklyApps.log.push(['tile_transparent', null]);
+    Maze.executionInfo.log.push(['tile_transparent', null]);
   }
 
   // If sound == true, play the goal animation, else reset it
@@ -5936,9 +6400,9 @@ var scheduleDirtChange = function(options) {
     createDirt(row, col);
   }
   if (current === 0) {
-    removeDirt(row, col);
+    Maze.removeDirt(row, col);
   } else {
-    updateDirt(row, col);
+    Maze.updateDirt(row, col);
   }
   BlocklyApps.playAudio(options.sound, {volume: 0.5});
 };
@@ -6038,15 +6502,26 @@ var isDirtCorrect = function() {
 };
 
 Maze.checkSuccess = function() {
-  if (atFinish() && isDirtCorrect()) {
-    // Finished.  Terminate the user's program.
-    BlocklyApps.log.push(['finish', null]);
-    throw true;
+  if (!atFinish()) {
+    return false;
   }
-  return false;
+  if (Maze.bee) {
+    if (!Maze.bee.finished()) {
+      return false;
+    }
+  } else if (!isDirtCorrect()) {
+    return false;
+  }
+
+  // Finished.  Terminate the user's program.
+  Maze.executionInfo.log.push(['finish', null]);
+  Maze.executionInfo.terminateWithValue(true);
+  return true;
 };
 
-},{"../../locale/bg_bg/common":43,"../../locale/bg_bg/maze":44,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":27,"../templates/page.html":35,"../timeoutList":40,"../utils":41,"./api":10,"./controls.html":12,"./tiles":21,"./visualization.html":26}],18:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"../../locale/bg_bg/maze":47,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":30,"../templates/page.html":38,"../timeoutList":43,"../utils":44,"./api":11,"./bee":12,"./controls.html":14,"./tiles":23,"./visualization.html":28}],20:[function(require,module,exports){
+var requiredBlockUtils = require('../required_block_utils');
+
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
 var TURN_LEFT = {'test': 'turnLeft', 'type': 'maze_turn', 'titles': {'DIR': 'turnLeft'}};
 var TURN_RIGHT = {'test': 'turnRight', 'type': 'maze_turn', 'titles': {'DIR': 'turnRight'}};
@@ -6057,6 +6532,11 @@ var IS_PATH_FORWARD = {'test': 'isPathForward', 'type': 'maze_ifElse', 'titles':
 var FOR_LOOP = {'test': 'for', 'type': 'controls_repeat', titles: {TIMES: '???'}};
 
 module.exports = {
+  moveNorth: requiredBlockUtils.simpleBlock('maze_moveNorth'),
+  moveSouth: requiredBlockUtils.simpleBlock('maze_moveSouth'),
+  moveEast: requiredBlockUtils.simpleBlock('maze_moveEast'),
+  moveWest: requiredBlockUtils.simpleBlock('maze_moveWest'),
+  controls_repeat_simplified: requiredBlockUtils.repeatSimpleBlock('???'),
   MOVE_FORWARD: MOVE_FORWARD,
   TURN_LEFT: TURN_LEFT,
   TURN_RIGHT: TURN_RIGHT,
@@ -6066,7 +6546,8 @@ module.exports = {
   IS_PATH_FORWARD: IS_PATH_FORWARD,
   FOR_LOOP: FOR_LOOP
 };
-},{}],19:[function(require,module,exports){
+
+},{"../required_block_utils":29}],21:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -6080,6 +6561,15 @@ module.exports = {
 var skinsBase = require('../skins');
 
 var CONFIGS = {
+
+  bee: {
+    look: '#000',
+    transparentTileEnding: true,
+    nonDisappearingPegmanHittingObstacle: true,
+    background: 4,
+    dirtSound: true,
+    pegmanYOffset: -8
+  },
 
   farmer: {
     look: '#000',
@@ -6180,6 +6670,8 @@ exports.load = function(assetUrl, id) {
   skin.graph = config.graph;
   skin.look = config.look;
   skin.dirt = skin.assetUrl('dirt.png');
+  skin.nectar = skin.assetUrl('nectar.png');
+  skin.honey = skin.assetUrl('honey.png');
   if (config.background !== undefined) {
     var index = Math.floor(Math.random() * config.background);
     skin.background = skin.assetUrl('background' + index + '.png');
@@ -6192,7 +6684,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":27}],20:[function(require,module,exports){
+},{"../skins":30}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6213,7 +6705,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],21:[function(require,module,exports){
+},{"ejs":48}],23:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -6276,7 +6768,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":41}],22:[function(require,module,exports){
+},{"../utils":44}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6297,7 +6789,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],23:[function(require,module,exports){
+},{"ejs":48}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6323,7 +6815,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/bg_bg/common":43,"../../../locale/bg_bg/maze":44,"ejs":45}],24:[function(require,module,exports){
+},{"../../../locale/bg_bg/common":46,"../../../locale/bg_bg/maze":47,"ejs":48}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6357,7 +6849,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/bg_bg/common":43,"ejs":45}],25:[function(require,module,exports){
+},{"../../../locale/bg_bg/common":46,"ejs":48}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6378,7 +6870,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],26:[function(require,module,exports){
+},{"ejs":48}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6399,7 +6891,127 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],27:[function(require,module,exports){
+},{"ejs":48}],29:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":44,"./xml":45}],30:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -6441,7 +7053,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -6646,7 +7258,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6667,7 +7279,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],30:[function(require,module,exports){
+},{"ejs":48}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6688,7 +7300,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":43,"ejs":45}],31:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"ejs":48}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6709,7 +7321,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],32:[function(require,module,exports){
+},{"ejs":48}],35:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6730,7 +7342,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":43,"ejs":45}],33:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"ejs":48}],36:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6753,7 +7365,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":43,"ejs":45}],34:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"ejs":48}],37:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6774,7 +7386,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":43,"ejs":45}],35:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"ejs":48}],38:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6799,7 +7411,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":43,"ejs":45}],36:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"ejs":48}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6821,7 +7433,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],37:[function(require,module,exports){
+},{"ejs":48}],40:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6842,7 +7454,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":43,"ejs":45}],38:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"ejs":48}],41:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6863,7 +7475,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":43,"ejs":45}],39:[function(require,module,exports){
+},{"../../locale/bg_bg/common":46,"ejs":48}],42:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6884,7 +7496,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":45}],40:[function(require,module,exports){
+},{"ejs":48}],43:[function(require,module,exports){
 var list = [];
 
 /**
@@ -6902,7 +7514,7 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -6910,6 +7522,13 @@ exports.shallowCopy = function(source) {
   }
 
   return result;
+};
+
+/**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
 };
 
 /**
@@ -6955,14 +7574,46 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],42:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],45:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();
@@ -6983,7 +7634,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],43:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bg=function(n){return n===1?"one":"other"}
 exports.blocklyMessage = function(d){return "Блокли"};
 
@@ -7013,13 +7664,13 @@ exports.dialogCancel = function(d){return "Отказ"};
 
 exports.dialogOK = function(d){return "OK"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "север"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "юг"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "изток"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "запад"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блоковете \"Повтори\" и \"или\" трябва да съдържат други блокове в себе си, за да работят. Уверете се, че вътрешния блок се вписва правилно във външния блок."};
 
@@ -7029,7 +7680,7 @@ exports.finalStage = function(d){return "Поздравления! Вие зав
 
 exports.finalStageTrophies = function(d){return "Поздравления! Вие завършихте последния етап и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоковете за вашата програма също могат да бъдат представени в JavaScript, най-широко приетия език за програмиране:"};
+exports.generatedCodeInfo = function(d){return "Дори най-добрите университети учат блок базирано програмиране(напр., "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Но под капака, блокове представляват кодове, написани на JavaScript, в света най-широко използваниятhttps://crowdin.net/translate/codeorg/43/enus-bg# за програмиране език:"};
 
 exports.hashError = function(d){return "За съжаление '%1' не съответства на нито една запазена програма."};
 
@@ -7037,7 +7688,7 @@ exports.help = function(d){return "Помощ"};
 
 exports.hintTitle = function(d){return "Подсказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "скок"};
 
 exports.levelIncompleteError = function(d){return "Използвате всички необходими видове блокове, но не по правилния начин."};
 
@@ -7051,9 +7702,9 @@ exports.nextLevel = function(d){return "Поздравления! Приключ
 
 exports.nextLevelTrophies = function(d){return "Поздравления! Завършихте пъзел "+v(d,"puzzleNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
 
-exports.nextStage = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Поздравления! Вие завършихте "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageNumber")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"трофей","other":n(d,"numTrophies")+" трофея"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравления! Завършихте етап "+v(d,"stageName")+" и спечелихте "+p(d,"numTrophies",0,"bg",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравления! Приключихте пъзел "+v(d,"puzzleNumber")+". (Въпреки това, можехте да използвате само "+p(d,"numBlocks",0,"bg",{"one":"1 блок","other":n(d,"numBlocks")+" блокове"})+".)"};
 
@@ -7093,9 +7744,9 @@ exports.tryAgain = function(d){return "Опитайте отново"};
 
 exports.backToPreviousLevel = function(d){return "Обратно към предишното ниво"};
 
-exports.saveToGallery = function(d){return "Save to your gallery"};
+exports.saveToGallery = function(d){return "Запазване на вашата галерия"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Запазете вашата галерия!"};
 
 exports.typeCode = function(d){return "Въведете вашия JavaScript код под тези инструкции."};
 
@@ -7119,10 +7770,10 @@ exports.tryHOC = function(d){return "Опитайте Часа на Кодира
 
 exports.signup = function(d){return "Регистрация във встъпителния курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Ето един съвет:"};
 
 
-},{"messageformat":56}],44:[function(require,module,exports){
+},{"messageformat":59}],47:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bg=function(n){return n===1?"one":"other"}
 exports.avoidCowAndRemove = function(d){return "избeгни кравата и премахни 1"};
 
@@ -7160,6 +7811,10 @@ exports.heightParameter = function(d){return "тежест"};
 
 exports.holePresent = function(d){return "има дупка"};
 
+exports.honey = function(d){return "make honey"};
+
+exports.honeyTooltip = function(d){return "Make honey from nectar"};
+
 exports.ifCode = function(d){return "ако"};
 
 exports.ifPathAhead = function(d){return "ако има път напред"};
@@ -7168,17 +7823,21 @@ exports.ifTooltip = function(d){return "Ако има път в тази пос�
 
 exports.ifelseTooltip = function(d){return "Ако има път в тази посока,  извърши първия блок действия. Ако няма, извърши втория блок действия."};
 
-exports.moveEastTooltip = function(d){return "Move me east one space."};
+exports.moveEastTooltip = function(d){return "Преместете ме изток един ход."};
 
 exports.moveForward = function(d){return "продължи напред"};
 
 exports.moveForwardTooltip = function(d){return "Премести ме напред с едно поле."};
 
-exports.moveNorthTooltip = function(d){return "Move me north one space."};
+exports.moveNorthTooltip = function(d){return "Преместете ме на Север един ход."};
 
-exports.moveSouthTooltip = function(d){return "Move me south one space."};
+exports.moveSouthTooltip = function(d){return "Преместете ме на юг един ход."};
 
-exports.moveWestTooltip = function(d){return "Move me west one space."};
+exports.moveWestTooltip = function(d){return "Преместете ме изток един ход."};
+
+exports.nectar = function(d){return "get nectar"};
+
+exports.nectarTooltip = function(d){return "Get nectar from a flower"};
 
 exports.nextLevel = function(d){return "Поздравления! Вие завършихте този пъзел."};
 
@@ -7214,13 +7873,13 @@ exports.removeStack = function(d){return "премахни натрупанит�
 
 exports.removeSquare = function(d){return "премахни квадрата"};
 
-exports.repeatUntil = function(d){return "повтаряй докато"};
+exports.repeatUntil = function(d){return "повтаряй докато не стане"};
 
 exports.repeatUntilBlocked = function(d){return "докато има място напред"};
 
 exports.repeatUntilFinish = function(d){return "повтаряй докато приключиш"};
 
-exports.step = function(d){return "Step"};
+exports.step = function(d){return "Стъпка"};
 
 exports.turnLeft = function(d){return "завий наляво"};
 
@@ -7235,7 +7894,7 @@ exports.whileTooltip = function(d){return "Повтаря поставените
 exports.yes = function(d){return "Да"};
 
 
-},{"messageformat":56}],45:[function(require,module,exports){
+},{"messageformat":59}],48:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7594,7 +8253,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":46,"./utils":47,"fs":48,"path":50}],46:[function(require,module,exports){
+},{"./filters":49,"./utils":50,"fs":51,"path":53}],49:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -7797,7 +8456,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],47:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7823,9 +8482,9 @@ exports.escape = function(html){
 };
  
 
-},{}],48:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 
-},{}],49:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7880,7 +8539,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],50:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8108,7 +8767,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":49}],51:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":52}],54:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -8619,7 +9278,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8705,7 +9364,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],53:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8792,13 +9451,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],54:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":52,"./encode":53}],55:[function(require,module,exports){
+},{"./decode":55,"./encode":56}],58:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -9431,7 +10090,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":51,"querystring":54}],56:[function(require,module,exports){
+},{"punycode":54,"querystring":57}],59:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -11014,4 +11673,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[16])
+},{}]},{},[18])

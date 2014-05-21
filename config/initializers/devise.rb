@@ -1,7 +1,11 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
-  config.secret_key = 'd38433cb04ea554af1a39582cef4a59d46268d6c3620c91cef374ed416a07781f7ceb06f227cd73c5abfdb77559d033806d441ad0b49370c58f7b99a78655789'
+  config.secret_key = Deploy.config['dashboard_devise_secret']
+
+  unless Rails.env.production?
+    config.secret_key ||= "not a secure secret key!"
+  end
 
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in Devise::Mailer,
@@ -94,7 +98,10 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 10
 
   # Setup a pepper to generate the encrypted password.
-  # config.pepper = "bdfb50992d830b1382cfef35d292933637cac86700dd826668082addc9d2b87b0f8b91ab5ed99948fbff9b3cdbe0490e64a5fedfd298f8d1e39f9a1ce44859fc"
+  config.pepper = Deploy.config['dashboard_devise_pepper']
+  unless Rails.env.production?
+    config.pepper ||= "not a pepper!"
+  end
 
   # ==> Configuration for :confirmable
   # A period that the user is allowed to access the website even without
@@ -242,6 +249,10 @@ Devise.setup do |config|
   #   manager.intercept_401 = false
   #   manager.default_strategies(:scope => :user).unshift :some_external_strategy
   # end
+  require 'custom_devise_failure'
+  config.warden do |manager|
+    manager.failure_app = CustomDeviseFailure
+  end
 
   # ==> Mountable engine configurations
   # When using Devise inside an engine, let's call it `MyEngine`, and this engine

@@ -20,14 +20,30 @@
     %br/
     = f.select :skin, options_for_select(@level.class.skins, @level.skin)
   .field
-    = f.label :start_direction
     - if @level.class.start_directions.present?
+      = f.label :start_direction
       = f.select :start_direction, options_for_select(@level.class.start_directions, @level.start_direction)
     - else
-      = f.text_field :start_direction, :value => @level.start_direction
-  .field
-    = f.label :step_mode
-    = f.select :step_mode, options_for_select([['Run Button Only', 0], ['Run and Step', 1], ['Step Button Only', 2]], :selected => @level.step_mode)
+      = f.label :start_direction, 'Start Direction (in degrees)'
+      = f.number_field :start_direction, :in => 0...360, :value => @level.start_direction
+  - if @level.type.try(:constantize) == Artist
+    .field
+      = f.label :x
+      = f.number_field :x, :value => @level.x
+    .field
+      = f.label :y
+      = f.number_field :y, :value => @level.y
+  - if @level.class.step_modes.present?
+    .field
+      = f.label :step_mode
+      = f.select :step_mode, options_for_select(@level.class.step_modes, @level.step_mode)
+  - if @level.is_a? Karel
+    .field
+      = f.label :nectar_goal, 'Nectar Goal (bee only)'
+      = f.number_field :nectar_goal, :value => @level.nectar_goal
+    .field
+      = f.label :honey_goal, 'Honey Goal (bee only)'
+      = f.number_field :honey_goal, :value => @level.honey_goal
   .field
     = f.label :is_k1, "Is K1 level?"
     = f.check_box :is_k1
@@ -37,9 +53,16 @@
     = f.collection_select :concept_ids, Concept.cached, :id, :name, { :selected => @level.concept_ids }, { :multiple => true, :name => 'level[concept_ids][]', :style => 'height: 160px' }
     %br/
     (shift-click to select multiple)
+  - if @level.is_a? Artist
+    .field
+      = link_to "Edit Solution Blocks", game_level_edit_blocks_path(@game, @level, :solution_blocks)
   .field
     = link_to "Edit Toolbox Blocks", game_level_edit_blocks_path(@game, @level, :toolbox_blocks)
   .field
     = link_to "Edit Start Blocks", game_level_edit_blocks_path(@game, @level, :start_blocks)
+  .field
+    = link_to "Edit Required Blocks", game_level_edit_blocks_path(@game, @level, :required_blocks)
+  .field
+    = link_to "Edit Predraw Blocks", game_level_edit_blocks_path(@game, @level, :predraw_blocks)
   .actions
     = f.submit

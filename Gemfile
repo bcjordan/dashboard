@@ -31,6 +31,7 @@ group :test do
   gem 'selenium-webdriver'
   gem 'rspec'
   gem 'chromedriver-helper'
+  gem 'colorize'
 end
 
 group :doc do
@@ -100,3 +101,5 @@ gem 'remotipart' # Ajax file upload
 gem 'stringex', '~> 2.5.2' # Provides String.to_ascii
 
 gem 'naturally' # for sorting string naturally
+
+gem 'videojs_rails'

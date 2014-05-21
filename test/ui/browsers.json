@@ -4,23 +4,23 @@
   /* our top browsers by analytics */
 
   {
-    "description": "Chrome 31 on Win7",
+    "name": "Chrome33Win7",
     "browser": "chrome",
-    "browser_version": "31",
+    "browser_version": "33",
     "device": null,
     "os": "Windows",
     "os_version": "7"
   },
   {
-    "description": "Chrome 31 on XP",
+    "name": "Chrome34XP",
     "browser": "chrome",
-    "browser_version": "31",
+    "browser_version": "34",
     "device": null,
     "os": "Windows",
     "os_version": "XP"
   },
   {
-    "description": "Safari on Mavericks",
+    "name": "SafariMavericks",
     "browser": "Safari",
     "browser_version": "7",
     "device": null,
@@ -28,7 +28,7 @@
     "os_version": "Mavericks"
   },
   {
-    "description": "IE 9 on Win 7",
+    "name": "IE9Win7",
     "browser": "Internet Explorer",
     "browser_version": "9",
     "device": null,
@@ -36,7 +36,7 @@
     "os_version": "7"
   },
   {
-    "description": "IE 10 on Win7",
+    "name": "IE10Win7",
     "browser": "Internet Explorer",
     "browser_version": "10",
     "device": null,
@@ -45,7 +45,7 @@
   },
   /* Selenium doesn't yet support IE11.
   {
-    "description": "IE 11 on Win7",
+    "name": "IE11Win7",
     "browser": "Internet Explorer",
     "browser_version": "11",
     "device": null,
@@ -54,7 +54,7 @@
   }, */
   /* Firefox 26 fails.
   {
-    "description": "Firefox 26 on Win7",
+    "name": "Firefox26Win7",
     "browser": "Firefox",
     "browser_version": "26.0",
     "device": null,
@@ -64,16 +64,16 @@
 
   /* browserstack sample list */
   {
-    "description": "iPhone 5",
+    "name": "iPhone5S",
     "browser": "iPhone",
     "platform": "MAC",
-    "device": "iPhone 5",
+    "device": "iPhone 5S",
     "deviceOrientation": "landscape",
     "mobile": true,
     "realMobile": false
   },
   {
-    "description": "Firefox 15 on Snow Leopard",
+    "name": "Firefox15SnowLeopard",
     "browser": "firefox",
     "browser_version": "15.0",
     "device": null,
@@ -81,42 +81,47 @@
     "os_version": "Snow Leopard"
   },
   {
-    "description": "Firefox 16 on Win7",
+    "name": "Firefox16Win7",
     "browser": "firefox",
     "browser_version": "16.0",
     "device": null,
     "os": "Windows",
     "os_version": "7"
   },
+  /* Win8 is not on our whitelist
   {
-    "description": "Firefox 17 on Win8",
+    "name": "Firefox 17 on Win8",
     "browser": "firefox",
     "browser_version": "17.0",
     "device": null,
     "os": "Windows",
     "os_version": "8"
   },
+  */
   /* We don't work on IE8.
   {
-    "description": "IE 8 on Win7",
+    "name": "IE8Win7",
     "browser": "ie",
     "browser_version": "8.0",
     "device": null,
     "os": "Windows",
     "os_version": "7"
-  }, */
+  },
+  */
+  /* Win8 is not on our whitelist
   {
-    "description": "IE 10 on Win8",
+    "name": "IE10Win8",
     "browser": "ie",
     "browser_version": "10.0",
     "device": null,
     "os": "Windows",
     "os_version": "8"
   },
+  */
 
   /* mobile browsers */
   {
-    "description": "Galaxy S3",
+    "name": "GalaxyS3",
     "browser": "android",
     "browser_version": null,
     "device": "Samsung Galaxy S III",
@@ -126,9 +131,9 @@
     "mobile": true
   },
 
-  /* Let's just do one Android browser for now 
+  /* Let's just do one Android browser for now
   {
-    "description": "Nexus 7",
+    "name": "Nexus7",
     "browser": "android",
     "browser_version": null,
     "device": "Google Nexus 7",
@@ -138,7 +143,7 @@
     "mobile": true
   },
   {
-    "description": "Note 2",
+    "name": "Note2",
     "browser": "android",
     "browser_version": null,
     "device": "Samsung Galaxy Note II",
@@ -146,20 +151,22 @@
     "os_version": "4.1",
     "rotatable": true,
     "mobile": true
-  }, */
+  },
+  */
   {
-    "description": "iPad 3",
+    "name": "iPad3",
     "browser": "iPad",
     "browser_version": null,
-    "device": "iPad 3rd (6.0)",
+    "device": "iPad 3rd (7.0)",
     "os": "ios",
-    "os_version": "6.0",
+    "os_version": "7.0",
     "deviceOrientation": "landscape",
     "mobile": true,
     "realMobile": false
-  },
+  }
+  /* BrowserStack's iPad Mini is 6.0, which is not on our whitelsit
   {
-    "description": "iPad Mini",
+    "name": "iPadMini",
     "browser": "iPad",
     "browser_version": null,
     "device": "iPad Mini",
@@ -169,4 +176,5 @@
     "mobile": true,
     "realMobile": false
   }
+  */
 ]

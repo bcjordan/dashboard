@@ -11,13 +11,37 @@ class Artist < Level
 
   def self.create_from_level_builder(params, level_params)
     game = Game.find(params[:game_id])
-    level = create(level_params.merge(user: params[:user], x: params[:x], y: params[:y], start_direction: params[:start_direction], game: game, level_num: 'custom'))
-    solution = LevelSource.lookup(level, params[:program])
-    level.update(solution_level_source: solution)
-    level
+    create(level_params.merge(user: params[:user], x: params[:x], y: params[:y], start_direction: params[:start_direction], game: game, level_num: 'custom', properties: { solution_blocks: params[:program] } ))
   end
 
-  def toolbox
+  # Blocks which are supported by required block editing.
+  def required_blocks
+    '<block type="controls_repeat_simplified">
+        <title name="TIMES">5</title>
+    </block>
+    <block type="simple_move_up"></block>
+    <block type="simple_move_down"></block>
+    <block type="simple_move_left"></block>
+    <block type="simple_move_right"></block>
+    <block type="simple_jump_up"></block>
+    <block type="simple_jump_down"></block>
+    <block type="simple_jump_left"></block>
+    <block type="simple_jump_right"></block>
+    <block type="simple_move_up_length"></block>
+    <block type="simple_move_down_length"></block>
+    <block type="simple_move_left_length"></block>
+    <block type="simple_move_right_length"></block>
+    <block type="draw_move_by_constant"></block>
+    <block type="draw_turn"></block>
+    <block type="draw_colour_simple"></block>
+    <block id="draw-color" type="draw_colour"></block>
+    <block type="controls_repeat"></block>
+    <block type="procedures_defnoreturn"></block>'
+  end
+
+  def toolbox(type)
+    return required_blocks if type == 'required_blocks'
+
     k1_blocks_category + '<category id="actions" name="Actions">
       <block type="draw_move">
         <value name="VALUE">

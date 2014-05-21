@@ -1,9 +1,26 @@
 module LevelsHelper
   def build_script_level_path(script_level)
-    if Script::HOC_ID == script_level.script_id
+    case script_level.script_id
+    when Script::HOC_ID
       hoc_chapter_path(script_level.chapter)
-    else
+    when Script::TWENTY_HOUR_ID
       script_level_path(script_level.script, script_level)
+    when Script::EDIT_CODE_ID
+      editcode_chapter_path(script_level.chapter)
+    when Script::TWENTY_FOURTEEN_LEVELS_ID
+      twenty_fourteen_chapter_path(script_level.chapter)
+    when Script::BUILDER_ID
+      builder_chapter_path(script_level.chapter)
+    when Script::FLAPPY_ID
+      flappy_chapter_path(script_level.chapter)
+    when Script::JIGSAW_ID
+      jigsaw_chapter_path(script_level.chapter)
+    else
+      if script_level.stage
+        script_stage_script_level_path(script_level.script, script_level.stage, script_level.position)
+      else
+        script_puzzle_path(script_level.script, script_level.chapter)
+      end
     end
   end
 
@@ -16,9 +33,6 @@ module LevelsHelper
   end
 
   def set_videos_and_blocks_and_callouts
-    solution = @level.solution_level_source
-    @solution_blocks = solution.data if solution
-
     @videos = @level.videos
 
     seen_videos = session[:videos_seen] || Set.new()
@@ -126,10 +140,15 @@ module LevelsHelper
       level['stepOnly'] = @level.step_mode == 2
     end
 
+    # Pass blockly the edit mode: "<start|toolbox|required>_blocks"
+    level['edit_blocks'] = params[:type]
+    level['edit_blocks_success'] = t('builder.success')
+
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
     Hash[%w(
-      start_blocks solution_blocks slider_speed start_direction instructions initial_dirt final_dirt
+      start_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal
+      required_blocks:levelBuilderRequiredBlocks
       toolbox_blocks:toolbox
       x:initialX
       y:initialY
@@ -166,16 +185,20 @@ module LevelsHelper
     [level, app_options]
   end
 
+  def string_or_image(prefix, text)
+    if ['.jpg', '.png'].include? File.extname(text)
+      "<img src='" + text + "'></img>"
+    else
+      data_t(prefix + '.' + @level.name, text)
+    end
+  end
+
   def multi_t(text)
-    data_t('multi.' + @level.name, text) || text
+    string_or_image('multi', text)
   end
 
   def match_t(text)
-    if ['.jpg', '.png'].include? File.extname(text)
-      "<img src='" + text + "''></img>"
-    else
-      data_t('match.' + @level.name, text)
-    end
+    string_or_image('match', text)
   end
 
 end

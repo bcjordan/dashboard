@@ -57,6 +57,10 @@ When /^I press "([^"]*)"$/ do |button|
   @button.click
 end
 
+When /^I press "([^"]*)" using jQuery$/ do |button|
+  @browser.execute_script("$('#" + button + "').click()");
+end
+
 When /^I press a button with xpath "([^"]*)"$/ do |xpath|
   @button = @browser.find_element(:xpath, xpath)
   @button.click
@@ -106,6 +110,14 @@ Then(/^"([^"]*)" should be in front of "([^"]*)"$/) do |selector_front, selector
   front_z_index = @browser.execute_script("return $('#{selector_front}').css('z-index')").to_i
   behind_z_index = @browser.execute_script("return $('#{selector_behind}').css('z-index')").to_i
   front_z_index.should be > behind_z_index
+end
+
+Then(/^I set slider speed to medium/) do
+  @browser.execute_script("Turtle.speedSlider.setValue(0.8)");
+end
+
+Then(/^I slow down execution speed$/) do
+  @browser.execute_script("Maze.scale.stepSpeed = 5;");
 end
 
 # Note: only works for levels other than the current one

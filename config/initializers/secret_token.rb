@@ -9,4 +9,8 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-Dashboard::Application.config.secret_key_base = '28e080bd2dd7770297ab434c382ec73645821d18aa8ff6ce51f7e985a6096126f6dd2fe10cc44a50d254b98c3d493a473c1ba56b519ce04c08197216a64759c9'
+Dashboard::Application.config.secret_key_base = Deploy.config['dashboard_secret_key_base']
+
+unless Rails.env.production?
+  Dashboard::Application.config.secret_key_base ||= "not a secure secret key!"
+end

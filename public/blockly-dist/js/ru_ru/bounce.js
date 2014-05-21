@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -33,6 +35,11 @@ module.exports = function(app, levels, options) {
     options.level.id = options.levelId;
     for (var prop in options.level) {
       level[prop] = options.level[prop];
+    }
+
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -71,7 +78,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":16}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":16,"./required_block_utils":18,"./utils":33}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -159,6 +166,14 @@ BlocklyApps.init = function(config) {
 
   // enableShowCode defaults to true if not defined
   BlocklyApps.enableShowCode = (config.enableShowCode === false) ? false : true;
+
+  // If the level has no ideal block count, don't show a block count. If it does
+  // have an ideal, show block count unless explicitly configured not to.
+  if (config.level && (config.level.ideal === undefined || config.level.ideal === Infinity)) {
+    BlocklyApps.enableShowBlockCount = false;
+  } else {
+    BlocklyApps.enableShowBlockCount = (config.enableShowBlockCount === false) ? false : true;
+  }
 
   // Store configuration.
   onAttempt = config.onAttempt || function(report) {
@@ -308,12 +323,15 @@ BlocklyApps.init = function(config) {
   BlocklyApps.Dialog = config.Dialog;
 
   var showCode = document.getElementById('show-code-header');
-  if (showCode) {
-    if (BlocklyApps.enableShowCode) {
-      dom.addClickTouchEvent(showCode, function() {
-        feedback.showGeneratedCode(BlocklyApps.Dialog);
-      });
-    }
+  if (showCode && BlocklyApps.enableShowCode) {
+    dom.addClickTouchEvent(showCode, function() {
+      feedback.showGeneratedCode(BlocklyApps.Dialog);
+    });
+  }
+
+  var blockCount = document.getElementById('workspace-header');
+  if (blockCount && !BlocklyApps.enableShowBlockCount) {
+    blockCount.style.visibility = 'hidden';
   }
 
   BlocklyApps.ICON = config.skin.staticAvatar;
@@ -360,8 +378,8 @@ BlocklyApps.init = function(config) {
     promptIcon.src = BlocklyApps.SMALL_ICON;
   }
 
-  // Allow empty blocks if editing required blocks.
-  if (config.level.edit_required_blocks) {
+  // Allow empty blocks if editing blocks.
+  if (config.level.edit_blocks) {
     BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = false;
   }
 
@@ -369,11 +387,12 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks'].forEach(function (prop) {
-    if (config[prop] !== undefined) {
-      options[prop] = config[prop];
-    }
-  });
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+    function (prop) {
+      if (config[prop] !== undefined) {
+        options[prop] = config[prop];
+      }
+    });
   BlocklyApps.inject(div, options);
 
   if (config.afterInject) {
@@ -661,21 +680,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -723,19 +727,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -776,6 +767,7 @@ BlocklyApps.TestResults = {
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
   FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
   FREE_PLAY: 30,              // 2 stars.
+  EDIT_BLOCKS: 70,
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -791,6 +783,11 @@ BlocklyApps.displayFeedback = function(options) {
   options.Dialog = BlocklyApps.Dialog;
   options.onContinue = onContinue;
   options.backToPreviousLevel = backToPreviousLevel;
+
+  // Special test code for edit blocks.
+  if (options.level.edit_blocks) {
+    options.feedbackType = BlocklyApps.TestResults.EDIT_BLOCKS;
+  }
 
   feedback.displayFeedback(options);
 };
@@ -848,6 +845,7 @@ BlocklyApps.resetButtonClick = function() {
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
+  Blockly.mainWorkspace.setEnableToolbox(true);
   Blockly.mainWorkspace.traceOn(false);
   BlocklyApps.reset(false);
 };
@@ -890,7 +888,9 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/ru_ru/common":35,"./builder":14,"./dom":16,"./feedback.js":17,"./slider":19,"./templates/buttons.html":21,"./templates/instructions.html":23,"./templates/learn.html":24,"./templates/makeYourOwn.html":25,"./utils":32,"./xml":33}],3:[function(require,module,exports){
+},{"../locale/ru_ru/common":36,"./builder":14,"./dom":16,"./feedback.js":17,"./slider":20,"./templates/buttons.html":22,"./templates/instructions.html":24,"./templates/learn.html":25,"./templates/makeYourOwn.html":26,"./utils":33,"./xml":34}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -899,13 +899,83 @@ exports.blockOfType = function(type) {
   return '<block type="' + type + '"></block>';
 };
 
+exports.blockWithNext = function (type, child) {
+  return '<block type="' + type + '"><next>' + child + '</next></block>';
+};
+
+/**
+ * Give a list of types, returns the xml assuming each block is a child of
+ * the previous block.
+ */
+exports.blocksFromList = function (types) {
+  if (types.length === 1) {
+    return this.blockOfType(types[0]);
+  }
+
+  return this.blockWithNext(types[0], this.blocksFromList(types.slice(1)));
+};
+
 exports.createCategory = function(name, blocks, custom) {
   return '<category name="' + name + '"' +
           (custom ? ' custom="' + custom + '"' : '') +
           '>' + blocks + '</category>';
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generate a simple block with a plain title and next/previous connectors.
+ */
+exports.generateSimpleBlock = function (blockly, generator, options) {
+  ['name', 'title', 'tooltip', 'functionName'].forEach(function (param) {
+    if (!options[param]) {
+      throw new Error('generateSimpleBlock requires param "' + param + '"');
+    }
+  });
+
+  var name = options.name;
+  var helpUrl = options.helpUrl || ""; // optional param
+  var title = options.title;
+  var tooltip = options.tooltip;
+  var functionName = options.functionName;
+
+  blockly.Blocks[name] = {
+    helpUrl: helpUrl,
+    init: function() {
+      // Note: has a fixed HSV.  Could make this customizable if need be
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+          .appendTitle(title);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(tooltip);
+    }
+  };
+
+  generator[name] = function() {
+    // Generate JavaScript for putting dirt on to a tile.
+    return functionName + '(\'block_id_' + this.id + '\');\n';
+  };
+};
+
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":34}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1633,7 +1703,7 @@ exports.install = function(blockly, skin) {
   delete blockly.Blocks.procedures_ifreturn;
 };
 
-},{"../../locale/ru_ru/bounce":34,"../codegen":15}],7:[function(require,module,exports){
+},{"../../locale/ru_ru/bounce":35,"../codegen":15}],7:[function(require,module,exports){
 /**
  * Blockly App: Bounce
  *
@@ -2407,6 +2477,7 @@ Bounce.init = function(config) {
   config.makeImage = BlocklyApps.assetUrl('media/promo.png');
 
   config.enableShowCode = false;
+  config.enableShowBlockCount = false;
 
   config.preventExtraTopLevelBlocks = true;
 
@@ -2698,8 +2769,6 @@ Bounce.onReportComplete = function(response) {
  * Execute the user's code.  Heaven help us...
  */
 Bounce.execute = function() {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 100; //TODO: Set higher for some levels
   var code = Blockly.Generator.workspaceToCode('JavaScript', 'bounce_whenRun');
   Bounce.result = ResultType.UNSET;
   Bounce.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
@@ -3080,7 +3149,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/ru_ru/bounce":34,"../../locale/ru_ru/common":35,"../base":2,"../codegen":15,"../dom":16,"../feedback.js":17,"../skins":18,"../templates/page.html":26,"../timeoutList":31,"./api":5,"./controls.html":8,"./tiles":12,"./visualization.html":13}],8:[function(require,module,exports){
+},{"../../locale/ru_ru/bounce":35,"../../locale/ru_ru/common":36,"../base":2,"../codegen":15,"../dom":16,"../feedback.js":17,"../skins":19,"../templates/page.html":27,"../timeoutList":32,"./api":5,"./controls.html":8,"./tiles":12,"./visualization.html":13}],8:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3101,7 +3170,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/bounce":34,"ejs":36}],9:[function(require,module,exports){
+},{"../../locale/ru_ru/bounce":35,"ejs":37}],9:[function(require,module,exports){
 /*jshint multistr: true */
 
 var Direction = require('./tiles').Direction;
@@ -3650,7 +3719,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":18}],12:[function(require,module,exports){
+},{"../skins":19}],12:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3710,7 +3779,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],14:[function(require,module,exports){
+},{"ejs":37}],14:[function(require,module,exports){
 var feedback = require('./feedback.js');
 var dom = require('./dom.js');
 var utils = require('./utils.js');
@@ -3740,10 +3809,10 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":16,"./feedback.js":17,"./templates/builder.html":20,"./utils.js":32,"url":46}],15:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
+},{"./dom.js":16,"./feedback.js":17,"./templates/builder.html":21,"./utils.js":33,"url":47}],15:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
  * Returns javascript code to call a timeout check with an optional block id.
@@ -3751,6 +3820,7 @@ var INFINITE_LOOP_TRAP_RE =
 exports.loopTrap = function(blockId) {
   var args = (blockId ? "'block_id_" + blockId + "'" : '');
  return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+
 };
 
 /**
@@ -4121,6 +4191,9 @@ var getFeedbackMessage = function(options) {
     case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
       message = msg.flappySpecificFail();
       break;
+    case BlocklyApps.TestResults.EDIT_BLOCKS:
+      message = options.level.edit_blocks_success;
+      break;
     case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
       /* fallthrough */
     case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
@@ -4479,17 +4552,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -4596,6 +4667,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -4629,7 +4704,127 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/ru_ru/common":35,"./codegen":15,"./dom":16,"./templates/buttons.html":21,"./templates/code.html":22,"./templates/readonly.html":27,"./templates/sharing.html":28,"./templates/showCode.html":29,"./templates/trophy.html":30,"./utils":32}],18:[function(require,module,exports){
+},{"../locale/ru_ru/common":36,"./codegen":15,"./dom":16,"./templates/buttons.html":22,"./templates/code.html":23,"./templates/readonly.html":28,"./templates/sharing.html":29,"./templates/showCode.html":30,"./templates/trophy.html":31,"./utils":33}],18:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
+/**
+ * Create the textual XML for a math_number block.
+ * @param {number|string} number The numeric amount, expressed as a
+ *     number or string.  Non-numeric strings may also be specified,
+ *     such as '???'.
+ * @return {string} The textual representation of a math_number block.
+ */
+exports.makeMathNumber = function(number) {
+  return '<block type="math_number"><title name="NUM">' +
+    number + '</title></block>';
+};
+
+/**
+ * Generate a required blocks dictionary for a simple block that does not
+ * have any parameters or values.
+ * @param {string} block_type The block type.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.simpleBlock = function(block_type) {
+  return {test: function(block) {return block.type == block_type; },
+    type: block_type};
+};
+
+/**
+ * Generate a required blocks dictionary for a repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeat = function(count) {
+  // This checks for a controls_repeat block rather than looking for 'for',
+  // since the latter may be generated by Turtle 2's draw_a_square.
+  return {test: function(block) {return block.type == 'controls_repeat';},
+    type: 'controls_repeat', titles: {'TIMES': count}};
+};
+
+/**
+ * Generate a required blocks dictionary for a simple repeat loop.  This does not
+ * test for the specified repeat count but includes it in the suggested block.
+ * @param {number|string} count The suggested repeat count.
+ * @return {Object} A required blocks dictionary able to check for and
+ *     generate the specified block.
+ */
+exports.repeatSimpleBlock = function(count) {
+  return {test: function(block) {return block.type == 'controls_repeat_simplified';},
+    type: 'controls_repeat_simplified', titles: {'TIMES': count}};
+};
+
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":33,"./xml":34}],19:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -4671,7 +4866,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -4876,7 +5071,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4897,7 +5092,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],21:[function(require,module,exports){
+},{"ejs":37}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4918,7 +5113,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":35,"ejs":36}],22:[function(require,module,exports){
+},{"../../locale/ru_ru/common":36,"ejs":37}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4939,7 +5134,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],23:[function(require,module,exports){
+},{"ejs":37}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4960,7 +5155,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":35,"ejs":36}],24:[function(require,module,exports){
+},{"../../locale/ru_ru/common":36,"ejs":37}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4983,7 +5178,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":35,"ejs":36}],25:[function(require,module,exports){
+},{"../../locale/ru_ru/common":36,"ejs":37}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5004,7 +5199,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":35,"ejs":36}],26:[function(require,module,exports){
+},{"../../locale/ru_ru/common":36,"ejs":37}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5029,7 +5224,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":35,"ejs":36}],27:[function(require,module,exports){
+},{"../../locale/ru_ru/common":36,"ejs":37}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5051,7 +5246,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],28:[function(require,module,exports){
+},{"ejs":37}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5072,7 +5267,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":35,"ejs":36}],29:[function(require,module,exports){
+},{"../../locale/ru_ru/common":36,"ejs":37}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5093,7 +5288,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":35,"ejs":36}],30:[function(require,module,exports){
+},{"../../locale/ru_ru/common":36,"ejs":37}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5114,7 +5309,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":36}],31:[function(require,module,exports){
+},{"ejs":37}],32:[function(require,module,exports){
 var list = [];
 
 /**
@@ -5132,7 +5327,7 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -5140,6 +5335,13 @@ exports.shallowCopy = function(source) {
   }
 
   return result;
+};
+
+/**
+ * Returns a clone of the object, stripping any functions on it.
+ */
+exports.cloneWithoutFunctions = function(object) {
+  return JSON.parse(JSON.stringify(object));
 };
 
 /**
@@ -5185,14 +5387,46 @@ exports.range = function(start, end) {
   return ints;
 };
 
-},{}],33:[function(require,module,exports){
+// Returns an array of required blocks by comparing a list of blocks with
+// a list of app specific block tests (defined in <app>/requiredBlocks.js)
+exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
+  var blocksXml = xml.parseElement(requiredBlocks);
+
+  var blocks = [];
+  Array.prototype.forEach.call(blocksXml.children, function(block) {
+    for (var testKey in blockTests) {
+      var test = blockTests[testKey];
+      if (typeof test === 'function') { test = test(); }
+      if (test.type === block.getAttribute('type')) {
+        blocks.push([test]);  // Test blocks get wrapped in an array.
+        break;
+      }
+    }
+  });
+
+  return blocks;
+};
+
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],34:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();
@@ -5213,7 +5447,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ru = function (n) {
   if ((n % 10) == 1 && (n % 100) != 11) {
     return 'one';
@@ -5270,11 +5504,11 @@ exports.isWall = function(d){return "is this a wall"};
 
 exports.isWallTooltip = function(d){return "Returns true if there is a wall here"};
 
-exports.launchBall = function(d){return "Запустила новый шарик"};
+exports.launchBall = function(d){return "запустить новый шарик"};
 
-exports.launchBallTooltip = function(d){return "Запустите шар в игру."};
+exports.launchBallTooltip = function(d){return "Запустить шарик в игру."};
 
-exports.makeYourOwn = function(d){return "Make Your Own Bounce Game"};
+exports.makeYourOwn = function(d){return "Создай Свою Игру Шарики"};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -5346,7 +5580,7 @@ exports.playSoundWood = function(d){return "play wood sound"};
 
 exports.putdownTower = function(d){return "положить башню"};
 
-exports.reinfFeedbackMsg = function(d){return "Вы можете нажать кнопку \"Попробуйте снова\" для возвращения в игру."};
+exports.reinfFeedbackMsg = function(d){return "Вы можете нажать кнопку «Повторить», чтобы вернуться в игру."};
 
 exports.removeSquare = function(d){return "разбросать квадрат"};
 
@@ -5358,63 +5592,63 @@ exports.repeatUntilFinish = function(d){return "повторять до окон
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
-exports.setBackgroundRandom = function(d){return "Задать случайную сцену"};
+exports.setBackgroundRandom = function(d){return "задать случайную сцену"};
 
-exports.setBackgroundHardcourt = function(d){return "Задать сцену с твердым покрытием"};
+exports.setBackgroundHardcourt = function(d){return "задать сцену с твердым покрытием"};
 
-exports.setBackgroundRetro = function(d){return "Задать ретро сцену"};
+exports.setBackgroundRetro = function(d){return "задать ретро сцену"};
 
-exports.setBackgroundTooltip = function(d){return "Задать фоновую картинку"};
+exports.setBackgroundTooltip = function(d){return "Задает фоновое изображение"};
 
-exports.setBallRandom = function(d){return "Задать случайный мяч"};
+exports.setBallRandom = function(d){return "задать случайный шарик"};
 
-exports.setBallHardcourt = function(d){return "Задать мяч для твердого покрытия"};
+exports.setBallHardcourt = function(d){return "задать шарик для твердого покрытия"};
 
-exports.setBallRetro = function(d){return "Задать ретро мяч"};
+exports.setBallRetro = function(d){return "задать ретро шарик"};
 
-exports.setBallTooltip = function(d){return "Задать изображение мяча "};
+exports.setBallTooltip = function(d){return "Задать изображение шарика"};
 
-exports.setBallSpeedRandom = function(d){return "присвоить случайную скорость мяча"};
+exports.setBallSpeedRandom = function(d){return "задать случайную скорость шарика"};
 
-exports.setBallSpeedVerySlow = function(d){return "присвоить очень медленную  скорость мяча"};
+exports.setBallSpeedVerySlow = function(d){return "задать очень медленную  скорость шарика"};
 
-exports.setBallSpeedSlow = function(d){return "присвоить медленную скорость мяча"};
+exports.setBallSpeedSlow = function(d){return "задать медленную скорость шарика"};
 
-exports.setBallSpeedNormal = function(d){return "присвоить нормальную скорость мяча"};
+exports.setBallSpeedNormal = function(d){return "задать нормальную скорость шарика"};
 
-exports.setBallSpeedFast = function(d){return "присвоить быструю скорость мяча"};
+exports.setBallSpeedFast = function(d){return "задать быструю скорость шарика"};
 
-exports.setBallSpeedVeryFast = function(d){return "присвоить очень быструю скорость мяча"};
+exports.setBallSpeedVeryFast = function(d){return "задать очень быструю скорость шарика"};
 
-exports.setBallSpeedTooltip = function(d){return "Присвоить скорость мяча"};
+exports.setBallSpeedTooltip = function(d){return "Задаёт скорость шарика"};
 
-exports.setPaddleRandom = function(d){return "Задать случайную педаль"};
+exports.setPaddleRandom = function(d){return "задать случайную ракетку"};
 
-exports.setPaddleHardcourt = function(d){return "Задать ракетку для твердого покрытия"};
+exports.setPaddleHardcourt = function(d){return "задать ракетку для твердого покрытия"};
 
-exports.setPaddleRetro = function(d){return "Задать ретро педаль "};
+exports.setPaddleRetro = function(d){return "задать ретро ракетку"};
 
-exports.setPaddleTooltip = function(d){return "Sets the ball paddle"};
+exports.setPaddleTooltip = function(d){return "Задаёт изображение ракетки"};
 
-exports.setPaddleSpeedRandom = function(d){return "присвоить случайную скорость удара"};
+exports.setPaddleSpeedRandom = function(d){return "задать случайную скорость ракетки"};
 
-exports.setPaddleSpeedVerySlow = function(d){return "присвоить очень медленную скорость удара"};
+exports.setPaddleSpeedVerySlow = function(d){return "задать очень медленную скорость ракетки"};
 
-exports.setPaddleSpeedSlow = function(d){return "присвоить медленную скорость удара"};
+exports.setPaddleSpeedSlow = function(d){return "задать медленную скорость ракетки"};
 
-exports.setPaddleSpeedNormal = function(d){return "присвоить нормальную скорость удара"};
+exports.setPaddleSpeedNormal = function(d){return "задать нормальную скорость ракетки"};
 
-exports.setPaddleSpeedFast = function(d){return "присвоить быструю скорость удара"};
+exports.setPaddleSpeedFast = function(d){return "задать быструю скорость ракетки"};
 
-exports.setPaddleSpeedVeryFast = function(d){return "присвоить очень быструю скорость удара"};
+exports.setPaddleSpeedVeryFast = function(d){return "задать очень быструю скорость ракетки"};
 
-exports.setPaddleSpeedTooltip = function(d){return "Присвоить скорость удара"};
+exports.setPaddleSpeedTooltip = function(d){return "Задаёт скорость ракетки"};
 
-exports.share = function(d){return "Share"};
+exports.share = function(d){return "Поделиться"};
 
-exports.shareBounceTwitter = function(d){return "Check out the Bounce game I made. I wrote it myself with @codeorg"};
+exports.shareBounceTwitter = function(d){return "Поиграйте в игру Шарики, которую сделал я сам. Я ее написал с помощью @codeorg"};
 
-exports.shareGame = function(d){return "Share your game:"};
+exports.shareGame = function(d){return "Поделитесь вашей игрой:"};
 
 exports.turnLeft = function(d){return "повернуть налево"};
 
@@ -5465,7 +5699,7 @@ exports.whileTooltip = function(d){return "Повторяет действия �
 exports.yes = function(d){return "Да"};
 
 
-},{"messageformat":47}],35:[function(require,module,exports){
+},{"messageformat":48}],36:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ru = function (n) {
   if ((n % 10) == 1 && (n % 100) != 11) {
     return 'one';
@@ -5508,23 +5742,23 @@ exports.dialogCancel = function(d){return "Отменить"};
 
 exports.dialogOK = function(d){return "Продолжить"};
 
-exports.directionNorthLetter = function(d){return "N"};
+exports.directionNorthLetter = function(d){return "С"};
 
-exports.directionSouthLetter = function(d){return "S"};
+exports.directionSouthLetter = function(d){return "Ю"};
 
-exports.directionEastLetter = function(d){return "E"};
+exports.directionEastLetter = function(d){return "В"};
 
-exports.directionWestLetter = function(d){return "W"};
+exports.directionWestLetter = function(d){return "З"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Блокам \"повторять\" или \"если\" необходимо иметь внутри другие блоки для работы. Убедись  в том, что внутренний блок должным образом подходит к блоку, в котором он содержится."};
 
-exports.extraTopBlocks = function(d){return "У вас есть дополнительные блоки, которые не присоединены к основному блоку."};
+exports.extraTopBlocks = function(d){return "У тебя есть оставшиеся блоки, которые не присоединены к основному блоку."};
 
 exports.finalStage = function(d){return "Поздравляю! Ты завершил последний этап."};
 
 exports.finalStageTrophies = function(d){return "Поздравляю! Ты завершил последний этап и выиграл "+p(d,"numTrophies",0,"ru",{"one":"кубок","other":n(d,"numTrophies")+" кубков"})+"."};
 
-exports.generatedCodeInfo = function(d){return "Блоки твоей программы также могут быть представлены на JavaScript, наиболее распространённом языке программирования в мире:"};
+exports.generatedCodeInfo = function(d){return "Даже в лучших университетах изучают блочное программирование (например, "+v(d,"berkeleyLink")+", "+v(d,"harvardLink")+"). Но на самом деле блоки, которые вы собирали могут быть отображены на JavaScript, наиболее широко используемом в мире языке программирования:"};
 
 exports.hashError = function(d){return "К сожалению, «%1» не соответствует какой-либо сохранённой программе."};
 
@@ -5532,13 +5766,13 @@ exports.help = function(d){return "Справка"};
 
 exports.hintTitle = function(d){return "Подсказка:"};
 
-exports.jump = function(d){return "jump"};
+exports.jump = function(d){return "прыжок"};
 
 exports.levelIncompleteError = function(d){return "Ты используешь все необходимые виды блоков, но неправильным способом."};
 
 exports.listVariable = function(d){return "список"};
 
-exports.makeYourOwnFlappy = function(d){return "Создайте свою аркадную игру"};
+exports.makeYourOwnFlappy = function(d){return "Создай свою игру Flappy Bird"};
 
 exports.missingBlocksErrorMsg = function(d){return "Для решения этой головоломки попробуй один или несколько из следующих блоков:"};
 
@@ -5546,9 +5780,9 @@ exports.nextLevel = function(d){return "Поздравляю! Головолом
 
 exports.nextLevelTrophies = function(d){return "Поздравляю! Ты завершил головоломку "+v(d,"puzzleNumber")+" и выиграл "+p(d,"numTrophies",0,"ru",{"one":"кубок","other":n(d,"numTrophies")+" кубков"})+"."};
 
-exports.nextStage = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageNumber")+"."};
+exports.nextStage = function(d){return "Поздравляем! Ты закончил "+v(d,"stageName")+"."};
 
-exports.nextStageTrophies = function(d){return "Поздравляем! Вы выполнили "+v(d,"stageName")+" и выиграли "+p(d,"numTrophies",0,"ru",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
+exports.nextStageTrophies = function(d){return "Поздравляю! Ты завершил этап "+v(d,"stageName")+" и выиграл "+p(d,"numTrophies",0,"ru",{"one":"a trophy","other":n(d,"numTrophies")+" trophies"})+"."};
 
 exports.numBlocksNeeded = function(d){return "Поздравляю! Ты завершил головоломку "+v(d,"puzzleNumber")+". (Однако, можно было обойтись всего  "+p(d,"numBlocks",0,"ru",{"one":"1 блоком","other":n(d,"numBlocks")+" блоками"})+".)"};
 
@@ -5576,7 +5810,7 @@ exports.tooManyBlocksMsg = function(d){return "Эта головоломка м�
 
 exports.tooMuchWork = function(d){return "Ты заставил меня попотеть! Может, будешь стараться делать меньше попыток?"};
 
-exports.flappySpecificFail = function(d){return "Ваш код выглядит хорошо - Она будет взлетать при клике мышкой. Но нужно будет нажимать на мышку до тех пор пока не достигнете цели."};
+exports.flappySpecificFail = function(d){return "Твой код выглядит не плохо - она будет взлетать при клике мышкой. Но тебе прийдется кликать мышкой много раз, чтобы достичь цели."};
 
 exports.toolboxHeader = function(d){return "Блоки"};
 
@@ -5588,9 +5822,9 @@ exports.tryAgain = function(d){return "Попытаться ещё раз"};
 
 exports.backToPreviousLevel = function(d){return "Вернуться на предыдущий уровень"};
 
-exports.saveToGallery = function(d){return "Сохранить в галерею"};
+exports.saveToGallery = function(d){return "Сохранить в твоей галереи"};
 
-exports.savedToGallery = function(d){return "Saved to your gallery!"};
+exports.savedToGallery = function(d){return "Сохранено в твоей галереи!"};
 
 exports.typeCode = function(d){return "Введите ваш код  на JavaScript под этой инструкцией."};
 
@@ -5614,10 +5848,10 @@ exports.tryHOC = function(d){return "Попробуйте Час кода"};
 
 exports.signup = function(d){return "Зарегистрируйтесь на вводный курс"};
 
-exports.hintHeader = function(d){return "Here's a tip:"};
+exports.hintHeader = function(d){return "Подсказка:"};
 
 
-},{"messageformat":47}],36:[function(require,module,exports){
+},{"messageformat":48}],37:[function(require,module,exports){
 
 /*!
  * EJS
@@ -5976,7 +6210,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":37,"./utils":38,"fs":39,"path":41}],37:[function(require,module,exports){
+},{"./filters":38,"./utils":39,"fs":40,"path":42}],38:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -6179,7 +6413,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 
 /*!
  * EJS
@@ -6205,9 +6439,9 @@ exports.escape = function(html){
 };
  
 
-},{}],39:[function(require,module,exports){
-
 },{}],40:[function(require,module,exports){
+
+},{}],41:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6262,7 +6496,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6490,7 +6724,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":40}],42:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":41}],43:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -7001,7 +7235,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7087,7 +7321,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7174,13 +7408,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":43,"./encode":44}],46:[function(require,module,exports){
+},{"./decode":44,"./encode":45}],47:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -7813,7 +8047,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":42,"querystring":45}],47:[function(require,module,exports){
+},{"punycode":43,"querystring":46}],48:[function(require,module,exports){
 /**
  * messageformat.js
  *

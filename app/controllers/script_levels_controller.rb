@@ -24,11 +24,7 @@ class ScriptLevelsController < ApplicationController
     authorize! :show, ScriptLevel
     @script = Script.get_from_cache(params[:script_id])
 
-    chapter = params[:chapter]
-    script_level_id = params[:id]
-    reset = params[:reset]
-
-    if reset
+    if params[:reset]
       # reset is a special mode which will delete the session if the user is not signed in
       # and start them at the beginning of the script.
       # If the user is signed in, continue normally
@@ -37,34 +33,20 @@ class ScriptLevelsController < ApplicationController
       return
     end
 
-    if ScriptLevel::NEXT == (chapter || script_level_id)
-      if current_user
-        redirect_to build_script_level_path(current_user.try(:next_untried_level, @script) || @script.script_levels.first)
-      else
-        session_progress = session[:progress] || {}
-
-        @script.script_levels.each do |sl|
-          if session_progress.fetch(sl.level_id, -1) < Activity::MINIMUM_PASS_RESULT
-            redirect_to build_script_level_path(sl)
-            break
-          end
-          if sl.level_id == @script.script_levels.last.level_id
-            # all levels complete - resume at first level
-            redirect_to build_script_level_path(@script.script_levels.first)
-          end
-        end
-      end
+    if params[:id] == ScriptLevel::NEXT ||
+        params[:chapter] == ScriptLevel::NEXT
+      redirect_to_next_script_level
       return
     end
 
-    if chapter
-      @script_level = @script.get_script_level_by_chapter(chapter.to_i)
-    else
-      @script_level = @script.get_script_level_by_id(script_level_id.to_i)
-    end
-    raise ActiveRecord::RecordNotFound unless @script_level
+    load_script_level
 
-    present_level(@script_level)
+    if request.path != (canonical_path = build_script_level_path(@script_level))
+      redirect_to canonical_path, status: :moved_permanently
+      return
+    end
+
+    present_level
 
     # TODO should we filter out robot user agents?
     slog(:tag => 'activity_start',
@@ -75,10 +57,39 @@ class ScriptLevelsController < ApplicationController
 
 private
 
-  def present_level(script_level)
-    @level = script_level.level
+  def redirect_to_next_script_level
+    if current_user
+      redirect_to build_script_level_path(current_user.try(:next_untried_level, @script) || @script.script_levels.first)
+      return
+    else
+      session_progress = session[:progress] || {}
+      
+      @script.script_levels.each do |sl|
+        if session_progress.fetch(sl.level_id, -1) < Activity::MINIMUM_PASS_RESULT
+          redirect_to build_script_level_path(sl)
+          return
+        end
+      end
+    end
+    # all levels complete - resume at first level
+    redirect_to build_script_level_path(@script.script_levels.first)
+  end
+
+  def load_script_level
+    if params[:chapter]
+      @script_level = @script.get_script_level_by_chapter(params[:chapter])
+    elsif params[:stage_id]
+      @script_level = @script.get_script_level_by_stage_and_position(params[:stage_id], params[:id])
+    else
+      @script_level = @script.get_script_level_by_id(params[:id])
+    end
+    raise ActiveRecord::RecordNotFound unless @script_level
+  end
+
+  def present_level
+    @level = @script_level.level
     @game = @level.game
-    @stage = script_level.stage
+    @stage = @script_level.stage
 
     set_videos_and_blocks_and_callouts
 

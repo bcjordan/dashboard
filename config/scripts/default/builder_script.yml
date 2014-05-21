@@ -1,2 +1,2 @@
-- Options: { id: 5, name: 'Builder Levels', trophies: false, hidden: true }
+- Options: { id: 5, name: 'builder', trophies: false, hidden: true }
 - {game: Custom, name: builder, level_num: builder, skin: artist_zombie}
