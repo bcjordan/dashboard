@@ -11,12 +11,14 @@ Dashboard::Application.routes.draw do
   end
   resources :concepts
   resources :activities
-  resources :sections do
+  resources :sections do # TODO: do this within a teacher scope
     member do
       get 'edit_students'
       patch 'update_students'
     end
   end
+  resources :teacher, only: [:index]
+
   resources :level_sources, path: '/sh/', only: [:show, :edit] do
     member do
       get 'generate_image'
@@ -142,11 +144,6 @@ Dashboard::Application.routes.draw do
 
   get '/api/user_menu', to: 'api#user_menu', as: 'user_menu'
   get '/api/user_hero', to: 'api#user_hero', as: 'user_hero'
-
-  get '/teacher', to: 'teacher#index'
-  scope '/teacher' do
-    resources :sections
-  end
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
