@@ -115,3 +115,7 @@ end
 Then(/^I set slider speed to medium/) do
   @browser.execute_script("Turtle.speedSlider.setValue(0.8)");
 end
+
+Then(/^I slow down execution speed$/) do
+  @browser.execute_script("Maze.scale.stepSpeed = 5;");
+end

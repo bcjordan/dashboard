@@ -14,7 +14,8 @@ Scenario: Toolbox in maze (non-category) is enabled
   Then the workspace has "1" blocks of type "maze_forever"
 
 Scenario: Toolbox in maze (non-category) is disabled while running
-  Then I press "runButton"
+  Then I slow down execution speed
+  And I press "runButton"
   Then element "#runButton" is hidden
   And element "#resetButton" is visible
   Then I drag block "4" to offset "220, 300"
