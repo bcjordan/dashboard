@@ -5021,8 +5021,6 @@ var stepSpeed;
 //TODO: Make configurable.
 BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
 
-Blockly.JavaScript.INFINITE_LOOP_TRAP = codegen.loopHighlight("Maze");
-
 var getTile = function(map, x, y) {
   if (map && map[y]) {
     return map[y][x];
@@ -5437,6 +5435,7 @@ Maze.init = function(config) {
     Blockly.HSV_SATURATION = 0.6;
 
     Blockly.SNAP_RADIUS *= Maze.scale.snapRadius;
+    Blockly.JavaScript.INFINITE_LOOP_TRAP = codegen.loopHighlight("Maze");
 
     Blockly.GRAY_OUT_UNDELETABLE = true;
 
