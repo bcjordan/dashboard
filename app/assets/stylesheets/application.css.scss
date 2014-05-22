@@ -329,7 +329,25 @@ a.level_link:link,a.level_link:visited { color: white; font-weight: 400; }
 a.level_link:hover { color: white; font-weight: 400; background-color: black; text-decoration: underline; }
 a.level_link:active { color: white; font-weight: 400; background-color: black; }
 
+/* This styling helps to push the footer to the bottom of a page. *?
+* {
+  margin: 0;
+}
+html, body {
+  height: 100%;
+}
+.wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0 auto -168px;  /* This is the same as the height of .push. */
+}
+.push {
+  height: 168px;  /* This is the same as the height of .footer once its padding is included. */
+}
+
 .footer {
+  height: 128px;  /* A height is required to push this footer to the bottom of the page. */
   padding-top: 20px;
   padding-bottom: 20px;
   font-size: 14px;

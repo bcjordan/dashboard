@@ -14,17 +14,20 @@
     = csrf_meta_tags
     = yield :head
   %body{ style: 'padding  :0px;' }
-    - if !phone? || !@level
-      = render partial: 'layouts/header'
-    - page = yield
-    - if @full_width
-      .full_container{ style: @no_padding ? 'padding: 0px 0px 25px 0px;' : '' }
-        = page
-    - else
-      .container.main{ style: 'padding: 10px;'}
-        = show_flashes.html_safe
+    .wrapper
+      - if !phone? || !@level
+        = render partial: 'layouts/header'
+      - page = yield
+      - if @full_width
+        .full_container{ style: @no_padding ? 'padding: 0px 0px 25px 0px;' : '' }
+          = page
+      - else
+        .container.main{ style: 'padding: 10px;'}
+          = show_flashes.html_safe
 
-        = page
+          = page
+      .push
+
     = render partial: 'layouts/footer'
 
     = yield :body_scripts
