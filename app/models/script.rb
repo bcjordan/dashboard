@@ -121,6 +121,10 @@ class Script < ActiveRecord::Base
   def self.add_script(options, data, custom=false)
     script = fetch_script(options)
     chapter = 0; game_chapter = Hash.new(0)
+    # Clear positions in case script levels or stages are deleted.
+    script.script_levels.each { |script_level| script_level.update(position: nil) }
+    script.stages.each { |stage| stage.update(position: nil) }
+    # Overwrites current script levels
     script.script_levels = data.map do |row|
       row.symbolize_keys!
 
@@ -148,11 +152,18 @@ class Script < ActiveRecord::Base
 
       # Set/create Stage containing custom ScriptLevel
       if stage
-        script_level.update(stage: Stage.where(name: stage, script: script).first_or_create)
+        stage_object = Stage.where(name: stage, script: script).first_or_create
+        stage_object.insert_at(0)
+        stage_object.move_to_bottom
+
+        script_level.update(stage: stage_object)
+        script_level.insert_at(0)
         script_level.move_to_bottom
       end
       script_level
     end
+    script.stages.each { |stage| stage.destroy if stage.script_levels.empty? }  # Remove empty stages.
+    script.reload.stages # Otherwise cached destroyed stages will still be in returned script object
     script
   end
 
