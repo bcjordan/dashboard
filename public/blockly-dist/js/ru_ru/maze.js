@@ -4934,7 +4934,7 @@ function cloneWithStep(level, step, stepOnly) {
   module.exports[level + '_step'] = obj;
 }
 
-cloneWithStep('2_1', true, false);
+cloneWithStep('2_1', true, true);
 cloneWithStep('2_2', true, false);
 cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
@@ -5462,7 +5462,7 @@ Maze.init = function(config) {
     var stepButton = document.getElementById('stepButton');
     dom.addClickTouchEvent(stepButton, stepButtonClick);
 
-    // base also calls BlocklyApps.resetButtonClick
+    // base's BlocklyApps.resetButtonClick will be called first
     var resetButton = document.getElementById('resetButton');
     dom.addClickTouchEvent(resetButton, Maze.resetButtonClick);
   };
@@ -5796,9 +5796,17 @@ Maze.beginAttempt = function (stepMode) {
   Maze.execute(stepMode);
 };
 
+/**
+ * App specific reset button click logic.  BlocklyApps.resetButtonClick will be
+ * called first.
+ */
 Maze.resetButtonClick = function () {
   var stepButton = document.getElementById('stepButton');
   stepButton.style.display = level.step ? 'inline' : 'none';
+
+  if (level.stepOnly) {
+    document.getElementById('runButton').style.display = 'none';
+  }
 
   if (Maze.cachedBlockStates) {
     // restore moveable/deletable/editable state from before we started stepping
@@ -6022,7 +6030,10 @@ Maze.performStep = function(stepMode) {
 
   var step = Maze.executionInfo.dequeueStep();
   if (!step) {
-    BlocklyApps.clearHighlighting();
+    var wasStepping = Maze.cachedBlockStates && Maze.cachedBlockStates.length > 0;
+    if (!wasStepping) {
+      BlocklyApps.clearHighlighting();
+    }
     Maze.animating_ = false;
     Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
@@ -6055,7 +6066,9 @@ Maze.performStep = function(stepMode) {
  * Animates a single action
  */
 function animateAction (action, stepMode) {
-  BlocklyApps.highlight(action.blockId, stepMode);
+  if (action.blockId) {
+    BlocklyApps.highlight(action.blockId, stepMode);
+  }
 
   switch (action.command) {
     case 'north':
