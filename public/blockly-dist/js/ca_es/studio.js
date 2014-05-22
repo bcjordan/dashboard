@@ -2344,6 +2344,10 @@ exports.saySprite = function (id, spriteIndex, text) {
   Studio.queueCmd(id, 'saySprite', {'spriteIndex': spriteIndex, 'text': text});
 };
 
+exports.showTitleScreen = function (id, title, text) {
+  Studio.queueCmd(id, 'showTitleScreen', {'title': title, 'text': text});
+};
+
 exports.setSpriteEmotion = function (id, spriteIndex, value) {
   Studio.queueCmd(id,
                   'setSpriteEmotion',
@@ -2958,6 +2962,43 @@ exports.install = function(blockly, skin) {
   };
 
   /**
+   * showTitleScreen
+   */
+  blockly.Blocks.studio_showTitleScreen = {
+    helpUrl: '',
+    init: function() {
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+        .appendTitle(msg.showTitleScreen());
+      this.appendDummyInput()
+        .appendTitle(msg.showTitleScreenTitle())
+        .appendTitle(new Blockly.FieldImage(
+                Blockly.assetUrl('media/quote0.png'), 12, 12))
+        .appendTitle(new Blockly.FieldTextInput(msg.showTSDefTitle()), 'TITLE')
+        .appendTitle(new Blockly.FieldImage(
+                Blockly.assetUrl('media/quote1.png'), 12, 12));
+      this.appendDummyInput()
+        .appendTitle(msg.showTitleScreenText())
+        .appendTitle(new Blockly.FieldImage(
+                Blockly.assetUrl('media/quote0.png'), 12, 12))
+        .appendTitle(new Blockly.FieldTextInput(msg.showTSDefText()), 'TEXT')
+        .appendTitle(new Blockly.FieldImage(
+                Blockly.assetUrl('media/quote1.png'), 12, 12));
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.showTitleScreenTooltip());
+    }
+  };
+
+  generator.studio_showTitleScreen = function() {
+    // Generate JavaScript for saying.
+    return 'Studio.showTitleScreen(\'block_id_' + this.id +
+               '\', ' +
+               blockly.JavaScript.quote_(this.getTitleValue('TITLE')) + ', ' +
+               blockly.JavaScript.quote_(this.getTitleValue('TEXT')) + ');\n';
+  };
+
+  /**
    * setSprite
    */
   blockly.Blocks.studio_setSprite = {
@@ -3005,10 +3046,22 @@ exports.install = function(blockly, skin) {
        [msg.setSpritePenguin(), '"penguin"']];
 
   generator.studio_setSprite = function() {
+    var value = this.getTitleValue('VALUE');
+    var indexString = this.getTitleValue('SPRITE') || '0';
+    if (!blockly.Blocks.studio_firstSetSprite &&
+        'random' !== value &&
+        '"hidden"' !== value) {
+      // Store the params for the first non-random, non-hidden setSprite
+      // call so we can auto-reference this sprite in showTitleScreen() later
+      blockly.Blocks.studio_firstSetSprite = {
+        'index': parseInt(indexString, 10),
+        'value': value.replace(/^"+|"+$/g, ''), // remove quotes
+      };
+    }
     return generateSetterCode({
       ctx: this,
       random: 1,
-      extraParams: (this.getTitleValue('SPRITE') || '0'),
+      extraParams: indexString,
       name: 'setSprite'});
   };
 
@@ -3076,7 +3129,7 @@ exports.install = function(blockly, skin) {
       this.appendDummyInput()
         .appendTitle(new Blockly.FieldImage(
                 Blockly.assetUrl('media/quote0.png'), 12, 12))
-        .appendTitle(new Blockly.FieldTextInput(''), 'TEXT')
+        .appendTitle(new Blockly.FieldTextInput(msg.defaultSayText()), 'TEXT')
         .appendTitle(new Blockly.FieldImage(
                 Blockly.assetUrl('media/quote1.png'), 12, 12));
       this.setInputsInline(true);
@@ -3188,12 +3241,6 @@ var tb = blockUtils.createToolbox;
 var blockOfType = blockUtils.blockOfType;
 var createCategory = blockUtils.createCategory;
 
-var defaultSayBlock = function () {
-  return '<block type="studio_saySprite"><title name="TEXT">' +
-          msg.defaultSayText() +
-          '</title></block>';
-};
-
 /*
  * Configuration for all levels.
  */
@@ -3224,7 +3271,7 @@ module.exports = {
     'timeoutFailureTick': 100,
     'toolbox':
       tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
-         defaultSayBlock()),
+         blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
@@ -3248,7 +3295,7 @@ module.exports = {
     'timeoutFailureTick': 100,
     'toolbox':
       tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
-         defaultSayBlock()),
+         blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
   },
@@ -3279,7 +3326,7 @@ module.exports = {
     'timeoutFailureTick': 200,
     'toolbox':
       tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
-         defaultSayBlock()),
+         blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
       <block type="studio_whenSpriteCollided" deletable="false" x="20" y="120"></block>'
@@ -3310,7 +3357,7 @@ module.exports = {
     'spriteStartingImage': 2,
     'toolbox':
       tb(blockOfType('studio_move') +
-         defaultSayBlock()),
+         blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_whenLeft" deletable="false" x="20" y="20"></block> \
       <block type="studio_whenRight" deletable="false" x="180" y="20"></block> \
@@ -3338,7 +3385,7 @@ module.exports = {
     'timeoutFailureTick': 200,
     'toolbox':
       tb(blockOfType('studio_moveDistance') +
-         defaultSayBlock()),
+         blockOfType('studio_saySprite')),
     'startBlocks':
      '<block type="studio_repeatForever" deletable="false" x="20" y="20"></block>'
   },
@@ -3370,7 +3417,7 @@ module.exports = {
     'toolbox':
       tb(blockOfType('studio_moveDistance') +
          blockOfType('studio_move') +
-         defaultSayBlock()),
+         blockOfType('studio_saySprite')),
     'minWorkspaceHeight': 600,
     'startBlocks':
      '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
@@ -3413,7 +3460,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1200,
+    'minWorkspaceHeight': 1300,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3437,13 +3484,14 @@ module.exports = {
          blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
          blockOfType('studio_repeatForever') +
+         blockOfType('studio_showTitleScreen') +
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_stop') +
          blockOfType('studio_wait') +
          blockOfType('studio_playSound') +
          blockOfType('studio_incrementScore') +
-         defaultSayBlock() +
+         blockOfType('studio_saySprite') +
          blockOfType('studio_setSpritePosition') +
          blockOfType('studio_setSpriteSpeed') +
          blockOfType('studio_setSpriteEmotion')),
@@ -3462,7 +3510,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 900,
+    'minWorkspaceHeight': 1000,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3479,13 +3527,14 @@ module.exports = {
       tb(createCategory(msg.catActions(),
                           blockOfType('studio_setSprite') +
                           blockOfType('studio_setBackground') +
+                          blockOfType('studio_showTitleScreen') +
                           blockOfType('studio_move') +
                           blockOfType('studio_moveDistance') +
                           blockOfType('studio_stop') +
                           blockOfType('studio_wait') +
                           blockOfType('studio_playSound') +
                           blockOfType('studio_incrementScore') +
-                          defaultSayBlock() +
+                          blockOfType('studio_saySprite') +
                           blockOfType('studio_setSpritePosition') +
                           blockOfType('studio_setSpriteSpeed') +
                           blockOfType('studio_setSpriteEmotion')) +
@@ -3729,16 +3778,35 @@ Studio.scale = {
   'stepSpeed': 33
 };
 
+Studio.TITLE_SCREEN_TIMEOUT = 5000;
+var TITLE_SCREEN_TITLE_Y_POSITION = 60; // bottom of title text
+var TITLE_SCREEN_TEXT_Y_POSITION = 100; // top of text group
+var TITLE_SCREEN_TEXT_SIDE_MARGIN = 20;
+var TITLE_SCREEN_TEXT_LINE_HEIGHT = 24;
+var TITLE_SCREEN_TEXT_MAX_LINES = 7;
+var TITLE_SCREEN_TEXT_TOP_MARGIN = 5;
+var TITLE_SCREEN_TEXT_V_PADDING = 15;
+var TITLE_SCREEN_TEXT_WIDTH = 360;
+var TITLE_SCREEN_TEXT_HEIGHT =
+      TITLE_SCREEN_TEXT_TOP_MARGIN + TITLE_SCREEN_TEXT_V_PADDING +
+      (TITLE_SCREEN_TEXT_MAX_LINES * TITLE_SCREEN_TEXT_LINE_HEIGHT);
+
+var TITLE_SPRITE_X_POS = 3;
+var TITLE_SPRITE_Y_POS = 6;
+
 Studio.SPEECH_BUBBLE_TIMEOUT = 3000;
-var SPEECH_BUBBLE_WIDTH = 180;
-var SPEECH_BUBBLE_HEIGHT = 60;
 var SPEECH_BUBBLE_RADIUS = 20;
-var SPEECH_BUBBLE_MARGIN = 10;
-var SPEECH_BUBBLE_PADDING = 5;
-var SPEECH_BUBBLE_LINE_HEIGHT = 20;
-var SPEECH_BUBBLE_MAX_LINES = 2;
-var SPEECH_BUBBLE_V_OFFSET = 5;
 var SPEECH_BUBBLE_H_OFFSET = 50;
+var SPEECH_BUBBLE_PADDING = 5;
+var SPEECH_BUBBLE_SIDE_MARGIN = 10;
+var SPEECH_BUBBLE_LINE_HEIGHT = 20;
+var SPEECH_BUBBLE_MAX_LINES = 4;
+var SPEECH_BUBBLE_TOP_MARGIN = 5;
+var SPEECH_BUBBLE_WIDTH = 180;
+var SPEECH_BUBBLE_HEIGHT = 20 +
+      (SPEECH_BUBBLE_MAX_LINES * SPEECH_BUBBLE_LINE_HEIGHT);
+
+var SCORE_TEXT_Y_POSITION = 60; // bottom of text
 
 var twitterOptions = {
   text: studioMsg.shareStudioTwitter(),
@@ -3880,10 +3948,47 @@ var drawMap = function() {
   score.setAttribute('id', 'score');
   score.setAttribute('class', 'studio-score');
   score.setAttribute('x', Studio.MAZE_WIDTH / 2);
-  score.setAttribute('y', 60);
+  score.setAttribute('y', SCORE_TEXT_Y_POSITION);
   score.appendChild(document.createTextNode(''));
   score.setAttribute('visibility', 'hidden');
   svg.appendChild(score);
+
+  var titleScreenTitle = document.createElementNS(Blockly.SVG_NS, 'text');
+  titleScreenTitle.setAttribute('id', 'titleScreenTitle');
+  titleScreenTitle.setAttribute('class', 'studio-ts-title');
+  titleScreenTitle.setAttribute('x', Studio.MAZE_WIDTH / 2);
+  titleScreenTitle.setAttribute('y', TITLE_SCREEN_TITLE_Y_POSITION);
+  titleScreenTitle.appendChild(document.createTextNode(''));
+  titleScreenTitle.setAttribute('visibility', 'hidden');
+  svg.appendChild(titleScreenTitle);
+
+  var titleScreenTextGroup = document.createElementNS(Blockly.SVG_NS, 'g');
+  var xPosTextGroup = (Studio.MAZE_WIDTH - TITLE_SCREEN_TEXT_WIDTH) / 2;
+  titleScreenTextGroup.setAttribute('id', 'titleScreenTextGroup');
+  titleScreenTextGroup.setAttribute('x', xPosTextGroup);
+  titleScreenTextGroup.setAttribute('y', TITLE_SCREEN_TEXT_Y_POSITION);
+  titleScreenTextGroup.setAttribute(
+      'transform',
+      'translate(' + xPosTextGroup + ',' + TITLE_SCREEN_TEXT_Y_POSITION + ')');
+  titleScreenTextGroup.setAttribute('visibility', 'hidden');
+
+  var titleScreenTextRect = document.createElementNS(Blockly.SVG_NS, 'rect');
+  titleScreenTextRect.setAttribute('id', 'titleScreenTextRect');
+  titleScreenTextRect.setAttribute('x', 0);
+  titleScreenTextRect.setAttribute('y', 0);
+  titleScreenTextRect.setAttribute('width', TITLE_SCREEN_TEXT_WIDTH);
+  titleScreenTextRect.setAttribute('class', 'studio-ts-text-rect');
+
+  var titleScreenText = document.createElementNS(Blockly.SVG_NS, 'text');
+  titleScreenText.setAttribute('id', 'titleScreenText');
+  titleScreenText.setAttribute('class', 'studio-ts-text');
+  titleScreenText.setAttribute('x', TITLE_SCREEN_TEXT_WIDTH / 2);
+  titleScreenText.setAttribute('y', 0);
+  titleScreenText.appendChild(document.createTextNode(''));
+
+  titleScreenTextGroup.appendChild(titleScreenTextRect);
+  titleScreenTextGroup.appendChild(titleScreenText);
+  svg.appendChild(titleScreenTextGroup);
 };
 
 var essentiallyEqual = function(float1, float2, opt_variance) {
@@ -3991,29 +4096,38 @@ var performQueuedMoves = function (i) {
 };
 
 //
-// Set speech text into SVG text tspan elements (manual word wrapping)
+// Set text into SVG text tspan elements (manual word wrapping)
 // Thanks http://stackoverflow.com/questions/
 //        7046986/svg-using-getcomputedtextlength-to-wrap-text
 //
+// opts.svgText: existing svg 'text' element
+// opts.text: full-length text string
+// opts.width: total width
+// opts.fullHeight: total height (fits maxLines of text)
+// opts.maxLines: max number of text lines
+// opts.lineHeight: height per line of text
+// opts.topMargin: top margin
+// opts.sideMargin: left & right margin (deducted from total width)
+//
 
-var setSpeechText = function(svgText, text) {
+var setSvgText = function(opts) {
   // Remove any children from the svgText node:
-  while (svgText.firstChild) {
-    svgText.removeChild(svgText.firstChild);
+  while (opts.svgText.firstChild) {
+    opts.svgText.removeChild(opts.svgText.firstChild);
   }
 
-  var words = text.split(' ');
+  var words = opts.text.split(' ');
   // Create first tspan element
   var tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-  tspan.setAttribute("x", SPEECH_BUBBLE_WIDTH / 2);
-  tspan.setAttribute("dy", SPEECH_BUBBLE_LINE_HEIGHT + SPEECH_BUBBLE_V_OFFSET);
+  tspan.setAttribute("x", opts.width / 2);
+  tspan.setAttribute("dy", opts.lineHeight + opts.topMargin);
   // Create text in tspan element
   var text_node = document.createTextNode(words[0]);
 
   // Add text to tspan element
   tspan.appendChild(text_node);
   // Add tspan element to DOM
-  svgText.appendChild(tspan);
+  opts.svgText.appendChild(tspan);
   var tSpansAdded = 1;
 
   for (var i = 1; i < words.length; i++) {
@@ -4023,25 +4137,25 @@ var setSpeechText = function(svgText, text) {
     tspan.firstChild.data += " " + words[i];
 
     if (tspan.getComputedTextLength() >
-        SPEECH_BUBBLE_WIDTH - 2 * SPEECH_BUBBLE_MARGIN) {
+        opts.width - 2 * opts.sideMargin) {
       // Remove added word
       tspan.firstChild.data = tspan.firstChild.data.slice(0, len);
 
-      if (SPEECH_BUBBLE_MAX_LINES === tSpansAdded) {
-        return SPEECH_BUBBLE_HEIGHT;
+      if (opts.maxLines === tSpansAdded) {
+        return opts.fullHeight;
       }
       // Create new tspan element
       tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-      tspan.setAttribute("x", SPEECH_BUBBLE_WIDTH / 2);
-      tspan.setAttribute("dy", SPEECH_BUBBLE_LINE_HEIGHT);
+      tspan.setAttribute("x", opts.width / 2);
+      tspan.setAttribute("dy", opts.lineHeight);
       text_node = document.createTextNode(words[i]);
       tspan.appendChild(text_node);
-      svgText.appendChild(tspan);
+      opts.svgText.appendChild(tspan);
       tSpansAdded++;
     }
   }
-  var linesLessThanMax = SPEECH_BUBBLE_MAX_LINES - Math.max(1, tSpansAdded);
-  return SPEECH_BUBBLE_HEIGHT - linesLessThanMax * SPEECH_BUBBLE_LINE_HEIGHT;
+  var linesLessThanMax = opts.maxLines - Math.max(1, tSpansAdded);
+  return opts.fullHeight - linesLessThanMax * opts.lineHeight;
 };
 
 //
@@ -4193,9 +4307,11 @@ Studio.onSvgClicked = function(e) {
     Studio.eventHandlers.forEach(function (handler) {
       var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
 
-      if (cmd && cmd.name === 'wait' &&
-          cmd.opts.waitForClick && !cmd.opts.waitComplete) {
-        cmd.opts.waitComplete = true;
+      if (cmd && cmd.opts.waitForClick && !cmd.opts.complete) {
+        if (cmd.opts.waitCallback) {
+          cmd.opts.waitCallback();
+        }
+        cmd.opts.complete = true;
       }
     });
   }
@@ -4358,8 +4474,8 @@ Studio.clearEventHandlersKillTickLoop = function() {
     Studio.eventHandlers.forEach(function (handler) {
       var cmd = handler.cmdQueue ? handler.cmdQueue[0] : null;
 
-      if (cmd && cmd.name === 'wait' &&
-          cmd.opts.waitTimeout && !cmd.opts.waitComplete) {
+      if (cmd && cmd.opts.waitTimeout && !cmd.opts.complete) {
+        // Note: not calling waitCallback() or setting complete = true
         window.clearTimeout(cmd.opts.waitTimeout);
       }
     });
@@ -4393,10 +4509,15 @@ BlocklyApps.reset = function(first) {
     softButtonsCell.className = 'soft-buttons-' + softButtonCount;
   }
 
-  // Reset the score.
+  // Reset the score and title screen.
   Studio.playerScore = 0;
   Studio.opponentScore = 0;
-  document.getElementById('score').setAttribute('visibility', 'hidden');
+  document.getElementById('score')
+    .setAttribute('visibility', 'hidden');
+  document.getElementById('titleScreenTitle')
+    .setAttribute('visibility', 'hidden');
+  document.getElementById('titleScreenTextGroup')
+    .setAttribute('visibility', 'hidden');
 
   // Reset configurable variables
   Studio.setBackground({'value': 'cave'});
@@ -4617,6 +4738,7 @@ Studio.execute = function() {
   Studio.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Studio.waitingForReport = false;
   Studio.response = null;
+  Blockly.Blocks.studio_firstSetSprite = null;
   var i;
 
   if (level.editCode) {
@@ -4635,12 +4757,12 @@ Studio.execute = function() {
   }
 
   var handlers = [];
+  registerHandlers(handlers, 'studio_whenGameStarts', 'whenGameStarts');
   registerHandlers(handlers, 'studio_whenLeft', 'whenLeft');
   registerHandlers(handlers, 'studio_whenRight', 'whenRight');
   registerHandlers(handlers, 'studio_whenUp', 'whenUp');
   registerHandlers(handlers, 'studio_whenDown', 'whenDown');
   registerHandlers(handlers, 'studio_repeatForever', 'repeatForever');
-  registerHandlers(handlers, 'studio_whenGameStarts', 'whenGameStarts');
   registerHandlersWithSpriteParam(handlers,
                                   'studio_whenSpriteClicked',
                                   'whenSpriteClicked',
@@ -4939,6 +5061,11 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       BlocklyApps.playAudio(cmd.opts.soundName, {volume: 0.5});
       break;
+    case 'showTitleScreen':
+      if (!cmd.opts.started) {
+        BlocklyApps.highlight(cmd.id);
+      }
+      return Studio.showTitleScreen(cmd.opts);
     case 'move':
       BlocklyApps.highlight(cmd.id);
       Studio.moveSingle(cmd.opts);
@@ -5003,6 +5130,7 @@ Studio.setSprite = function (opts) {
   Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
   Studio.sprite[opts.index].flags |= (opts.value !== 'hidden') ?
                                       skinTheme(opts.value).spriteFlags : 0;
+  Studio.sprite[opts.index].value = opts.value;
 
   var element = document.getElementById('sprite' + opts.index);
   element.setAttribute('visibility',
@@ -5065,13 +5193,146 @@ var createSpeechBubblePath = function (x, y, w, h, r, onTop, onRight) {
   return strPath;
 };
 
+var onWaitComplete = function (opts) {
+  if (!opts.complete) {
+    if (opts.waitCallback) {
+      opts.waitCallback();
+    }
+    opts.complete = true;
+  }
+};
+
+Studio.wait = function (opts) {
+  if (!opts.started) {
+    opts.started = true;
+
+    // opts.value is the number of milliseconds to wait - or zero which means
+    // "wait for click"
+    if (0 === opts.value) {
+      opts.waitForClick = true;
+    } else {
+      opts.waitTimeout = window.setTimeout(
+        delegate(this, onWaitComplete, opts),
+        opts.value);
+    }
+  }
+
+  return opts.complete;
+};
+
+//
+// setSpritePositionInstant is used internally so a sprite can be moved
+// instantly, without waiting for the next onTick - and optionally overriding
+// the displayDir after movement (otherwise it will revert to SOUTH)
+//
+
+var setSpritePositionInstant = function (i, x, y, displayDir) {
+  var sprite = Studio.sprite[i];
+  Studio.setSpritePosition({'spriteIndex': i, 'x': x, 'y': y});
+  if (displayDir) {
+      sprite.dir = displayDir;
+      sprite.displayDir = displayDir;
+  }
+
+  // Move the spriteClipRect manually so that the next ontick() doesn't
+  // interpret this change in position as one that requires rotating
+  // the sprite through various directions
+  var spriteClipRect = document.getElementById('spriteClipRect' + i);
+  var xCoord = sprite.x * Studio.SQUARE_SIZE;
+  var yCoord = sprite.y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
+  spriteClipRect.setAttribute('x', xCoord);
+  spriteClipRect.setAttribute('y', yCoord);
+};
+
+Studio.hideTitleScreen = function (opts) {
+  if (opts.titleSprite) {
+    // If we have displayed a title sprite and nobody has moved or changed
+    // it while the title screen was displayed, then restore it now:
+    var sprite = Studio.sprite[opts.titleSprite.index];
+    if (sprite.x === TITLE_SPRITE_X_POS &&
+        sprite.y === TITLE_SPRITE_Y_POS &&
+        sprite.value === opts.titleSprite.value) {
+      Studio.setSprite({'index': opts.titleSprite.index,
+                        'value': opts.titleSprite.prevValue});
+      setSpritePositionInstant(opts.titleSprite.index,
+                               opts.titleSprite.prevX,
+                               opts.titleSprite.prevY,
+                               opts.titleSprite.prevDisplayDir);
+
+    }
+  }
+
+  var tsTitle = document.getElementById('titleScreenTitle');
+  var tsTextGroup = document.getElementById('titleScreenTextGroup');
+  tsTitle.setAttribute('visibility', 'hidden');
+  tsTextGroup.setAttribute('visibility', 'hidden');
+
+  opts.complete = true;
+};
+
+Studio.showTitleScreen = function (opts) {
+  if (!opts.started) {
+    opts.started = true;
+    var tsTitle = document.getElementById('titleScreenTitle');
+    var tsTextGroup = document.getElementById('titleScreenTextGroup');
+    var tsText = document.getElementById('titleScreenText');
+    var tsTextRect = document.getElementById('titleScreenTextRect');
+    tsTitle.textContent = opts.title;
+    var svgTextOpts = {
+      'svgText': tsText,
+      'text': opts.text,
+      'width': TITLE_SCREEN_TEXT_WIDTH,
+      'lineHeight': TITLE_SCREEN_TEXT_LINE_HEIGHT,
+      'topMargin': TITLE_SCREEN_TEXT_TOP_MARGIN,
+      'sideMargin': TITLE_SCREEN_TEXT_SIDE_MARGIN,
+      'maxLines': TITLE_SCREEN_TEXT_MAX_LINES,
+      'fullHeight': TITLE_SCREEN_TEXT_HEIGHT,
+    };
+    var tsTextHeight = setSvgText(svgTextOpts);
+    tsTextRect.setAttribute('height', tsTextHeight);
+
+    tsTitle.setAttribute('visibility', 'visible');
+    tsTextGroup.setAttribute('visibility', 'visible');
+
+    if (Blockly.Blocks.studio_firstSetSprite) {
+      // If we sniffed out some knowledge around the first setSprite call,
+      // then we will borrow that sprite and show it temporarily at the bottom
+      // of the title screen (storing its previous state for later recovery):
+      var fSS = Blockly.Blocks.studio_firstSetSprite;
+      var sprite = Studio.sprite[fSS.index];
+      opts.titleSprite = {
+        'index': fSS.index,
+        'value': fSS.value,
+        'prevX': sprite.x,
+        'prevY': sprite.y,
+        'prevDisplayDir': sprite.displayDir,
+        'prevValue': sprite.value,
+      };
+      Studio.setSprite({'index': fSS.index, 'value': fSS.value});
+      setSpritePositionInstant(fSS.index,
+                               TITLE_SPRITE_X_POS,
+                               TITLE_SPRITE_Y_POS,
+                               Direction.SOUTH);
+    }
+
+    // Wait for a click or a timeout
+    opts.waitForClick = true;
+    opts.waitCallback = delegate(this, Studio.hideTitleScreen, opts);
+    opts.waitTimeout = window.setTimeout(
+        delegate(this, onWaitComplete, opts),
+        Studio.TITLE_SCREEN_TIMEOUT);
+  }
+
+  return opts.complete;
+};
+
 Studio.hideSpeechBubble = function (opts) {
   var speechBubble = document.getElementById('speechBubble' + opts.spriteIndex);
   speechBubble.setAttribute('visibility', 'hidden');
   speechBubble.removeAttribute('onTop');
   speechBubble.removeAttribute('onRight');
   speechBubble.removeAttribute('height');
-  opts.sayComplete = true;
+  opts.complete = true;
   Studio.sayComplete++;
 };
 
@@ -5080,7 +5341,18 @@ Studio.saySprite = function (opts) {
     opts.started = true;
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
-    var bblHeight = setSpeechText(bblText, opts.text);
+
+    var svgTextOpts = {
+      'svgText': bblText,
+      'text': opts.text,
+      'width': SPEECH_BUBBLE_WIDTH,
+      'lineHeight': SPEECH_BUBBLE_LINE_HEIGHT,
+      'topMargin': SPEECH_BUBBLE_TOP_MARGIN,
+      'sideMargin': SPEECH_BUBBLE_SIDE_MARGIN,
+      'maxLines': SPEECH_BUBBLE_MAX_LINES,
+      'fullHeight': SPEECH_BUBBLE_HEIGHT,
+    };
+    var bblHeight = setSvgText(svgTextOpts);
     var speechBubblePath =
         document.getElementById('speechBubblePath' + opts.spriteIndex);
     var speechBubble =
@@ -5099,29 +5371,7 @@ Studio.saySprite = function (opts) {
         Studio.SPEECH_BUBBLE_TIMEOUT);
   }
 
-  return opts.sayComplete;
-};
-
-var onWaitComplete = function (opts) {
-  opts.waitComplete = true;
-};
-
-Studio.wait = function (opts) {
-  if (!opts.started) {
-    opts.started = true;
-
-    // opts.value is the number of milliseconds to wait - or zero which means
-    // "wait for click"
-    if (0 === opts.value) {
-      opts.waitForClick = true;
-    } else {
-      opts.waitTimeout = window.setTimeout(
-        delegate(this, onWaitComplete, opts),
-        opts.value);
-    }
-  }
-
-  return opts.waitComplete;
+  return opts.complete;
 };
 
 Studio.stop = function (opts) {
@@ -6178,6 +6428,18 @@ exports.share = function(d){return "Share"};
 exports.shareStudioTwitter = function(d){return "Check out the story I made. I wrote it myself with @codeorg"};
 
 exports.shareGame = function(d){return "Share your story:"};
+
+exports.showTitleScreen = function(d){return "show title screen"};
+
+exports.showTitleScreenTitle = function(d){return "title"};
+
+exports.showTitleScreenText = function(d){return "text"};
+
+exports.showTSDefTitle = function(d){return "type title here"};
+
+exports.showTSDefText = function(d){return "type text here"};
+
+exports.showTitleScreenTooltip = function(d){return "Show a title screen with the associated title and text."};
 
 exports.setSprite = function(d){return "set"};
 
