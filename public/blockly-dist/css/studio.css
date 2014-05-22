@@ -87,7 +87,8 @@ button.arrow:focus {
 .studio-speech-bubble {
   fill: black;
   font-size: 16px;
-  text-anchor: middle; }
+  text-anchor: middle;
+  cursor: default; }
 
 .studio-speech-bubble-path {
   fill: white;
@@ -101,4 +102,28 @@ button.arrow:focus {
   font-weight: bold;
   fill: white;
   stroke: black;
-  stroke-width: 2; }
+  stroke-width: 2;
+  cursor: default; }
+
+.studio-ts-title {
+  text-anchor: middle;
+  font-size: xx-large;
+  font-weight: bold;
+  fill: white;
+  stroke: black;
+  stroke-width: 2;
+  cursor: default; }
+
+.studio-ts-text {
+  text-anchor: middle;
+  font-size: 20px;
+  font-weight: bold;
+  fill: white;
+  stroke: black;
+  stroke-width: 1;
+  cursor: default; }
+
+.studio-ts-text-rect {
+  stroke: white;
+  stroke-width: 3;
+  fill: none; }
