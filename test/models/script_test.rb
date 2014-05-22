@@ -55,6 +55,34 @@ class ScriptTest < ActiveSupport::TestCase
     assert_not Stage.exists?(stage)
   end
 
+  test 'should remove empty stages, retaining ordering' do
+    script_file_3_stages = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture_3_stages.script")
+    script_file_middle_missing = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture_middle_missing.script")
+    scripts,_ = Script.setup([], [script_file_3_stages])
+    assert_equal 3, scripts[0].stages.count
+    first = scripts[0].stages[0]
+    second = scripts[0].stages[1]
+    third = scripts[0].stages[2]
+    assert_equal 'Stage1', first.name
+    assert_equal 'Stage2', second.name
+    assert_equal 'Stage3', third.name
+    assert_equal 1, first.position
+    assert_equal 2, second.position
+    assert_equal 3, third.position
+
+    # Reupload a similar script lacking the middle stage.
+    scripts,_ = Script.setup([], [script_file_middle_missing])
+    assert_equal 2, scripts[0].stages.count
+    assert_not Stage.exists?(second)
+
+    first = scripts[0].stages[0]
+    second = scripts[0].stages[1]
+    assert_equal 'Stage1', first.name
+    assert_equal 'Stage3', second.name
+    assert_equal 1, first.position
+    assert_equal 2, second.position
+  end
+
   test 'should not create two scripts with same name' do
     create(:script, :name => 'script')
     raise = assert_raises ActiveRecord::RecordInvalid do

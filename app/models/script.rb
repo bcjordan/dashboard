@@ -157,6 +157,11 @@ class Script < ActiveRecord::Base
       script_level
     end
     script.stages.each { |stage| stage.delete if stage.script_levels.empty? }  # Remove empty stages.
+    # Not necessary? TODO(bjordan): remove before PR merge
+    # script.stages.each do |stage|
+    #   stage.insert_at(0)
+    #   stage.move_to_bottom
+    # end
     script
   end
 
