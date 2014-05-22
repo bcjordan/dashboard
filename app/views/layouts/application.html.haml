@@ -25,8 +25,8 @@
         .container.main{ style: 'padding: 10px;'}
           = show_flashes.html_safe
           = page
-      .push
-      - if !@no_padding 
+      - unless @share && phone?
+        .push
         = render partial: 'layouts/footer'
 
     = yield :body_scripts
