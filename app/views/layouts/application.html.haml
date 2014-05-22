@@ -18,14 +18,15 @@
       = render partial: 'layouts/header'
     - page = yield
     - if @full_width
-      .full_container{ style: @no_padding ? 'padding: 0px 0px 25px 0px;' : '' }
+      .full_container{ style: @no_padding ? 'padding: 0px;' : '' }
         = page
     - else
       .container.main{ style: 'padding: 10px;'}
         = show_flashes.html_safe
 
         = page
-    = render partial: 'layouts/footer'
+    - if !@no_padding 
+      = render partial: 'layouts/footer'
 
     = yield :body_scripts
 

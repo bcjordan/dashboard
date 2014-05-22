@@ -96,9 +96,13 @@
     }
     return false;
   }
+  function isShowingPopup()
+  {
+    return $("#headerPopup").css('display') != 'none';
+  }
   togglePopup = function () {
     $("#headerPopup").toggle();
-    if ($("#headerPopup").css('display') == 'none') {
+    if (!isShowingPopup()) {
       $(".header_popup_link_glyph").html("&#x25BC;");
       $(".header_popup_link_text").html("#{t(:more)}");
       $(".transparent_backdrop").off('click', handlePopupClick);
@@ -120,8 +124,7 @@
       togglePopup();
       $.ajax({url:'#{header_stats_path()}', data: { script_id: #{script.id} }, success:function(result) {
           $("#headerPopupBody").html(result);
-          if (trophiesClicked)
-          {
+          if (trophiesClicked === true) {
             jumpToTrophies();
           }
         }
@@ -129,8 +132,7 @@
     }
     else {
       togglePopup();
-      if (trophiesClicked)
-      {
+      if (isShowingPopup() && trophiesClicked === true) {
         jumpToTrophies();
       }
     }

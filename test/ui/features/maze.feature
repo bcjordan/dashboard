@@ -1,6 +1,7 @@
 Feature: Complete a maze level
 
 Background:
+  Given I am on "http://learn.code.org/reset_session"
   Given I am on "http://learn.code.org/s/1/level/16?noautoplay=true"
   And I rotate to landscape
   And I wait for 2 seconds
@@ -43,3 +44,5 @@ Scenario: Submit a valid solution
   And I press "continue-button"
   And I wait for 2 seconds
   Then check that I am on "http://learn.code.org/s/1/level/17"
+  Then check that level 16 on this stage is done
+  Then check that level 15 on this stage is not done

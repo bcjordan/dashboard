@@ -91,3 +91,16 @@ Then(/^the workspace has "(.*?)" blocks of type "(.*?)"$/) do |n, type|
   result = @browser.execute_script(code)
   result.should eq n.to_i
 end
+
+Then /^block "([^"]*)" has class "(.*?)"$/ do |blockId, className|
+  item = @browser.find_element(:css, "g[block-id='#{blockId}']")
+  classes = item.attribute("class")
+  puts classes
+  classes.include?(className).should eq true
+end
+
+Then /^block "([^"]*)" doesn't have class "(.*?)"$/ do |blockId, className|
+  item = @browser.find_element(:css, "g[block-id='#{blockId}']")
+  classes = item.attribute("class")
+  classes.include?(className).should eq false
+end

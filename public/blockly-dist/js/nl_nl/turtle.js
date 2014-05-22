@@ -1,6 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -24,7 +25,7 @@ StubDialog.prototype.hide = function() {
   console.log(this);
 };
 
-module.exports = function(app, levels, options, requiredBlockTests) {
+module.exports = function(app, levels, options) {
 
   // If a levelId is not provided, then options.level is specified in full.
   // Otherwise, options.level overrides resolved level on a per-property basis.
@@ -36,9 +37,9 @@ module.exports = function(app, levels, options, requiredBlockTests) {
       level[prop] = options.level[prop];
     }
 
-    if (requiredBlockTests && options.level.required_blocks) {
-      level.requiredBlocks = utils.parseRequiredBlocks(
-          options.level.required_blocks, requiredBlockTests);
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -77,7 +78,7 @@ module.exports = function(app, levels, options, requiredBlockTests) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":35}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":35}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -114,6 +115,7 @@ var Slider = require('./slider');
 //TODO: These should be members of a BlocklyApp instance.
 var onAttempt;
 var onContinue;
+var onResetPressed;
 var backToPreviousLevel;
 
 /**
@@ -184,6 +186,9 @@ BlocklyApps.init = function(config) {
   };
   onContinue = config.onContinue || function() {
     console.log('Continue!');
+  };
+  onResetPressed = config.onResetPressed || function() {
+    console.log('Reset!');
   };
   backToPreviousLevel = config.backToPreviousLevel || function() {};
 
@@ -679,21 +684,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -741,19 +731,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -768,7 +745,7 @@ BlocklyApps.initTime = undefined;
 
 /**
  * Reset the playing field to the start position and kill any pending
- * animation tasks.  This will benerally be replaced by an application.
+ * animation tasks.  This will typically be replaced by an application.
  * @param {boolean} first True if an opening animation is to be played.
  */
 BlocklyApps.reset = function(first) {};
@@ -844,8 +821,6 @@ BlocklyApps.report = function(options) {
 
   // Disable the run button until onReportComplete is called.
   if (!BlocklyApps.share) {
-    document.getElementById('runButton').setAttribute('disabled', 'disabled');
-
     var onAttemptCallback = (function() {
       return function(builderDetails) {
         for (var option in builderDetails) {
@@ -869,6 +844,7 @@ BlocklyApps.report = function(options) {
  * Click the reset button.  Reset the application.
  */
 BlocklyApps.resetButtonClick = function() {
+  onResetPressed();
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
@@ -916,6 +892,8 @@ var getIdealBlockNumberMsg = function() {
 };
 
 },{"../locale/nl_nl/common":37,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":12,"./templates/buttons.html":14,"./templates/instructions.html":16,"./templates/learn.html":17,"./templates/makeYourOwn.html":18,"./utils":35,"./xml":36}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -981,7 +959,26 @@ exports.generateSimpleBlock = function (blockly, generator, options) {
   };
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":36}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1000,12 +997,12 @@ exports.install = function(blockly, skin) {
     init: function() {
       this.setHelpUrl(blockly.Msg.CONTROLS_REPEAT_HELPURL);
       this.setHSV(322, 0.90, 0.95);
-      this.appendStatementInput('DO')
-        .appendTitle(new blockly.FieldImage(skin.repeatImage));
       this.appendDummyInput()
         .appendTitle(blockly.Msg.CONTROLS_REPEAT_TITLE_REPEAT)
         .appendTitle(new Blockly.FieldTextInput('10',
           blockly.FieldTextInput.nonnegativeIntegerValidator), 'TIMES');
+      this.appendStatementInput('DO')
+        .appendTitle(new blockly.FieldImage(skin.repeatImage));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(blockly.Msg.CONTROLS_REPEAT_TOOLTIP);
@@ -1044,16 +1041,25 @@ exports.builderForm = function(onAttemptCallback) {
 };
 
 },{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":13,"./utils.js":35,"url":49}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
-var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
+
+var LOOP_HIGHLIGHT = 'loopHighlight();\n';
+var LOOP_HIGHLIGHT_RE =
+    new RegExp(LOOP_HIGHLIGHT.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
- * Returns javascript code to call a timeout check with an optional block id.
+ * Returns javascript code to call a timeout check
  */
-exports.loopTrap = function(blockId) {
-  var args = (blockId ? "'block_id_" + blockId + "'" : '');
- return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+exports.loopTrap = function() {
+  return INFINITE_LOOP_TRAP;
+};
+
+exports.loopHighlight = function (apiName, blockId) {
+  var args = "'block_id_" + blockId + "'";
+  if (blockId === undefined) {
+    args = "%1";
+  }
+  return apiName + '.' + LOOP_HIGHLIGHT.replace('()', '(' + args + ')');
 };
 
 /**
@@ -1066,7 +1072,9 @@ exports.strip = function(code) {
     // Strip out serial numbers.
     .replace(/(,\s*)?'block_id_\d+'\)/g, ')')
     // Remove timeouts.
-    .replace(INFINITE_LOOP_TRAP_RE, '')
+    .replace(INFINITE_LOOP_TRAP, '')
+    // Strip out loop highlight
+    .replace(LOOP_HIGHLIGHT_RE, '')
     // Strip out class namespaces.
     .replace(/(BlocklyApps|Maze|Turtle)\./g, '')
     // Strip out particular helper functions.
@@ -1785,17 +1793,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -1902,6 +1908,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -1995,6 +2005,10 @@ exports.define = function(name) {
 };
 
 },{}],10:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
 /**
  * Create the textual XML for a math_number block.
  * @param {number|string} number The numeric amount, expressed as a
@@ -2045,7 +2059,72 @@ exports.repeatSimpleBlock = function(count) {
     type: 'controls_repeat_simplified', titles: {'TIMES': count}};
 };
 
-},{}],11:[function(require,module,exports){
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":35,"./xml":36}],11:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -2624,8 +2703,7 @@ var drawHouse = function(length) {
  * Warning: Has side effects to BlocklyApps.
  */
 exports.answer = function(page, level) {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = Infinity;
+  api.log = [];
   var count, sideIdx, len;
   if (page == 1) {
     switch (level) {
@@ -2878,90 +2956,92 @@ exports.answer = function(page, level) {
     }
   }
   BlocklyApps.reset();
-  return BlocklyApps.log;
+  return api.log;
 };
 
 },{"../base":2,"./api":25}],25:[function(require,module,exports){
 var BlocklyApps = require('../base');
 
+exports.log = [];
+
 exports.moveForward = function(distance, id) {
-  BlocklyApps.log.push(['FD', distance, id]);
+  this.log.push(['FD', distance, id]);
 };
 
 exports.moveBackward = function(distance, id) {
-  BlocklyApps.log.push(['FD', -distance, id]);
+  this.log.push(['FD', -distance, id]);
 };
 
 exports.moveUp = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 0, id]);
+  this.log.push(['MV', distance, 0, id]);
 };
 
 exports.moveDown = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 180, id]);
+  this.log.push(['MV', distance, 180, id]);
 };
 
 exports.moveLeft = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 270, id]);
+  this.log.push(['MV', distance, 270, id]);
 };
 
 exports.moveRight = function(distance, id) {
-  BlocklyApps.log.push(['MV', distance, 90, id]);
+  this.log.push(['MV', distance, 90, id]);
 };
 
 exports.jumpUp = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 0, id]);
+  this.log.push(['JD', distance, 0, id]);
 };
 
 exports.jumpDown = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 180, id]);
+  this.log.push(['JD', distance, 180, id]);
 };
 
 exports.jumpLeft = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 270, id]);
+  this.log.push(['JD', distance, 270, id]);
 };
 
 exports.jumpRight = function(distance, id) {
-  BlocklyApps.log.push(['JD', distance, 90, id]);
+  this.log.push(['JD', distance, 90, id]);
 };
 
 exports.jumpForward = function(distance, id) {
-  BlocklyApps.log.push(['JF', distance, id]);
+  this.log.push(['JF', distance, id]);
 };
 
 exports.jumpBackward = function(distance, id) {
-  BlocklyApps.log.push(['JF', -distance, id]);
+  this.log.push(['JF', -distance, id]);
 };
 
 exports.turnRight = function(angle, id) {
-  BlocklyApps.log.push(['RT', angle, id]);
+  this.log.push(['RT', angle, id]);
 };
 
 exports.turnLeft = function(angle, id) {
-  BlocklyApps.log.push(['RT', -angle, id]);
+  this.log.push(['RT', -angle, id]);
 };
 
 exports.penUp = function(id) {
-  BlocklyApps.log.push(['PU', id]);
+  this.log.push(['PU', id]);
 };
 
 exports.penDown = function(id) {
-  BlocklyApps.log.push(['PD', id]);
+  this.log.push(['PD', id]);
 };
 
 exports.penWidth = function(width, id) {
-  BlocklyApps.log.push(['PW', Math.max(width, 0), id]);
+  this.log.push(['PW', Math.max(width, 0), id]);
 };
 
 exports.penColour = function(colour, id) {
-  BlocklyApps.log.push(['PC', colour, id]);
+  this.log.push(['PC', colour, id]);
 };
 
 exports.hideTurtle = function(id) {
-  BlocklyApps.log.push(['HT', id]);
+  this.log.push(['HT', id]);
 };
 
 exports.showTurtle = function(id) {
-  BlocklyApps.log.push(['ST', id]);
+  this.log.push(['ST', id]);
 };
 
 },{"../base":2}],26:[function(require,module,exports){
@@ -4529,15 +4609,14 @@ window.Turtle = require('./turtle');
 var blocks = require('./blocks');
 var skins = require('../skins');
 var levels = require('./levels');
-var requiredBlocks = require('./requiredBlocks');
 
 window.turtleMain = function(options) {
   options.skinsModule = skins;
   options.blocksModule = blocks;
-  appMain(window.Turtle, levels, options, requiredBlocks);
+  appMain(window.Turtle, levels, options);
 };
 
-},{"../appMain":1,"../skins":11,"./blocks":26,"./levels":29,"./requiredBlocks":31,"./turtle":34}],31:[function(require,module,exports){
+},{"../appMain":1,"../skins":11,"./blocks":26,"./levels":29,"./turtle":34}],31:[function(require,module,exports){
 /**
  * Sets BlocklyApp constants that depend on the page and level.
  * This encapsulates many functions used for BlocklyApps.REQUIRED_BLOCKS.
@@ -4727,21 +4806,8 @@ module.exports = {
   SET_COLOUR_PICKER: SET_COLOUR_PICKER,
   SET_COLOUR_RANDOM: SET_COLOUR_RANDOM,
   defineWithArg: defineWithArg,
-  controls_repeat_simplified: requiredBlockUtils.repeatSimpleBlock('???'),
-  draw_colour_simple: requiredBlockUtils.simpleBlock('draw_colour_simple'),
-  simple_move_up: requiredBlockUtils.simpleBlock('simple_move_up'),
-  simple_move_down: requiredBlockUtils.simpleBlock('simple_move_down'),
-  simple_move_left: requiredBlockUtils.simpleBlock('simple_move_left'),
-  simple_move_right: requiredBlockUtils.simpleBlock('simple_move_right'),
-  simple_jump_up: requiredBlockUtils.simpleBlock('simple_jump_up'),
-  simple_jump_down: requiredBlockUtils.simpleBlock('simple_jump_down'),
-  simple_jump_left: requiredBlockUtils.simpleBlock('simple_jump_left'),
-  simple_jump_right: requiredBlockUtils.simpleBlock('simple_jump_right'),
-  simple_move_up_length: requiredBlockUtils.simpleBlock('simple_move_up_length'),
-  simple_move_down_length: requiredBlockUtils.simpleBlock('simple_move_down_length'),
-  simple_move_left_length: requiredBlockUtils.simpleBlock('simple_move_left_length'),
-  simple_move_right_length: requiredBlockUtils.simpleBlock('simple_move_right_length')
 };
+
 },{"../required_block_utils":10}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
@@ -5096,8 +5162,14 @@ Turtle.drawAnswer = function() {
 };
 
 Turtle.drawLogOnCanvas = function(log, canvas) {
-  BlocklyApps.log = log;
-  Turtle.drawCurrentBlocksOnCanvas(canvas);
+  BlocklyApps.reset();
+  while (log.length) {
+    var tuple = log.shift();
+    Turtle.step(tuple[0], tuple.splice(1));
+  }
+  canvas.globalCompositeOperation = 'copy';
+  canvas.drawImage(Turtle.ctxScratch.canvas, 0, 0);
+  canvas.globalCompositeOperation = 'source-over';
 };
 
 Turtle.drawBlocksOnCanvas = function(blocks, canvas) {
@@ -5110,14 +5182,7 @@ Turtle.drawBlocksOnCanvas = function(blocks, canvas) {
 };
 
 Turtle.drawCurrentBlocksOnCanvas = function(canvas) {
-  BlocklyApps.reset();
-  while (BlocklyApps.log.length) {
-    var tuple = BlocklyApps.log.shift();
-    Turtle.step(tuple[0], tuple.splice(1));
-  }
-  canvas.globalCompositeOperation = 'copy';
-  canvas.drawImage(Turtle.ctxScratch.canvas, 0, 0);
-  canvas.globalCompositeOperation = 'source-over';
+  Turtle.drawLogOnCanvas(api.log, canvas);
 };
 
 /**
@@ -5289,13 +5354,12 @@ Turtle.evalCode = function(code) {
  * Execute the user's code.  Heaven help us...
  */
 Turtle.execute = function() {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 1000000;
+  api.log = [];
 
   Turtle.code = Blockly.Generator.workspaceToCode('JavaScript');
   Turtle.evalCode(Turtle.code);
 
-  // BlocklyApps.log now contains a transcript of all the user's actions.
+  // api.log now contains a transcript of all the user's actions.
   // Reset the graphic and animate the transcript.
   BlocklyApps.reset();
   BlocklyApps.playAudio('start', {volume : 0.5, loop : true});
@@ -5312,7 +5376,7 @@ Turtle.animate = function() {
   // All tasks should be complete now.  Clean up the PID list.
   Turtle.pid = 0;
 
-  var tuple = BlocklyApps.log.shift();
+  var tuple = api.log.shift();
   if (!tuple) {
     document.getElementById('spinner').style.visibility = 'hidden';
     Blockly.mainWorkspace.highlightBlock(null);
@@ -5718,8 +5782,6 @@ var getFeedbackImage = function() {
 };
 
 },{"../../locale/nl_nl/turtle":38,"../base":2,"../codegen":6,"../skins":11,"../templates/page.html":19,"./api":25,"./controls.html":27,"./core":28,"./levels":29}],35:[function(require,module,exports){
-var xml = require('./xml');
-
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -5799,14 +5861,26 @@ exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
   return blocks;
 };
 
-},{"./xml":36}],36:[function(require,module,exports){
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],36:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();

@@ -116,6 +116,8 @@ module LevelsHelper
       request.protocol + request.host_with_port + ActionController::Base.helpers.asset_path('flappy_sharing_drawing.png')
     elsif app == 'bounce'
       request.protocol + request.host_with_port + ActionController::Base.helpers.asset_path('bounce_sharing_drawing.png')
+    elsif app == 'studio'
+      request.protocol + request.host_with_port + ActionController::Base.helpers.asset_path('studio_sharing_drawing.png')
     else
       level_source_image = LevelSourceImage.find_by_level_source_id(level_source.id)
       if !level_source_image.nil? && !level_source_image.image.nil?
@@ -147,7 +149,8 @@ module LevelsHelper
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
     Hash[%w(
-      start_blocks required_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal
+      start_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal
+      required_blocks:levelBuilderRequiredBlocks
       toolbox_blocks:toolbox
       x:initialX
       y:initialY

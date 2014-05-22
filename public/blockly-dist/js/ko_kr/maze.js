@@ -1,6 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 var utils = require('./utils');
+var requiredBlockUtils = require('./required_block_utils');
 window.BlocklyApps = require('./base');
 
 if (typeof global !== 'undefined') {
@@ -24,7 +25,7 @@ StubDialog.prototype.hide = function() {
   console.log(this);
 };
 
-module.exports = function(app, levels, options, requiredBlockTests) {
+module.exports = function(app, levels, options) {
 
   // If a levelId is not provided, then options.level is specified in full.
   // Otherwise, options.level overrides resolved level on a per-property basis.
@@ -36,9 +37,9 @@ module.exports = function(app, levels, options, requiredBlockTests) {
       level[prop] = options.level[prop];
     }
 
-    if (requiredBlockTests && options.level.required_blocks) {
-      level.requiredBlocks = utils.parseRequiredBlocks(
-          options.level.required_blocks, requiredBlockTests);
+    if (options.level.levelBuilderRequiredBlocks) {
+      level.requiredBlocks = requiredBlockUtils.makeTestsFromBuilderRequiredBlocks(
+          options.level.levelBuilderRequiredBlocks);
     }
 
     options.level = level;
@@ -77,7 +78,7 @@ module.exports = function(app, levels, options, requiredBlockTests) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./utils":43}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":29,"./utils":44}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -114,6 +115,7 @@ var Slider = require('./slider');
 //TODO: These should be members of a BlocklyApp instance.
 var onAttempt;
 var onContinue;
+var onResetPressed;
 var backToPreviousLevel;
 
 /**
@@ -184,6 +186,9 @@ BlocklyApps.init = function(config) {
   };
   onContinue = config.onContinue || function() {
     console.log('Continue!');
+  };
+  onResetPressed = config.onResetPressed || function() {
+    console.log('Reset!');
   };
   backToPreviousLevel = config.backToPreviousLevel || function() {};
 
@@ -679,21 +684,6 @@ BlocklyApps.clearHighlighting = function () {
   BlocklyApps.highlight(null);
 };
 
-/**
- * If the user has executed too many actions, we're probably in an infinite
- * loop.  Sadly I wasn't able to solve the Halting Problem.
- * @param {?string} opt_id ID of loop block to highlight.
- * @throws {Infinity} Throws an error to terminate the user's program.
- */
-BlocklyApps.checkTimeout = function(opt_id) {
-  if (opt_id) {
-    BlocklyApps.log.push([null, opt_id]);
-  }
-  if (BlocklyApps.ticks-- < 0) {
-    throw Infinity;
-  }
-};
-
 // The following properties get their non-default values set by the application.
 
 /**
@@ -741,19 +731,6 @@ BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = undefined;
 BlocklyApps.levelComplete = null;
 
 /**
- * Transcript of user's actions.  The format is application-dependent.
- * @type {?Array.<Array>}
- */
-BlocklyApps.log = null;
-
-/**
- * The number of steps remaining before the currently running program
- * is deemed to be in an infinite loop and terminated.
- * @type {?number}
- */
-BlocklyApps.ticks = null;
-
-/**
  * The number of attempts (how many times the run button has been pressed)
  * @type {?number}
  */
@@ -768,7 +745,7 @@ BlocklyApps.initTime = undefined;
 
 /**
  * Reset the playing field to the start position and kill any pending
- * animation tasks.  This will benerally be replaced by an application.
+ * animation tasks.  This will typically be replaced by an application.
  * @param {boolean} first True if an opening animation is to be played.
  */
 BlocklyApps.reset = function(first) {};
@@ -844,8 +821,6 @@ BlocklyApps.report = function(options) {
 
   // Disable the run button until onReportComplete is called.
   if (!BlocklyApps.share) {
-    document.getElementById('runButton').setAttribute('disabled', 'disabled');
-
     var onAttemptCallback = (function() {
       return function(builderDetails) {
         for (var option in builderDetails) {
@@ -869,6 +844,7 @@ BlocklyApps.report = function(options) {
  * Click the reset button.  Reset the application.
  */
 BlocklyApps.resetButtonClick = function() {
+  onResetPressed();
   document.getElementById('runButton').style.display = 'inline';
   document.getElementById('resetButton').style.display = 'none';
   BlocklyApps.clearHighlighting();
@@ -915,7 +891,9 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/ko_kr/common":45,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":30,"./templates/buttons.html":32,"./templates/instructions.html":34,"./templates/learn.html":35,"./templates/makeYourOwn.html":36,"./utils":43,"./xml":44}],3:[function(require,module,exports){
+},{"../locale/ko_kr/common":46,"./builder":5,"./dom":7,"./feedback.js":9,"./slider":31,"./templates/buttons.html":33,"./templates/instructions.html":35,"./templates/learn.html":36,"./templates/makeYourOwn.html":37,"./utils":44,"./xml":45}],3:[function(require,module,exports){
+var xml = require('./xml');
+
 exports.createToolbox = function(blocks) {
   return '<xml id="toolbox" style="display: none;">' + blocks + '</xml>';
 };
@@ -981,7 +959,26 @@ exports.generateSimpleBlock = function (blockly, generator, options) {
   };
 };
 
-},{}],4:[function(require,module,exports){
+/**
+ * Generates a single block from a <block/> DOM element, adding it to the main workspace
+ * @param blockDOM {Element}
+ * @returns {*}
+ */
+exports.domToBlock = function(blockDOM) {
+  return Blockly.Xml.domToBlock_(Blockly.mainWorkspace, blockDOM);
+};
+
+/**
+ * Generates a single block from a block XML string—e.g., <block type="testBlock"></block>,
+ * and adds it to the main workspace
+ * @param blockDOMString
+ * @returns {*}
+ */
+exports.domStringToBlock = function(blockDOMString) {
+  return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
+};
+
+},{"./xml":45}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1000,12 +997,12 @@ exports.install = function(blockly, skin) {
     init: function() {
       this.setHelpUrl(blockly.Msg.CONTROLS_REPEAT_HELPURL);
       this.setHSV(322, 0.90, 0.95);
-      this.appendStatementInput('DO')
-        .appendTitle(new blockly.FieldImage(skin.repeatImage));
       this.appendDummyInput()
         .appendTitle(blockly.Msg.CONTROLS_REPEAT_TITLE_REPEAT)
         .appendTitle(new Blockly.FieldTextInput('10',
           blockly.FieldTextInput.nonnegativeIntegerValidator), 'TIMES');
+      this.appendStatementInput('DO')
+        .appendTitle(new blockly.FieldImage(skin.repeatImage));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(blockly.Msg.CONTROLS_REPEAT_TOOLTIP);
@@ -1043,17 +1040,26 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":31,"./utils.js":43,"url":57}],6:[function(require,module,exports){
-var INFINITE_LOOP_TRAP = '  BlocklyApps.checkTimeout();\n';
-var INFINITE_LOOP_TRAP_RE =
-    new RegExp(INFINITE_LOOP_TRAP.replace(/\(.*\)/, '\\(.*\\)'), 'g');
+},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":32,"./utils.js":44,"url":58}],6:[function(require,module,exports){
+var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
+
+var LOOP_HIGHLIGHT = 'loopHighlight();\n';
+var LOOP_HIGHLIGHT_RE =
+    new RegExp(LOOP_HIGHLIGHT.replace(/\(.*\)/, '\\(.*\\)'));
 
 /**
- * Returns javascript code to call a timeout check with an optional block id.
+ * Returns javascript code to call a timeout check
  */
-exports.loopTrap = function(blockId) {
-  var args = (blockId ? "'block_id_" + blockId + "'" : '');
- return INFINITE_LOOP_TRAP.replace('()', '(' + args + ')');
+exports.loopTrap = function() {
+  return INFINITE_LOOP_TRAP;
+};
+
+exports.loopHighlight = function (apiName, blockId) {
+  var args = "'block_id_" + blockId + "'";
+  if (blockId === undefined) {
+    args = "%1";
+  }
+  return apiName + '.' + LOOP_HIGHLIGHT.replace('()', '(' + args + ')');
 };
 
 /**
@@ -1066,7 +1072,9 @@ exports.strip = function(code) {
     // Strip out serial numbers.
     .replace(/(,\s*)?'block_id_\d+'\)/g, ')')
     // Remove timeouts.
-    .replace(INFINITE_LOOP_TRAP_RE, '')
+    .replace(INFINITE_LOOP_TRAP, '')
+    // Strip out loop highlight
+    .replace(LOOP_HIGHLIGHT_RE, '')
     // Strip out class namespaces.
     .replace(/(BlocklyApps|Maze|Turtle)\./g, '')
     // Strip out particular helper functions.
@@ -1198,6 +1206,98 @@ exports.isMobile = function() {
 };
 
 },{}],8:[function(require,module,exports){
+/**
+ * Stores information about a current Maze execution.  Execution consists of a
+ * series of steps, where each step may contain one or more actions.
+ */
+var ExecutionInfo = function (options) {
+  options = options || {};
+  this.terminated_ = false;
+  this.terminationValue_ = null;
+  this.steps_ = [];
+  this.ticks = options.ticks || Infinity;
+  this.collection_ = null;
+};
+
+module.exports = ExecutionInfo;
+
+ExecutionInfo.prototype.terminateWithValue = function (value) {
+  this.terminated_ = true;
+  this.terminationValue_ = value;
+};
+
+ExecutionInfo.prototype.isTerminated = function () {
+  return this.terminated_;
+};
+
+ExecutionInfo.prototype.terminationValue = function () {
+  return this.terminationValue_;
+};
+
+ExecutionInfo.prototype.queueAction = function (command, blockId) {
+  var action = {command: command, blockId: blockId};
+  if (this.collection_) {
+    this.collection_.push(action);
+  } else {
+    // single action step (most common case)
+    this.steps_.push([action]);
+  }
+};
+
+ExecutionInfo.prototype.dequeueStep = function () {
+  return this.steps_.shift();
+};
+
+
+/**
+ * If we have no steps left, or our only remaining step is a single finish action
+ * we're done executing, and if we're in step mode won't want to wait around
+ * for another step press.
+ */
+ExecutionInfo.prototype.onLastStep = function () {
+  if (this.steps_.length === 0) {
+    return true;
+  }
+
+  if (this.steps_.length === 1) {
+    var step = this.steps_[0];
+    if (step.length === 1 && step[0].command === 'finish') {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Collect all actions queued up between now and the call to stopCollecting,
+ * and put them in a single step
+ */
+ExecutionInfo.prototype.collectActions = function () {
+  if (this.collection_) {
+    throw new Error("Already collecting");
+  }
+  this.collection_ = [];
+};
+
+ExecutionInfo.prototype.stopCollecting = function () {
+  if (!this.collection_) {
+    throw new Error("Not currently collecting");
+  }
+  this.steps_.push(this.collection_);
+  this.collection_ = null;
+};
+
+/**
+ * If the user has executed too many actions, we're probably in an infinite
+ * loop.  Set termination value to Infinity
+ */
+ExecutionInfo.prototype.checkTimeout = function() {
+  if (this.ticks-- < 0) {
+    this.terminateWithValue(Infinity);
+  }
+};
+
+},{}],9:[function(require,module,exports){
 var trophy = require('./templates/trophy.html');
 var utils = require('./utils');
 var readonly = require('./templates/readonly.html');
@@ -1785,17 +1885,15 @@ var getMissingRequiredBlocks = function () {
          i < BlocklyApps.REQUIRED_BLOCKS.length &&
              missingBlockNum < BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG;
          i++) {
-      var blocks = BlocklyApps.REQUIRED_BLOCKS[i];
+      var requiredBlock = BlocklyApps.REQUIRED_BLOCKS[i];
       // For each of the test
       // If at least one of the tests succeeded, we consider the required block
       // is used
       var usedRequiredBlock = false;
-      for (var testId = 0; testId < blocks.length; testId++) {
-        var test = blocks[testId].test;
+      for (var testId = 0; testId < requiredBlock.length; testId++) {
+        var test = requiredBlock[testId].test;
         if (typeof test === 'string') {
-          if (!code) {
-            code = Blockly.Generator.workspaceToCode('JavaScript');
-          }
+          code = code || Blockly.Generator.workspaceToCode('JavaScript');
           if (code.indexOf(test) !== -1) {
             // Succeeded, moving to the next list of tests
             usedRequiredBlock = true;
@@ -1902,6 +2000,10 @@ var generateXMLForBlocks = function(blocks) {
   var k, name;
   for (var i = 0; i < blocks.length; i++) {
     var block = blocks[i];
+    if (block.blockDisplayXML) {
+      blockXMLStrings.push(block.blockDisplayXML);
+      continue;
+    }
     blockXMLStrings.push('<block', ' type="', block.type, '" x="',
                         blockX.toString(), '" y="', blockY, '">');
     if (block.titles) {
@@ -1935,7 +2037,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/ko_kr/common":45,"./codegen":6,"./dom":7,"./templates/buttons.html":32,"./templates/code.html":33,"./templates/readonly.html":38,"./templates/sharing.html":39,"./templates/showCode.html":40,"./templates/trophy.html":41,"./utils":43}],9:[function(require,module,exports){
+},{"../locale/ko_kr/common":46,"./codegen":6,"./dom":7,"./templates/buttons.html":33,"./templates/code.html":34,"./templates/readonly.html":39,"./templates/sharing.html":40,"./templates/showCode.html":41,"./templates/trophy.html":42,"./utils":44}],10:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -1994,15 +2096,22 @@ exports.define = function(name) {
   };
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var tiles = require('./tiles');
 var Direction = tiles.Direction;
 var MoveDirection = tiles.MoveDirection;
 var TurnDirection = tiles.TurnDirection;
 var SquareType = tiles.SquareType;
+var utils = require('../utils');
 
-//TODO: This file should be void of logic like turtle/api.js
-// Mentions of `Maze.` is bad.
+/**
+ * Only call API functions if we haven't yet terminated execution
+ */
+var API_FUNCTION = function (fn) {
+  return utils.executeIfConditional(function () {
+    return !Maze.executionInfo.isTerminated();
+  }, fn);
+};
 
 /**
  * Is there a path next to pegman?
@@ -2037,7 +2146,7 @@ var isPath = function(direction, id) {
       break;
   }
   if (id) {
-    BlocklyApps.log.push([command, id]);
+    Maze.executionInfo.queueAction(command, id);
   }
   return square !== SquareType.WALL &&
         square !== SquareType.OBSTACLE &&
@@ -2053,8 +2162,9 @@ var isPath = function(direction, id) {
  */
 var move = function(direction, id) {
   if (!isPath(direction, null)) {
-    BlocklyApps.log.push(['fail_' + (direction ? 'backward' : 'forward'), id]);
-    throw false;
+    Maze.executionInfo.queueAction('fail_' + (direction ? 'backward' : 'forward'), id);
+    Maze.executionInfo.terminateWithValue(false);
+    return;
   }
   // If moving backward, flip the effective direction.
   var effectiveDirection = Maze.pegmanD + direction;
@@ -2077,7 +2187,7 @@ var move = function(direction, id) {
       command = 'west';
       break;
   }
-  BlocklyApps.log.push([command, id]);
+  Maze.executionInfo.queueAction(command, id);
   Maze.checkSuccess();
 };
 
@@ -2090,11 +2200,11 @@ var turn = function(direction, id) {
   if (direction == TurnDirection.RIGHT) {
     // Right turn (clockwise).
     Maze.pegmanD += TurnDirection.RIGHT;
-    BlocklyApps.log.push(['right', id]);
+    Maze.executionInfo.queueAction('right', id);
   } else {
     // Left turn (counterclockwise).
     Maze.pegmanD += TurnDirection.LEFT;
-    BlocklyApps.log.push(['left', id]);
+    Maze.executionInfo.queueAction('left', id);
   }
   Maze.pegmanD = tiles.constrainDirection4(Maze.pegmanD);
 };
@@ -2138,106 +2248,113 @@ function isTurnAround(direction, newDirection) {
 }
 
 function moveAbsoluteDirection(direction, id) {
+  Maze.executionInfo.collectActions();
   turnTo(direction, id);
   move(MoveDirection.FORWARD, id);
+  Maze.executionInfo.stopCollecting();
 }
 
-exports.moveForward = function(id) {
+exports.moveForward = API_FUNCTION(function(id) {
   move(MoveDirection.FORWARD, id);
-};
+});
 
-exports.moveBackward = function(id) {
+exports.moveBackward = API_FUNCTION(function(id) {
   move(MoveDirection.BACKWARD, id);
-};
+});
 
-exports.moveNorth = function(id) {
+exports.moveNorth = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.NORTH, id);
-};
+});
 
-exports.moveSouth = function(id) {
+exports.moveSouth = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.SOUTH, id);
-};
+});
 
-exports.moveEast = function(id) {
+exports.moveEast = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.EAST, id);
-};
+});
 
-exports.moveWest = function(id) {
+exports.moveWest = API_FUNCTION(function(id) {
   moveAbsoluteDirection(Direction.WEST, id);
-};
+});
 
-exports.turnLeft = function(id) {
+exports.turnLeft = API_FUNCTION(function(id) {
   turn(TurnDirection.LEFT, id);
-};
+});
 
-exports.turnRight = function(id) {
+exports.turnRight = API_FUNCTION(function(id) {
   turn(TurnDirection.RIGHT, id);
-};
+});
 
-exports.isPathForward = function(id) {
+exports.isPathForward = API_FUNCTION(function(id) {
   return isPath(MoveDirection.FORWARD, id);
-};
-exports.noPathForward = function(id) {
+});
+exports.noPathForward = API_FUNCTION(function(id) {
   return !isPath(MoveDirection.FORWARD, id);
-};
+});
 
-exports.isPathRight = function(id) {
+exports.isPathRight = API_FUNCTION(function(id) {
   return isPath(MoveDirection.RIGHT, id);
-};
+});
 
-exports.isPathBackward = function(id) {
+exports.isPathBackward = API_FUNCTION(function(id) {
   return isPath(MoveDirection.BACKWARD, id);
-};
+});
 
-exports.isPathLeft = function(id) {
+exports.isPathLeft = API_FUNCTION(function(id) {
   return isPath(MoveDirection.LEFT, id);
-};
+});
 
-exports.pilePresent = function(id) {
+exports.pilePresent = API_FUNCTION(function(id) {
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   return Maze.dirt_[y][x] > 0;
-};
+});
 
-exports.holePresent = function(id) {
+exports.holePresent = API_FUNCTION(function(id) {
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   return Maze.dirt_[y][x] < 0;
-};
+});
 
-exports.currentPositionNotClear = function(id) {
+exports.currentPositionNotClear = API_FUNCTION(function(id) {
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   return Maze.dirt_[y][x] !== 0;
-};
+});
 
-exports.fill = function(id) {
-  BlocklyApps.log.push(['putdown', id]);
+exports.fill = API_FUNCTION(function(id) {
+  Maze.executionInfo.queueAction('putdown', id);
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   Maze.dirt_[y][x] = Maze.dirt_[y][x] + 1;
-};
+});
 
-exports.dig = function(id) {
-  BlocklyApps.log.push(['pickup', id]);
+exports.dig = API_FUNCTION(function(id) {
+  Maze.executionInfo.queueAction('pickup', id);
   var x = Maze.pegmanX;
   var y = Maze.pegmanY;
   Maze.dirt_[y][x] = Maze.dirt_[y][x] - 1;
-};
+});
 
-exports.notFinished = function() {
+exports.notFinished = API_FUNCTION(function() {
   return !Maze.checkSuccess();
-};
+});
 
-exports.nectar = function(id) {
+// The code for this API should get stripped when showing code
+exports.loopHighlight = API_FUNCTION(function (id) {
+  Maze.executionInfo.queueAction('null', id);
+});
+
+exports.nectar = API_FUNCTION(function(id) {
   Maze.bee.getNectar(id);
-};
+});
 
-exports.honey = function(id) {
+exports.honey = API_FUNCTION(function(id) {
   Maze.bee.makeHoney(id);
-};
+});
 
-},{"./tiles":22}],11:[function(require,module,exports){
+},{"../utils":44,"./tiles":23}],12:[function(require,module,exports){
 var utils = require('../utils');
 
 var Bee = function (maze, config) {
@@ -2326,6 +2443,18 @@ Bee.prototype.hiveRemainingCapacity = function (row, col) {
   return Math.abs(currentVal + 1);
 };
 
+/**
+ * Update model to represent made honey.  Does no validation
+ */
+Bee.prototype.makeHoneyAt = function (row, col) {
+  var capacity = this.hiveRemainingCapacity(row, col);
+  if (capacity > 0 && capacity !== Infinity) {
+    this.maze_.dirt_[row][col] += 1; // update progress towards goal
+  }
+
+  this.nectar_ -= 1;
+  this.honey_ += 1;
+};
 
 // API
 
@@ -2335,11 +2464,11 @@ Bee.prototype.getNectar = function (id) {
 
   // Nectar is positive.  Make sure we have it.
   if (this.maze_.dirt_[row][col] <= 0) {
-    // todo - rationalize with exception throwing changes
-    throw false;
+    this.maze_.executionInfo.terminateWithValue(false);
+    return;
   }
 
-  BlocklyApps.log.push(['nectar', id]);
+  this.maze_.executionInfo.queueAction('nectar', id);
   this.nectar_ += 1;
 };
 
@@ -2348,30 +2477,13 @@ Bee.prototype.makeHoney = function (id) {
   var row = this.maze_.pegmanY;
 
   if (this.nectar_ === 0 || this.hiveRemainingCapacity(row, col) === 0) {
-    // todo - rationalize with exception throwing changes
-    throw false;
+    this.maze_.executionInfo.terminateWithValue(false);
+    return;
   }
 
-  BlocklyApps.log.push(['honey', id]);
+  this.maze_.executionInfo.queueAction('honey', id);
   this.makeHoneyAt(row, col);
 };
-
-/**
- * Update model to represent made honey.  Does no validation
- */
-Bee.prototype.makeHoneyAt = function (row, col) {
-  var capacity = this.hiveRemainingCapacity(row, col);
-  if (capacity > 0 && capacity !== Infinity) {
-    this.maze_.dirt_[row][col] += 1; // update progress towards goal
-
-    // todo (brent) - when a hive with a goal goes to 0, should we display
-    // something different than the goalless hive? (answer is prob yes)
-  }
-
-  this.nectar_ -= 1;
-  this.honey_ += 1;
-};
-
 
 // ANIMATIONS
 
@@ -2504,7 +2616,7 @@ Bee.prototype.setTilesTransparent = function () {
   }
 };
 
-},{"../utils":43}],12:[function(require,module,exports){
+},{"../utils":44}],13:[function(require,module,exports){
 /**
  * Blockly Demo: Maze
  *
@@ -2817,7 +2929,7 @@ exports.install = function(blockly, skin) {
     var argument = 'Maze.' + this.getTitleValue('DIR') +
       '(\'block_id_' + this.id + '\')';
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + branch;
     return 'while (' + argument + ') {\n' + branch + '}\n';
   };
 
@@ -2843,7 +2955,7 @@ exports.install = function(blockly, skin) {
   generator.maze_untilBlocked = function() {
     var argument = 'Maze.isPathForward' + '(\'block_id_' + this.id + '\')';
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + branch;
     return 'while (' + argument + ') {\n' + branch + '}\n';
   };
 
@@ -2865,7 +2977,7 @@ exports.install = function(blockly, skin) {
   generator.maze_forever = function() {
     // Generate JavaScript for do forever loop.
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + codegen.loopHighlight('Maze', this.id) + branch;
     return 'while (Maze.notFinished()) {\n' + branch + '}\n';
   };
 
@@ -2887,7 +2999,7 @@ exports.install = function(blockly, skin) {
     var argument = 'Maze.' + this.getTitleValue('DIR') +
         '(\'block_id_' + this.id + '\')';
     var branch = generator.statementToCode(this, 'DO');
-    branch = codegen.loopTrap(this.id) + branch;
+    branch = codegen.loopTrap() + branch;
     return 'while (' + argument + ') {\n' + branch + '}\n';
   };
 
@@ -2902,7 +3014,7 @@ exports.install = function(blockly, skin) {
 
 };
 
-},{"../../locale/ko_kr/maze":46,"../block_utils":3,"../codegen":6}],13:[function(require,module,exports){
+},{"../../locale/ko_kr/maze":47,"../block_utils":3,"../codegen":6}],14:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -2923,7 +3035,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/maze":46,"ejs":47}],14:[function(require,module,exports){
+},{"../../locale/ko_kr/maze":47,"ejs":48}],15:[function(require,module,exports){
 /*jshint multistr: true */
 
 var levelBase = require('../level_base');
@@ -4166,7 +4278,7 @@ module.exports = {
   }
 };
 
-},{"../../locale/ko_kr/maze":46,"../block_utils":3,"../level_base":9,"./karelStartBlocks.xml":15,"./tiles":22,"./toolboxes/karel1.xml":23,"./toolboxes/karel2.xml":24,"./toolboxes/karel3.xml":25}],15:[function(require,module,exports){
+},{"../../locale/ko_kr/maze":47,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":16,"./tiles":23,"./toolboxes/karel1.xml":24,"./toolboxes/karel2.xml":25,"./toolboxes/karel3.xml":26}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4198,7 +4310,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/maze":46,"ejs":47}],16:[function(require,module,exports){
+},{"../../locale/ko_kr/maze":47,"ejs":48}],17:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
 var reqBlocks = require('./requiredBlocks');
@@ -4822,13 +4934,13 @@ function cloneWithStep(level, step, stepOnly) {
   module.exports[level + '_step'] = obj;
 }
 
-cloneWithStep('2_1', true, false);
+cloneWithStep('2_1', true, true);
 cloneWithStep('2_2', true, false);
 cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
 cloneWithStep('karel_2_9', true, false);
 
-},{"../block_utils":3,"../utils":43,"./karelLevels":14,"./requiredBlocks":19,"./startBlocks.xml":21,"./tiles":22,"./toolboxes/maze.xml":26}],17:[function(require,module,exports){
+},{"../block_utils":3,"../utils":44,"./karelLevels":15,"./requiredBlocks":20,"./startBlocks.xml":22,"./tiles":23,"./toolboxes/maze.xml":27}],18:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -4838,17 +4950,16 @@ if (typeof global !== 'undefined') {
 var blocks = require('./blocks');
 var levels = require('./levels');
 var skins = require('./skins');
-var requiredBlocks = require('./requiredBlocks');
 
 window.mazeMain = function(options) {
   options.skinsModule = skins;
   options.blocksModule = blocks;
 
-  appMain(window.Maze, levels, options, requiredBlocks);
+  appMain(window.Maze, levels, options);
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":12,"./levels":16,"./maze":18,"./requiredBlocks":19,"./skins":20}],18:[function(require,module,exports){
+},{"../appMain":1,"./blocks":13,"./levels":17,"./maze":19,"./skins":21}],19:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -4888,6 +4999,8 @@ var utils = require('../utils');
 
 var Bee = require('./bee');
 
+var ExecutionInfo = require('../executionInfo');
+
 var Direction = tiles.Direction;
 var SquareType = tiles.SquareType;
 var TurnDirection = tiles.TurnDirection;
@@ -4905,14 +5018,10 @@ var skin;
  */
 var stepSpeed;
 
-/**
- * Actions in BlocklyApps.log are a tuple in the form [command, block_id]
- */
-var ACTION_COMMAND = 0;
-var ACTION_BLOCK_ID = 1;
-
 //TODO: Make configurable.
 BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
+
+Blockly.JavaScript.INFINITE_LOOP_TRAP = codegen.loopHighlight("Maze");
 
 var getTile = function(map, x, y) {
   if (map && map[y]) {
@@ -5353,7 +5462,7 @@ Maze.init = function(config) {
     var stepButton = document.getElementById('stepButton');
     dom.addClickTouchEvent(stepButton, stepButtonClick);
 
-    // base also calls BlocklyApps.resetButtonClick
+    // base's BlocklyApps.resetButtonClick will be called first
     var resetButton = document.getElementById('resetButton');
     dom.addClickTouchEvent(resetButton, Maze.resetButtonClick);
   };
@@ -5687,9 +5796,17 @@ Maze.beginAttempt = function (stepMode) {
   Maze.execute(stepMode);
 };
 
+/**
+ * App specific reset button click logic.  BlocklyApps.resetButtonClick will be
+ * called first.
+ */
 Maze.resetButtonClick = function () {
   var stepButton = document.getElementById('stepButton');
   stepButton.style.display = level.step ? 'inline' : 'none';
+
+  if (level.stepOnly) {
+    document.getElementById('runButton').style.display = 'none';
+  }
 
   if (Maze.cachedBlockStates) {
     // restore moveable/deletable/editable state from before we started stepping
@@ -5737,9 +5854,6 @@ var displayFeedback = function() {
 Maze.onReportComplete = function(response) {
   Maze.response = response;
   Maze.waitingForReport = false;
-  // Disable the run button until onReportComplete is called.
-  var runButton = document.getElementById('runButton');
-  runButton.disabled = false;
   displayFeedback();
 };
 
@@ -5747,8 +5861,8 @@ Maze.onReportComplete = function(response) {
  * Execute the user's code.  Heaven help us...
  */
 Maze.execute = function(stepMode) {
-  BlocklyApps.log = [];
-  BlocklyApps.ticks = 100; //TODO: Set higher for some levels
+
+  Maze.executionInfo = new ExecutionInfo({ticks: 100});
   var code = Blockly.Generator.workspaceToCode('JavaScript');
   Maze.result = ResultType.UNSET;
   Maze.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
@@ -5771,44 +5885,58 @@ Maze.execute = function(stepMode) {
     }
   }
 
-  // Try running the user's code.  There are four possible outcomes:
-  // 1. If pegman reaches the finish [SUCCESS], true is thrown.
+  // Try running the user's code.  There are a few possible outcomes:
+  // 1. If pegman reaches the finish [SUCCESS], executionInfo's termination
+  //    value is set to true.
   // 2. If the program is terminated due to running too long [TIMEOUT],
-  //    false is thrown.
-  // 3. If another error occurs [ERROR], that error is thrown.
-  // 4. If the program ended normally but without solving the maze [FAILURE],
-  //    no error or exception is thrown.
+  //    the termination value is set to Infinity
+  // 3. If the program terminated because of hitting a wall/obstacle, the
+  //    termination value is set to false and the ResultType is ERROR
+  // 4. If the program finishes without meeting success condition, we have no
+  //    termination value and set ResultType to FAILURE
+  // 5. The only other time we should fail should be if an exception is thrown
+  //    during execution, in which case we set ResultType to ERROR.
   // The animation should be fast if execution was successful, slow otherwise
   // to help the user see the mistake.
   BlocklyApps.playAudio('start', {volume: 0.5});
   try {
     codegen.evalWith(code, {
       BlocklyApps: BlocklyApps,
-      Maze: api
+      Maze: api,
+      executionInfo: Maze.executionInfo
     });
-    Maze.checkSuccess();
-    // If did not finish, shedule a failure.
-    BlocklyApps.log.push(['finish', null]);
-    Maze.result = ResultType.FAILURE;
-    stepSpeed = 150;
-  } catch (e) {
-    // A boolean is thrown for normal termination. XXX Except when it isn't...
-    // Abnormal termination is a user error.
-    if (e === Infinity) {
-      Maze.result = ResultType.TIMEOUT;
-      stepSpeed = 0;  // Go infinitely fast so program ends quickly.
-    } else if (e === true) {
-      Maze.result = ResultType.SUCCESS;
-      stepSpeed = 100;
-    } else if (e === false) {
-      Maze.result = ResultType.ERROR;
+    if (!Maze.executionInfo.isTerminated() && !Maze.checkSuccess()) {
+      // If did not finish, shedule a failure.
+      Maze.executionInfo.queueAction('finish', null);
+      Maze.result = ResultType.FAILURE;
       stepSpeed = 150;
     } else {
-      // Syntax error, can't happen.
-      Maze.result = ResultType.ERROR;
-      window.alert(e);
-      return;
+      switch (Maze.executionInfo.terminationValue()) {
+        case Infinity:
+          // Detected an infinite loop.  Animate what we have as quickly as
+          // possible
+          // todo - add a unit test
+          Maze.result = ResultType.TIMEOUT;
+          stepSpeed = 0;
+          break;
+        case true:
+          Maze.result = ResultType.SUCCESS;
+          stepSpeed = 100;
+          break;
+        case false:
+          Maze.result = ResultType.ERROR;
+          stepSpeed = 150;
+          break;
+        default:
+          Maze.result = ResultType.ERROR;
+          break;
+      }
     }
+  } catch (e) {
+    // Syntax error, can't happen.
+    Maze.result = ResultType.ERROR;
+    console.error("Unexpected exception: " + e + "\n" + e.stack);
+    return;
   }
 
   // If we know they succeeded, mark levelComplete true
@@ -5842,7 +5970,7 @@ Maze.execute = function(stepMode) {
     onComplete: Maze.onReportComplete
   });
 
-  // BlocklyApps.log now contains a transcript of all the user's actions.
+  // Maze. now contains a transcript of all the user's actions.
   // Reset the maze and animate the transcript.
   BlocklyApps.reset(false);
   Maze.animating_ = true;
@@ -5900,13 +6028,12 @@ Maze.performStep = function(stepMode) {
   // running/stepping will turn it off
   Blockly.mainWorkspace.traceOn(true);
 
-  var action;
-  // get action with non-null command
-  do {
-    action = BlocklyApps.log.shift();
-  } while (action && action[ACTION_COMMAND] === null);
-  if (!action) {
-    BlocklyApps.clearHighlighting();
+  var step = Maze.executionInfo.dequeueStep();
+  if (!step) {
+    var wasStepping = Maze.cachedBlockStates && Maze.cachedBlockStates.length > 0;
+    if (!wasStepping) {
+      BlocklyApps.clearHighlighting();
+    }
     Maze.animating_ = false;
     Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
@@ -5914,13 +6041,14 @@ Maze.performStep = function(stepMode) {
     return;
   }
 
-  animateAction(action, stepMode);
+  for (var i = 0; i < step.length; i++) {
+    animateAction(step[i], stepMode);
+  }
 
   var finishSteps = !stepMode;
   if (stepMode) {
     // If we've run out of steps, finish things up
-    if (BlocklyApps.log.length === 0 || BlocklyApps.log.length === 1 &&
-      BlocklyApps.log[0][ACTION_COMMAND] === "finish") {
+    if (Maze.executionInfo.onLastStep()) {
       var stepButton = document.getElementById('stepButton');
       stepButton.style.display = 'none';
       finishSteps = true;
@@ -5938,9 +6066,11 @@ Maze.performStep = function(stepMode) {
  * Animates a single action
  */
 function animateAction (action, stepMode) {
-  BlocklyApps.highlight(action[ACTION_BLOCK_ID], stepMode);
+  if (action.blockId) {
+    BlocklyApps.highlight(action.blockId, stepMode);
+  }
 
-  switch (action[ACTION_COMMAND]) {
+  switch (action.command) {
     case 'north':
       Maze.animatedMove(Direction.NORTH);
       break;
@@ -6289,7 +6419,7 @@ Maze.scheduleDance = function(sound) {
 
   // Setting the tiles to be transparent
   if (sound && skin.transparentTileEnding) {
-    BlocklyApps.log.push(['tile_transparent', null]);
+    Maze.executionInfo.queueAction('tile_transparent', null);
   }
 
   // If sound == true, play the goal animation, else reset it
@@ -6463,11 +6593,12 @@ Maze.checkSuccess = function() {
   }
 
   // Finished.  Terminate the user's program.
-  BlocklyApps.log.push(['finish', null]);
-  throw true;
+  Maze.executionInfo.queueAction('finish', null);
+  Maze.executionInfo.terminateWithValue(true);
+  return true;
 };
 
-},{"../../locale/ko_kr/common":45,"../../locale/ko_kr/maze":46,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":29,"../templates/page.html":37,"../timeoutList":42,"../utils":43,"./api":10,"./bee":11,"./controls.html":13,"./tiles":22,"./visualization.html":27}],19:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"../../locale/ko_kr/maze":47,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":30,"../templates/page.html":38,"../timeoutList":43,"../utils":44,"./api":11,"./bee":12,"./controls.html":14,"./tiles":23,"./visualization.html":28}],20:[function(require,module,exports){
 var requiredBlockUtils = require('../required_block_utils');
 
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
@@ -6495,7 +6626,7 @@ module.exports = {
   FOR_LOOP: FOR_LOOP
 };
 
-},{"../required_block_utils":28}],20:[function(require,module,exports){
+},{"../required_block_utils":29}],21:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -6632,7 +6763,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":29}],21:[function(require,module,exports){
+},{"../skins":30}],22:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6653,7 +6784,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],22:[function(require,module,exports){
+},{"ejs":48}],23:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -6716,7 +6847,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":43}],23:[function(require,module,exports){
+},{"../utils":44}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6737,7 +6868,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],24:[function(require,module,exports){
+},{"ejs":48}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6763,7 +6894,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/ko_kr/common":45,"../../../locale/ko_kr/maze":46,"ejs":47}],25:[function(require,module,exports){
+},{"../../../locale/ko_kr/common":46,"../../../locale/ko_kr/maze":47,"ejs":48}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6797,7 +6928,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/ko_kr/common":45,"ejs":47}],26:[function(require,module,exports){
+},{"../../../locale/ko_kr/common":46,"ejs":48}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6818,7 +6949,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],27:[function(require,module,exports){
+},{"ejs":48}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6839,7 +6970,11 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],28:[function(require,module,exports){
+},{"ejs":48}],29:[function(require,module,exports){
+var xml = require('./xml');
+var blockUtils = require('./block_utils');
+var utils = require('./utils');
+
 /**
  * Create the textual XML for a math_number block.
  * @param {number|string} number The numeric amount, expressed as a
@@ -6890,7 +7025,72 @@ exports.repeatSimpleBlock = function(count) {
     type: 'controls_repeat_simplified', titles: {'TIMES': count}};
 };
 
-},{}],29:[function(require,module,exports){
+/**
+ * Returns an array of required blocks by comparing a list of blocks with
+ * a list of app specific block tests (defined in <app>/requiredBlocks.js)
+ */
+exports.makeTestsFromBuilderRequiredBlocks = function (customRequiredBlocks) {
+  var blocksXml = xml.parseElement(customRequiredBlocks);
+
+  var requiredBlocksTests = [];
+  Array.prototype.forEach.call(blocksXml.children, function(requiredBlockXML) {
+    requiredBlocksTests.push([{
+      test: function(userBlock) {
+        var temporaryRequiredBlock = blockUtils.domToBlock(requiredBlockXML);
+        var blockMeetsRequirements = exports.blocksMatch(userBlock, temporaryRequiredBlock);
+        temporaryRequiredBlock.dispose();
+        return blockMeetsRequirements;
+      },
+      blockDisplayXML: xml.serialize(requiredBlockXML)
+    }]);
+  });
+
+  return requiredBlocksTests;
+};
+
+/**
+ * Checks if two blocks are "equivalent"
+ * Currently means their type and all of their titles match exactly
+ * @param blockA
+ * @param blockB
+ */
+exports.blocksMatch = function(blockA, blockB) {
+  var typesMatch = blockA.type === blockB.type;
+  var titlesMatch = exports.blockTitlesMatch(blockA, blockB);
+  return typesMatch && titlesMatch;
+};
+
+/**
+ * Compares two blocks' titles, returns true if they all match
+ * @returns {boolean}
+ * @param blockA
+ * @param blockB
+ */
+exports.blockTitlesMatch = function(blockA, blockB) {
+  var blockATitles = blockA.getTitles();
+  var blockBTitles = blockB.getTitles();
+
+  var nameCompare = function(a,b) { return a.name < b.name; };
+  blockATitles.sort(nameCompare);
+  blockBTitles.sort(nameCompare);
+
+  for (var i = 0; i < blockATitles.length || i < blockBTitles.length; i++) {
+    var blockATitle = blockATitles[i];
+    var blockBTitle = blockBTitles[i];
+    if (!blockATitle || !blockBTitle ||
+      !titlesMatch(blockATitle, blockBTitle)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+var titlesMatch = function(titleA, titleB) {
+  return titleB.name === titleA.name &&
+    titleB.getValue() === titleA.getValue();
+};
+
+},{"./block_utils":3,"./utils":44,"./xml":45}],30:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -6932,7 +7132,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -7137,7 +7337,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7158,7 +7358,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],32:[function(require,module,exports){
+},{"ejs":48}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7179,7 +7379,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":45,"ejs":47}],33:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"ejs":48}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7200,7 +7400,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],34:[function(require,module,exports){
+},{"ejs":48}],35:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7221,7 +7421,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":45,"ejs":47}],35:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"ejs":48}],36:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7244,7 +7444,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":45,"ejs":47}],36:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"ejs":48}],37:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7265,7 +7465,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":45,"ejs":47}],37:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"ejs":48}],38:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7290,7 +7490,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":45,"ejs":47}],38:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"ejs":48}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7312,7 +7512,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],39:[function(require,module,exports){
+},{"ejs":48}],40:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7333,7 +7533,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":45,"ejs":47}],40:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"ejs":48}],41:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7354,7 +7554,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":45,"ejs":47}],41:[function(require,module,exports){
+},{"../../locale/ko_kr/common":46,"ejs":48}],42:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7375,7 +7575,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":47}],42:[function(require,module,exports){
+},{"ejs":48}],43:[function(require,module,exports){
 var list = [];
 
 /**
@@ -7393,9 +7593,7 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],43:[function(require,module,exports){
-var xml = require('./xml');
-
+},{}],44:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -7475,14 +7673,26 @@ exports.parseRequiredBlocks = function(requiredBlocks, blockTests) {
   return blocks;
 };
 
-},{"./xml":44}],44:[function(require,module,exports){
+/**
+ * Given two functions, generates a function that returns the result of the
+ * second function if and only if the first function returns true
+ */
+exports.executeIfConditional = function (conditional, fn) {
+  return function () {
+    if (conditional()) {
+      return fn.apply(this, arguments);
+    }
+  };
+};
+
+},{}],45:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
   return serializer.serializeToString(node);
 };
 
-// Parses a single root element string.
+// Parses a single root element string, wrapping it in an <xml/> element
 exports.parseElement = function(text) {
   var parser = new DOMParser();
   text = text.trim();
@@ -7503,7 +7713,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ko=function(n){return "other"}
 exports.blocklyMessage = function(d){return "Blockly(블러클리)"};
 
@@ -7642,7 +7852,7 @@ exports.signup = function(d){return "샘플 코스를 위해 가입하기"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":58}],46:[function(require,module,exports){
+},{"messageformat":59}],47:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ko=function(n){return "other"}
 exports.avoidCowAndRemove = function(d){return "젖소 피해 치우기 1번"};
 
@@ -7763,7 +7973,7 @@ exports.whileTooltip = function(d){return "어떤 조건이 될 때까지(~할 �
 exports.yes = function(d){return "예"};
 
 
-},{"messageformat":58}],47:[function(require,module,exports){
+},{"messageformat":59}],48:[function(require,module,exports){
 
 /*!
  * EJS
@@ -8122,7 +8332,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":48,"./utils":49,"fs":50,"path":52}],48:[function(require,module,exports){
+},{"./filters":49,"./utils":50,"fs":51,"path":53}],49:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -8325,7 +8535,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 
 /*!
  * EJS
@@ -8351,9 +8561,9 @@ exports.escape = function(html){
 };
  
 
-},{}],50:[function(require,module,exports){
-
 },{}],51:[function(require,module,exports){
+
+},{}],52:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -8408,7 +8618,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8636,7 +8846,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":51}],53:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":52}],54:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -9147,7 +9357,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9233,7 +9443,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9320,13 +9530,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":54,"./encode":55}],57:[function(require,module,exports){
+},{"./decode":55,"./encode":56}],58:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -9959,7 +10169,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":53,"querystring":56}],58:[function(require,module,exports){
+},{"punycode":54,"querystring":57}],59:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -11542,4 +11752,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[17])
+},{}]},{},[18])
