@@ -2,14 +2,6 @@
 en:
   data:
     multi:
-      K-1 multi 1:
-        Maze Multiple Choice One: Maze Multiple Choice One
-        Choose the best answer.: Choose the best answer.
-        Which blocks work?: Which blocks work?
-        E,N: E,N
-        E,S: E,S
-        W,S: W,S
-        W,N: W,N
       K-1 Maze Multiple Choice 1:
         Maze: Maze
         Solve the puzzle: Solve the puzzle
@@ -19,6 +11,14 @@ en:
         /script_assets/multis/K-1/K-1_Maze/b2.png: /script_assets/multis/K-1/K-1_Maze/b2.png
         /script_assets/multis/K-1/K-1_Maze/c2.png: /script_assets/multis/K-1/K-1_Maze/c2.png
         /script_assets/multis/K-1/K-1_Maze/d2.png: /script_assets/multis/K-1/K-1_Maze/d2.png
+      K-1 multi 1:
+        Maze Multiple Choice One: Maze Multiple Choice One
+        Choose the best answer.: Choose the best answer.
+        Which blocks work?: Which blocks work?
+        E,N: E,N
+        E,S: E,S
+        W,S: W,S
+        W,N: W,N
       K-1 multi 2:
         Maze Multiple Choice Two: Maze Multiple Choice Two
         Choose the best answer.: Choose the best answer.
@@ -27,16 +27,16 @@ en:
         W,W,N: W,W,N
         N,E,E: N,E,E
         E,E,N: E,E,N
-      test-brendan:
-        Presidents: Presidents
-        This multiple choice is all about the presidents of the United States.: This
-          multiple choice is all about the presidents of the United States.
-        Who was the first president of the USA?: Who was the first president of the
-          USA?
-        Fred Flintstone: Fred Flintstone
-        Martha Washington: Martha Washington
-        George Washington: George Washington
-        George Jetson: George Jetson
+      K-1 multi 3:
+        Maze Multiple Choice Two: Maze Multiple Choice Two
+        /script_assets/matches/images/head.jpg: /script_assets/matches/images/head.jpg
+        This puzzle is all about selecting the correct flowers.: This puzzle is all
+          about selecting the correct flowers.
+        Which flowers are yellow?: Which flowers are yellow?
+        /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
+        /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
+        /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
+        /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
       K-1 multi 4:
         Driver and Helper: Driver and Helper
         /script_assets/multis/driver_helper.jpg: /script_assets/multis/driver_helper.jpg
@@ -54,13 +54,13 @@ en:
           the <large>driver</large>?
         /script_assets/multis/helper.jpg: /script_assets/multis/helper.jpg
         /script_assets/multis/driver.jpg: /script_assets/multis/driver.jpg
-      K-1 multi 3:
-        Maze Multiple Choice Two: Maze Multiple Choice Two
-        /script_assets/matches/images/head.jpg: /script_assets/matches/images/head.jpg
-        This puzzle is all about selecting the correct flowers.: This puzzle is all
-          about selecting the correct flowers.
-        Which flowers are yellow?: Which flowers are yellow?
-        /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
-        /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
-        /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
-        /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
+      test-brendan:
+        Presidents: Presidents
+        This multiple choice is all about the presidents of the United States.: This
+          multiple choice is all about the presidents of the United States.
+        Who was the first president of the USA?: Who was the first president of the
+          USA?
+        Fred Flintstone: Fred Flintstone
+        Martha Washington: Martha Washington
+        George Washington: George Washington
+        George Jetson: George Jetson
