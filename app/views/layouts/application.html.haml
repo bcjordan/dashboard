@@ -1,4 +1,5 @@
 !!! 5
+- show_footer = ! (@share && phone?)
 %html{:dir => locale_dir}
   %head
     %title= @page_title ? "#{t(:appname)} - #{@page_title}" : t(:appname)
@@ -25,9 +26,11 @@
         .container.main{ style: 'padding: 10px;'}
           = show_flashes.html_safe
           = page
-      - unless @share && phone?
+      - if show_footer
         .push
-        = render partial: 'layouts/footer'
+
+    - if show_footer 
+      = render partial: 'layouts/footer'
 
     = yield :body_scripts
 
