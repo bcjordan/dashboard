@@ -47,7 +47,7 @@ class ScriptTest < ActiveSupport::TestCase
     scripts,_ = Script.setup([], [@script_file])
     assert_equal 2, scripts[0].stages.count
 
-    # Reupload a script of the same name, but lacking the second stage.
+    # Reupload a script of the same filename / name, but lacking the second stage.
     stage = scripts[0].stages.last
     script_file_empty_stage = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture.script")
     scripts,_ = Script.setup([], [script_file_empty_stage])
@@ -55,9 +55,9 @@ class ScriptTest < ActiveSupport::TestCase
     assert_not Stage.exists?(stage)
   end
 
-  test 'should remove empty stages, retaining ordering' do
-    script_file_3_stages = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture_3_stages.script")
-    script_file_middle_missing = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture_middle_missing.script")
+  test 'should remove empty stages, reordering stages' do
+    script_file_3_stages = File.join(self.class.fixture_path, "test_fixture_3_stages.script")
+    script_file_middle_missing_reversed = File.join(self.class.fixture_path, "duplicate_scripts", "test_fixture_3_stages.script")
     scripts,_ = Script.setup([], [script_file_3_stages])
     assert_equal 3, scripts[0].stages.count
     first = scripts[0].stages[0]
@@ -70,17 +70,17 @@ class ScriptTest < ActiveSupport::TestCase
     assert_equal 2, second.position
     assert_equal 3, third.position
 
-    # Reupload a similar script lacking the middle stage.
-    scripts,_ = Script.setup([], [script_file_middle_missing])
+    # Reupload a script of the same filename / name, but lacking the middle stage.
+    scripts,_ = Script.setup([], [script_file_middle_missing_reversed])
     assert_equal 2, scripts[0].stages.count
-    # assert_not Stage.exists?(second) <-- this fails?
+    assert_not Stage.exists?(second)
 
     first = scripts[0].stages[0]
     second = scripts[0].stages[1]
-    assert_equal 'Stage1', first.name
-    assert_equal 'Stage3', second.name
     assert_equal 1, first.position
     assert_equal 2, second.position
+    assert_equal 'Stage3', first.name
+    assert_equal 'Stage1', second.name
   end
 
   test 'should not create two scripts with same name' do
