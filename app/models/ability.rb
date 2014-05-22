@@ -18,7 +18,7 @@ class Ability
       # can :manage, user.students.where("email = ''")
 
       # TODO a bunch of these should probably be limited by user_id
-      can :manage, Section
+      can :manage, Section, user_id: user.id # TODO limit this to teachers
       can :create, Activity
       can :save_to_gallery, Activity, user_id: user.id
       can :create, GalleryActivity, user_id: user.id

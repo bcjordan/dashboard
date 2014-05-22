@@ -132,10 +132,8 @@ class SectionsControllerTest < ActionController::TestCase
     # not updated
     assert_not_equal "Ha", @laurel_section_1.reload.name
 
-    assert flash.alert
-    assert_redirected_to sections_followers_path
+    assert_response :forbidden
   end
-
 
   test "should not update section if teacher already has a section with name" do
     patch :update, id: @laurel_section_2, section: { :name => @laurel_section_1.name }
@@ -167,12 +165,6 @@ class SectionsControllerTest < ActionController::TestCase
     assert_redirected_to sections_followers_path
   end
   
-  test "should not update section owned by another teacher" do
-    patch :update, id: @chris_section, section: { :name => "Ha" }
-
-    assert_redirected_to sections_followers_path
-  end
-
   test "should destroy section" do
     assert_equal @laurel_section_1, @follower.section
 
@@ -221,6 +213,18 @@ class SectionsControllerTest < ActionController::TestCase
 
     assert_redirected_to action: 'edit_students'
   end
+
+  test "should not update students for section that belongs to another teacher" do
+    assert_no_difference('User.count') do
+      patch :update_students, id: @chris_section, section: { students_attributes: [{name: 'Laurel T', username: 'laurelt', password: 'laurelt'} ] }
+    end
+
+    # not updated
+    assert_not_equal "Ha", @laurel_section_1.reload.name
+
+    assert_response :forbidden
+  end
+
 
   test "adding multiple students with errors" do
     # Parameters: {"utf8"=>"â",

@@ -3,8 +3,6 @@ class SectionsController < ApplicationController
   check_authorization
   load_and_authorize_resource
 
-  before_action :set_section, only: [:show, :edit, :update, :destroy]
-
   def index
     @sections = current_user.sections.order('name')
   end
@@ -32,10 +30,6 @@ class SectionsController < ApplicationController
   end
 
   def edit_students
-    @followers = current_user.followers.
-      where(section: @section).
-      order('users.name').
-      includes([:student_user, :section])
   end
 
   def update_students
@@ -92,19 +86,6 @@ class SectionsController < ApplicationController
   end
 
   private
-  # Use callbacks to share common setup or constraints between actions.
-  def set_section
-    @section = Section.find(params[:id])
-
-    if @section
-      if !current_user.admin? && (!@section.user || (@section.user != current_user))
-        # TODO use cancan
-        flash[:alert] = I18n.t('crud.access_denied', model: Section.model_name.human)
-        redirect_to sections_followers_path
-        return
-      end
-    end
-  end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def section_params
