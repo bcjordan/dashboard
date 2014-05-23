@@ -58,7 +58,15 @@ class Level < ActiveRecord::Base
   def write_custom_levels_to_file
     File.open(Rails.root.join("config", "scripts", "custom_levels.json"), 'w+') do |file|
       levels = Level.custom_levels
-      file << levels.to_json
+      levels_json = levels.as_json
+      levels_json.each do |level|
+        %w(maze initial_dirt final_dirt).map do |maze|
+          x = level['properties']; x[maze] = x[maze].to_json if x[maze]
+        end
+        level.delete 'id'
+        level.reject! { |k, v| v.nil? }
+      end
+      file << JSON.pretty_generate(levels_json)
     end
   end
 end
