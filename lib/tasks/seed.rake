@@ -33,6 +33,7 @@ namespace :seed do
     scripts_seeded_mtime = (Rails.env == "staging" && File.exist?(SEEDED)) ? File.mtime(SEEDED) : Time.at(0)
     custom_scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
     default_scripts = Dir.glob("config/scripts/default/*.yml").sort.select { |script| File.mtime(script) > scripts_seeded_mtime }
+    Level.update_unplugged if File.mtime('config/locales/unplugged.en.yml') > scripts_seeded_mtime
     script, custom_i18n = Script.setup(default_scripts, custom_scripts)
     Script.update_i18n(custom_i18n)
     touch SEEDED
@@ -68,7 +69,7 @@ namespace :seed do
   file 'config/scripts/.matches_seeded' => MATCHES_GLOB do |t|
     Rake::Task['seed:matches'].invoke
     touch t.name
-  end  
+  end
 
  # explicit execution of "seed:matches"
   task matches: :environment do
