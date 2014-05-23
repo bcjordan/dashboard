@@ -52,7 +52,7 @@ class Level < ActiveRecord::Base
   end
 
   def self.custom_levels
-    where("user_id IS NOT NULL")
+    where.not(user_id: nil).order(:name)
   end
 
   def write_custom_levels_to_file
