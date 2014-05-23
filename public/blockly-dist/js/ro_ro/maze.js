@@ -2934,8 +2934,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_whileNotClear.DIRECTIONS = [
-    [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-    [msg.while() + ' ' + msg.holePresent(), 'holePresent']
+    [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+    [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent']
   ];
 
   blockly.Blocks.maze_untilBlocked = {
@@ -3004,8 +3004,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_untilBlockedOrNotClear.DIRECTIONS = [
-       [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-       [msg.while() + ' ' + msg.holePresent(), 'holePresent'],
+       [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+       [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent'],
        [msg.repeatUntilBlocked(), 'isPathForward']
   ];
 
@@ -7985,7 +7985,7 @@ exports.turnRight = function(d){return "ia-o la dreapta"};
 
 exports.turnTooltip = function(d){return "Mă roteşte la stânga sau la dreapta cu 90 de grade."};
 
-exports.while = function(d){return "în timp ce"};
+exports.whileMsg = function(d){return "în timp ce"};
 
 exports.whileTooltip = function(d){return "Repetă acţiunile cuprinse până când punctul final este atins."};
 

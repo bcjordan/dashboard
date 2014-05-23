@@ -2934,8 +2934,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_whileNotClear.DIRECTIONS = [
-    [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-    [msg.while() + ' ' + msg.holePresent(), 'holePresent']
+    [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+    [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent']
   ];
 
   blockly.Blocks.maze_untilBlocked = {
@@ -3004,8 +3004,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_untilBlockedOrNotClear.DIRECTIONS = [
-       [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-       [msg.while() + ' ' + msg.holePresent(), 'holePresent'],
+       [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+       [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent'],
        [msg.repeatUntilBlocked(), 'isPathForward']
   ];
 
@@ -7967,7 +7967,7 @@ exports.turnRight = function(d){return "Rẽ Phải"};
 
 exports.turnTooltip = function(d){return "Quay tôi sang trái hoặc phải 90 độ."};
 
-exports.while = function(d){return "Lặp khi"};
+exports.whileMsg = function(d){return "Lặp khi"};
 
 exports.whileTooltip = function(d){return "Lặp lại các hành động trong câu lệnh cho đến khi có kết quả."};
 

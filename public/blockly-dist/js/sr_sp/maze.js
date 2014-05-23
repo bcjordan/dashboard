@@ -2934,8 +2934,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_whileNotClear.DIRECTIONS = [
-    [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-    [msg.while() + ' ' + msg.holePresent(), 'holePresent']
+    [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+    [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent']
   ];
 
   blockly.Blocks.maze_untilBlocked = {
@@ -3004,8 +3004,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_untilBlockedOrNotClear.DIRECTIONS = [
-       [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-       [msg.while() + ' ' + msg.holePresent(), 'holePresent'],
+       [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+       [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent'],
        [msg.repeatUntilBlocked(), 'isPathForward']
   ];
 
@@ -7993,7 +7993,7 @@ exports.turnRight = function(d){return "скрени десно"};
 
 exports.turnTooltip = function(d){return "Закрене ме на лево или десно за 90 степени."};
 
-exports.while = function(d){return "док"};
+exports.whileMsg = function(d){return "док"};
 
 exports.whileTooltip = function(d){return "Понавлјај затворену акцију док се не досегне циљна тачка."};
 

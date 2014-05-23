@@ -2934,8 +2934,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_whileNotClear.DIRECTIONS = [
-    [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-    [msg.while() + ' ' + msg.holePresent(), 'holePresent']
+    [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+    [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent']
   ];
 
   blockly.Blocks.maze_untilBlocked = {
@@ -3004,8 +3004,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_untilBlockedOrNotClear.DIRECTIONS = [
-       [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-       [msg.while() + ' ' + msg.holePresent(), 'holePresent'],
+       [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+       [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent'],
        [msg.repeatUntilBlocked(), 'isPathForward']
   ];
 
@@ -7967,7 +7967,7 @@ exports.turnRight = function(d){return "snu mot høyre"};
 
 exports.turnTooltip = function(d){return "Snur meg mot venstre eller høyre med 90 grader."};
 
-exports.while = function(d){return "så lenge"};
+exports.whileMsg = function(d){return "så lenge"};
 
 exports.whileTooltip = function(d){return "Gjenta disse handlingene inntil målet er nådd."};
 

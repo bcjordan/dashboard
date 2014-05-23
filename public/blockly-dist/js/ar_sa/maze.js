@@ -2934,8 +2934,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_whileNotClear.DIRECTIONS = [
-    [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-    [msg.while() + ' ' + msg.holePresent(), 'holePresent']
+    [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+    [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent']
   ];
 
   blockly.Blocks.maze_untilBlocked = {
@@ -3004,8 +3004,8 @@ exports.install = function(blockly, skin) {
   };
 
   blockly.Blocks.maze_untilBlockedOrNotClear.DIRECTIONS = [
-       [msg.while() + ' ' + msg.pilePresent(), 'pilePresent'],
-       [msg.while() + ' ' + msg.holePresent(), 'holePresent'],
+       [msg.whileMsg() + ' ' + msg.pilePresent(), 'pilePresent'],
+       [msg.whileMsg() + ' ' + msg.holePresent(), 'holePresent'],
        [msg.repeatUntilBlocked(), 'isPathForward']
   ];
 
@@ -8001,7 +8001,7 @@ exports.turnRight = function(d){return "اتجه الى اليمين"};
 
 exports.turnTooltip = function(d){return "تحويل اتجاه الرسام يمينا او يسارا بمقدار 90 درجة ."};
 
-exports.while = function(d){return "أكرر طالما"};
+exports.whileMsg = function(d){return "أكرر طالما"};
 
 exports.whileTooltip = function(d){return "أكرر الاجراءات المغلقة حتى الوصول الى نقطة النهاية."};
 

@@ -5689,7 +5689,7 @@ exports.whenWallCollided = function(d){return "when ball hits wall"};
 
 exports.whenWallCollidedTooltip = function(d){return "Execute the actions below when a ball collides with a wall."};
 
-exports.while = function(d){return "當"};
+exports.whileMsg = function(d){return "當"};
 
 exports.whileTooltip = function(d){return "重覆程式積木內的動作，直到完成為止。"};
 

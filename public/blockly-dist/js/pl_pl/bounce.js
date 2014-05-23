@@ -5703,7 +5703,7 @@ exports.whenWallCollided = function(d){return "kiedy piłka uderza w ścianę"};
 
 exports.whenWallCollidedTooltip = function(d){return "Wykonaj poniższe czynności, gdy piłka zderza się ze ścianą."};
 
-exports.while = function(d){return "dopóki"};
+exports.whileMsg = function(d){return "dopóki"};
 
 exports.whileTooltip = function(d){return "Powtarzaj wymienione czynności, aż do osiągnięcia punktu końcowego."};
 

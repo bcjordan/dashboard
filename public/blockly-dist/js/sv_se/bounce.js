@@ -5689,7 +5689,7 @@ exports.whenWallCollided = function(d){return "when ball hits wall"};
 
 exports.whenWallCollidedTooltip = function(d){return "Execute the actions below when a ball collides with a wall."};
 
-exports.while = function(d){return "medan"};
+exports.whileMsg = function(d){return "medan"};
 
 exports.whileTooltip = function(d){return "Upprepa de omslutna åtgärderna tills målet nåtts."};
 

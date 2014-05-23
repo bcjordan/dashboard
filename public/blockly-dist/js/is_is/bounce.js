@@ -5689,7 +5689,7 @@ exports.whenWallCollided = function(d){return "þegar bolti hittir vegg"};
 
 exports.whenWallCollidedTooltip = function(d){return "Gera aðgerðirnar fyrir neðan þegar bolti rekst á vegg."};
 
-exports.while = function(d){return "meðan"};
+exports.whileMsg = function(d){return "meðan"};
 
 exports.whileTooltip = function(d){return "Endurtaka aðgerðirnar í kubbnum þar til endamarki er náð."};
 
