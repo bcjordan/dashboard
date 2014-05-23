@@ -35,7 +35,7 @@ class Maze < Level
       file_contents = CSV.new(params[:maze_source].read)
       contents = self.class.load_maze(file_contents, size)
     elsif level_params[:maze]
-      contents = JSON.parse(level_params[:maze]).map { |row| row.map { |cell| Integer(cell) } }
+      contents = JSON.parse(level_params[:maze])
     else
       raise ArgumentError.new("Maze level data not found")
     end
@@ -63,7 +63,7 @@ class Maze < Level
   #   array that Blockly can render.
   # Throws ArgumentError if there is a non integer value in the array.
   def self.parse_maze(maze_json, size)
-    { 'maze' => JSON.parse(maze_json)}
+    { 'maze' => JSON.parse(maze_json).map { |row| row.map { |cell| Integer(cell) } }}
   end
 
   # Returns an 'unparsed' array object from the parsed properties
