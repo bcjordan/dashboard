@@ -7125,6 +7125,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -7752,6 +7755,8 @@ exports.directionEastLetter = function(d){return "изток"};
 
 exports.directionWestLetter = function(d){return "запад"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Блоковете \"Повтори\" и \"или\" трябва да съдържат други блокове в себе си, за да работят. Уверете се, че вътрешния блок се вписва правилно във външния блок."};
 
 exports.extraTopBlocks = function(d){return "Имате допълнителни блокчета, които не са били използвани в блока за програмиране."};
@@ -7845,6 +7850,8 @@ exports.orientationLock = function(d){return "Изключете заключв�
 exports.wantToLearn = function(d){return "Искате ли да се научите да кодирате?"};
 
 exports.watchVideo = function(d){return "Гледайте видеото"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Опитайте Часа на Кодирането"};
 

@@ -7125,6 +7125,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -7769,6 +7772,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "قطعة \" أكرر\" او \" اذا \" تحتاج ان تحتوي على قطع اخرى داخلها من اجل العمل . تأكد من القطع الداخلية بحيث يجب ان تكون تناسب القطع المحتوية في الداخل ."};
 
 exports.extraTopBlocks = function(d){return "لديك قطع إضافية لم ترفق على قطع الاحتفالية."};
@@ -7862,6 +7867,8 @@ exports.orientationLock = function(d){return "قم بتعطيل قفل التو�
 exports.wantToLearn = function(d){return "هل تريد أن تتعلم البرمجة؟"};
 
 exports.watchVideo = function(d){return "شاهد الفيديو"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "جرب \"Hour of Code\""};
 

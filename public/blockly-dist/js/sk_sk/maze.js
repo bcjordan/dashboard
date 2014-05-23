@@ -7125,6 +7125,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -7760,6 +7763,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "\"Repeat\", alebo \"If\" bloky musia obsahovať ďalšie bloky vo vnútri aby pracovali. Uistite sa, že vnútorný blok sedí správne vo vnútri týchto blokov."};
 
 exports.extraTopBlocks = function(d){return "Máte ďalšie extra bloky, ktoré nie sú pripojené k blokom udalostí."};
@@ -7853,6 +7858,8 @@ exports.orientationLock = function(d){return "Vypnite zámok orientácie v nasta
 exports.wantToLearn = function(d){return "Chcete sa naučiť programovať?"};
 
 exports.watchVideo = function(d){return "Pozrieť video"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Vyskúšajte hodinu kódovania"};
 

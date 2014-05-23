@@ -4868,6 +4868,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5734,6 +5737,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "“Repeat”或“If”模块需要其他的模块充填在里面才能工作。请确保在容器模块里填入了合适的模块。"};
 
 exports.extraTopBlocks = function(d){return "你有多余的块，这些块没有附加到任何的事件块。"};
@@ -5827,6 +5832,8 @@ exports.orientationLock = function(d){return "关闭设置中的旋转锁定。"
 exports.wantToLearn = function(d){return "想要学习如何写代码吗？"};
 
 exports.watchVideo = function(d){return "观看视频"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "来试试”编程一小时“项目！"};
 

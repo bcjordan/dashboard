@@ -7125,6 +7125,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -7752,6 +7755,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "\"반복\" 블럭이나 \"조건\" 블럭이 실행되려면, 그 안에 다른 블럭들이 있어야 합니다. 블럭 안쪽에 필요한 블럭들을 끼워 맞춰 연결하세요."};
 
 exports.extraTopBlocks = function(d){return "이벤트 블럭에 연결하지 않은 남는 블럭이 있습니다."};
@@ -7845,6 +7850,8 @@ exports.orientationLock = function(d){return "회전 잠금을 해제하세요."
 exports.wantToLearn = function(d){return "코드(code)를 배워볼까요?"};
 
 exports.watchVideo = function(d){return "비디오 보기"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Hour of Code 해보기"};
 

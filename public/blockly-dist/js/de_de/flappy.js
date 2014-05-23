@@ -2055,6 +2055,7 @@ exports.incrementPlayerScore = function(id) {
 'use strict';
 
 var msg = require('../../locale/de_de/flappy');
+var commonMsg = require('../../locale/de_de/common');
 
 var generateSetterCode = function (ctx, name) {
   var value = ctx.getTitleValue('VALUE');
@@ -2081,7 +2082,8 @@ exports.install = function(blockly, skin) {
     init: function () {
       this.setHSV(140, 1.00, 0.74);
       this.appendDummyInput()
-        .appendTitle(msg.whenClick());
+        .appendTitle(commonMsg.when())
+        .appendTitle(new blockly.FieldImage(skin.clickIcon));
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenClickTooltip());
@@ -2099,7 +2101,8 @@ exports.install = function(blockly, skin) {
     init: function () {
       this.setHSV(140, 1.00, 0.74);
       this.appendDummyInput()
-        .appendTitle(msg.whenCollideGround());
+        .appendTitle(commonMsg.when())
+        .appendTitle(new blockly.FieldImage(skin.collideGroundIcon));
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenCollideGroundTooltip());
@@ -2117,7 +2120,8 @@ exports.install = function(blockly, skin) {
     init: function () {
       this.setHSV(140, 1.00, 0.74);
       this.appendDummyInput()
-        .appendTitle(msg.whenCollideObstacle());
+        .appendTitle(commonMsg.when())
+        .appendTitle(new blockly.FieldImage(skin.collideObstacleIcon));
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenCollideObstacleTooltip());
@@ -2158,7 +2162,8 @@ exports.install = function(blockly, skin) {
     init: function () {
       this.setHSV(140, 1.00, 0.74);
       this.appendDummyInput()
-        .appendTitle(msg.whenRunButtonClick());
+        .appendTitle(commonMsg.when())
+        .appendTitle(new blockly.FieldImage(skin.startIcon));
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenRunButtonClickTooltip());
@@ -2176,7 +2181,8 @@ exports.install = function(blockly, skin) {
     init: function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
-        .appendTitle(msg.flap());
+        .appendTitle(msg.flap())
+        .appendTitle(new blockly.FieldImage(skin.flapIcon));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.flapTooltip());
@@ -2274,7 +2280,8 @@ exports.install = function(blockly, skin) {
     init: function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
-        .appendTitle(msg.endGame());
+        .appendTitle(commonMsg.end())
+        .appendTitle(new blockly.FieldImage(skin.endIcon));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.endGameTooltip());
@@ -2542,7 +2549,7 @@ exports.install = function(blockly, skin) {
   delete blockly.Blocks.procedures_ifreturn;
 };
 
-},{"../../locale/de_de/flappy":35}],11:[function(require,module,exports){
+},{"../../locale/de_de/common":34,"../../locale/de_de/flappy":35}],11:[function(require,module,exports){
 module.exports = {
   WORKSPACE_BUFFER: 20,
   WORKSPACE_COL_WIDTH: 210,
@@ -4145,7 +4152,10 @@ exports.load = function(assetUrl, id) {
   skin.clickrun = skin.assetUrl('clickrun.png');
   skin.getready = skin.assetUrl('getready.png');
   skin.gameover = skin.assetUrl('gameover.png');
-
+  skin.flapIcon = skin.assetUrl('flap-bird.png');
+  skin.crashIcon = skin.assetUrl('when-crash.png');
+  skin.collideObstacleIcon = skin.assetUrl('when-obstacle.png');
+  skin.collideGroundIcon = skin.assetUrl('when-crash.png');
   skin.tiles = skin.assetUrl('tiles.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
@@ -4361,6 +4371,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -4970,6 +4983,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Die \"Wiederholen\"- und die \"Wenn\"-Bausteine benötigten im Inneren andere Bausteine um zu funktionieren. Stelle sicher, dass der innere Baustein in den umschließenden Baustein passt."};
 
 exports.extraTopBlocks = function(d){return "Es gibt zusätzliche Bausteine, die keinem Ereignis-Baustein zugeordnet sind."};
@@ -5063,6 +5078,8 @@ exports.orientationLock = function(d){return "Deaktivieren Sie die Dreh-Möglich
 exports.wantToLearn = function(d){return "Möchtest du programmieren lernen?"};
 
 exports.watchVideo = function(d){return "Video anschauen"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Probiere \"The Hour of Code\" aus"};
 

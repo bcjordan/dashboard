@@ -2158,6 +2158,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5941,6 +5944,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "\"Gjenta\"- eller \"Hvis\"-blokken må ha andre blokker inne i seg for å fungere. Kontroller at den indre blokken sitter riktig på plass i blokken som er utenfor."};
 
 exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
@@ -6034,6 +6039,8 @@ exports.orientationLock = function(d){return "Skru av roteringslåsen på enhete
 exports.wantToLearn = function(d){return "Vil du lære å kode?"};
 
 exports.watchVideo = function(d){return "Se videoen"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Prøv Kodetimen"};
 

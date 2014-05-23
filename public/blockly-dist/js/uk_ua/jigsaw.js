@@ -3111,6 +3111,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -3733,6 +3736,8 @@ exports.directionEastLetter = function(d){return "Сх"};
 
 exports.directionWestLetter = function(d){return "Зх"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Блоки \"Повторити\" та \"Якщо\" повинні містити інші блоки. Переконайтесь, що внутрішній блок належно розміщений всередині зовнішнього."};
 
 exports.extraTopBlocks = function(d){return "У вас є додаткові блоки, які не прив'язані до жодного блоку подій."};
@@ -3826,6 +3831,8 @@ exports.orientationLock = function(d){return "Увімкніть блокува�
 exports.wantToLearn = function(d){return "Хочете навчитись програмувати?"};
 
 exports.watchVideo = function(d){return "Переглянути відео"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Спробуйте годину коду"};
 

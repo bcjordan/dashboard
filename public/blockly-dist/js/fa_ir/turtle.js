@@ -2158,6 +2158,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5941,6 +5944,8 @@ exports.directionEastLetter = function(d){return "شرق"};
 
 exports.directionWestLetter = function(d){return "غرب"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "بلوک های \"تکرار\" (Repeat) یا \"شرطی\" (If)  برای کار کردن، نیاز به بلوکهای دیگری در داخل خود دارند. مطمئن شوید که بلوک داخلی، به درستی درون بلوک اصلی قرار گرفته است."};
 
 exports.extraTopBlocks = function(d){return "شما بلوک های اضافه ای دارید که به یک بلوک رویداد متصل نیست."};
@@ -6034,6 +6039,8 @@ exports.orientationLock = function(d){return "حالت افقی را در تنظ
 exports.wantToLearn = function(d){return "می‌خواید کد نویسی را یاد بگیرید؟"};
 
 exports.watchVideo = function(d){return "ویدیو را ببینید"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "ساعتِ کد نویسی را امتحان کنید"};
 

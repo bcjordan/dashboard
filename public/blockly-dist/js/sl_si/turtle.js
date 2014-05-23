@@ -2158,6 +2158,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5952,6 +5955,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Znotraj 'Ponovi' ali 'če' bloka morajo biti drugi bloki, da bo delovalo. Prepričaj se, da se notranji bloki ustrezno prilegajo zunanjemu bloku."};
 
 exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
@@ -6045,6 +6050,8 @@ exports.orientationLock = function(d){return "Izključi zaklepanje orientacije v
 exports.wantToLearn = function(d){return "Se želiš naučiti programirati?"};
 
 exports.watchVideo = function(d){return "Glej video"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Poizkusi Uro za programiranje (Hour to Code)"};
 

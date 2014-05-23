@@ -7125,6 +7125,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -7752,6 +7755,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "\"Tekrar\" bloğu veya \"Eğer\" bloğunun çalışması için  içerisinde bir başka blok yer almalıdır. İçteki bloğu, dış blok içerisine yerleştirdiğine emin ol."};
 
 exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
@@ -7845,6 +7850,8 @@ exports.orientationLock = function(d){return "Yönlendirme kilidini aygıt ayarl
 exports.wantToLearn = function(d){return "Kod yazmayı öğrenmek ister misiniz?"};
 
 exports.watchVideo = function(d){return "Videoyu İzle"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Kodlama Saati'ni Deneyin"};
 

@@ -4868,6 +4868,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5734,6 +5737,8 @@ exports.directionEastLetter = function(d){return "Kelet"};
 
 exports.directionWestLetter = function(d){return "Nyugat"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Akkor van értelme az \"Ismétel\" vagy a \"Ha\" blokknak, ha van  bennük egy vagy több blokk. Bizonyosodj meg róla, hogy a belső blokk megfelelően illeszkedik a külső blokkhoz."};
 
 exports.extraTopBlocks = function(d){return "Van egy blokk, ami nincs csatolva egyetlen eseményblokkhoz se."};
@@ -5827,6 +5832,8 @@ exports.orientationLock = function(d){return "Kapcsold ki a tájolási zárat az
 exports.wantToLearn = function(d){return "Szeretnél megtanulni programozni?"};
 
 exports.watchVideo = function(d){return "Nézd meg a videót"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Próbáld ki a kódolás óráját"};
 

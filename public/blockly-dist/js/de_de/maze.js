@@ -7125,6 +7125,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -7752,6 +7755,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Die \"Wiederholen\"- und die \"Wenn\"-Bausteine benötigten im Inneren andere Bausteine um zu funktionieren. Stelle sicher, dass der innere Baustein in den umschließenden Baustein passt."};
 
 exports.extraTopBlocks = function(d){return "Es gibt zusätzliche Bausteine, die keinem Ereignis-Baustein zugeordnet sind."};
@@ -7845,6 +7850,8 @@ exports.orientationLock = function(d){return "Deaktivieren Sie die Dreh-Möglich
 exports.wantToLearn = function(d){return "Möchtest du programmieren lernen?"};
 
 exports.watchVideo = function(d){return "Video anschauen"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Probiere \"The Hour of Code\" aus"};
 

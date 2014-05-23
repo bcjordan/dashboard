@@ -2099,6 +2099,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -6094,6 +6097,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Kubbarnir \"endurtaka\" og \"ef\" verða að innihalda aðra kubba til að virka. Gættu þess að innri kubburinn smellpassi í ytri kubbinn."};
 
 exports.extraTopBlocks = function(d){return "Þú hefur auka kubba sem ekki tengjast atvikakubbi."};
@@ -6187,6 +6192,8 @@ exports.orientationLock = function(d){return "Slökktu á stefnulæsingu í stil
 exports.wantToLearn = function(d){return "Viltu læra að kóða?"};
 
 exports.watchVideo = function(d){return "Horfa á videóið"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Prófa Kóðun í klukkustund"};
 

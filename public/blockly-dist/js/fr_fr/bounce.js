@@ -4868,6 +4868,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5734,6 +5737,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "O"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Le bloc « Répéter » ou «Si» doit avoir des autres blocs à l'intérieur pour fonctionner. Assurez-vous que le bloc interne s'adapte correctement à l'intérieur du bloc conteneur."};
 
 exports.extraTopBlocks = function(d){return "Vous avez des blocs supplémentaires qui ne sont pas attachés à un bloc d'événements."};
@@ -5827,6 +5832,8 @@ exports.orientationLock = function(d){return "Désactive le verrouillage de l'or
 exports.wantToLearn = function(d){return "Voulez-vous apprendre à coder ?"};
 
 exports.watchVideo = function(d){return "Voir la vidéo"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Essayez l'Heure de Code"};
 

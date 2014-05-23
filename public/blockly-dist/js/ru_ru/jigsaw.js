@@ -3111,6 +3111,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -3733,6 +3736,8 @@ exports.directionEastLetter = function(d){return "В"};
 
 exports.directionWestLetter = function(d){return "З"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Блокам \"повторять\" или \"если\" необходимо иметь внутри другие блоки для работы. Убедись  в том, что внутренний блок должным образом подходит к блоку, в котором он содержится."};
 
 exports.extraTopBlocks = function(d){return "У тебя есть оставшиеся блоки, которые не присоединены к основному блоку."};
@@ -3826,6 +3831,8 @@ exports.orientationLock = function(d){return "Выключите блокиро�
 exports.wantToLearn = function(d){return "Хотите научиться писать код?"};
 
 exports.watchVideo = function(d){return "Посмотреть видео"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Попробуйте Час кода"};
 

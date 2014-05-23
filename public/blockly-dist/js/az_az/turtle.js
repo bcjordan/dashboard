@@ -2158,6 +2158,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5941,6 +5944,8 @@ exports.directionEastLetter = function(d){return "Şərq"};
 
 exports.directionWestLetter = function(d){return "Qərb"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "\"Təkrar\" və ya \"Əgər\" blokları işləsin deyə içərisində başqa blokların olmağı lazımdır. Əmin olun ki, daxili blokun konteyner blokun içərisinə düz yerləşir."};
 
 exports.extraTopBlocks = function(d){return "You have extra blocks that aren't attached to an event block."};
@@ -6034,6 +6039,8 @@ exports.orientationLock = function(d){return "Cihaz nizamlamalarında səmt kili
 exports.wantToLearn = function(d){return "Want to learn to code?"};
 
 exports.watchVideo = function(d){return "Vidəo izle"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Kodlama Saati'ni dənə"};
 

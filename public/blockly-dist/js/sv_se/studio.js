@@ -2099,6 +2099,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -6094,6 +6097,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "\"Upprepa\" eller \"Om\" blocken måste ha andra block inuti sig för att fungera. Se till att det inre blocket sitter rätt inuti blocket."};
 
 exports.extraTopBlocks = function(d){return "Du har extra block som inte är kopplade till händelseblock."};
@@ -6187,6 +6192,8 @@ exports.orientationLock = function(d){return "Stäng av orienterings låset i en
 exports.wantToLearn = function(d){return "Vill du lära dig att programmera?"};
 
 exports.watchVideo = function(d){return "Titta på videon"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Prove en Timme med Kod"};
 
