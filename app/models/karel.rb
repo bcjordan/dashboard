@@ -8,8 +8,8 @@ class Karel < Maze
   # If type is "Karel" return a 3 entry hash with keys 'maze', 'initial_dirt',
   # and 'final_dirt', the keys map to 2d arrays blockly can render.
   # final_dirt is always zeroed out until it is removed from Blockly.
-  def self.parse_maze(contents, size)
-    maze = super['maze']
+  def self.parse_maze(maze_json, size)
+    maze = JSON.parse(maze_json)
     map, initial_dirt, final_dirt = (0...3).map { Array.new(size) { Array.new(size, 0) }}
     maze.each_with_index do |row, x|
       row.each_with_index do |cell, y|
