@@ -30,8 +30,11 @@ If you won't be making modifications to blockly code, you can just skip the syml
 
 ### Setting up Dashboard
 
-1. `git clone https://github.com/code-dot-org/dashboard.git`
+1. If you're a contributor likely to be contributing modifications to this repository, [create a fork of the dashboard repository following this GitHub guide](https://help.github.com/articles/fork-a-repo). Our default main development branch is called `finished`.
+1. `git clone https://github.com/your-username/dashboard.git`
 1. `cd dashboard` (this repository's root)
+2. `git remote add upstream https://github.com/code-dot-org/dashboard.git`
+3. `git fetch upstream`
 2. Install ruby build prerequisites (using rbenv) and MySQL:
     - OSX: Using [Homebrew](http://brew.sh/) to install:
       + Install Homebrew:
@@ -134,15 +137,15 @@ For the time being—for access to Pivotal Tracker, email [brian@code.org](mailt
 
 ## Submitting Pull Requests
 
-If you do not have repository privileges, you can [create a fork and issue a pull request](https://help.github.com/articles/using-pull-requests) from it.
+Contributors should follow the GitHub [fork-and-pull model](https://help.github.com/articles/using-pull-requests) to submit pull requests into this repository.
 
-1. Checkout a new branch for a new feature
+1. On your fork, either push to your own finished branch or checkout a new branch for your feature
     - `git checkout -b branch_name`
-2. Develop the new feature and push the changes to **your** repository
+2. Develop the new feature and push the changes to **your** fork and branch
     - `git add YYY`
     - `git commit -m "ZZZ"`
     - `git push origin branch_name`
-3. Go to the GitHub repository
+3. Go to the dashboard GitHub page
     - [https://github.com/code-dot-org/dashboard](https://github.com/code-dot-org/dashboard)
-4. Click on the "Pull Request" link, and send out a PR for others to review.
-
+4. Click on the "Pull Request" link, look over your diff, and submit it to others to review.
+    - For bonus points, include screenshots. Command + Ctrl + Shift + 4 in OS X lets you copy a screen selection to your clipboard, which GitHub will let you paste right into the description
