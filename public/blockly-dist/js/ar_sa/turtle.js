@@ -391,7 +391,7 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals', 'grayOutUndeletableBlocks'].forEach(
     function (prop) {
       if (config[prop] !== undefined) {
         options[prop] = config[prop];
@@ -5080,6 +5080,8 @@ Turtle.init = function(config) {
   skin = config.skin;
   level = config.level;
 
+  config.grayOutUndeletableBlocks = true;
+
   Turtle.AVATAR_HEIGHT = 51;
   Turtle.AVATAR_WIDTH = 70;
 
@@ -5105,8 +5107,6 @@ Turtle.init = function(config) {
     // (execute) and the infinite loop detection function.
     //XXX Not sure if this is still right.
     Blockly.JavaScript.addReservedWords('Turtle,code');
-
-    Blockly.GRAY_OUT_UNDELETABLE = true;
 
     // Helper for creating canvas elements.
     var createCanvas = function(id, width, height) {

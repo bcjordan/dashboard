@@ -391,7 +391,7 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals', 'grayOutUndeletableBlocks'].forEach(
     function (prop) {
       if (config[prop] !== undefined) {
         options[prop] = config[prop];
@@ -5380,6 +5380,8 @@ Maze.init = function(config) {
   skin = config.skin;
   level = config.level;
 
+  config.grayOutUndeletableBlocks = true;
+
   if (config.skinId === 'bee') {
     Maze.bee = new Bee(Maze, config);
   }
@@ -5436,8 +5438,6 @@ Maze.init = function(config) {
 
     Blockly.SNAP_RADIUS *= Maze.scale.snapRadius;
     Blockly.JavaScript.INFINITE_LOOP_TRAP = codegen.loopHighlight("Maze");
-
-    Blockly.GRAY_OUT_UNDELETABLE = true;
 
     Maze.start_ = undefined;
     Maze.finish_ = undefined;
