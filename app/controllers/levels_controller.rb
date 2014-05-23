@@ -101,6 +101,18 @@ class LevelsController < ApplicationController
 
   def new
     authorize! :create, :level
+
+    # Clone existing level and open edit page
+    if params[:clone]
+      old_level = Level.find(params[:clone])
+      @level = old_level.dup
+      # resolve duplicate name conflicts with 'X (copy); X (copy 2); X (copy 3)... X (copy 10)'
+      copy=0; result = false; until result || copy > 10 do
+        result = @level.update(name: "#{old_level.name} (copy#{" #{copy}" if (copy += 1) > 1})")
+      end
+      redirect_to(edit_game_level_url(@level.game, @level))
+      return
+    end
     @type_class = params[:type].try(:constantize)
 
     # Can't use case/when because a constantized string does not === the class by that name.

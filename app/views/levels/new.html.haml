@@ -13,4 +13,4 @@
     = link_to t('crud.show'), game_level_path(level.game, level)
     = link_to t('crud.edit'), edit_game_level_path(level.game, level)
     = link_to t('crud.delete'), game_level_path(level.game, level, redirect: levels_new_path), method: :delete
-
+    = link_to 'Clone', new_game_level_path(level.game, :clone => level.id)
