@@ -60,8 +60,8 @@ class Level < ActiveRecord::Base
       levels = Level.custom_levels
       levels_json = levels.as_json
       levels_json.each do |level|
-        %w(maze initial_dirt final_dirt).map do |maze|
-          x = level['properties']; x[maze] = x[maze].to_json if x[maze]
+        %w(maze initial_dirt final_dirt).map do |maze_type|
+          level['properties'][maze_type] &&= level['properties'][maze_type].to_json
         end
         level.delete 'id'
         level.reject! { |k, v| v.nil? }
