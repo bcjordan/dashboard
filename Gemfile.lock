@@ -187,6 +187,7 @@ GEM
     redcarpet (3.1.1)
     ref (1.0.5)
     remotipart (1.2.1)
+    retryable (1.3.5)
     rmagick (2.13.2)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
@@ -291,6 +292,7 @@ DEPENDENCIES
   rails-i18n (~> 4.0.0)
   redcarpet
   remotipart
+  retryable
   rmagick
   rspec
   ruby-prof
