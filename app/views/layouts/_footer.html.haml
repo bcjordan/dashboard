@@ -1,5 +1,5 @@
 .navbar-static-top.footer
-  .container{ style: 'padding: 10px;' }
+  .container{ style: 'padding: 10px;' + (@full_width ? "width: 855px; margin-left: 25px;" : "") }
     .row
       .span3
         &copy; Code.org, 2014
@@ -7,7 +7,7 @@
         = form_tag(locale_url, method: :post, id: 'localeForm') do
           = hidden_field_tag :return_to, request.url
           = select_tag :locale, options_for_select(options_for_locale_select, locale), onchange: 'switchLocale();'
-      .span9
+      .span9{style: (@full_width ? "width: 615px;" : "")}
         = link_to t('footer.feedback'), 'http://support.code.org/'
         = ' - '
         = link_to t('footer.translate'), 'http://eepurl.com/Im_In'

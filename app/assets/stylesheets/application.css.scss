@@ -334,19 +334,11 @@ $footer_height: 128px;
 $footer_padding-top: 20px;
 $footer_padding-bottom: 20px;
 $footer_fullheight: $footer_height + $footer_padding-top + $footer_padding-bottom;
-* {
-  margin: 0;
-}
 html, body {
   height: 100%;
 }
 .wrapper {
   min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  margin-top: 0;
-  margin-right: auto;
-  margin-left: auto;
   margin-bottom: -$footer_fullheight;     /* This is the same as the height of .push. */
 }
 .push {
