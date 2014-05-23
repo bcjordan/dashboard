@@ -186,7 +186,6 @@ GEM
       json (~> 1.4)
     redcarpet (3.1.1)
     ref (1.0.5)
-    remotipart (1.2.1)
     rmagick (2.13.2)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
@@ -290,7 +289,6 @@ DEPENDENCIES
   rails (= 4.0.3)
   rails-i18n (~> 4.0.0)
   redcarpet
-  remotipart
   rmagick
   rspec
   ruby-prof

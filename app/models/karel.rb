@@ -1,31 +1,45 @@
 class Karel < Maze
-  BUILDER_FORM = "https://docs.google.com/a/code.org/spreadsheet/ccc?key=0Au-CEJJ_kBL3dGpmbmcxQnF6Z0lZZDcxY0p2LWFIaGc&usp=drive_web#gid=0"
 
   # List of possible skins, the first is used as a default.
   def self.skins
     ['farmer', 'farmer_night', 'bee']
   end
 
-  # Karel level builder mazes have the information for three 2D arrays embeded
-  #   into one.
+  # If type is "Karel" return a 3 entry hash with keys 'maze', 'initial_dirt',
+  # and 'final_dirt', the keys map to 2d arrays blockly can render.
   # final_dirt is always zeroed out until it is removed from Blockly.
   def self.parse_maze(contents, size)
     maze = super['maze']
-
     map, initial_dirt, final_dirt = (0...3).map { Array.new(size) { Array.new(size, 0) }}
-
     maze.each_with_index do |row, x|
       row.each_with_index do |cell, y|
-        if cell >= 100
-          map[x][y] = cell % 100
-        else
+        # "+X" or "-X" cells define dirt
+        if cell[0] == '+' || cell[0] == '-'
           map[x][y] = 1 # map is a path
-          initial_dirt[x][y] = cell
+          initial_dirt[x][y] = Integer(cell, 10)
+        else
+          map[x][y] = cell
         end
       end
     end
 
     { 'maze' => map, 'initial_dirt' => initial_dirt, 'final_dirt' => final_dirt }
+  end
+
+  def self.unparse_maze(contents)
+    maze, initial_dirt, final_dirt = [contents['maze'], contents['initial_dirt'], contents['final_dirt']]
+    output = Array.new(maze.size) { Array.new(maze[0].size, 0) }
+    maze.each_with_index do |row, x|
+      row.each_with_index do |map, y|
+        dirt = initial_dirt[x][y]
+        if map == 1 && dirt != 0
+          output[x][y] = (dirt > 0 ? '+' : '') + dirt.to_s
+        else
+          output[x][y] = map
+        end
+      end
+    end
+    output
   end
 
   def toolbox(type)
