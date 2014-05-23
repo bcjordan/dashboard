@@ -128,7 +128,7 @@ en:
         'maze_2_5': "There's a way I can get to the silly pig using only 2 blocks. Can you figure it out?"
         'maze_2_6': "Try to get me to the green intruder using only three blocks."
         'maze_2_7': "Help me banish this bad piggy using the fewest number of blocks. Try using more than one \"repeat times\" block."
-        'maze_2_8': "When a block is grey, that means you can't delete it or change it. Try and solve this puzzle using the \"repeat\" block that repeats 3 times. Try putting these 3 blocks inside the grey \"repeat\" block: move, move, turn."
+        'maze_2_8': "When a block is grey, that means you can't delete it. Solve this puzzle using the \"repeat\" block that repeats 3 times. Try putting these 3 blocks inside the grey \"repeat\" block: move, move, turn."
         'maze_2_9': "Ok, try the new \"repeat until\" block - it will repeat until I reach the annoying pig."
         'maze_2_10': "Ok, one last time for practice - can you solve this one using only 4 blocks?"
         'maze_2_11': "Dear person.  Me zombie. Me hungry. Must... get... to sunflower... Can you get me there with only 5 blocks?"
@@ -300,7 +300,7 @@ en:
         drag_blocks: 'Drag a "move" block and snap it below the other block'
         run: 'Hit "Run" to try your program'
         watch_again: 'Click here to watch the video again'
-        gray_block_explanation: "Blocks that are grey can't be moved or deleted. Can you solve the puzzle anyway?"
+        gray_block_explanation: "Blocks that are grey can't be deleted. Can you solve the puzzle anyway?"
         show_code_explanation: "Click here to see the code for the program you're making"
         instructions_repeat_explanation: 'The instructions for each puzzle are repeated here'
         category_explanation: "You have all the same blocks but they've now been arranged in categories"

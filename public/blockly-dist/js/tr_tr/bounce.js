@@ -391,7 +391,7 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals', 'grayOutUndeletableBlocks'].forEach(
     function (prop) {
       if (config[prop] !== undefined) {
         options[prop] = config[prop];
@@ -5689,7 +5689,7 @@ exports.whenWallCollided = function(d){return "top duvara çarptığında"};
 
 exports.whenWallCollidedTooltip = function(d){return "Top duvarla çarpıştığında, aşağıdaki işlemleri yürüt."};
 
-exports.while = function(d){return "sürece"};
+exports.whileMsg = function(d){return "sürece"};
 
 exports.whileTooltip = function(d){return "Bitiş noktasına ulaşana kadar blok içindeki işlemleri tekrarla."};
 

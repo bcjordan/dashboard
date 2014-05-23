@@ -391,7 +391,7 @@ BlocklyApps.init = function(config) {
   var options = {
     toolbox: config.level.toolbox
   };
-  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals'].forEach(
+  ['trashcan', 'scrollbars', 'concreteBlocks', 'varsInGlobals', 'grayOutUndeletableBlocks'].forEach(
     function (prop) {
       if (config[prop] !== undefined) {
         options[prop] = config[prop];
@@ -5689,7 +5689,7 @@ exports.whenWallCollided = function(d){return "þegar bolti hittir vegg"};
 
 exports.whenWallCollidedTooltip = function(d){return "Gera aðgerðirnar fyrir neðan þegar bolti rekst á vegg."};
 
-exports.while = function(d){return "meðan"};
+exports.whileMsg = function(d){return "meðan"};
 
 exports.whileTooltip = function(d){return "Endurtaka aðgerðirnar í kubbnum þar til endamarki er náð."};
 
