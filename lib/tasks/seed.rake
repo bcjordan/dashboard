@@ -88,10 +88,10 @@ namespace :seed do
   task custom_levels: :environment do
     if Rails.env != "staging" || ENV["FORCE_CUSTOM_LEVELS"]
       Level.transaction do
-        JSON.parse(File.read("config/scripts/custom_levels.json")).each do |row|
+        JSON.parse(File.read('config/scripts/custom_levels.json')).each do |row|
           level = Level.where(name: row['name']).first_or_create
           %w(maze initial_dirt final_dirt).map do |maze|
-            x = row['properties']; x[maze] = JSON.parse(x[maze]) if x[maze].is_a? String
+            prop = row['properties']; prop[maze] = JSON.parse(prop[maze]) if prop[maze].is_a? String
           end
           row.delete 'id'
           level.update row
