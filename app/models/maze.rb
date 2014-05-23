@@ -53,8 +53,8 @@ class Maze < Level
   # contents - should respond to read by returning a 2d square array
   #   with the given size, representing a blockly level.
   # Throws ArgumentError if there is a non integer value in the array.
-  def self.load_maze(contents, size)
-    raw_maze = contents.read[0...size]
+  def self.load_maze(maze_file, size)
+    raw_maze = maze_file.read[0...size]
     raw_maze.map {|row| row.map {|cell| Integer(cell)}}
   end
 
@@ -62,8 +62,8 @@ class Maze < Level
   # If type is "Maze" return a single entry hash with 'maze' mapping to a 2d
   #   array that Blockly can render.
   # Throws ArgumentError if there is a non integer value in the array.
-  def self.parse_maze(contents, size)
-    { 'maze' => JSON.parse(contents)}
+  def self.parse_maze(maze_json, size)
+    { 'maze' => JSON.parse(maze_json)}
   end
 
   # Returns an 'unparsed' array object from the parsed properties
