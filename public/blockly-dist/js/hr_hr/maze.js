@@ -5992,7 +5992,7 @@ Maze.execute = function(stepMode) {
         editable: block.isEditable()
       });
       block.setMovable(false);
-      block.setDeletable(true);
+      block.setDeletable(false);
       block.setEditable(false);
     });
   }
