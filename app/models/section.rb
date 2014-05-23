@@ -1,7 +1,11 @@
 class Section < ActiveRecord::Base
   belongs_to :user
+
   has_many :followers, dependent: :nullify
+  accepts_nested_attributes_for :followers
+  
   has_many :students, through: :followers, source: :student_user
+  accepts_nested_attributes_for :students
 
   validates :name, uniqueness: { scope: :user_id }
   validates :name, presence: true
@@ -10,6 +14,17 @@ class Section < ActiveRecord::Base
 
   def assign_code
     self.code = random_code
+  end
+
+  def students_attributes=(params)
+    follower_params = params.collect do |student|
+      {
+       user_id: user.id,
+       student_user_attributes: student
+      }
+    end
+    
+    self.followers_attributes = follower_params
   end
 
   private
