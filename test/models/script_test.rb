@@ -5,7 +5,7 @@ class ScriptTest < ActiveSupport::TestCase
     @game = create(:game)
     @script_file = File.join(self.class.fixture_path, "test_fixture.script")
     # Level names match those in 'test.script'
-    @levels = (1..5).map { |n| create(:level, :name => "Level #{n}") }
+    @levels = (1..5).map { |n| create(:level, :name => "Level #{n}", :game => @game) }
   end
 
   test 'create script from DSL' do
@@ -171,4 +171,11 @@ class ScriptTest < ActiveSupport::TestCase
     assert_equal 3, third.position
     assert_equal original_count, ScriptLevel.count
   end
+
+  test 'unplugged in script' do
+    @script_file = File.join(self.class.fixture_path, 'test_unplugged.script')
+    scripts, _ = Script.setup([], [@script_file])
+    assert_equal 'Unplugged', scripts[0].script_levels[1].level['type']
+  end
+
 end

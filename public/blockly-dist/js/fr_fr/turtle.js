@@ -61,8 +61,12 @@ module.exports = function(app, levels, options) {
   };
 
   options.skin = options.skinsModule.load(BlocklyApps.assetUrl, options.skinId);
-  blocksCommon.install(Blockly, options.skin);
-  options.blocksModule.install(Blockly, options.skin);
+  var blockInstallOptions = {
+    skin: options.skin,
+    isK1: options.level.is_k1
+  };
+  blocksCommon.install(Blockly, blockInstallOptions);
+  options.blocksModule.install(Blockly, blockInstallOptions);
 
   addReadyListener(function() {
     if (options.readonly) {
@@ -196,7 +200,8 @@ BlocklyApps.init = function(config) {
   container.innerHTML = config.html;
   var runButton = container.querySelector('#runButton');
   var resetButton = container.querySelector('#resetButton');
-  dom.addClickTouchEvent(runButton, BlocklyApps.runButtonClick);
+  var throttledRunClick = utils.debounce(BlocklyApps.runButtonClick, 250, true);
+  dom.addClickTouchEvent(runButton, throttledRunClick);
   dom.addClickTouchEvent(resetButton, BlocklyApps.resetButtonClick);
 
   var belowViz = document.getElementById('belowVisualization');
@@ -988,7 +993,8 @@ exports.domStringToBlock = function(blockDOMString) {
  * Install extensions to Blockly's language and JavaScript generator
  * @param blockly instance of Blockly
  */
-exports.install = function(blockly, skin) {
+exports.install = function(blockly, blockInstallOptions) {
+  var skin = blockInstallOptions.skin;
   // Re-uses the repeat block generator from core
   blockly.JavaScript.controls_repeat_simplified = blockly.JavaScript.controls_repeat;
 
@@ -2158,6 +2164,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -3075,7 +3084,8 @@ var msg = require('../../locale/fr_fr/turtle');
 var commonMsg = require('../../locale/fr_fr/common');
 
 // Install extensions to Blockly's language and JavaScript generator.
-exports.install = function(blockly, skin) {
+exports.install = function(blockly, blockInstallOptions) {
+  var skin = blockInstallOptions.skin;
 
   var generator = blockly.Generator.get('JavaScript');
   blockly.JavaScript = generator;
@@ -5875,6 +5885,30 @@ exports.executeIfConditional = function (conditional, fn) {
   };
 };
 
+/**
+ * From underscore.js. Returns a function, that, as long as it continues to be invoked before the wait time,
+ * will not be triggered. To use for a button to prevent double-clicks, for example,
+ *  `var debouncedOnClick = utils.debounce(onClick, 1000, true);`
+ * @param func function to run
+ * @param wait time to require waiting before subsequent calls
+ * @param immediate trigger the function call on the leading edge (immediately)
+ * @returns {Function}
+ */
+exports.debounce = function(func, wait, immediate) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+};
+
 },{}],36:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
@@ -5940,6 +5974,8 @@ exports.directionSouthLetter = function(d){return "S"};
 exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "O"};
+
+exports.end = function(d){return "end"};
 
 exports.emptyBlocksErrorMsg = function(d){return "Le bloc « Répéter » ou «Si» doit avoir des autres blocs à l'intérieur pour fonctionner. Assurez-vous que le bloc interne s'adapte correctement à l'intérieur du bloc conteneur."};
 
@@ -6034,6 +6070,8 @@ exports.orientationLock = function(d){return "Désactive le verrouillage de l'or
 exports.wantToLearn = function(d){return "Voulez-vous apprendre à coder ?"};
 
 exports.watchVideo = function(d){return "Voir la vidéo"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Essayez l'Heure de Code"};
 

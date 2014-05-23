@@ -61,8 +61,12 @@ module.exports = function(app, levels, options) {
   };
 
   options.skin = options.skinsModule.load(BlocklyApps.assetUrl, options.skinId);
-  blocksCommon.install(Blockly, options.skin);
-  options.blocksModule.install(Blockly, options.skin);
+  var blockInstallOptions = {
+    skin: options.skin,
+    isK1: options.level.is_k1
+  };
+  blocksCommon.install(Blockly, blockInstallOptions);
+  options.blocksModule.install(Blockly, blockInstallOptions);
 
   addReadyListener(function() {
     if (options.readonly) {
@@ -196,7 +200,8 @@ BlocklyApps.init = function(config) {
   container.innerHTML = config.html;
   var runButton = container.querySelector('#runButton');
   var resetButton = container.querySelector('#resetButton');
-  dom.addClickTouchEvent(runButton, BlocklyApps.runButtonClick);
+  var throttledRunClick = utils.debounce(BlocklyApps.runButtonClick, 250, true);
+  dom.addClickTouchEvent(runButton, throttledRunClick);
   dom.addClickTouchEvent(resetButton, BlocklyApps.resetButtonClick);
 
   var belowViz = document.getElementById('belowVisualization');
@@ -988,7 +993,8 @@ exports.domStringToBlock = function(blockDOMString) {
  * Install extensions to Blockly's language and JavaScript generator
  * @param blockly instance of Blockly
  */
-exports.install = function(blockly, skin) {
+exports.install = function(blockly, blockInstallOptions) {
+  var skin = blockInstallOptions.skin;
   // Re-uses the repeat block generator from core
   blockly.JavaScript.controls_repeat_simplified = blockly.JavaScript.controls_repeat;
 
@@ -2055,6 +2061,7 @@ exports.incrementPlayerScore = function(id) {
 'use strict';
 
 var msg = require('../../locale/tr_tr/flappy');
+var commonMsg = require('../../locale/tr_tr/common');
 
 var generateSetterCode = function (ctx, name) {
   var value = ctx.getTitleValue('VALUE');
@@ -2070,7 +2077,9 @@ var generateSetterCode = function (ctx, name) {
 };
 
 // Install extensions to Blockly's language and JavaScript generator.
-exports.install = function(blockly, skin) {
+exports.install = function(blockly, blockInstallOptions) {
+  var skin = blockInstallOptions.skin;
+  var isK1 = blockInstallOptions.isK1;
 
   var generator = blockly.Generator.get('JavaScript');
   blockly.JavaScript = generator;
@@ -2080,8 +2089,13 @@ exports.install = function(blockly, skin) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenClick());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.clickIcon));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenClick());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenClickTooltip());
@@ -2098,8 +2112,13 @@ exports.install = function(blockly, skin) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenCollideGround());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.collideGroundIcon));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenCollideGround());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenCollideGroundTooltip());
@@ -2116,8 +2135,13 @@ exports.install = function(blockly, skin) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenCollideObstacle());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.collideObstacleIcon));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenCollideObstacle());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenCollideObstacleTooltip());
@@ -2157,8 +2181,13 @@ exports.install = function(blockly, skin) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenRunButtonClick());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.startIcon));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenRunButtonClick());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenRunButtonClickTooltip());
@@ -2175,8 +2204,13 @@ exports.install = function(blockly, skin) {
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.flap());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(msg.flap())
+          .appendTitle(new blockly.FieldImage(skin.flapIcon));
+      } else {
+        this.appendDummyInput().appendTitle(msg.flap());
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.flapTooltip());
@@ -2273,8 +2307,13 @@ exports.install = function(blockly, skin) {
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.endGame());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.end())
+          .appendTitle(new blockly.FieldImage(skin.endIcon));
+      } else {
+        this.appendDummyInput().appendTitle(msg.endGame());
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.endGameTooltip());
@@ -2542,7 +2581,7 @@ exports.install = function(blockly, skin) {
   delete blockly.Blocks.procedures_ifreturn;
 };
 
-},{"../../locale/tr_tr/flappy":35}],11:[function(require,module,exports){
+},{"../../locale/tr_tr/common":34,"../../locale/tr_tr/flappy":35}],11:[function(require,module,exports){
 module.exports = {
   WORKSPACE_BUFFER: 20,
   WORKSPACE_COL_WIDTH: 210,
@@ -4145,7 +4184,10 @@ exports.load = function(assetUrl, id) {
   skin.clickrun = skin.assetUrl('clickrun.png');
   skin.getready = skin.assetUrl('getready.png');
   skin.gameover = skin.assetUrl('gameover.png');
-
+  skin.flapIcon = skin.assetUrl('flap-bird.png');
+  skin.crashIcon = skin.assetUrl('when-crash.png');
+  skin.collideObstacleIcon = skin.assetUrl('when-obstacle.png');
+  skin.collideGroundIcon = skin.assetUrl('when-crash.png');
   skin.tiles = skin.assetUrl('tiles.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
@@ -4361,6 +4403,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -4904,6 +4949,30 @@ exports.executeIfConditional = function (conditional, fn) {
   };
 };
 
+/**
+ * From underscore.js. Returns a function, that, as long as it continues to be invoked before the wait time,
+ * will not be triggered. To use for a button to prevent double-clicks, for example,
+ *  `var debouncedOnClick = utils.debounce(onClick, 1000, true);`
+ * @param func function to run
+ * @param wait time to require waiting before subsequent calls
+ * @param immediate trigger the function call on the leading edge (immediately)
+ * @returns {Function}
+ */
+exports.debounce = function(func, wait, immediate) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+};
+
 },{}],33:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
@@ -4969,6 +5038,8 @@ exports.directionSouthLetter = function(d){return "S"};
 exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
+
+exports.end = function(d){return "end"};
 
 exports.emptyBlocksErrorMsg = function(d){return "\"Tekrar\" bloğu veya \"Eğer\" bloğunun çalışması için  içerisinde bir başka blok yer almalıdır. İçteki bloğu, dış blok içerisine yerleştirdiğine emin ol."};
 
@@ -5063,6 +5134,8 @@ exports.orientationLock = function(d){return "Yönlendirme kilidini aygıt ayarl
 exports.wantToLearn = function(d){return "Kod yazmayı öğrenmek ister misiniz?"};
 
 exports.watchVideo = function(d){return "Videoyu İzle"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Kodlama Saati'ni Deneyin"};
 

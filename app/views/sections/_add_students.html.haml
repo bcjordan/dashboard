@@ -1,0 +1,89 @@
+:css
+  #add-students-form tr td,
+  #add-students-form tr th {
+    font-size: 20px;
+    height: 30px;
+    padding: 5px;
+  }
+
+  #add-students-form tr.odd {
+    background-color: #cccccc;
+  }
+
+  #add-students-form tr.even {
+    background-color: white;
+  }
+  
+
+%h4{ id:'add_students' }
+
+- if @section.errors.any?
+  #error_explanation
+    %ul
+      - @section.errors.full_messages.each do |msg|
+        %li= msg
+
+= form_for(@section, :url => {controller: 'sections', action: 'update_students', id: @section}) do |f|
+  %table{id: 'add-students-form'}
+    %tr
+      %th Name
+      %th Username
+      %th Password
+      %th
+    - @section.students.each do |student|
+      - if student.new_record?
+        = fields_for 'section[students_attributes][]', student, index: nil do |user_f|
+          %tr{class: cycle('odd', 'even')}
+            %td
+              = user_f.text_field :name
+            %td
+              = user_f.text_field :username
+            %td
+              = user_f.text_field :password
+            %td
+      - else
+        %tr{class: cycle('odd', 'even')}
+          %td
+            = student.name
+          %td
+            = student.username
+          %td
+            = link_to "Change Password", ""
+          %td
+            = link_to "Edit", ""
+  = f.submit "Save"
+  = link_to "Cancel", ""
+
+%table{style:"display:none"}
+  %tr{id:"form-row-prototype", class: cycle('odd', 'even')}
+    %td
+      %input{class:"input-xlarge", class:"name", name:"section[students_attributes][][name]", placeholder:"eg. John Smith", type:"text"}
+    %td
+      %input{class:"input-xlarge", class:"username", name:"section[students_attributes][][username]", placeholder:"eg. johnsmith583", type:"text"}
+    %td
+      %input{class:"input-xlarge", class:"username", name:"section[students_attributes][][password]", placeholder:"eg. johnsmith583", type:"text"}
+
+:javascript
+  function appendRow() {
+    // append a copy of the prototype row and attach myself as an event handler to the last row in the table
+    var selector = ".form-row:last .name";
+    $('#add-students-form').off('change', selector, appendRow);
+    $("#form-row-prototype").clone(true).removeAttr('id').attr('class', 'form-row').appendTo("#add-students-form");
+    $('#add-students-form').on('change', selector, appendRow);
+  }
+
+  $(appendRow());
+
+%h4{ id:'add_students' } Ask your students to register themselves
+
+%p
+  Instead of making you spend a lot of time individually importing student data, you can set up your class quickly
+  by asking them to signup. Your students will need to choose usernames and passwords, but they WON'T be required to
+  provide an email address. If a student forgets their password, you will be able to reset it for them.
+%p
+  Ask your students to visit
+  %b= link_to 'http://code.org/join', 'http://code.org/join'
+  and enter their section-code:
+  %b= @section.code
+  = link_to '(Send in email)', build_invite_mailto(@section, current_user), target: :_blank
+  %br/

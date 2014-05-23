@@ -61,8 +61,12 @@ module.exports = function(app, levels, options) {
   };
 
   options.skin = options.skinsModule.load(BlocklyApps.assetUrl, options.skinId);
-  blocksCommon.install(Blockly, options.skin);
-  options.blocksModule.install(Blockly, options.skin);
+  var blockInstallOptions = {
+    skin: options.skin,
+    isK1: options.level.is_k1
+  };
+  blocksCommon.install(Blockly, blockInstallOptions);
+  options.blocksModule.install(Blockly, blockInstallOptions);
 
   addReadyListener(function() {
     if (options.readonly) {
@@ -196,7 +200,8 @@ BlocklyApps.init = function(config) {
   container.innerHTML = config.html;
   var runButton = container.querySelector('#runButton');
   var resetButton = container.querySelector('#resetButton');
-  dom.addClickTouchEvent(runButton, BlocklyApps.runButtonClick);
+  var throttledRunClick = utils.debounce(BlocklyApps.runButtonClick, 250, true);
+  dom.addClickTouchEvent(runButton, throttledRunClick);
   dom.addClickTouchEvent(resetButton, BlocklyApps.resetButtonClick);
 
   var belowViz = document.getElementById('belowVisualization');
@@ -988,7 +993,8 @@ exports.domStringToBlock = function(blockDOMString) {
  * Install extensions to Blockly's language and JavaScript generator
  * @param blockly instance of Blockly
  */
-exports.install = function(blockly, skin) {
+exports.install = function(blockly, blockInstallOptions) {
+  var skin = blockInstallOptions.skin;
   // Re-uses the repeat block generator from core
   blockly.JavaScript.controls_repeat_simplified = blockly.JavaScript.controls_repeat;
 
@@ -1218,8 +1224,7 @@ var generateSetterCode = function (ctx, name) {
 };
 
 // Install extensions to Blockly's language and JavaScript generator.
-exports.install = function(blockly, skin) {
-
+exports.install = function(blockly, blockInstallOptions) {
   var generator = blockly.Generator.get('JavaScript');
   blockly.JavaScript = generator;
 
@@ -1235,12 +1240,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenLeftTooltip());
     }
   };
-  
+
   generator.bounce_whenLeft = function() {
     // Generate JavaScript for handling Left arrow button event.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenRight = {
     // Block to handle event when the Right arrow button is pressed.
     helpUrl: '',
@@ -1253,12 +1258,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenRightTooltip());
     }
   };
-  
+
   generator.bounce_whenRight = function() {
     // Generate JavaScript for handling Right arrow button event.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenUp = {
     // Block to handle event when the Up arrow button is pressed.
     helpUrl: '',
@@ -1271,12 +1276,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenUpTooltip());
     }
   };
-  
+
   generator.bounce_whenUp = function() {
     // Generate JavaScript for handling Up arrow button event.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenDown = {
     // Block to handle event when the Down arrow button is pressed.
     helpUrl: '',
@@ -1289,12 +1294,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenDownTooltip());
     }
   };
-  
+
   generator.bounce_whenDown = function() {
     // Generate JavaScript for handling Down arrow button event.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenWallCollided = {
     // Block to handle event when a wall/ball collision occurs.
     helpUrl: '',
@@ -1307,12 +1312,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenWallCollidedTooltip());
     }
   };
-  
+
   generator.bounce_whenWallCollided = function() {
     // Generate JavaScript for handling when a wall/ball collision occurs.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenBallInGoal = {
     // Block to handle event when a ball enters a goal.
     helpUrl: '',
@@ -1325,12 +1330,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenBallInGoalTooltip());
     }
   };
-  
+
   generator.bounce_whenBallInGoal = function() {
     // Generate JavaScript for handling when a ball in goal event occurs.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenBallMissesPaddle = {
     // Block to handle event when a ball misses the paddle.
     helpUrl: '',
@@ -1343,12 +1348,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenBallMissesPaddleTooltip());
     }
   };
-  
+
   generator.bounce_whenBallMissesPaddle = function() {
     // Generate JavaScript for handling when a ball misses the paddle.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenPaddleCollided = {
     // Block to handle event when a wall collision occurs.
     helpUrl: '',
@@ -1361,12 +1366,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.whenPaddleCollidedTooltip());
     }
   };
-  
+
   generator.bounce_whenPaddleCollided = function() {
     // Generate JavaScript for handling when a paddle/ball collision occurs.
     return '\n';
   };
-  
+
   blockly.Blocks.bounce_whenGameStarts = {
     // Block to handle event when the game starts
     helpUrl: '',
@@ -1397,12 +1402,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.moveLeftTooltip());
     }
   };
-  
+
   generator.bounce_moveLeft = function() {
     // Generate JavaScript for moving left.
     return 'Bounce.moveLeft(\'block_id_' + this.id + '\');\n';
   };
-  
+
   blockly.Blocks.bounce_moveRight = {
     // Block for moving right.
     helpUrl: '',
@@ -1415,12 +1420,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.moveRightTooltip());
     }
   };
-  
+
   generator.bounce_moveRight = function() {
     // Generate JavaScript for moving right.
     return 'Bounce.moveRight(\'block_id_' + this.id + '\');\n';
   };
-  
+
   blockly.Blocks.bounce_moveUp = {
     // Block for moving up.
     helpUrl: '',
@@ -1433,12 +1438,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.moveUpTooltip());
     }
   };
-  
+
   generator.bounce_moveUp = function() {
     // Generate JavaScript for moving up.
     return 'Bounce.moveUp(\'block_id_' + this.id + '\');\n';
   };
-  
+
   blockly.Blocks.bounce_moveDown = {
     // Block for moving down.
     helpUrl: '',
@@ -1451,7 +1456,7 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.moveDownTooltip());
     }
   };
-  
+
   generator.bounce_moveDown = function() {
     // Generate JavaScript for moving down.
     return 'Bounce.moveDown(\'block_id_' + this.id + '\');\n';
@@ -1483,13 +1488,13 @@ exports.install = function(blockly, skin) {
        [msg.playSoundLosePoint2(), 'losepoint2'],
        [msg.playSoundGoal1(), 'goal1'],
        [msg.playSoundGoal2(), 'goal2']];
-  
+
   generator.bounce_playSound = function() {
     // Generate JavaScript for playing a sound.
     return 'Bounce.playSound(\'block_id_' + this.id + '\', \'' +
                this.getTitleValue('SOUND') + '\');\n';
   };
-  
+
   blockly.Blocks.bounce_incrementPlayerScore = {
     // Block for incrementing the player's score.
     helpUrl: '',
@@ -1502,12 +1507,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.incrementPlayerScoreTooltip());
     }
   };
-  
+
   generator.bounce_incrementPlayerScore = function() {
     // Generate JavaScript for incrementing the player's score.
     return 'Bounce.incrementPlayerScore(\'block_id_' + this.id + '\');\n';
   };
-  
+
   blockly.Blocks.bounce_incrementOpponentScore = {
     // Block for incrementing the opponent's score.
     helpUrl: '',
@@ -1520,12 +1525,12 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.incrementOpponentScoreTooltip());
     }
   };
-  
+
   generator.bounce_incrementOpponentScore = function() {
     // Generate JavaScript for incrementing the opponent's score.
     return 'Bounce.incrementOpponentScore(\'block_id_' + this.id + '\');\n';
   };
-  
+
   blockly.Blocks.bounce_bounceBall = {
     // Block for bouncing a ball.
     helpUrl: '',
@@ -1538,7 +1543,7 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.bounceBallTooltip());
     }
   };
-  
+
   generator.bounce_bounceBall = function() {
     // Generate JavaScript for bouncing a ball.
     return 'Bounce.bounceBall(\'block_id_' + this.id + '\');\n';
@@ -1556,7 +1561,7 @@ exports.install = function(blockly, skin) {
       this.setTooltip(msg.launchBallTooltip());
     }
   };
-  
+
   generator.bounce_launchBall = function() {
     // Generate JavaScript for launching a ball.
     return 'Bounce.launchBall(\'block_id_' + this.id + '\');\n';
@@ -1701,7 +1706,7 @@ exports.install = function(blockly, skin) {
   generator.bounce_setPaddle = function() {
     return generateSetterCode(this, 'setPaddle');
   };
-  
+
   delete blockly.Blocks.procedures_defreturn;
   delete blockly.Blocks.procedures_ifreturn;
 };
@@ -4868,6 +4873,9 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    clickIcon: assetUrl('media/common_images/when-click-hand.png'),
+    startIcon: assetUrl('media/common_images/start-icon.png'),
+    endIcon: assetUrl('media/common_images/end-icon.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],
@@ -5429,6 +5437,30 @@ exports.executeIfConditional = function (conditional, fn) {
   };
 };
 
+/**
+ * From underscore.js. Returns a function, that, as long as it continues to be invoked before the wait time,
+ * will not be triggered. To use for a button to prevent double-clicks, for example,
+ *  `var debouncedOnClick = utils.debounce(onClick, 1000, true);`
+ * @param func function to run
+ * @param wait time to require waiting before subsequent calls
+ * @param immediate trigger the function call on the leading edge (immediately)
+ * @returns {Function}
+ */
+exports.debounce = function(func, wait, immediate) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+};
+
 },{}],34:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
@@ -5734,6 +5766,8 @@ exports.directionEastLetter = function(d){return "E"};
 
 exports.directionWestLetter = function(d){return "W"};
 
+exports.end = function(d){return "end"};
+
 exports.emptyBlocksErrorMsg = function(d){return "Kubbarnir \"endurtaka\" og \"ef\" verða að innihalda aðra kubba til að virka. Gættu þess að innri kubburinn smellpassi í ytri kubbinn."};
 
 exports.extraTopBlocks = function(d){return "Þú hefur auka kubba sem ekki tengjast atvikakubbi."};
@@ -5827,6 +5861,8 @@ exports.orientationLock = function(d){return "Slökktu á stefnulæsingu í stil
 exports.wantToLearn = function(d){return "Viltu læra að kóða?"};
 
 exports.watchVideo = function(d){return "Horfa á videóið"};
+
+exports.when = function(d){return "when"};
 
 exports.tryHOC = function(d){return "Prófa Kóðun í klukkustund"};
 

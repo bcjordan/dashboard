@@ -97,9 +97,11 @@ gem 'acts_as_list'
 
 gem 'kaminari' # pagination
 
-gem 'remotipart' # Ajax file upload
 gem 'stringex', '~> 2.5.2' # Provides String.to_ascii
 
 gem 'naturally' # for sorting string naturally
 
 gem 'videojs_rails'
+
+gem 'retryable' # retry code blocks when they throw exceptions
+

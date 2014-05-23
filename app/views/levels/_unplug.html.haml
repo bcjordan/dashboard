@@ -1,11 +1,12 @@
 .unplugged
-  %h2 #{data_t('unplugged', @game.name)[:title]}
+  - unplugged = @level.type == 'Unplugged' ? @level.name : @game.name
+  %h2 #{data_t('unplugged', unplugged)[:title]}
 
-  %p #{data_t('unplugged', @game.name)[:desc]}
+  %p #{data_t('unplugged', unplugged)[:desc]}
 
   .buttons
 
-    - pdfs = data_t('unplugged', @game.name)[:pdfs]
+    - pdfs = data_t('unplugged', unplugged)[:pdfs]
     - if pdfs
       - pdfs.each_with_index do |pdf, i|
         %a.btn.pdf-button{href: asset_url('/unplugged/' + pdf + '.pdf'),
@@ -18,12 +19,12 @@
     %a.btn.btn-primary.next-stage
       = t('next_stage')
 
-  - video = data_t('unplugged', @game.name)[:video]
+  - video = data_t('unplugged', unplugged)[:video]
   - if video
     %iframe{src: youtube_url(video, {autoplay: 0}), scrolling: 'no'}
   - else
     %p Video Coming Soon!
-  - download = data_t('unplugged', @game.name)[:download]
+  - download = data_t('unplugged', unplugged)[:download]
   - if download
     %a.btn.btn-primary{href: download}
       = t('video.download')

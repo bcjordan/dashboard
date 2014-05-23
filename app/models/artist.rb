@@ -10,8 +10,15 @@ class Artist < Level
   end
 
   def self.create_from_level_builder(params, level_params)
-    game = Game.find(params[:game_id])
-    create(level_params.merge(user: params[:user], x: params[:x], y: params[:y], start_direction: params[:start_direction], game: game, level_num: 'custom', properties: { solution_blocks: params[:program] } ))
+    create(level_params.merge(
+        user: params[:user],
+        x: params[:x],
+        y: params[:y],
+        start_direction: params[:start_direction],
+        game: Game.find(params[:game_id]),
+        level_num: 'custom',
+        properties: { solution_blocks: params[:program] }
+    ))
   end
 
   # Blocks which are supported by required block editing.

@@ -38,6 +38,21 @@ class ScriptsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "should get show of hoc" do
+    get :show, id: Script::HOC_ID
+    assert_response :success
+  end
+
+  test "should get show of k-8" do
+    get :show, id: Script::TWENTY_HOUR_ID
+    assert_response :success
+  end
+
+  test "should get show of custom script" do
+    get :show, id: Script.find_by_name("k-1")
+    assert_response :success
+  end
+
   test "should get show if not signed in" do
     sign_out @admin
     get :show, id: Script::FLAPPY_ID

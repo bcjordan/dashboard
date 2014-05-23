@@ -31,12 +31,16 @@ class ActivitiesController < ApplicationController
                                  time: [[params[:time].to_i, 0].max, MAX_INT_MILESTONE].min,
                                  level_source: @level_source )
 
-    user_level = UserLevel.where(user: current_user, level: @script_level.level).first_or_create
-    user_level.attempts += 1 unless user_level.best?
-    user_level.best_result = user_level.best_result ?
-      [test_result, user_level.best_result].max :
-      test_result
-    user_level.save!
+
+    retryable on: Mysql2::Error, matching: /Duplicate entry/ do # catch race conditions in first_or_create
+      user_level = UserLevel.where(user: current_user, level: @script_level.level).first_or_create
+
+      user_level.attempts += 1 unless user_level.best?
+      user_level.best_result = user_level.best_result ?
+        [test_result, user_level.best_result].max :
+        test_result
+      user_level.save!
+    end
 
     if lines > 0 && Activity.passing?(test_result)
       current_user.total_lines += lines
