@@ -61,8 +61,12 @@ module.exports = function(app, levels, options) {
   };
 
   options.skin = options.skinsModule.load(BlocklyApps.assetUrl, options.skinId);
-  blocksCommon.install(Blockly, options.skin);
-  options.blocksModule.install(Blockly, options.skin);
+  var blockInstallOptions = {
+    skin: options.skin,
+    isK1: options.level.is_k1
+  };
+  blocksCommon.install(Blockly, blockInstallOptions);
+  options.blocksModule.install(Blockly, blockInstallOptions);
 
   addReadyListener(function() {
     if (options.readonly) {
@@ -989,7 +993,8 @@ exports.domStringToBlock = function(blockDOMString) {
  * Install extensions to Blockly's language and JavaScript generator
  * @param blockly instance of Blockly
  */
-exports.install = function(blockly, skin) {
+exports.install = function(blockly, blockInstallOptions) {
+  var skin = blockInstallOptions.skin;
   // Re-uses the repeat block generator from core
   blockly.JavaScript.controls_repeat_simplified = blockly.JavaScript.controls_repeat;
 
@@ -2100,7 +2105,8 @@ function addQueuedWhenReady() {
 
 
 // Install extensions to Blockly's language and JavaScript generator.
-exports.install = function(blockly, skin) {
+exports.install = function(blockly, blockInstallOptions) {
+  var skin = blockInstallOptions.skin;
   // could make this settable on the level if I need
   var HSV = [0, 1.00, 0.98];
 
