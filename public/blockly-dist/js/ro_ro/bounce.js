@@ -5698,7 +5698,7 @@ exports.whenWallCollided = function(d){return "când mingea loveşte peretele"};
 
 exports.whenWallCollidedTooltip = function(d){return "Execută acţiunile de mai jos când o bilă se ciocneşte cu un perete."};
 
-exports.while = function(d){return "în timp ce"};
+exports.whileMsg = function(d){return "în timp ce"};
 
 exports.whileTooltip = function(d){return "Repetă acţiunile cuprinse până când punctul final este atins."};
 

@@ -5689,7 +5689,7 @@ exports.whenWallCollided = function(d){return "כאשר הכדור פוגע בק
 
 exports.whenWallCollidedTooltip = function(d){return "בצע את הפעולות להלן כאשר הכדור מתנגש עם הקיר."};
 
-exports.while = function(d){return "כל עוד"};
+exports.whileMsg = function(d){return "כל עוד"};
 
 exports.whileTooltip = function(d){return "חזור על שורת הפעולות עד שתגיע לנקודת הסיום."};
 

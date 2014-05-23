@@ -5697,7 +5697,7 @@ exports.whenWallCollided = function(d){return "when ball hits wall"};
 
 exports.whenWallCollidedTooltip = function(d){return "Execute the actions below when a ball collides with a wall."};
 
-exports.while = function(d){return "dokud"};
+exports.whileMsg = function(d){return "dokud"};
 
 exports.whileTooltip = function(d){return "Opakuje obsažené akce dokud nedosáhne cíle."};
 
