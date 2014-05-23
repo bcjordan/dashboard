@@ -196,7 +196,8 @@ BlocklyApps.init = function(config) {
   container.innerHTML = config.html;
   var runButton = container.querySelector('#runButton');
   var resetButton = container.querySelector('#resetButton');
-  dom.addClickTouchEvent(runButton, BlocklyApps.runButtonClick);
+  var throttledRunClick = utils.debounce(BlocklyApps.runButtonClick, 250, true);
+  dom.addClickTouchEvent(runButton, throttledRunClick);
   dom.addClickTouchEvent(resetButton, BlocklyApps.resetButtonClick);
 
   var belowViz = document.getElementById('belowVisualization');
@@ -4914,6 +4915,30 @@ exports.executeIfConditional = function (conditional, fn) {
     if (conditional()) {
       return fn.apply(this, arguments);
     }
+  };
+};
+
+/**
+ * From underscore.js. Returns a function, that, as long as it continues to be invoked before the wait time,
+ * will not be triggered. To use for a button to prevent double-clicks, for example,
+ *  `var debouncedOnClick = utils.debounce(onClick, 1000, true);`
+ * @param func function to run
+ * @param wait time to require waiting before subsequent calls
+ * @param immediate trigger the function call on the leading edge (immediately)
+ * @returns {Function}
+ */
+exports.debounce = function(func, wait, immediate) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
   };
 };
 
