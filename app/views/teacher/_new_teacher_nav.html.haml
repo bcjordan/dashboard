@@ -1,0 +1,76 @@
+:scss
+  // copied from colors.css
+  $header_text: white;
+  $bkgnd_color: #00adbc;
+  $inset_color: #cde;
+  $dark_color:  #7665a0;
+  $hdr_color:   #7665a0;
+  $light_gray: #c6cacd;
+  $light_green: #b9bf15;
+  $orange: #ffa400;
+  $purple: #7665a0;
+
+  #teacher-nav {
+    font-size: 16px;
+    border-bottom: 5px solid $purple;
+    .tab {
+      margin-right: 2px;
+      padding: 9px;
+      font-weight: bold;
+      color: white;
+      float: left;
+      display: block;
+    }
+    span.tab {
+      background-color: $purple;
+    }
+    span.tab.inactive {
+      background-color: $light-gray;
+      font-style: italic;
+    }
+    a.tab {
+      background-color: $light_green;
+    }
+    span.section-select {
+      height: 36px;
+      padding: auto 10px;
+      display: block;
+      float: right;
+    }
+  }
+
+
+
+- current ||= nil
+%div{ id: 'teacher-nav' }
+  - if section = @section || current_user.sections.first
+    - if current == 'report'
+      %span{ class: 'tab'}= t('teacher.rollup')
+    - elsif section.students.empty?
+      %span{ class: 'tab inactive'}= t('teacher.rollup') 
+    - else      
+      = link_to t('teacher.rollup'), section_path(section), class: 'tab'
+    - if current == 'manage'
+      %span{ class: 'tab'}= t('teacher.students.manage')
+    - else      
+      = link_to t('teacher.students.manage'), edit_students_section_path(section), class: 'tab'
+
+
+  %span{ class: 'section-select'}
+    - options_select = options_from_collection_for_select(current_user.sections, :id, :name, @section.try(:id))
+    = select_tag('section_id', options_select + "<option value='manage'>#{t 'teacher.sections.manage'}</option>".html_safe, include_blank: true, style: 'margin: 0 7px 0px 4px', id: 'section_id')
+  %br/
+  %br/
+
+:javascript
+  $(
+    $("#section_id").change(function() {
+      var section_id = $("#section_id").val();
+      if (section_id === "manage") {
+        window.location.href = "#{sections_path}";
+      } else { 
+        var section_url = "/sections/" + section_id;
+        window.location.href = section_url;
+      }
+    })
+  );

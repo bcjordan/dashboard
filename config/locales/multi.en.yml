@@ -2,7 +2,7 @@
 en:
   data:
     multi:
-      K-1 Maze Multiple Choice 1:
+      K-1 Maze Multiple Choice 2:
         Maze: Maze
         Solve the puzzle: Solve the puzzle
         /script_assets/multis/K-1/K-1_Maze/prompt.png: /script_assets/multis/K-1/K-1_Maze/prompt.png

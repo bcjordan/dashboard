@@ -83,7 +83,7 @@ class FollowersController < ApplicationController
   def sections
     @sections = current_user.sections.order('name')
   end
-
+  
   def create_student
     student_params = params[:user].permit([:username, :name, :password, :gender, :birthday, :parent_email])
     raise "no student data posted" if !student_params

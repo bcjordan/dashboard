@@ -14,6 +14,10 @@ FactoryGirl.define do
     factory :teacher do
       user_type User::TYPE_TEACHER
     end
+
+    factory :student_user do
+      user_type User::TYPE_STUDENT
+    end
   end
 
   factory :section do
@@ -110,5 +114,11 @@ FactoryGirl.define do
   end
 
   factory :prize_provider do
+  end
+
+  factory :follower do
+    section
+    user { section.user }
+    student_user
   end
 end

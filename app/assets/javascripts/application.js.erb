@@ -12,7 +12,6 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require jquery.remotipart
 //= require jquery.ui.all
 //= require video
 //= require_tree .
@@ -24,6 +23,15 @@
 // Prevent callstack exceptions when opening multiple dialogs
 // http://stackoverflow.com/a/15856139/2506748
 $.fn.modal.Constructor.prototype.enforceFocus = function () {};
+
+// In IE console is only defined when developer tools is open. Define it as a
+// noop when undefined (otherwise exceptions get thrown)
+if (!window.console) {
+  window.console = {};
+}
+if (!window.console.log) {
+  window.console.log = function () { };
+}
 
 var KEY_ESCAPE = 27;
 
