@@ -58,7 +58,27 @@ class Level < ActiveRecord::Base
   def write_custom_levels_to_file
     File.open(Rails.root.join("config", "scripts", "custom_levels.json"), 'w+') do |file|
       levels = Level.custom_levels
-      file << levels.to_json
+      levels_json = levels.as_json
+      levels_json.each do |level|
+        %w(maze initial_dirt final_dirt).map do |maze_type|
+          level['properties'][maze_type] &&= level['properties'][maze_type].to_json
+        end
+        level.delete 'id'
+        level.reject! { |k, v| v.nil? }
+      end
+      file << JSON.pretty_generate(levels_json)
+    end
+  end
+
+  def self.update_unplugged
+    # Unplugged level data is specified in 'unplugged.en.yml' file
+    unplugged = I18n.t('data.unplugged')
+    unplugged_game = Game.find_by(name: 'Unplugged')
+    unplugged.map do |name,_|
+      Level.where(name: name).first_or_create.update(
+        type: 'Unplugged',
+        game: unplugged_game
+      )
     end
   end
 end

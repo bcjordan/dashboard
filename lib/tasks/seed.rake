@@ -33,6 +33,7 @@ namespace :seed do
     scripts_seeded_mtime = (Rails.env == "staging" && File.exist?(SEEDED)) ? File.mtime(SEEDED) : Time.at(0)
     custom_scripts = SCRIPTS_GLOB.select { |script| File.mtime(script) > scripts_seeded_mtime }
     default_scripts = Dir.glob("config/scripts/default/*.yml").sort.select { |script| File.mtime(script) > scripts_seeded_mtime }
+    Level.update_unplugged if File.mtime('config/locales/unplugged.en.yml') > scripts_seeded_mtime
     script, custom_i18n = Script.setup(default_scripts, custom_scripts)
     Script.update_i18n(custom_i18n)
     touch SEEDED
@@ -68,7 +69,7 @@ namespace :seed do
   file 'config/scripts/.matches_seeded' => MATCHES_GLOB do |t|
     Rake::Task['seed:matches'].invoke
     touch t.name
-  end  
+  end
 
  # explicit execution of "seed:matches"
   task matches: :environment do
@@ -88,8 +89,11 @@ namespace :seed do
   task custom_levels: :environment do
     if Rails.env != "staging" || ENV["FORCE_CUSTOM_LEVELS"]
       Level.transaction do
-        JSON.parse(File.read("config/scripts/custom_levels.json")).each do |row|
+        JSON.parse(File.read('config/scripts/custom_levels.json')).each do |row|
           level = Level.where(name: row['name']).first_or_create
+          %w(maze initial_dirt final_dirt).map do |maze|
+            prop = row['properties']; prop[maze] = JSON.parse(prop[maze]) if prop[maze].is_a? String
+          end
           row.delete 'id'
           level.update row
         end

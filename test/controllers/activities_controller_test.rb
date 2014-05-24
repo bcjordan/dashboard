@@ -350,6 +350,70 @@ class ActivitiesControllerTest < ActionController::TestCase
     assert_equal expected_response, JSON.parse(@response.body)
   end
 
+  test "logged in milestone with race condition when creating UserLevel" do
+    # first_or_create does not prevent race conditions between
+    # checking for an existing object and creating it -- we have a db
+    # uniqueness constraint so the right thing in this case is to
+    # catch that exception and just run it again (the second time we
+    # will get the 'existing' object)
+    
+    # TODO actually test experiment instead of just stubbing it out
+    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
+
+    # do all the logging
+    @controller.expects :log_milestone
+    @controller.expects :slog
+    @controller.expects(:trophy_check).with(@user)
+
+    # some Mocha shenanigans to simulate throwing a duplicate entry
+    # error and then succeeding by returning the existing userlevel
+    existing_user_level = UserLevel.create(user: @user, level: @script_level.level)
+    user_level_creator = mock('user_level_creator')
+    user_level_creator.stubs(:first_or_create).
+      raises(Mysql2::Error.new("Duplicate entry '1208682-37' for key 'index_user_levels_on_user_id_and_level_id'")).
+      then.
+      returns(existing_user_level)
+
+    UserLevel.stubs(:where).returns(user_level_creator)
+
+    assert_creates(LevelSource, Activity) do
+      assert_does_not_create(GalleryActivity, UserLevel) do
+        assert_difference('@user.reload.total_lines', 20) do # update total lines
+          post :milestone, user_id: @user, script_level_id: @script_level, :lines => 20, :attempt => "1", :result => "true", :testResult => "100", :time => "1000", :app => "test", :program => "<hey>"
+        end
+      end
+    end
+
+    assert_response :success
+
+    expected_response = {"previous_level"=>"/s/#{@script.id}/level/#{@script_level_prev.id}",
+                         "total_lines"=>35,
+                         "redirect"=>"/s/#{@script.id}/level/#{@script_level_next.id}",
+                         "level_source"=>"http://test.host/sh/#{assigns(:level_source).id}",
+                         "save_to_gallery_url"=>"/gallery?gallery_activity%5Bactivity_id%5D=#{assigns(:activity).id}",
+                         "design"=>"white_background"}
+
+
+    assert_equal expected_response, JSON.parse(@response.body)
+  end
+
+  test "logged in milestone race condition retrying code will not retry forever" do
+    # do all the logging
+    @controller.expects :log_milestone
+
+    # simulate always throwing an exception on first_or_create (not
+    # supposed to happen, but we shouldn't get stuck in a loop anyway)
+    user_level_creator = mock('user_level_creator')
+    user_level_creator.stubs(:first_or_create).
+      raises(Mysql2::Error.new("Duplicate entry '1208682-37' for key 'index_user_levels_on_user_id_and_level_id'"))
+    UserLevel.stubs(:where).returns(user_level_creator)
+
+    # we should just raise the exception
+    assert_raises(Mysql2::Error) do
+      post :milestone, user_id: @user, script_level_id: @script_level, :lines => 20, :attempt => "1", :result => "true", :testResult => "100", :time => "1000", :app => "test", :program => "<hey>"
+      p @response.body
+    end
+  end
 
   # TODO actually test trophies
 
