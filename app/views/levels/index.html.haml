@@ -17,7 +17,7 @@
         - if can? :destroy, level
           %td= link_to t('crud.destroy'), [@game, level], method: :delete, data: { confirm: t('crud.confirm') }
         - if can? :create, Level
-          %td= link_to 'Clone', new_game_level_path(@game, :clone => level.id)
+          %td= link_to 'Clone', game_level_clone_path(@game, level), method: :post
 %br/
 - if can? :create, Level
   = link_to t('crud.new_model', model: Level.model_name.human), new_game_level_path
