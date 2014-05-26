@@ -1,5 +1,14 @@
 - if current_user && current_user.admin?
   %h3= t(:demos)
+  = link_to "Games", games_path
+  |
+  = link_to "Concepts", concepts_path
+  |
+  = link_to "Videos", videos_path
+  |
+  = link_to "Recent Activity", all_usage_path
+  %br/
+  %br/
   %ul
     %li= link_to 'Feedback System', frequent_unsuccessful_level_sources_path
     %li
@@ -13,3 +22,5 @@
   = link_to t("builder.manage"), levels_new_path
   %h3= link_to 'Admin Stats', admin_stats_path
   %h3= link_to 'Gallery', admin_gallery_path
+  %br/
+  %br/
