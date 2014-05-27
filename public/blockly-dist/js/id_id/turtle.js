@@ -2158,6 +2158,10 @@ exports.load = function(assetUrl, id) {
     downArrow: assetUrl('media/common_images/move-south-arrow.png'),
     upArrow: assetUrl('media/common_images/move-north-arrow.png'),
     rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftArrowSmall: assetUrl('media/common_images/draw-west-arrow.png'),
+    downArrowSmall: assetUrl('media/common_images/draw-south-arrow.png'),
+    upArrowSmall: assetUrl('media/common_images/draw-north-arrow.png'),
+    rightArrowSmall: assetUrl('media/common_images/draw-east-arrow.png'),
     leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
     downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
     upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
@@ -3502,10 +3506,10 @@ exports.install = function(blockly, blockInstallOptions) {
     SHORT_MOVE_LENGTH: 50,
     LONG_MOVE_LENGTH: 100,
     DIRECTION_CONFIGS: {
-      left: { title: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
-      right: { title: commonMsg.directionEastLetter(), moveFunction: 'moveRight', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
-      up: { title: commonMsg.directionNorthLetter(), moveFunction: 'moveUp', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
-      down: { title: commonMsg.directionSouthLetter(), moveFunction: 'moveDown', image: skin.downArrow, tooltip: msg.moveSouthTooltip() },
+      left: { title: commonMsg.directionWestLetter(), moveFunction: 'moveLeft', image: skin.leftArrow, smallImage: skin.leftArrowSmall, tooltip: msg.moveWestTooltip() },
+      right: { title: commonMsg.directionEastLetter(), moveFunction: 'moveRight', image: skin.rightArrow, smallImage: skin.rightArrowSmall, tooltip: msg.moveEastTooltip() },
+      up: { title: commonMsg.directionNorthLetter(), moveFunction: 'moveUp', image: skin.upArrow, smallImage: skin.upArrowSmall, tooltip: msg.moveNorthTooltip() },
+      down: { title: commonMsg.directionSouthLetter(), moveFunction: 'moveDown', image: skin.downArrow, smallImage: skin.downArrowSmall, tooltip: msg.moveSouthTooltip() },
       jump_left: { title: commonMsg.jump() + " " + commonMsg.directionWestLetter(), moveFunction: 'jumpLeft', image: skin.leftJumpArrow, tooltip: msg.jumpWestTooltip() },
       jump_right: { title: commonMsg.jump() + " " + commonMsg.directionEastLetter(), moveFunction: 'jumpRight', image: skin.rightJumpArrow, tooltip: msg.jumpEastTooltip() },
       jump_up: { title: commonMsg.jump() + " " + commonMsg.directionNorthLetter(), moveFunction: 'jumpUp', image: skin.upJumpArrow, tooltip: msg.jumpNorthTooltip() },
@@ -3535,8 +3539,9 @@ exports.install = function(blockly, blockInstallOptions) {
         helpUrl: '',
         init: function () {
           this.setHSV(184, 1.00, 0.74);
+          var imageToUse = hasLengthInput ? directionConfig.smallImage : directionConfig.image;
           var input = this.appendDummyInput().appendTitle(directionConfig.title)
-            .appendTitle(new blockly.FieldImage(directionConfig.image));
+            .appendTitle(new blockly.FieldImage(imageToUse));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
           this.setTooltip(directionConfig.tooltip);
