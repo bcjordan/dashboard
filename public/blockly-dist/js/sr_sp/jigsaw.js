@@ -1051,7 +1051,7 @@ var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTe
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
 var LOOP_HIGHLIGHT_RE =
-    new RegExp(LOOP_HIGHLIGHT.replace(/\(.*\)/, '\\(.*\\)'));
+    new RegExp(LOOP_HIGHLIGHT.replace(/\(.*\)/, '\\(.*\\)'), 'g');
 
 /**
  * Returns javascript code to call a timeout check
