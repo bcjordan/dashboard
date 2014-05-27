@@ -1,20 +1,17 @@
 - if Rails.env.production?
   :javascript
-    var analytic_locale = "#{locale}";
-
-  - if current_user
-    :javascript
-      var analytic_signin_state = 'signed_in';
-  -else
-    :javascript
-      var analytic_signin_state = 'signed_out';
-
-  :javascript
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
     ga('create', 'UA-37745279-3', 'code.org');
-    ga('set', 'dimension1', analytic_signin_state);
-    ga('set', 'dimension2', analytic_locale);
+
+    if ("#{current_user != nil}" == "true")
+      ga('set', 'dimension1', "signed_in");
+    
+    var browserLocale = "#{request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first}"
+    var selectedLocale = "#{locale[0...2]}";
+    if (browserLocale != selectedLocale)
+      ga('set', 'dimension2', selectedLocale);
+    
     ga('send', 'pageview');
