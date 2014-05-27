@@ -2400,6 +2400,10 @@ exports.incrementScore = function(id, player) {
   Studio.queueCmd(id, 'incrementScore', {'player': player});
 };
 
+exports.setScoreText = function(id, text) {
+  Studio.queueCmd(id, 'setScoreText', {'text': text});
+};
+
 exports.wait = function(id, value) {
   Studio.queueCmd(id, 'wait', {'value': value});
 };
@@ -2755,10 +2759,10 @@ exports.install = function(blockly, blockInstallOptions) {
         this.getTitleValue('DIR') + ');\n';
   };
 
-  blockly.Blocks.studio_moveDistance = {
+  var initMoveDistanceBlock = function (block) {
     // Block for moving/gliding a specific distance.
-    helpUrl: '',
-    init: function() {
+    block.helpUrl = '';
+    block.init = function() {
       var dropdownArray =
           this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
@@ -2775,37 +2779,51 @@ exports.install = function(blockly, blockInstallOptions) {
         .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
       this.appendDummyInput()
         .appendTitle('\t');
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.DISTANCE), 'DISTANCE');
+      if (block.params) {
+        this.appendValueInput('DISTANCE')
+          .setCheck('Number');
+        this.appendDummyInput()
+          .appendTitle(msg.moveDistancePixels());
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.DISTANCE), 'DISTANCE');
+      }
       this.setPreviousStatement(true);
       this.setInputsInline(true);
       this.setNextStatement(true);
       this.setTooltip(msg.moveDistanceTooltip());
+    };
+
+    block.SPRITE =
+      [[msg.moveSprite1(), '0'],
+       [msg.moveSprite2(), '1'],
+       [msg.moveSprite3(), '2'],
+       [msg.moveSprite4(), '3'],
+       [msg.moveSprite5(), '4'],
+       [msg.moveSprite6(), '5']];
+
+    block.DIR =
+        [[msg.moveDirectionUp(), Direction.NORTH.toString()],
+         [msg.moveDirectionDown(), Direction.SOUTH.toString()],
+         [msg.moveDirectionLeft(), Direction.WEST.toString()],
+         [msg.moveDirectionRight(), Direction.EAST.toString()],
+         [msg.moveDirectionRandom(), 'random']];
+
+    if (!block.params) {
+      block.DISTANCE =
+          [[msg.moveDistance25(), '25'],
+           [msg.moveDistance50(), '50'],
+           [msg.moveDistance100(), '100'],
+           [msg.moveDistance200(), '200'],
+           [msg.moveDistance400(), '400'],
+           [msg.moveDistanceRandom(), 'random']];
     }
   };
 
-  blockly.Blocks.studio_moveDistance.SPRITE =
-    [[msg.moveSprite1(), '0'],
-     [msg.moveSprite2(), '1'],
-     [msg.moveSprite3(), '2'],
-     [msg.moveSprite4(), '3'],
-     [msg.moveSprite5(), '4'],
-     [msg.moveSprite6(), '5']];
-
-  blockly.Blocks.studio_moveDistance.DIR =
-      [[msg.moveDirectionUp(), Direction.NORTH.toString()],
-       [msg.moveDirectionDown(), Direction.SOUTH.toString()],
-       [msg.moveDirectionLeft(), Direction.WEST.toString()],
-       [msg.moveDirectionRight(), Direction.EAST.toString()],
-       [msg.moveDirectionRandom(), 'random']];
-
-  blockly.Blocks.studio_moveDistance.DISTANCE =
-      [[msg.moveDistance25(), '25'],
-       [msg.moveDistance50(), '50'],
-       [msg.moveDistance100(), '100'],
-       [msg.moveDistance200(), '200'],
-       [msg.moveDistance400(), '400'],
-       [msg.moveDistanceRandom(), 'random']];
+  blockly.Blocks.studio_moveDistance = {};
+  initMoveDistanceBlock(blockly.Blocks.studio_moveDistance);
+  blockly.Blocks.studio_moveDistanceParams = { 'params': true };
+  initMoveDistanceBlock(blockly.Blocks.studio_moveDistanceParams);
 
   generator.studio_moveDistance = function() {
     // Generate JavaScript for moving.
@@ -2824,6 +2842,26 @@ exports.install = function(blockly, blockInstallOptions) {
     if (dirParam === 'random') {
       dirParam = 'Studio.random([' + allDirections + '])';
     }
+
+    return 'Studio.moveDistance(\'block_id_' + this.id +
+        '\', ' +
+        (this.getTitleValue('SPRITE') || '0') + ', ' +
+        dirParam + ', ' +
+        distParam + ');\n';
+  };
+
+  generator.studio_moveDistanceParams = function() {
+    // Generate JavaScript for moving (params version).
+
+    var allDirections = this.DIR.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var dirParam = this.getTitleValue('DIR');
+    if (dirParam === 'random') {
+      dirParam = 'Studio.random([' + allDirections + '])';
+    }
+    var distParam = Blockly.JavaScript.valueToCode(this, 'DISTANCE',
+        Blockly.JavaScript.ORDER_NONE) || '0';
 
     return 'Studio.moveDistance(\'block_id_' + this.id +
         '\', ' +
@@ -2886,6 +2924,28 @@ exports.install = function(blockly, blockInstallOptions) {
     // Generate JavaScript for incrementing the score.
     return 'Studio.incrementScore(\'block_id_' + this.id + '\', \'' +
                 this.getTitleValue('PLAYER') + '\');\n';
+  };
+
+  blockly.Blocks.studio_setScoreText = {
+    // Block for setting the score text.
+    helpUrl: '',
+    init: function() {
+      this.setHSV(184, 1.00, 0.74);
+      this.appendValueInput('TEXT')
+        .setCheck('String')
+        .appendTitle(msg.setScoreText());
+      this.setInputsInline(true);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.setScoreTextTooltip());
+    }
+  };
+
+  generator.studio_setScoreText = function() {
+    // Generate JavaScript for setting the score text.
+    var arg = Blockly.JavaScript.valueToCode(this, 'TEXT',
+        Blockly.JavaScript.ORDER_NONE) || '';
+    return 'Studio.setScoreText(\'block_id_' + this.id + '\', ' + arg + ');\n';
   };
 
   blockly.Blocks.studio_setSpriteSpeed = {
@@ -2973,38 +3033,66 @@ exports.install = function(blockly, blockInstallOptions) {
   /**
    * showTitleScreen
    */
-  blockly.Blocks.studio_showTitleScreen = {
-    helpUrl: '',
-    init: function() {
+  var initShowTitleScreenBlock = function (block) {
+    block.helpUrl = '';
+    block.init = function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
         .appendTitle(msg.showTitleScreen());
-      this.appendDummyInput()
-        .appendTitle(msg.showTitleScreenTitle())
-        .appendTitle(new Blockly.FieldImage(
-                Blockly.assetUrl('media/quote0.png'), 12, 12))
-        .appendTitle(new Blockly.FieldTextInput(msg.showTSDefTitle()), 'TITLE')
-        .appendTitle(new Blockly.FieldImage(
-                Blockly.assetUrl('media/quote1.png'), 12, 12));
-      this.appendDummyInput()
-        .appendTitle(msg.showTitleScreenText())
-        .appendTitle(new Blockly.FieldImage(
-                Blockly.assetUrl('media/quote0.png'), 12, 12))
-        .appendTitle(new Blockly.FieldTextInput(msg.showTSDefText()), 'TEXT')
-        .appendTitle(new Blockly.FieldImage(
-                Blockly.assetUrl('media/quote1.png'), 12, 12));
+      if (block.params) {
+        this.appendValueInput('TITLE')
+          .setCheck('String')
+          .setAlign(Blockly.ALIGN_RIGHT)
+          .appendTitle(msg.showTitleScreenTitle());
+        this.appendValueInput('TEXT')
+          .setCheck('String')
+          .setAlign(Blockly.ALIGN_RIGHT)
+          .appendTitle(msg.showTitleScreenText());
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.showTitleScreenTitle())
+          .appendTitle(new Blockly.FieldImage(
+                  Blockly.assetUrl('media/quote0.png'), 12, 12))
+          .appendTitle(new Blockly.FieldTextInput(
+              msg.showTSDefTitle()),
+              'TITLE')
+          .appendTitle(new Blockly.FieldImage(
+                  Blockly.assetUrl('media/quote1.png'), 12, 12));
+        this.appendDummyInput()
+          .appendTitle(msg.showTitleScreenText())
+          .appendTitle(new Blockly.FieldImage(
+                  Blockly.assetUrl('media/quote0.png'), 12, 12))
+          .appendTitle(new Blockly.FieldTextInput(msg.showTSDefText()), 'TEXT')
+          .appendTitle(new Blockly.FieldImage(
+                  Blockly.assetUrl('media/quote1.png'), 12, 12));
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.showTitleScreenTooltip());
-    }
+    };
   };
 
+  blockly.Blocks.studio_showTitleScreen = {};
+  initShowTitleScreenBlock(blockly.Blocks.studio_showTitleScreen);
+  blockly.Blocks.studio_showTitleScreenParams = { 'params': true };
+  initShowTitleScreenBlock(blockly.Blocks.studio_showTitleScreenParams);
+
   generator.studio_showTitleScreen = function() {
-    // Generate JavaScript for saying.
+    // Generate JavaScript for showing title screen.
     return 'Studio.showTitleScreen(\'block_id_' + this.id +
                '\', ' +
                blockly.JavaScript.quote_(this.getTitleValue('TITLE')) + ', ' +
                blockly.JavaScript.quote_(this.getTitleValue('TEXT')) + ');\n';
+  };
+
+  generator.studio_showTitleScreenParams = function() {
+    // Generate JavaScript for showing title screen (param version).
+    var titleParam = Blockly.JavaScript.valueToCode(this, 'TITLE',
+        Blockly.JavaScript.ORDER_NONE) || '';
+    var textParam = Blockly.JavaScript.valueToCode(this, 'TEXT',
+        Blockly.JavaScript.ORDER_NONE) || '';
+    return 'Studio.showTitleScreen(\'block_id_' + this.id +
+               '\', ' + titleParam + ', ' + textParam + ');\n';
   };
 
   /**
@@ -3122,9 +3210,10 @@ exports.install = function(blockly, blockInstallOptions) {
       name: 'setSpriteEmotion'});
   };
 
-  blockly.Blocks.studio_saySprite = {
-    helpUrl: '',
-    init: function() {
+  var initSayBlock = function (block) {
+    // Block for waiting a specific amount of time.
+    block.helpUrl = '';
+    block.init = function() {
       var dropdownArray =
           this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
@@ -3135,26 +3224,36 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.saySprite());
       }
-      this.appendDummyInput()
-        .appendTitle(new Blockly.FieldImage(
-                Blockly.assetUrl('media/quote0.png'), 12, 12))
-        .appendTitle(new Blockly.FieldTextInput(msg.defaultSayText()), 'TEXT')
-        .appendTitle(new Blockly.FieldImage(
-                Blockly.assetUrl('media/quote1.png'), 12, 12));
+      if (block.params) {
+        this.appendValueInput('TEXT')
+          .setCheck('String');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new Blockly.FieldImage(
+                  Blockly.assetUrl('media/quote0.png'), 12, 12))
+          .appendTitle(new Blockly.FieldTextInput(msg.defaultSayText()), 'TEXT')
+          .appendTitle(new Blockly.FieldImage(
+                  Blockly.assetUrl('media/quote1.png'), 12, 12));
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.saySpriteTooltip());
-    }
+    };
+
+    block.SPRITE =
+        [[msg.saySprite1(), '0'],
+         [msg.saySprite2(), '1'],
+         [msg.saySprite3(), '2'],
+         [msg.saySprite4(), '3'],
+         [msg.saySprite5(), '4'],
+         [msg.saySprite6(), '5']];
   };
 
-  blockly.Blocks.studio_saySprite.SPRITE =
-      [[msg.saySprite1(), '0'],
-       [msg.saySprite2(), '1'],
-       [msg.saySprite3(), '2'],
-       [msg.saySprite4(), '3'],
-       [msg.saySprite5(), '4'],
-       [msg.saySprite6(), '5']];
+  blockly.Blocks.studio_saySprite = {};
+  initSayBlock(blockly.Blocks.studio_saySprite);
+  blockly.Blocks.studio_saySpriteParams = { 'params': true };
+  initSayBlock(blockly.Blocks.studio_saySpriteParams);
 
   generator.studio_saySprite = function() {
     // Generate JavaScript for saying.
@@ -3164,36 +3263,73 @@ exports.install = function(blockly, blockInstallOptions) {
                blockly.JavaScript.quote_(this.getTitleValue('TEXT')) + ');\n';
   };
 
-  blockly.Blocks.studio_wait = {
-    helpUrl: '',
-    init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[2][1]);  // default to half second
-
+  generator.studio_saySpriteParams = function() {
+    // Generate JavaScript for saying (param version).
+    var textParam = Blockly.JavaScript.valueToCode(this, 'TEXT',
+        Blockly.JavaScript.ORDER_NONE) || '';
+    return 'Studio.saySprite(\'block_id_' + this.id +
+               '\', ' +
+               (this.getTitleValue('SPRITE') || '0') + ', ' +
+               textParam + ');\n';
+  };
+  
+  var initWaitBlock = function (block) {
+    // Block for waiting a specific amount of time.
+    block.helpUrl = '';
+    block.init = function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(dropdown, 'VALUE');
+      if (block.params) {
+        this.appendDummyInput()
+          .appendTitle(msg.waitFor());
+        this.appendValueInput('VALUE')
+          .setCheck('Number');
+        this.appendDummyInput()
+          .appendTitle(msg.waitSeconds());
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[2][1]);  // default to half second
+
+        this.appendDummyInput()
+          .appendTitle(dropdown, 'VALUE');
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
-      this.setTooltip(msg.waitTooltip());
+      this.setTooltip(block.params ?
+                        msg.waitParamsTooltip() :
+                        msg.waitTooltip());
+    };
+
+    if (!block.params) {
+      block.VALUES =
+        [[msg.waitForClick(), '0'],
+         [msg.waitForRandom(), 'random'],
+         [msg.waitForHalfSecond(), '500'],
+         [msg.waitFor1Second(), '1000'],
+         [msg.waitFor2Seconds(), '2000'],
+         [msg.waitFor5Seconds(), '5000'],
+         [msg.waitFor10Seconds(), '10000']];
     }
   };
 
-  blockly.Blocks.studio_wait.VALUES =
-      [[msg.waitForClick(), '0'],
-       [msg.waitForRandom(), 'random'],
-       [msg.waitForHalfSecond(), '500'],
-       [msg.waitFor1Second(), '1000'],
-       [msg.waitFor2Seconds(), '2000'],
-       [msg.waitFor5Seconds(), '5000'],
-       [msg.waitFor10Seconds(), '10000']];
+  blockly.Blocks.studio_wait = {};
+  initWaitBlock(blockly.Blocks.studio_wait);
+  blockly.Blocks.studio_waitParams = { 'params': true };
+  initWaitBlock(blockly.Blocks.studio_waitParams);
 
   generator.studio_wait = function() {
     return generateSetterCode({
       ctx: this,
       random: 1,
       name: 'wait'});
+  };
+
+  generator.studio_waitParams = function() {
+    // Generate JavaScript for wait (params version).
+    var valueParam = Blockly.JavaScript.valueToCode(this, 'VALUE',
+        Blockly.JavaScript.ORDER_NONE) || '0';
+    return 'Studio.wait(\'block_id_' + this.id +
+        '\', (' + valueParam + ' * 1000));\n';
   };
 
 };
@@ -3536,14 +3672,28 @@ module.exports = {
       tb(createCategory(msg.catActions(),
                           blockOfType('studio_setSprite') +
                           blockOfType('studio_setBackground') +
-                          blockOfType('studio_showTitleScreen') +
+                        '<block type="studio_showTitleScreenParams"> \
+                          <value name="TITLE"><block type="text"></block> \
+                          </value> \
+                          <value name="TEXT"><block type="text"></block> \
+                          </value></block>' +
                           blockOfType('studio_move') +
-                          blockOfType('studio_moveDistance') +
+                      '<block type="studio_moveDistanceParams" inline="true"> \
+                        <value name="DISTANCE"><block type="math_number"> \
+                                <title name="NUM">25</title></block> \
+                        </value></block>' +
                           blockOfType('studio_stop') +
-                          blockOfType('studio_wait') +
+                        '<block type="studio_waitParams" inline="true"> \
+                          <value name="VALUE"><block type="math_number"> \
+                                  <title name="NUM">1</title></block> \
+                          </value></block>' +
                           blockOfType('studio_playSound') +
-                          blockOfType('studio_incrementScore') +
-                          blockOfType('studio_saySprite') +
+                        '<block type="studio_setScoreText" inline="true"> \
+                          <value name="TEXT"><block type="text"></block> \
+                          </value></block>' +
+                        '<block type="studio_saySpriteParams" inline="true"> \
+                          <value name="TEXT"><block type="text"></block> \
+                          </value></block>' +
                           blockOfType('studio_setSpritePosition') +
                           blockOfType('studio_setSpriteSpeed') +
                           blockOfType('studio_setSpriteEmotion')) +
@@ -3556,8 +3706,33 @@ module.exports = {
                           blockOfType('studio_whenSpriteClicked') +
                           blockOfType('studio_whenSpriteCollided')) +
          createCategory(msg.catControl(),
-                          blockOfType('controls_repeat') +
-                          blockOfType('studio_repeatForever')) +
+                          blockOfType('studio_repeatForever') +
+                         '<block type="controls_repeat_ext"> \
+                            <value name="TIMES"> \
+                              <block type="math_number"> \
+                                <title name="NUM">10</title> \
+                              </block> \
+                            </value> \
+                          </block>' +
+                          blockOfType('controls_whileUntil') +
+                         '<block type="controls_for"> \
+                            <value name="FROM"> \
+                              <block type="math_number"> \
+                                <title name="NUM">1</title> \
+                              </block> \
+                            </value> \
+                            <value name="TO"> \
+                              <block type="math_number"> \
+                                <title name="NUM">10</title> \
+                              </block> \
+                            </value> \
+                            <value name="BY"> \
+                              <block type="math_number"> \
+                                <title name="NUM">1</title> \
+                              </block> \
+                            </value> \
+                          </block>' +
+                          blockOfType('controls_flow_statements')) +
          createCategory(msg.catLogic(),
                           blockOfType('controls_if') +
                           blockOfType('logic_compare') +
@@ -3566,8 +3741,34 @@ module.exports = {
                           blockOfType('logic_boolean')) +
          createCategory(msg.catMath(),
                           blockOfType('math_number') +
-                          blockOfType('math_change') +
+                         '<block type="math_change"> \
+                            <value name="DELTA"> \
+                              <block type="math_number"> \
+                                <title name="NUM">1</title> \
+                              </block> \
+                            </value> \
+                          </block>' +
+                         '<block type="math_random_int"> \
+                            <value name="FROM"> \
+                              <block type="math_number"> \
+                                <title name="NUM">1</title> \
+                              </block> \
+                            </value> \
+                            <value name="TO"> \
+                              <block type="math_number"> \
+                                <title name="NUM">100</title> \
+                              </block> \
+                            </value> \
+                          </block>' +
                           blockOfType('math_arithmetic')) +
+         createCategory(msg.catText(),
+                          blockOfType('text') +
+                          blockOfType('text_join') +
+                         '<block type="text_append"> \
+                            <value name="TEXT"> \
+                              <block type="text"></block> \
+                            </value> \
+                          </block>') +
          createCategory(msg.catVariables(), '', 'VARIABLE') +
          createCategory(msg.catProcedures(), '', 'PROCEDURE')),
     'startBlocks':
@@ -4521,6 +4722,7 @@ BlocklyApps.reset = function(first) {
   // Reset the score and title screen.
   Studio.playerScore = 0;
   Studio.opponentScore = 0;
+  Studio.scoreText = null;
   document.getElementById('score')
     .setAttribute('visibility', 'hidden');
   document.getElementById('titleScreenTitle')
@@ -4992,10 +5194,14 @@ Studio.displaySprite = function(i) {
 
 Studio.displayScore = function() {
   var score = document.getElementById('score');
-  score.textContent = studioMsg.scoreText({
-    playerScore: Studio.playerScore,
-    opponentScore: Studio.opponentScore
-  });
+  if (Studio.scoreText) {
+    score.textContent = Studio.scoreText;
+  } else {
+    score.textContent = studioMsg.scoreText({
+      playerScore: Studio.playerScore,
+      opponentScore: Studio.opponentScore
+    });
+  }
   score.setAttribute('visibility', 'visible');
 };
 
@@ -5092,6 +5298,10 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       Studio.incrementScore(cmd.opts);
       break;
+    case 'setScoreText':
+      BlocklyApps.highlight(cmd.id);
+      Studio.setScoreText(cmd.opts);
+      break;
     case 'wait':
       if (!cmd.opts.started) {
         BlocklyApps.highlight(cmd.id);
@@ -5115,6 +5325,11 @@ Studio.incrementScore = function (opts) {
   } else {
     Studio.playerScore++;
   }
+  Studio.displayScore();
+};
+
+Studio.setScoreText = function (opts) {
+  Studio.scoreText = opts.text;
   Studio.displayScore();
 };
 
@@ -6272,6 +6487,8 @@ exports.catMath = function(d){return "Math"};
 
 exports.catProcedures = function(d){return "Functions"};
 
+exports.catText = function(d){return "Text"};
+
 exports.catVariables = function(d){return "Variables"};
 
 exports.continue = function(d){return "Продолжить"};
@@ -6307,6 +6524,8 @@ exports.moveDistance100 = function(d){return "100 пикселей"};
 exports.moveDistance200 = function(d){return "200 пикселей"};
 
 exports.moveDistance400 = function(d){return "400 пикселей"};
+
+exports.moveDistancePixels = function(d){return "pixels"};
 
 exports.moveDistanceRandom = function(d){return "random pixels"};
 
@@ -6440,6 +6659,10 @@ exports.setBackgroundUnderwater = function(d){return "set underwater background"
 
 exports.setBackgroundTooltip = function(d){return "Установить на задний план изображение"};
 
+exports.setScoreText = function(d){return "set score"};
+
+exports.setScoreTextTooltip = function(d){return "Sets the text to be displayed in the score area."};
+
 exports.setSpriteEmotionAngry = function(d){return "to a angry emotion"};
 
 exports.setSpriteEmotionHappy = function(d){return "to a happy emotion"};
@@ -6534,6 +6757,10 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
+exports.waitFor = function(d){return "wait for"};
+
+exports.waitSeconds = function(d){return "seconds"};
+
 exports.waitForClick = function(d){return "wait for click"};
 
 exports.waitForRandom = function(d){return "wait for random"};
@@ -6547,6 +6774,8 @@ exports.waitFor2Seconds = function(d){return "wait for 2 seconds"};
 exports.waitFor5Seconds = function(d){return "wait for 5 seconds"};
 
 exports.waitFor10Seconds = function(d){return "wait for 10 seconds"};
+
+exports.waitParamsTooltip = function(d){return "Waits for a specified number of seconds or use zero to wait until a click occurs."};
 
 exports.waitTooltip = function(d){return "Waits for a specified amount of time or until a click occurs."};
 
