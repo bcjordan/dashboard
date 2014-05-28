@@ -11,11 +11,12 @@
       ga('set', 'dimension1', 'signed_in');
   
   - browser_locale = request.env['HTTP_ACCEPT_LANGUAGE']
-  - browser_language = browser_locale ? browser_locale.scan(/^[a-z]{2}/).first : "";
-  - current_language = locale[0...2]
+  - if browser_locale
+    - browser_language = browser_locale.scan(/^[a-z]{2}/).first
+    - current_language = locale[0...2]
 
-  - if current_language != browser_language
-    :javascript
-      ga('set', 'dimension2', "#{current_language}");
+    - if current_language != browser_language
+      :javascript
+        ga('set', 'dimension2', "#{current_language}");
     
     ga('send', 'pageview');
