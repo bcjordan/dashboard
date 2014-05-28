@@ -2171,6 +2171,7 @@ exports.load = function(assetUrl, id) {
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
     startIcon: assetUrl('media/common_images/start-icon.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
     winSound: [skinUrl('win.mp3'), skinUrl('win.ogg')],

@@ -363,6 +363,9 @@ input[type="radio"] {
 .goog-menuitem-checkbox {
   background: ""; }
 
+.blocklyRectangularDropdownMenu .goog-menuitem-highlight, .blocklyRectangularDropdownMenu .goog-menuitem-hover {
+  background-color: rgba(255, 255, 255, 0.35); }
+
 .generated-code-container {
   margin-top: 10px; }
   .generated-code-container .generatedCodeMessage {
