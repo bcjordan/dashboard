@@ -48,9 +48,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "logged in milestone" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
     # do all the logging
     @controller.expects :log_milestone
     @controller.expects :slog
@@ -110,9 +107,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "logged in milestone not passing" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
     # do all the logging
     @controller.expects :log_milestone
     @controller.expects :slog
@@ -139,9 +133,6 @@ class ActivitiesControllerTest < ActionController::TestCase
 
 
   test "logged in milestone with image not passing" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
     # do all the logging
     @controller.expects :log_milestone
     @controller.expects :slog
@@ -169,9 +160,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "logged in milestone with image" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
     # do all the logging
     @controller.expects :log_milestone
     @controller.expects :slog
@@ -201,9 +189,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "logged in milestone with existing level source and level source image" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
     # do all the logging
     @controller.expects :log_milestone
     @controller.expects :slog
@@ -243,10 +228,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "logged in milestone with existing level source and level source image updates image if old image was blank" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
-
     program = "<whatever>"
     
     level_source = LevelSource.lookup(@script_level.level, program) # creates it, doesn't just look it up, despite the name
@@ -279,10 +260,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "logged in milestone with existing level source and level source image does not update image if new image is blank" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
-
     program = "<whatever>"
     
     level_source = LevelSource.lookup(@script_level.level, program) # creates it, doesn't just look it up, despite the name
@@ -315,10 +292,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "logged in milestone with existing level source and level source image does not update image if old image is good" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
-
     program = "<whatever>"
     
     level_source = LevelSource.lookup(@script_level.level, program) # creates it, doesn't just look it up, despite the name
@@ -356,9 +329,6 @@ class ActivitiesControllerTest < ActionController::TestCase
     # uniqueness constraint so the right thing in this case is to
     # catch that exception and just run it again (the second time we
     # will get the 'existing' object)
-    
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
 
     # do all the logging
     @controller.expects :log_milestone
@@ -451,9 +421,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "anonymous milestone with existing session adds progress in session" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
     sign_out @user
     
     # set up existing session
@@ -491,9 +458,6 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test "anonymous milestone not passing" do
-    # TODO actually test experiment instead of just stubbing it out
-    ActivityHint.expects(:is_experimenting_feedback?).returns(false)
-
     sign_out @user
     
     session['lines'] = 10

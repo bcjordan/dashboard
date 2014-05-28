@@ -134,7 +134,7 @@ class ApplicationController < ActionController::Base
     end
 
     # Check if the current level_source has program specific hint, use it if use is set.
-    if ActivityHint.is_experimenting_feedback? && options[:level_source]
+    if options[:level_source]
       experiment_hints = []
       options[:level_source].level_source_hints.each do |hint|
         if hint.selected?
@@ -150,9 +150,9 @@ class ApplicationController < ActionController::Base
         response[:hint] = experiment_hints[rand(experiment_hints.count)]
       end
 
-      # Record this activity
+      # Record this activity only if we are in experiment mode
       if response[:hint]
-        if options[:activity]
+        if ActivityHint.is_experimenting_feedback? && options[:activity]
           ActivityHint.create!(
               activity_id: options[:activity].id,
               level_source_hint_id: response[:hint].id
