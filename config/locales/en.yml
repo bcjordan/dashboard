@@ -307,8 +307,9 @@ en:
     feedback: 'Provide feedback'
     translate: 'Help us translate to your language'
     support: Support
-    tos: 'Terms of service'
+    tos: 'Terms'
     privacy: 'Privacy Policy'
+    secure: 'Secure Version'
   prize_mail:
     prize_earned:
       subject: "Redeem your prize at Code.org!"
