@@ -131,7 +131,7 @@ browsers.each do |browser|
     next
   end
   testStartTime = Time.now
-  HipChat.log "Running with <b>#{browser["description"] ? browser["description"] : browser.inspect}</b>..."
+  HipChat.log "Running UI tests with <b>#{browser['name'] || browser.inspect}</b>..."
   puts "Running with: #{browser["description"] ? browser["description"] : browser.inspect}"
 
   ENV['SELENIUM_BROWSER'] = browser['browser']
@@ -173,8 +173,11 @@ browsers.each do |browser|
   suiteResultString = succeeded ? "succeeded".green : "failed".red
   testDuration = Time.now - testStartTime
 
-  color = succeeded ? 'gray' : 'red'
-  HipChat.log "Result: <b>#{suiteResultString}</b>.  Duration: #{testDuration.round(2)} seconds", color:color
+  if succeeded
+    HipChat.log "Success: <b>#{browser['name'] || browser.inspect}</b> (#{testDuration.round(2)} seconds)"
+  else
+    HipChat.log "FAILED: <b>#{browser['name'] || browser.inspect}</b> (#{testDuration.round(2)} seconds)", color:'red'
+  end
   puts "  Result: " + suiteResultString + ".  Duration: " + testDuration.round(2).to_s + " seconds"
 end
 
