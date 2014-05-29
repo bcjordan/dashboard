@@ -2537,12 +2537,12 @@ exports.install = function(blockly, blockInstallOptions) {
 
   blockly.Blocks.flappy_setObstacle.K1_CHOICES =
       [[skin.randomPurpleIcon, 'random'],
-       [skin.obstacle_bottom, '"flappy"'],
-       [skin.scifi.obstacle_bottom, '"scifi"'],
-       [skin.underwater.obstacle_bottom, '"underwater"'],
-       [skin.cave.obstacle_bottom, '"cave"'],
-       [skin.santa.obstacle_bottom, '"santa"'],
-       [skin.laser.obstacle_bottom, '"laser"']];
+       [skin.obstacle_bottom_thumb, '"flappy"'],
+       [skin.scifi.obstacle_bottom_thumb, '"scifi"'],
+       [skin.underwater.obstacle_bottom_thumb, '"underwater"'],
+       [skin.cave.obstacle_bottom_thumb, '"cave"'],
+       [skin.santa.obstacle_bottom_thumb, '"santa"'],
+       [skin.laser.obstacle_bottom_thumb, '"laser"']];
 
   generator.flappy_setObstacle = function() {
     return generateSetterCode(this, 'setObstacle');
@@ -2585,12 +2585,12 @@ exports.install = function(blockly, blockInstallOptions) {
 
   blockly.Blocks.flappy_setGround.K1_CHOICES =
       [[skin.randomPurpleIcon, 'random'],
-       [skin.ground, '"flappy"'],
-       [skin.scifi.ground, '"scifi"'],
-       [skin.underwater.ground, '"underwater"'],
-       [skin.cave.ground, '"cave"'],
-       [skin.santa.ground, '"santa"'],
-       [skin.lava.ground, '"lava"']];
+       [skin.ground_thumb, '"flappy"'],
+       [skin.scifi.ground_thumb, '"scifi"'],
+       [skin.underwater.ground_thumb, '"underwater"'],
+       [skin.cave.ground_thumb, '"cave"'],
+       [skin.santa.ground_thumb, '"santa"'],
+       [skin.lava.ground_thumb, '"lava"']];
 
   generator.flappy_setGround = function() {
     return generateSetterCode(this, 'setGround');
@@ -4206,32 +4206,40 @@ exports.load = function(assetUrl, id) {
     background: skin.assetUrl('background_scifi.png'),
     avatar: skin.assetUrl('avatar_scifi.png'),
     obstacle_bottom: skin.assetUrl('obstacle_bottom_scifi.png'),
+    obstacle_bottom_thumb: skin.assetUrl('obstacle_bottom_scifi_thumb.png'),
     obstacle_top: skin.assetUrl('obstacle_top_scifi.png'),
-    ground: skin.assetUrl('ground_scifi.png')
+    ground: skin.assetUrl('ground_scifi.png'),
+    ground_thumb: skin.assetUrl('ground_scifi_thumb.png')
   };
 
   skin.underwater = {
     background: skin.assetUrl('background_underwater.png'),
     avatar: skin.assetUrl('avatar_underwater.png'),
     obstacle_bottom: skin.assetUrl('obstacle_bottom_underwater.png'),
+    obstacle_bottom_thumb: skin.assetUrl('obstacle_bottom_underwater_thumb.png'),
     obstacle_top: skin.assetUrl('obstacle_top_underwater.png'),
-    ground: skin.assetUrl('ground_underwater.png')
+    ground: skin.assetUrl('ground_underwater.png'),
+    ground_thumb: skin.assetUrl('ground_underwater_thumb.png')
   };
 
   skin.cave = {
     background: skin.assetUrl('background_cave.png'),
     avatar: skin.assetUrl('avatar_cave.png'),
     obstacle_bottom: skin.assetUrl('obstacle_bottom_cave.png'),
+    obstacle_bottom_thumb: skin.assetUrl('obstacle_bottom_cave_thumb.png'),
     obstacle_top: skin.assetUrl('obstacle_top_cave.png'),
-    ground: skin.assetUrl('ground_cave.png')
+    ground: skin.assetUrl('ground_cave.png'),
+    ground_thumb: skin.assetUrl('ground_cave_thumb.png')
   };
 
   skin.santa = {
     background: skin.assetUrl('background_santa.png'),
     avatar: skin.assetUrl('santa.png'),
     obstacle_bottom: skin.assetUrl('obstacle_bottom_santa.png'),
+    obstacle_bottom_thumb: skin.assetUrl('obstacle_bottom_santa_thumb.png'),
     obstacle_top: skin.assetUrl('obstacle_top_santa.png'),
-    ground: skin.assetUrl('ground_santa.png')
+    ground: skin.assetUrl('ground_santa.png'),
+    ground_thumb: skin.assetUrl('ground_santa_thumb.png')
   };
 
   skin.night = {
@@ -4244,11 +4252,13 @@ exports.load = function(assetUrl, id) {
 
   skin.laser = {
     obstacle_bottom: skin.assetUrl('obstacle_bottom_laser.png'),
+    obstacle_bottom_thumb: skin.assetUrl('obstacle_bottom_laser_thumb.png'),
     obstacle_top: skin.assetUrl('obstacle_top_laser.png')
   };
 
   skin.lava = {
-    ground: skin.assetUrl('ground_lava.png')
+    ground: skin.assetUrl('ground_lava.png'),
+    ground_thumb: skin.assetUrl('ground_lava_thumb.png')
   };
 
   skin.shark = {
@@ -4285,8 +4295,10 @@ exports.load = function(assetUrl, id) {
 
   // Images
   skin.ground = skin.assetUrl('ground.png');
+  skin.ground_thumb = skin.assetUrl('ground_thumb.png');
   skin.obstacle_top = skin.assetUrl('obstacle_top.png');
   skin.obstacle_bottom = skin.assetUrl('obstacle_bottom.png');
+  skin.obstacle_bottom_thumb = skin.assetUrl('obstacle_bottom_thumb.png');
   skin.instructions = skin.assetUrl('instructions.png');
   skin.clickrun = skin.assetUrl('clickrun.png');
   skin.getready = skin.assetUrl('getready.png');
