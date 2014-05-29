@@ -4428,6 +4428,7 @@ var FeedbackBlocks = function(options) {
       baseUrl: BlocklyApps.BASE_URL,
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
+      level: options.level,
       blocks: generateXMLForBlocks(missingBlocks)
     }
   });
