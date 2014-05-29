@@ -8,7 +8,7 @@ gem 'rails-i18n', '~> 4.0.0'
 gem 'mysql2', '0.3.13'
 gem 'seamless_database_pool'
 
-gem 'le', '2.2.2'
+gem 'le', '~> 2.2'
 
 group :development, :test do
   # Use debugger

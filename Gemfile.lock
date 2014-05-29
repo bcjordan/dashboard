@@ -108,7 +108,7 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     kgio (2.9.2)
-    le (2.2.2)
+    le (2.2.8)
     libv8 (3.16.14.3)
     mail (2.5.4)
       mime-types (~> 1.16)
@@ -276,7 +276,7 @@ DEPENDENCIES
   jquery-rails
   jquery-ui-rails
   kaminari
-  le (= 2.2.2)
+  le (~> 2.2)
   mocha
   mysql2 (= 0.3.13)
   naturally
