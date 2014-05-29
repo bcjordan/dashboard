@@ -764,19 +764,30 @@ BlocklyApps.runButtonClick = function() {};
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
  */
 BlocklyApps.TestResults = {
-  NO_TESTS_RUN: -1,           // Default.
-  EMPTY_BLOCK_FAIL: 1,        // 0 stars.
-  TOO_FEW_BLOCKS_FAIL: 2,     // 0 stars.
-  LEVEL_INCOMPLETE_FAIL: 3,   // 0 stars.
-  MISSING_BLOCK_UNFINISHED: 4,// 0 star.
-  EXTRA_TOP_BLOCKS_FAIL: 5,   // 0 stars.
-  MISSING_BLOCK_FINISHED: 10, // 1 star.
+  // Default value before any tests are run.
+  NO_TESTS_RUN: -1,
+
+  // Zero stars.  The level was not solved.
+  EMPTY_BLOCK_FAIL: 1,        // A container block, such as "repeat", was empty.
+  TOO_FEW_BLOCKS_FAIL: 2,     // Fewer than the ideal number of blocks used.
+  LEVEL_INCOMPLETE_FAIL: 3,   // Default failure to complete a level.
+  MISSING_BLOCK_UNFINISHED: 4,// A required block was not used.
+  EXTRA_TOP_BLOCKS_FAIL: 5,   // There was more than one top-level block.
+
+  // One star.  The level was solved in an unacceptable way.
+  MISSING_BLOCK_FINISHED: 10, // The level was solved without required block.
   OTHER_1_STAR_FAIL: 11,      // Application-specific 1-star failure.
-  TOO_MANY_BLOCKS_FAIL: 20,   // 2 stars, try again or continue.
+
+  // Two stars.  The level was solved in an acceptable, but not ideal, manner.
+  TOO_MANY_BLOCKS_FAIL: 20,   // More than the ideal number of blocks were used.
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
-  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
-  FREE_PLAY: 30,              // 2 stars.
-  EDIT_BLOCKS: 70,
+  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy app failure. TODO: Fold into prior case.
+
+  // Other.
+  FREE_PLAY: 30,              // The user is in free-play mode.
+  EDIT_BLOCKS: 70,            // The user is creating/editing a new level.
+
+  // Three stars.  The level was solved in the ideal manner.
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -1660,6 +1671,7 @@ var FeedbackBlocks = function(options) {
       baseUrl: BlocklyApps.BASE_URL,
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
+      level: options.level,
       blocks: generateXMLForBlocks(missingBlocks)
     }
   });
@@ -3385,8 +3397,11 @@ return buf.join('');
 /*jshint multistr: true */
 
 var msg = require('../../locale/hr_hr/studio');
+var utils = require('../utils');
 var blockUtils = require('../block_utils');
-var Direction = require('./tiles').Direction;
+var tiles = require('./tiles');
+var Direction = tiles.Direction;
+var Emotions = tiles.Emotions;
 var tb = blockUtils.createToolbox;
 var blockOfType = blockUtils.blockOfType;
 var createCategory = blockUtils.createCategory;
@@ -3569,6 +3584,187 @@ module.exports = {
          blockOfType('studio_move') +
          blockOfType('studio_saySprite')),
     'minWorkspaceHeight': 600,
+    'startBlocks':
+     '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">8</title></block> \
+        </next></block> \
+      <block type="studio_whenRight" deletable="false" x="20" y="100"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">2</title></block> \
+        </next></block> \
+      <block type="studio_whenUp" deletable="false" x="20" y="180"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">1</title></block> \
+        </next></block> \
+      <block type="studio_whenDown" deletable="false" x="20" y="260"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">4</title></block> \
+        </next></block> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="340"> \
+        <statement name="DO"><block type="studio_moveDistance"> \
+                <title name="SPRITE">1</title> \
+                <title name="DISTANCE">400</title> \
+          <next><block type="studio_moveDistance"> \
+                  <title name="SPRITE">1</title> \
+                  <title name="DISTANCE">400</title> \
+                  <title name="DIR">4</title></block> \
+          </next></block> \
+      </statement></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="450"></block>'
+  },
+  '7': {
+    'requiredBlocks': [
+      [{'test': 'saySprite', 'type': 'studio_saySprite'}]
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0,16, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'goal': {
+      successCondition: function () {
+        return (Studio.sayComplete > 1);
+      }
+    },
+    'timeoutFailureTick': 200,
+    'toolbox':
+      tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
+         blockOfType('studio_saySprite')),
+    'startBlocks':
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
+  },
+  '8': {
+    'requiredBlocks': [
+      [{'test': 'setSpriteEmotion', 'type': 'studio_setSpriteEmotion'}]
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 16,0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'spriteStartingImage': 4,
+    'goal': {
+      successCondition: function () {
+        return (Studio.sprite[0].emotion === Emotions.HAPPY) &&
+               (Studio.tickCount >= 50);
+      }
+    },
+    'timeoutFailureTick': 100,
+    'toolbox':
+      tb('<block type="studio_moveDistance"><title name="DIR">2</title></block>' +
+         blockOfType('studio_setSpriteEmotion')),
+    'startBlocks':
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
+  },
+  '9': {
+    'requiredBlocks': [
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'softButtons': [
+      'leftButton',
+      'rightButton',
+      'downButton',
+      'upButton'
+    ],
+    'map': [
+      [0, 0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [16,0, 0, 0,16, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'spriteStartingImage': 2,
+    'spriteFinishIndex': 1,
+    'minWorkspaceHeight': 500,
+    'toolbox':
+      tb('<block type="studio_moveDistance"> \
+           <title name="DISTANCE">400</title> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_saySprite"> \
+           <title name="SPRITE">1</title></block>'),
+    'startBlocks':
+     '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">8</title></block> \
+        </next></block> \
+      <block type="studio_whenRight" deletable="false" x="20" y="100"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">2</title></block> \
+        </next></block> \
+      <block type="studio_whenUp" deletable="false" x="20" y="180"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">1</title></block> \
+        </next></block> \
+      <block type="studio_whenDown" deletable="false" x="20" y="260"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">4</title></block> \
+        </next></block> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="340"></block>'
+  },
+  '10': {
+    'requiredBlocks': [
+      [{'test': 'playSound', 'type': 'studio_playSound'}],
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'softButtons': [
+      'leftButton',
+      'rightButton',
+      'downButton',
+      'upButton'
+    ],
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [16,0, 0, 0,16, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'spriteStartingImage': 2,
+    'spriteFinishIndex': 1,
+    'minWorkspaceHeight': 600,
+    'goal': {
+      successCondition: function () {
+        return (Studio.playSoundCount > 0) &&
+               (Studio.tickCount >= 120);
+      }
+    },
+    'timeoutFailureTick': 300,
+    'toolbox':
+      tb('<block type="studio_moveDistance"> \
+           <title name="DISTANCE">400</title> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_saySprite"> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_playSound"> \
+           <title name="SOUND">crunch</title></block>'),
     'startBlocks':
      '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
         <next><block type="studio_move"> \
@@ -3781,7 +3977,17 @@ module.exports = {
   },
 };
 
-},{"../../locale/hr_hr/studio":36,"../block_utils":3,"./tiles":20}],17:[function(require,module,exports){
+// K-1 levels:
+module.exports.k1_1 = utils.extend(module.exports['1'],  {'is_k1': true});
+module.exports.k1_2 = utils.extend(module.exports['7'],  {'is_k1': true});
+module.exports.k1_3 = utils.extend(module.exports['2'],  {'is_k1': true});
+module.exports.k1_4 = utils.extend(module.exports['3'],  {'is_k1': true});
+module.exports.k1_5 = utils.extend(module.exports['8'],  {'is_k1': true});
+module.exports.k1_6 = utils.extend(module.exports['4'],  {'is_k1': true});
+module.exports.k1_7 = utils.extend(module.exports['9'],  {'is_k1': true});
+module.exports.k1_8 = utils.extend(module.exports['10'], {'is_k1': true});
+
+},{"../../locale/hr_hr/studio":36,"../block_utils":3,"../utils":33,"./tiles":20}],17:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Studio = require('./studio');
@@ -4036,6 +4242,7 @@ var loadLevel = function() {
   Studio.spriteStartingImage = level.spriteStartingImage;
   Studio.spritesHiddenToStart = level.spritesHiddenToStart;
   Studio.softButtons_ = level.softButtons || [];
+  Studio.spriteFinishIndex = level.spriteFinishIndex || 0;
 
   // Override scalars.
   for (var key in level.scale) {
@@ -4145,17 +4352,19 @@ var drawMap = function() {
     }
   }
 
-  if (Studio.sprite0Finish_) {
-    for (i = 0; i < Studio.sprite0FinishCount; i++) {
+  if (Studio.spriteFinish_) {
+    for (i = 0; i < Studio.spriteFinishCount; i++) {
       // Add finish markers.
-      var sprite0FinishMarker = document.createElementNS(Blockly.SVG_NS, 'image');
-      sprite0FinishMarker.setAttribute('id', 'sprite0finish' + i);
-      sprite0FinishMarker.setAttributeNS('http://www.w3.org/1999/xlink',
-                                         'xlink:href',
-                                         skin.goal);
-      sprite0FinishMarker.setAttribute('height', Studio.MARKER_HEIGHT);
-      sprite0FinishMarker.setAttribute('width', Studio.MARKER_WIDTH);
-      svg.appendChild(sprite0FinishMarker);
+      var spriteFinishMarker = document.createElementNS(
+          Blockly.SVG_NS,
+          'image');
+      spriteFinishMarker.setAttribute('id', 'spriteFinish' + i);
+      spriteFinishMarker.setAttributeNS('http://www.w3.org/1999/xlink',
+                                        'xlink:href',
+                                        skin.goal);
+      spriteFinishMarker.setAttribute('height', Studio.MARKER_HEIGHT);
+      spriteFinishMarker.setAttribute('width', Studio.MARKER_WIDTH);
+      svg.appendChild(spriteFinishMarker);
     }
   }
 
@@ -4644,19 +4853,19 @@ Studio.init = function(config) {
 
   config.preventExtraTopLevelBlocks = true;
 
-  Studio.sprite0FinishCount = 0;
+  Studio.spriteFinishCount = 0;
   Studio.spriteCount = 0;
   Studio.sprite = [];
 
   // Locate the start and finish squares.
   for (var y = 0; y < Studio.ROWS; y++) {
     for (var x = 0; x < Studio.COLS; x++) {
-      if (Studio.map[y][x] & SquareType.SPRITE0FINISH) {
-        if (0 === Studio.sprite0FinishCount) {
-          Studio.sprite0Finish_ = [];
+      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
+        if (0 === Studio.spriteFinishCount) {
+          Studio.spriteFinish_ = [];
         }
-        Studio.sprite0Finish_[Studio.sprite0FinishCount] = {x: x, y: y};
-        Studio.sprite0FinishCount++;
+        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
+        Studio.spriteFinishCount++;
       } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
         if (0 === Studio.spriteCount) {
           Studio.spriteStart_ = [];
@@ -4738,9 +4947,10 @@ BlocklyApps.reset = function(first) {
   // Reset configurable variables
   Studio.setBackground({'value': 'cave'});
 
-  // Reset currentCmdQueue and sayComplete count:
+  // Reset currentCmdQueue and various counts:
   Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
+  Studio.playSoundCount = 0;
 
   // Reset the Globals object used to contain program variables:
   Studio.Globals = [];
@@ -4773,20 +4983,20 @@ BlocklyApps.reset = function(first) {
 
   var svg = document.getElementById('svgStudio');
 
-  if (Studio.sprite0Finish_) {
-    for (i = 0; i < Studio.sprite0FinishCount; i++) {
+  if (Studio.spriteFinish_) {
+    for (i = 0; i < Studio.spriteFinishCount; i++) {
       // Mark each finish as incomplete.
-      Studio.sprite0Finish_[i].finished = false;
+      Studio.spriteFinish_[i].finished = false;
 
       // Move the finish icons into position.
-      var sprite0FinishIcon = document.getElementById('sprite0finish' + i);
-      sprite0FinishIcon.setAttribute(
+      var spriteFinishIcon = document.getElementById('spriteFinish' + i);
+      spriteFinishIcon.setAttribute(
           'x',
-          Studio.SQUARE_SIZE * Studio.sprite0Finish_[i].x);
-      sprite0FinishIcon.setAttribute(
+          Studio.SQUARE_SIZE * Studio.spriteFinish_[i].x);
+      spriteFinishIcon.setAttribute(
           'y',
-          Studio.SQUARE_SIZE * Studio.sprite0Finish_[i].y);
-      sprite0FinishIcon.setAttributeNS(
+          Studio.SQUARE_SIZE * Studio.spriteFinish_[i].y);
+      spriteFinishIcon.setAttributeNS(
           'http://www.w3.org/1999/xlink',
           'xlink:href',
           skin.goal);
@@ -5280,6 +5490,7 @@ Studio.callCmd = function (cmd) {
     case 'playSound':
       BlocklyApps.highlight(cmd.id);
       BlocklyApps.playAudio(cmd.opts.soundName, {volume: 0.5});
+      Studio.playSoundCount++;
       break;
     case 'showTitleScreen':
       if (!cmd.opts.started) {
@@ -5680,23 +5891,23 @@ Studio.timedOut = function() {
 
 Studio.allFinishesComplete = function() {
   var i;
-  if (Studio.sprite0Finish_) {
+  if (Studio.spriteFinish_) {
     var finished, playSound;
-    for (i = 0, finished = 0; i < Studio.sprite0FinishCount; i++) {
-      if (!Studio.sprite0Finish_[i].finished) {
-        if (essentiallyEqual(Studio.sprite[0].x,
-                             Studio.sprite0Finish_[i].x,
+    for (i = 0, finished = 0; i < Studio.spriteFinishCount; i++) {
+      if (!Studio.spriteFinish_[i].finished) {
+        if (essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].x,
+                             Studio.spriteFinish_[i].x,
                              tiles.FINISH_COLLIDE_DISTANCE) &&
-            essentiallyEqual(Studio.sprite[0].y,
-                             Studio.sprite0Finish_[i].y,
+            essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].y,
+                             Studio.spriteFinish_[i].y,
                              tiles.FINISH_COLLIDE_DISTANCE)) {
-          Studio.sprite0Finish_[i].finished = true;
+          Studio.spriteFinish_[i].finished = true;
           finished++;
           playSound = true;
 
           // Change the finish icon to goalSuccess.
-          var sprite0FinishIcon = document.getElementById('sprite0finish' + i);
-          sprite0FinishIcon.setAttributeNS(
+          var spriteFinishIcon = document.getElementById('spriteFinish' + i);
+          spriteFinishIcon.setAttributeNS(
               'http://www.w3.org/1999/xlink',
               'xlink:href',
               skin.goalSuccess);
@@ -5705,11 +5916,11 @@ Studio.allFinishesComplete = function() {
         finished++;
       }
     }
-    if (playSound && finished != Studio.sprite0FinishCount) {
+    if (playSound && finished != Studio.spriteFinishCount) {
       // Play a sound unless we've hit the last flag
       BlocklyApps.playAudio('flag', {volume: 0.5});
     }
-    return (finished == Studio.sprite0FinishCount);
+    return (finished == Studio.spriteFinishCount);
   }
   return false;
 };
@@ -5902,7 +6113,7 @@ exports.DEFAULT_SPRITE_SPEED = 0.1;
  */
 exports.SquareType = {
   OPEN: 0,
-  SPRITE0FINISH: 1,
+  SPRITEFINISH: 1,
   SPRITESTART: 16,
 };
 

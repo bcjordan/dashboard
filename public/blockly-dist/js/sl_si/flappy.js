@@ -764,19 +764,30 @@ BlocklyApps.runButtonClick = function() {};
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
  */
 BlocklyApps.TestResults = {
-  NO_TESTS_RUN: -1,           // Default.
-  EMPTY_BLOCK_FAIL: 1,        // 0 stars.
-  TOO_FEW_BLOCKS_FAIL: 2,     // 0 stars.
-  LEVEL_INCOMPLETE_FAIL: 3,   // 0 stars.
-  MISSING_BLOCK_UNFINISHED: 4,// 0 star.
-  EXTRA_TOP_BLOCKS_FAIL: 5,   // 0 stars.
-  MISSING_BLOCK_FINISHED: 10, // 1 star.
+  // Default value before any tests are run.
+  NO_TESTS_RUN: -1,
+
+  // Zero stars.  The level was not solved.
+  EMPTY_BLOCK_FAIL: 1,        // A container block, such as "repeat", was empty.
+  TOO_FEW_BLOCKS_FAIL: 2,     // Fewer than the ideal number of blocks used.
+  LEVEL_INCOMPLETE_FAIL: 3,   // Default failure to complete a level.
+  MISSING_BLOCK_UNFINISHED: 4,// A required block was not used.
+  EXTRA_TOP_BLOCKS_FAIL: 5,   // There was more than one top-level block.
+
+  // One star.  The level was solved in an unacceptable way.
+  MISSING_BLOCK_FINISHED: 10, // The level was solved without required block.
   OTHER_1_STAR_FAIL: 11,      // Application-specific 1-star failure.
-  TOO_MANY_BLOCKS_FAIL: 20,   // 2 stars, try again or continue.
+
+  // Two stars.  The level was solved in an acceptable, but not ideal, manner.
+  TOO_MANY_BLOCKS_FAIL: 20,   // More than the ideal number of blocks were used.
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
-  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy failure
-  FREE_PLAY: 30,              // 2 stars.
-  EDIT_BLOCKS: 70,
+  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy app failure. TODO: Fold into prior case.
+
+  // Other.
+  FREE_PLAY: 30,              // The user is in free-play mode.
+  EDIT_BLOCKS: 70,            // The user is creating/editing a new level.
+
+  // Three stars.  The level was solved in the ideal manner.
   ALL_PASS: 100               // 3 stars.
 };
 
@@ -1660,6 +1671,7 @@ var FeedbackBlocks = function(options) {
       baseUrl: BlocklyApps.BASE_URL,
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
+      level: options.level,
       blocks: generateXMLForBlocks(missingBlocks)
     }
   });
@@ -3165,6 +3177,9 @@ Flappy.init = function(config) {
   Flappy.clearEventHandlersKillTickLoop();
   skin = config.skin;
   level = config.level;
+
+  config.grayOutUndeletableBlocks = level.grayOutUndeletableBlocks;
+
   onSharePage = config.share;
   loadLevel();
 
@@ -3756,6 +3771,13 @@ var eventBlock = function (type, child) {
     '</block>';
 };
 
+// not movable or deletable
+var anchoredBlock = function (type, child) {
+  return '<block type="' + type + '" deletable="false" movable="false">' +
+    (child ? '<next>' + child + '</next>' : '') +
+    '</block>';
+};
+
 /*
  * Configuration for all levels.
  */
@@ -4091,6 +4113,7 @@ module.exports = {
   },
 
   '11': {
+    shareable: true,
     'requiredBlocks': [
     ],
     'obstacles': true,
@@ -4160,8 +4183,8 @@ module.exports = {
 
 
 module.exports.k1_1 = {
-  'hideWorkspace': true,
   'is_k1': true,
+  grayOutUndeletableBlocks: true,
   'requiredBlocks': [],
   'obstacles': true,
   'ground': true,
@@ -4172,11 +4195,11 @@ module.exports.k1_1 = {
   },
   'toolbox': '',
   'startBlocks':
-    eventBlock('flappy_whenClick', flapBlock) +
-    eventBlock('flappy_whenCollideGround', endGameBlock) +
-    eventBlock('flappy_whenCollideObstacle', endGameBlock) +
-    eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
-    eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
+    anchoredBlock('flappy_whenClick', anchoredBlock('flappy_flap')) +
+    anchoredBlock('flappy_whenCollideGround', anchoredBlock('flappy_endGame')) +
+    anchoredBlock('flappy_whenCollideObstacle', anchoredBlock('flappy_endGame')) +
+    anchoredBlock('flappy_whenEnterObstacle', anchoredBlock('flappy_incrementPlayerScore')) +
+    anchoredBlock('flappy_whenRunButtonClick', anchoredBlock('flappy_setSpeed'))
 };
 
 // flap to goal
