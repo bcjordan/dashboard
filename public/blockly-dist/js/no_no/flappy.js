@@ -2677,7 +2677,7 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/no_no/flappy') ; buf.push('\n\n<td id="share-cell" class="share-cell-none">\n  <button id="shareButton" class="share shareRight">\n    <img src="', escape((5,  assetUrl('media/1x1.gif') )), '">', escape((5,  msg.share() )), '\n  </button>\n</td>'); })();
+ buf.push('');1; var msg = require('../../locale/no_no/flappy') ; buf.push('\n\n<td id="right-button-cell" class="hide">\n  <button id="rightButton" class="share shareRight">\n    <img src="', escape((5,  assetUrl('media/1x1.gif') )), '">', escape((5,  shareable ? msg.share() : msg.finish() )), '\n  </button>\n</td>\n'); })();
 } 
 return buf.join('');
 };
@@ -3173,7 +3173,7 @@ Flappy.init = function(config) {
     data: {
       localeDirection: BlocklyApps.localeDirection(),
       visualization: require('./visualization.html')(),
-      controls: require('./controls.html')({assetUrl: BlocklyApps.assetUrl}),
+      controls: require('./controls.html')({assetUrl: BlocklyApps.assetUrl, shareable: level.shareable}),
       blockUsed: undefined,
       idealBlockNumber: undefined,
       blockCounterClass: 'block-counter-default'
@@ -3236,6 +3236,12 @@ Flappy.init = function(config) {
 
   config.preventExtraTopLevelBlocks = true;
 
+
+  if (level.is_k1) {
+    // k1 blocks are taller
+    constants.WORKSPACE_ROW_HEIGHT *= 1.5;
+  }
+
   // define how our blocks should be arranged
   var col1 = constants.WORKSPACE_BUFFER;
   var col2 = col1 + constants.WORKSPACE_COL_WIDTH;
@@ -3245,17 +3251,22 @@ Flappy.init = function(config) {
 
   config.blockArrangement = {
     'flappy_whenClick': { x: col1, y: row1},
+    'flappy_whenRunButtonClick': { x: col1, y: row2},
     'flappy_whenCollideGround': { x: col2, y: row1},
     'flappy_whenCollideObstacle': { x: col2, y: row2},
-    'flappy_whenEnterObstacle': { x: col2, y: row3},
-    'flappy_whenRunButtonClick': { x: col1, y: row2}
+    'flappy_whenEnterObstacle': { x: col2, y: row3}
   };
+
+  // if we dont have collide events, hvae enter obstacle in top row
+  if (level.startBlocks.indexOf('whenCollide') === -1) {
+    config.blockArrangement.flappy_whenEnterObstacle = {x :col2, y: row1 };
+  }
 
   BlocklyApps.init(config);
 
   if (!onSharePage) {
-    var shareButton = document.getElementById('shareButton');
-    dom.addClickTouchEvent(shareButton, Flappy.onPuzzleComplete);
+    var rightButton = document.getElementById('rightButton');
+    dom.addClickTouchEvent(rightButton, Flappy.onPuzzleComplete);
   }
 };
 
@@ -3357,8 +3368,8 @@ BlocklyApps.runButtonClick = function() {
   Flappy.execute();
 
   if (level.freePlay && !onSharePage) {
-    var shareCell = document.getElementById('share-cell');
-    shareCell.className = 'share-cell-enabled';
+    var rightButtonCell = document.getElementById('right-button-cell');
+    rightButtonCell.className = 'right-button-cell-enabled';
   }
   if (level.score) {
     document.getElementById('score').setAttribute('visibility', 'visible');
@@ -3389,7 +3400,7 @@ var displayFeedback = function() {
       feedbackType: Flappy.testResults,
       response: Flappy.response,
       level: level,
-      showingSharing: level.freePlay,
+      showingSharing: level.freePlay && level.shareable,
       twitter: twitterOptions,
       appStrings: {
         reinfFeedbackMsg: flappyMsg.reinfFeedbackMsg(),
@@ -3714,6 +3725,7 @@ var checkFinished = function () {
 
 var constants = require('./constants');
 var tb = require('../block_utils').createToolbox;
+var utils = require('../utils');
 
 var category = function (name, blocks) {
   return '<category id="' + name + '" name="' + name + '">' + blocks + '</category>';
@@ -3734,23 +3746,12 @@ var setGroundBlock = '<block type="flappy_setGround"></block>';
 var setGravityBlock = '<block type="flappy_setGravity"></block>';
 var setScoreBlock = '<block type="flappy_setScore"></block>';
 
-var COL_WIDTH = constants.WORKSPACE_COL_WIDTH;
-var COL1 = constants.WORKSPACE_BUFFER;
-var COL2 = COL1 + COL_WIDTH;
-
-var ROW_HEIGHT = constants.WORKSPACE_ROW_HEIGHT;
-var ROW1 = constants.WORKSPACE_BUFFER;
-var ROW2 = ROW1 + ROW_HEIGHT;
-var ROW3 = ROW2 + ROW_HEIGHT;
-
 var AVATAR_HEIGHT = constants.AVATAR_HEIGHT;
 var AVATAR_WIDTH = constants.AVATAR_WIDTH;
 var AVATAR_Y_OFFSET = constants.AVATAR_Y_OFFSET;
 
-var eventBlock = function (type, x, y, child) {
-  return '<block type="' + type + '" deletable="false"' +
-    ' x="' + x + '"' +
-    ' y="' + y + '">' +
+var eventBlock = function (type, child) {
+  return '<block type="' + type + '" deletable="false">' +
     (child ? '<next>' + child + '</next>' : '') +
     '</block>';
 };
@@ -3798,7 +3799,7 @@ module.exports = {
     'toolbox':
       tb(flapBlock + playSoundBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1)
+      eventBlock('flappy_whenClick')
   },
 
   '2': {
@@ -3829,8 +3830,8 @@ module.exports = {
     'toolbox':
       tb(flapBlock + endGameBlock + playSoundBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1, flapBlock) +
-      eventBlock('flappy_whenCollideGround', COL2, ROW1)
+      eventBlock('flappy_whenClick', flapBlock) +
+      eventBlock('flappy_whenCollideGround')
   },
 
   '3': {
@@ -3872,8 +3873,8 @@ module.exports = {
     'toolbox':
       tb(flapBlock + playSoundBlock + setSpeedBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1, flapBlock) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2)
+      eventBlock('flappy_whenClick', flapBlock) +
+      eventBlock('flappy_whenRunButtonClick')
   },
 
   '4': {
@@ -3905,9 +3906,9 @@ module.exports = {
     'toolbox':
       tb(flapBlock + endGameBlock + playSoundBlock + setSpeedBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', 20, 20, flapBlock) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2, setSpeedBlock) +
-      eventBlock('flappy_whenCollideObstacle', COL2, ROW2)
+      eventBlock('flappy_whenClick', flapBlock) +
+      eventBlock('flappy_whenRunButtonClick', setSpeedBlock) +
+      eventBlock('flappy_whenCollideObstacle')
   },
 
   '5': {
@@ -3947,11 +3948,9 @@ module.exports = {
     'toolbox':
       tb(flapBlock + endGameBlock + incrementScoreBlock + playSoundBlock + setSpeedBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1, flapBlock) +
-      // eventBlock('flappy_whenCollideGround', COL1, ROW2, endGameBlock) +
-      // eventBlock('flappy_whenCollideObstacle', COL2, ROW2, endGameBlock) +
-      eventBlock('flappy_whenEnterObstacle', COL2, ROW1) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2, setSpeedBlock)
+      eventBlock('flappy_whenClick', flapBlock) +
+      eventBlock('flappy_whenEnterObstacle') +
+      eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
   },
 
   '6': {
@@ -3988,11 +3987,11 @@ module.exports = {
     'toolbox':
       tb(flapHeightBlock + endGameBlock + incrementScoreBlock + playSoundBlock + setSpeedBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1) +
-      // eventBlock('flappy_whenCollideGround', COL1, ROW2, endGameBlock) +
-      // eventBlock('flappy_whenCollideObstacle', COL2, ROW2, endGameBlock) +
-      eventBlock('flappy_whenEnterObstacle', COL2, ROW1, incrementScoreBlock) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2, setSpeedBlock)
+      eventBlock('flappy_whenClick') +
+      // eventBlock('flappy_whenCollideGround', endGameBlock) +
+      // eventBlock('flappy_whenCollideObstacle', endGameBlock) +
+      eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
+      eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
   },
 
   '7': {
@@ -4015,11 +4014,11 @@ module.exports = {
       tb(flapHeightBlock + endGameBlock + incrementScoreBlock + playSoundBlock +
         setSpeedBlock + setBackgroundBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1, flapHeightBlock) +
-      eventBlock('flappy_whenCollideGround', COL2, ROW1, endGameBlock) +
-      eventBlock('flappy_whenCollideObstacle', COL2, ROW2, endGameBlock) +
-      eventBlock('flappy_whenEnterObstacle', COL2, ROW3, incrementScoreBlock) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2, setSpeedBlock)
+      eventBlock('flappy_whenClick', flapHeightBlock) +
+      eventBlock('flappy_whenCollideGround', endGameBlock) +
+      eventBlock('flappy_whenCollideObstacle', endGameBlock) +
+      eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
+      eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
   },
 
   '8': {
@@ -4052,11 +4051,11 @@ module.exports = {
       tb(flapHeightBlock + endGameBlock + incrementScoreBlock + playSoundBlock +
         setSpeedBlock + setBackgroundBlock + setPlayerBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1, flapHeightBlock) +
-      eventBlock('flappy_whenCollideGround', COL2, ROW1, endGameBlock) +
-      eventBlock('flappy_whenCollideObstacle', COL2, ROW2, endGameBlock) +
-      eventBlock('flappy_whenEnterObstacle', COL2, ROW3, incrementScoreBlock) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2, setSpeedBlock)
+      eventBlock('flappy_whenClick', flapHeightBlock) +
+      eventBlock('flappy_whenCollideGround', endGameBlock) +
+      eventBlock('flappy_whenCollideObstacle', endGameBlock) +
+      eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
+      eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
   },
 
   '9': {
@@ -4084,11 +4083,11 @@ module.exports = {
       tb(flapHeightBlock + endGameBlock + incrementScoreBlock + playSoundBlock +
         setSpeedBlock + setBackgroundBlock + setPlayerBlock + setScoreBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1, flapHeightBlock) +
-      eventBlock('flappy_whenCollideGround', COL2, ROW1, endGameBlock) +
-      eventBlock('flappy_whenCollideObstacle', COL2, ROW2) +
-      eventBlock('flappy_whenEnterObstacle', COL2, ROW3, incrementScoreBlock) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2, setSpeedBlock)
+      eventBlock('flappy_whenClick', flapHeightBlock) +
+      eventBlock('flappy_whenCollideGround', endGameBlock) +
+      eventBlock('flappy_whenCollideObstacle') +
+      eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
+      eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
   },
 
   '11': {
@@ -4117,11 +4116,11 @@ module.exports = {
         setScoreBlock
       ),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1) +
-      eventBlock('flappy_whenCollideGround', COL2, ROW1) +
-      eventBlock('flappy_whenCollideObstacle', COL2, ROW2) +
-      eventBlock('flappy_whenEnterObstacle', COL2, ROW3) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2)
+      eventBlock('flappy_whenClick') +
+      eventBlock('flappy_whenCollideGround') +
+      eventBlock('flappy_whenCollideObstacle') +
+      eventBlock('flappy_whenEnterObstacle') +
+      eventBlock('flappy_whenRunButtonClick')
   },
   'k1': {
     'requiredBlocks': [
@@ -4151,15 +4150,139 @@ module.exports = {
         setScoreBlock
       ),
     'startBlocks':
-      eventBlock('flappy_whenClick', COL1, ROW1) +
-      eventBlock('flappy_whenCollideGround', COL2, ROW1) +
-      eventBlock('flappy_whenCollideObstacle', COL2, ROW2) +
-      eventBlock('flappy_whenEnterObstacle', COL2, ROW3) +
-      eventBlock('flappy_whenRunButtonClick', COL1, ROW2)
+      eventBlock('flappy_whenClick') +
+      eventBlock('flappy_whenCollideGround') +
+      eventBlock('flappy_whenCollideObstacle') +
+      eventBlock('flappy_whenEnterObstacle') +
+      eventBlock('flappy_whenRunButtonClick')
   }
 };
 
-},{"../block_utils":3,"./constants":11}],15:[function(require,module,exports){
+
+module.exports.k1_1 = {
+  'hideWorkspace': true,
+  'is_k1': true,
+  'requiredBlocks': [],
+  'obstacles': true,
+  'ground': true,
+  'score': true,
+  'freePlay': true,
+  'scale': {
+    'snapRadius': 2
+  },
+  'toolbox': '',
+  'startBlocks':
+    eventBlock('flappy_whenClick', flapBlock) +
+    eventBlock('flappy_whenCollideGround', endGameBlock) +
+    eventBlock('flappy_whenCollideObstacle', endGameBlock) +
+    eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
+    eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
+};
+
+// flap to goal
+module.exports.k1_2 = utils.extend(module.exports['1'], { 'is_k1': true});
+
+// hit ground
+module.exports.k1_3 = utils.extend(module.exports['2'], { 'is_k1': true});
+
+// set speed
+module.exports.k1_4 = utils.extend(module.exports['3'], { 'is_k1': true});
+
+// crash into obstacle
+module.exports.k1_5 = utils.extend(module.exports['4'], { 'is_k1': true});
+
+// pass through obstacle, score a point
+module.exports.k1_6 = utils.extend(module.exports['5'], { 'is_k1': true});
+
+// score multiple points for each pass
+module.exports.k1_7 = {
+  'is_k1': true,
+  'requiredBlocks': [
+    [{'test': 'incrementPlayerScore', 'type': 'flappy_incrementPlayerScore'}]
+  ],
+  'defaultFlap': 'SMALL',
+  'obstacles': true,
+  'ground': true,
+  'score': true,
+  'freePlay': false,
+  'goal': {
+    // todo - kind of ugly that we end up loopin through all obstacles twice,
+    // once to check for success and again to check for failure
+    successCondition: function () {
+      var insideObstacle = false;
+      Flappy.obstacles.forEach(function (obstacle) {
+        if (!obstacle.hitAvatar && obstacle.containsAvatar()) {
+          insideObstacle = true;
+        }
+      });
+      return insideObstacle && Flappy.playerScore > 1;
+    },
+    failureCondition: function () {
+      var insideObstacle = false;
+      Flappy.obstacles.forEach(function (obstacle) {
+        if (!obstacle.hitAvatar && obstacle.containsAvatar()) {
+          insideObstacle = true;
+        }
+      });
+      return insideObstacle && Flappy.playerScore <= 1;
+    }
+  },
+  'scale': {
+    'snapRadius': 2
+  },
+  'toolbox':
+    tb(flapBlock + endGameBlock + incrementScoreBlock + playSoundBlock + setSpeedBlock),
+  'startBlocks':
+    eventBlock('flappy_whenClick', flapBlock) +
+    eventBlock('flappy_whenEnterObstacle') +
+    eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
+};
+
+// change the scene
+module.exports.k1_8 = utils.extend(module.exports['7'], {
+  'is_k1': true,
+  // override regular flappy so that we dont use variable flap block
+  'toolbox':
+    tb(flapBlock + endGameBlock + incrementScoreBlock + playSoundBlock +
+      setSpeedBlock + setBackgroundBlock),
+  'startBlocks':
+    eventBlock('flappy_whenClick', flapBlock) +
+    eventBlock('flappy_whenCollideGround', endGameBlock) +
+    eventBlock('flappy_whenCollideObstacle', endGameBlock) +
+    eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
+    eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
+});
+
+// changing the player
+module.exports.k1_9 = {
+  'is_k1': true,
+  'requiredBlocks': [
+    [{'test': 'setPlayer', 'type': 'flappy_setPlayer'}]
+  ],
+  'obstacles': true,
+  'ground': true,
+  'score': true,
+  'freePlay': false,
+  'goal': {
+    successCondition: function () {
+      return (Flappy.gameState === Flappy.GameStates.OVER);
+    }
+  },
+  'scale': {
+    'snapRadius': 2
+  },
+  'toolbox':
+    tb(flapBlock + endGameBlock + incrementScoreBlock + playSoundBlock +
+      setSpeedBlock + setBackgroundBlock + setPlayerBlock),
+  'startBlocks':
+    eventBlock('flappy_whenClick', flapBlock) +
+    eventBlock('flappy_whenCollideGround', endGameBlock) +
+    eventBlock('flappy_whenCollideObstacle', endGameBlock) +
+    eventBlock('flappy_whenEnterObstacle', incrementScoreBlock) +
+    eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
+};
+
+},{"../block_utils":3,"../utils":32,"./constants":11}],15:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Flappy = require('./flappy');
@@ -5297,6 +5420,8 @@ exports.flapLarge = function(d){return "flaks en stor mengde"};
 exports.flapVeryLarge = function(d){return "flaks en veldig stor mengde"};
 
 exports.flapTooltip = function(d){return "Fly Flappy oppover."};
+
+exports.finish = function(d){return "Finish"};
 
 exports.incrementPlayerScore = function(d){return "Få et poeng"};
 
