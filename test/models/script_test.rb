@@ -183,7 +183,6 @@ class ScriptTest < ActiveSupport::TestCase
       "stage 'Stage1'; level 'Level 1'; level 'blockly:Studio:100'"
     )[0].map{|stage| stage[:levels]}.flatten)
 
-    assert_equal 'blockly', script.script_levels[1].level.name
     assert_equal 'Studio', script.script_levels[1].level.game.name
     assert_equal '100', script.script_levels[1].level.level_num
   end

@@ -139,10 +139,9 @@ class Script < ActiveRecord::Base
 
       # if :level_num is present, find/create the reference to the Blockly level.
       level = row[:level_num] ?
-        Level.where(game: Game.find_by(name: row.delete(:game)), level_num: row[:level_num]).first_or_create :
-        Level.find_by(name: row[:name])
+        Level.create_with(name: row.delete(:name)).find_or_create_by!(game: Game.find_by(name: row.delete(:game)), level_num: row[:level_num]) :
+        Level.find_by!(name: row.delete(:name))
 
-      raise "There does not exist a level with the name '#{row[:name]}'. From the row: #{row}" if level.nil?
       raise "Level #{level.to_json}, does not have a game." if level.game.nil?
       stage = row.delete(:stage)
       level.update(row)
