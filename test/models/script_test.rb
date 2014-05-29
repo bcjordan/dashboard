@@ -38,7 +38,7 @@ class ScriptTest < ActiveSupport::TestCase
 
     # Set different 'trophies' and 'hidden' options from defaults in Script.setup
     options = {name: File.basename(@script_file, ".script"), trophies: true, hidden: false}
-    script = Script.add_script(options, parsed_script, true)
+    script = Script.add_script(options, parsed_script)
     assert_equal script_id, script.script_levels[4].script_id
     assert_not_equal script_level_id, script.script_levels[4].id
   end
@@ -176,6 +176,15 @@ class ScriptTest < ActiveSupport::TestCase
     @script_file = File.join(self.class.fixture_path, 'test_unplugged.script')
     scripts, _ = Script.setup([], [@script_file])
     assert_equal 'Unplugged', scripts[0].script_levels[1].level['type']
+  end
+
+  test 'blockly level in custom script' do
+    script = Script.add_script({name: 'test script'}, ScriptDSL.parse(
+      "stage 'Stage1'; level 'Level 1'; level 'blockly:Studio:100'"
+    )[0].map{|stage| stage[:levels]}.flatten)
+
+    assert_equal 'Studio', script.script_levels[1].level.game.name
+    assert_equal '100', script.script_levels[1].level.level_num
   end
 
 end
