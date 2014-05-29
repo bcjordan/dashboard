@@ -8,7 +8,7 @@ Background:
 Scenario: Share a flappy game, visit the share page, and visit the workspace
   When I press "x-close"
   Then I press "runButton"
-  Then I press "shareButton"
+  Then I press "rightButton"
   And I wait for 1 seconds
   Then I navigate to the share URL
 
@@ -21,6 +21,7 @@ Scenario: Share a flappy game, visit the share page, and visit the workspace
   And ensure Flappy gameState is ACTIVE
 
   When I press "open-workspace"
+  And I wait for 5 seconds
   And ensure Flappy gameState is WAITING
   When I press "runButton"
   Then ensure Flappy gameState is WAITING
