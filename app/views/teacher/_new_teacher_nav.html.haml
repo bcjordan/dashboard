@@ -43,20 +43,22 @@
 
 - current ||= nil
 %div{ id: 'teacher-nav' }
-  - if section = @section || current_user.sections.first
+  - if @section
     - if current == 'report'
       %span{ class: 'tab'}= t('teacher.rollup')
-    - elsif section.students.empty?
+    - elsif @section.students.empty?
       %span{ class: 'tab inactive'}= t('teacher.rollup') 
     - else      
-      = link_to t('teacher.rollup'), section_path(section), class: 'tab'
+      = link_to t('teacher.rollup'), section_path(@section), class: 'tab'
     - if current == 'manage'
       %span{ class: 'tab'}= t('teacher.students.manage')
     - else      
-      = link_to t('teacher.students.manage'), edit_students_section_path(section), class: 'tab'
+      = link_to t('teacher.students.manage'), edit_students_section_path(@section), class: 'tab'
 
 
   %span{ class: 'section-select'}
+    - unless @section
+      Choose a section:
     - options_select = options_from_collection_for_select(current_user.sections, :id, :name, @section.try(:id))
     = select_tag('section_id', options_select + "<option value='manage'>#{t 'teacher.sections.manage'}</option>".html_safe, include_blank: true, style: 'margin: 0 7px 0px 4px', id: 'section_id')
   %br/
