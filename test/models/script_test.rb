@@ -187,4 +187,8 @@ class ScriptTest < ActiveSupport::TestCase
     assert_equal '100', script.script_levels[1].level.level_num
   end
 
+  test 'counts number of stages in script' do
+    assert_equal 20, Script.twenty_hour_script.script_levels_from_game(Game.find_by(name:'Maze').id).count
+  end
+
 end

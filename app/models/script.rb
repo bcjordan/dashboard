@@ -50,7 +50,7 @@ class Script < ActiveRecord::Base
   end
 
   def script_levels_from_game(game_id)
-    self.script_levels.select { |sl| sl.level.game_id == game_id }
+    self.script_levels.joins(:level).where(levels: {game_id: game_id})
   end
 
   def multiple_games?
