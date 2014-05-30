@@ -33,7 +33,7 @@
 ## There are now 4 ways to log in
 * section (where login method is secret picture) + (select from list by name) + secret picture (classroom student only)
 * section (where login method is secret word) + (select from list by name) + secret word (classroom student only)
-* email + password (teacher or independent student
+* email + password (teacher or independent student)
 * username + password (legacy independent student accounts — no new users like this) 
 
 ## Ok 4 and a half
@@ -42,14 +42,14 @@
 
 ## Informal constraints (should we formalize these?)
 * student.name should be unique within section (if this constraint is not met students may be confused when logging in)
-* if student does not have email (or legacy username), student must have at least one section (if this constraint is not met the student has now way to log in)
+* if student does not have email (or legacy username), student must have at least one section (if this constraint is not met the student has no way to log in)
 
 ## Now here is the part you are waiting for, what do we have to do to the data?
 
 ### make user_type actually mean something
 ```
 delete from followers where user_id = student_user_id # no more self-following
-update users set user_type = ‘teacher’ where “user has students” # only teachers can have students
+update users set user_type = ‘teacher’ where "user has students" # only teachers can have students
 update users set user_type = ‘student’ where user_type != ‘teacher’ # it’s nullable now but we don’t want it to be
 alter table users change column user_type not null
 # there will still be teachers with teachers but I think that’s ok. this means we do not have to change anyone who is already user_type: teacher to user_type :student
