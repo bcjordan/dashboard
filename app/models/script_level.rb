@@ -34,7 +34,7 @@ class ScriptLevel < ActiveRecord::Base
   end
 
   def stage_position_str
-    "#{stage ? "#{I18n.t('stage')} #{stage.position}" : data_t_suffix('script.name', script.name, next_level.level.game.name)}"
+    "#{stage ? "#{I18n.t('stage')} #{stage.position}" : I18n.t("data.script.name.#{script.name}.#{level.game.name}")}"
   end
 
   def name
