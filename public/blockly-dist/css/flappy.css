@@ -51,10 +51,7 @@
 .hide {
   display: none; }
 
-.share-cell-none {
-  display: none; }
-
-.share-cell-enabled {
+.right-button-cell-enabled {
   min-width: 102px; }
 
 .flappy-score {
