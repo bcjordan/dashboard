@@ -1,12 +1,3 @@
-:javascript
-  $(function() {
-    $( "#user_birthday" ).datepicker({
-      changeMonth: true,
-      changeYear: true,
-      yearRange: "-120:+0",
-    });
-  });
-
 - if !@section
   Please enter the code shared with you by your teacher. It's a 6-character code made up of letters and numbers
   %br/
@@ -35,7 +26,7 @@
     %br/
     = f.select(:gender, options_for_select([["Gender (optional)", '', {disabled: true, selected: true}], ['Male', 'm'], ['Female', 'f']], :selected => @user.gender))
     %br/
-    = f.text_field(:birthday, id: "user_birthday", placeholder: "Birthday (optional)")
+    = f.number_field(:age, placeholder: t('signup_form.age'))
 
     %br/
     = submit_tag 'Register', class: 'btn btn-primary'
@@ -44,5 +35,5 @@
   $( "#section_code" ).placeholder();
   $( "#user_name" ).placeholder();
   $( "#user_username" ).placeholder();
-  $( "#user_birthday" ).placeholder();
+  $( "#user_age" ).placeholder();
 
