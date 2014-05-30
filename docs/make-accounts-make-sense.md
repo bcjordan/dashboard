@@ -1,27 +1,29 @@
-# We have to change 3 tables: Sections, Followers and Users
+## We have to change 3 tables: Sections, Followers and Users
 
-## Sections
-### new constraint
+### Sections
+#### new constraint
 * user_id must be user_type = ‘teacher'
-### new columns
+
+#### new columns
 * script_id (nullable)
 * login method: secret picture | secret word | email/password
 * grade (text, optional)
 * admin code (for non-owners to import students from this section)
 
-## Followers
-### new constraints
+### Followers
+#### new constraints
 * section_id is not nullable
 * user_id must be user_type = ‘teacher'
 * section.user_id must = user_id (I think this is true now)
 
-## User
-### new constraints
+### User
+#### new constraints
 * user_type is not nullable (default is student)
 * username is deprecated (new users do not have username; old users can still use username to log in) (not editable)
 * email (required for teachers) (user can change) (any user can add)
 * password (required for teachers) (user can change) (only shown if email exists)
-### new columns
+ 
+#### new columns
 * secret picture id (owning teacher or self can reset) (only shown if member of section w/ picture login)
 * secret words (owning teacher or self can reset) (only shown if member of section w/ word login)
 * active (boolean) (false means can’t log in)
@@ -29,13 +31,13 @@
 (I haven’t mentioned the new multiple teacher stuff but that’s its own thing and all new tables/code so we don’t have to talk about it now)
 
 ## There are now 4 ways to log in
-section (where login method is secret picture) + (select from list by name) + secret picture (classroom student only)
-section (where login method is secret word) + (select from list by name) + secret word (classroom student only)
-email + password (teacher or independent student
-username + password (legacy independent student accounts — no new users like this) 
+* section (where login method is secret picture) + (select from list by name) + secret picture (classroom student only)
+* section (where login method is secret word) + (select from list by name) + secret word (classroom student only)
+* email + password (teacher or independent student
+* username + password (legacy independent student accounts — no new users like this) 
 
 ## Ok 4 and a half
-oauth
+* oauth
 
 
 ## Informal constraints (should we formalize these?)
@@ -83,9 +85,9 @@ alter table user add columns secret_picture, secret_word
 # also randomly generate the secret_(picture|word) unless we are lazy-creating it
 ```
 
-# Whoa, is that it? that is not too bad...
+## Whoa, is that it? that is not too bad...
 
-# But wait, what happened to existing users?
+## But wait, what happened to existing users?
 
 * If you were using the teacher UI you should still have access to the teacher UI
 * If you were logging in with username/password or email/password you should be able to do what you were doing
@@ -93,7 +95,7 @@ alter table user add columns secret_picture, secret_word
 * If you were ONLY following yourself AND you weren’t a teacher you can’t access the teacher UI anymore.
 * If you had students that were not in a section you have a new "default section" with those students in it
 
-WHAT IS GOING TO BE A LITTLE MESSY
+## What is going to be a little messy?
 
 if we want to have existing students with only username/password
 * still be able to log in
