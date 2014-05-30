@@ -578,6 +578,7 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test 'milestone changes to next stage in custom script' do
+    ScriptLevel.class_variable_set(:@@script_level_map, nil)
     game = create(:game)
     levels = (1..3).map { |n| create(:level, :name => "Level #{n}", :game => game) }
     script_dsl = ScriptDSL.parse(
