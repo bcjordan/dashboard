@@ -32,6 +32,7 @@ group :test do
   gem 'rspec'
   gem 'chromedriver-helper'
   gem 'colorize'
+  gem 'timecop'
 end
 
 group :doc do

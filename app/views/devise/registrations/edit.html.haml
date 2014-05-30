@@ -51,18 +51,8 @@
       = f.label t('signup_form.gender')
       = f.select :gender, gender_options
     .field
-      = f.label t('signup_form.birthday')
-      :javascript
-        $(function() {
-          $( "#user_birthday" ).datepicker({
-            changeMonth: true,
-            changeYear: true,
-            yearRange: "-120:+0",
-            dateFormat: "yy-mm-dd"
-          });
-        });
-
-      = f.text_field(:birthday, id: "user_birthday", placeholder: t('signup_form.birthday'))
+      = f.label t('signup_form.age')
+      = f.number_field :age
   - if resource.teacher? || resource.students.length > 0
     .field
       = f.label :school
@@ -76,6 +66,3 @@
 -#  = t('user.cancel.hint')
 -#  = button_to t('user.cancel.button'), registration_path(resource_name), :data => { :confirm => t('crud.confirm') }, :method => :delete
 = link_to t('crud.back'), :back
-
-:javascript
-  $( "#user_birthday" ).placeholder();
