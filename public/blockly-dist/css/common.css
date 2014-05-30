@@ -365,6 +365,15 @@ input[type="radio"] {
 
 .blocklyRectangularDropdownMenu .goog-menuitem-highlight, .blocklyRectangularDropdownMenu .goog-menuitem-hover {
   background-color: rgba(255, 255, 255, 0.35); }
+.blocklyRectangularDropdownMenu.blocklyGridDropdownMenu {
+  background-color: white !important;
+  padding-top: 5px !important; }
+  .blocklyRectangularDropdownMenu.blocklyGridDropdownMenu .goog-menuitem {
+    display: inline-block;
+    margin-left: 4px;
+    margin-top: 4px; }
+  .blocklyRectangularDropdownMenu.blocklyGridDropdownMenu .goog-menuitem-highlight, .blocklyRectangularDropdownMenu.blocklyGridDropdownMenu .goog-menuitem-hover {
+    margin: -4px -4px 0 0 !important; }
 
 .generated-code-container {
   margin-top: 10px; }
