@@ -1,8 +1,6 @@
 require 'test_helper'
 
 class FollowersControllerTest < ActionController::TestCase
-  include Devise::TestHelpers
-
   setup do
     @laurel = create(:teacher)
     @laurel_section_1 = create(:section, user: @laurel)
@@ -45,6 +43,42 @@ class FollowersControllerTest < ActionController::TestCase
     end
 
     assert_redirected_to manage_followers_path
+  end
+
+
+  test "student_user_new" do
+    sign_out @laurel
+
+    get :student_user_new, section_code: @chris_section.code
+
+    assert_response :success
+    assert assigns(:user)
+    
+    assert ! assigns(:user).persisted?
+  end
+
+
+  test "student_register with age" do
+    sign_out @laurel
+
+    student_params = {username: 'student1',
+                      name: "A name",
+                      password: "apassword",
+                      gender: 'F',
+                      age: '13'}
+    
+    assert_creates(User, Follower) do
+      post :student_register, section_code: @chris_section.code, user: student_params
+    end
+
+    assert_redirected_to '/'
+
+    assert_equal 'student1', assigns(:user).username
+    assert_equal 'A name', assigns(:user).name
+    assert_equal 'F', assigns(:user).gender
+    assert_equal Date.today - 13.years, assigns(:user).birthday
+    assert_equal 'manual', assigns(:user).provider
+    assert_equal User::TYPE_STUDENT, assigns(:user).user_type
   end
 
 end

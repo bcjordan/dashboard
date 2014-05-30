@@ -18,6 +18,7 @@ class ActivitiesControllerTest < ActionController::TestCase
     @blank_image = File.read('test/fixtures/artist_image_blank.png', binmode: true)
     @good_image = File.read('test/fixtures/artist_image_1.png', binmode: true)
     @another_good_image = File.read('test/fixtures/artist_image_2.png', binmode: true)
+    @post_hash = {user_id: @user, script_level_id: @script_level, lines: 20, attempt: '1', result: 'true', testResult: '100', time: '1000', app: 'test', program: '<hey>'}
   end
 
   test "should get index" do
@@ -568,4 +569,29 @@ class ActivitiesControllerTest < ActionController::TestCase
     assert_response 403
   end
 
+  test 'milestone changes to next stage in default script' do
+    last_level_in_stage = @script_level.script.script_levels.keep_if{|x|x.level.game.name == 'Artist'}.last
+    post :milestone, @post_hash.merge(script_level_id: last_level_in_stage)
+    assert_response :success
+    response = JSON.parse(@response.body)
+    assert_equal({'previous'=>{'number'=>2, 'name'=>'Stage 5'}, 'new'=>{'number'=>14, 'name'=>'Stage 6'}}, response['stage_changing'])
+  end
+
+  test 'milestone changes to next stage in custom script' do
+    game = create(:game)
+    levels = (1..3).map { |n| create(:level, :name => "Level #{n}", :game => game) }
+    script_dsl = ScriptDSL.parse(
+      "stage 'Milestone Stage 1'; level 'Level 1'; level 'Level 2'; stage 'Milestone Stage 2'; level 'Level 3'"
+    )
+    script = Script.add_script({name: 'Milestone Script'}, script_dsl[0].map{|stage| stage[:levels]}.flatten)
+
+    last_level_in_first_stage = script.stages.first.script_levels.last
+    post :milestone, @post_hash.merge(script_level_id: last_level_in_first_stage)
+    assert_response :success
+    response = JSON.parse(@response.body)
+
+    # find localized test strings for custom stage names in script
+    assert_equal('milestone-stage-1', response['stage_changing']['previous']['name'])
+    assert_equal('milestone-stage-2', response['stage_changing']['new']['name'])
+  end
 end

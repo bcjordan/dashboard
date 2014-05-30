@@ -90,6 +90,7 @@ en:
     address_placeholder: 'address, city, state, zip'
     gender: 'Gender (optional)'
     birthday: 'Birthday (optional)'
+    age: 'Age (optional)'
     submit: 'Sign up'
     teacher: 'Are you a teacher?'
     valid_username: "Available!"

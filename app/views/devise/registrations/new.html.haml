@@ -81,19 +81,8 @@
           %br/
           .itemblock
             .labelblock
-              = t('signup_form.birthday')
-            :javascript
-              $(function() {
-                $( "#user_birthday" ).datepicker({
-                  changeMonth: true,
-                  changeYear: true,
-                  yearRange: "-120:+0",
-                  dateFormat: "yy-mm-dd"
-                });
-              });
-
-            = f.text_field(:birthday, id: "user_birthday", class: "fieldblock")
-
+              = t('signup_form.age')
+            = f.number_field :age, class: "fieldblock"
         %br/
 
         = f.submit t('signup_form.submit'), class: "btn btn-primary btn-large"
@@ -150,5 +139,4 @@
   $( "#user_name" ).placeholder();
   $( "#user_email" ).placeholder();
   $( "#user_username" ).placeholder();
-  $( "#user_birthday" ).placeholder();
   $( "#user_school" ).placeholder();

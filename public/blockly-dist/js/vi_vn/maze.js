@@ -2490,6 +2490,7 @@ Bee.prototype.getNectar = function (id) {
   }
 
   this.maze_.executionInfo.queueAction('nectar', id);
+  this.maze_.dirt_[row][col] -= 1;
   this.nectar_ += 1;
   this.totalNectar_ += 1;
 };
