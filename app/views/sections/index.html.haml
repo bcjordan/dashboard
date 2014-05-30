@@ -1,6 +1,6 @@
 - @page_title = t('teacher.sections.manage')
 
-= render partial: 'shared/teacher_nav', locals: { current: 'sections' }
+= render partial: 'teacher/new_teacher_nav', locals: { current: 'sections' }
 
 %h1= @page_title
 
@@ -12,30 +12,43 @@
 
 %table{ style: "width:775px; table-layout:fixed;"}
   %colgroup
-    %col{ width: 350 }
+    %col{ width: 200 }
+    %col{ width: 125 }
+    %col{ width: 125 }
+    %col{ width: 125 }
     %col{ width: 125 }
     %col{ width: 300 }
+    %col{ width: 125 }
 
   %tr
     %th.manage-th Section
     %th.manage-th Students
-    %th.manage-th Add Students Section-Code
+    %th.manage-th Secret type
+    %th.manage-th Grade 
+    %th.manage-th Course
+    %th.manage-th Section Code
+    %th
 
   - @sections.each do |section|
     %tr.manage-tr
       %td.manage-td
         = link_to section.try(:name), section
-        (
-        = link_to("rename", edit_section_path(section.id))
-        ,
-        = link_to("delete", section_path(section.id), confirm: "Are you sure you want to delete this section?", method: :delete)
-        )
       %td.manage-td
         = section.students.count
+      %td.manage-td
+        word
+      %td.manage-td
+        1
+      %td.manage-td
+        K-1
       %td.manage-td
         %span
           = section.code
         = link_to '(Send in email)', build_invite_mailto(section, current_user), target: :_blank
+      %td.manage-td
+        = link_to("edit", edit_section_path(section.id))
+        = link_to("delete", section_path(section.id), confirm: "Are you sure you want to delete this section?", method: :delete)
+       
 
 :javascript
   $(document).ready(function() {
