@@ -8,7 +8,8 @@ class ScriptLevel < ActiveRecord::Base
 
   NEXT = 'next'
 
-  # this is
+  # this is a temporary (request-scope) variable set by User.rb#levels_from_script to find the UserLevel
+  # corresponding to this ScriptLevel for a specific user
   attr_accessor :user_level
 
   def next_level
