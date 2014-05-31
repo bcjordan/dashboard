@@ -92,9 +92,11 @@ class User < ActiveRecord::Base
       super
     end
   end
-
-  def self.find_first_by_auth_conditions(warden_conditions)
-    conditions = warden_conditions.dup
+  
+  # overrides Devise::Authenticatable#find_first_by_auth_conditions
+  # see https://github.com/plataformatec/devise/blob/master/lib/devise/models/authenticatable.rb#L245
+  def self.find_first_by_auth_conditions(tainted_conditions)
+    conditions = devise_parameter_filter.filter(tainted_conditions.dup)
     if login = conditions.delete(:login)
       where(conditions).where(['username = :value OR email = :value', { :value => login.downcase }]).first
     else

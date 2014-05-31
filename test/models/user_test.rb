@@ -191,4 +191,18 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 'some', create(:user, :name => '  some whitespace in front  ').short_name # whitespace in front
   end
 
+  test "cannot call find_first_by_auth_conditions with nonsense" do
+    # login by username still works
+    user = create :user, username: 'blahblah'
+    assert_equal user, User.find_first_by_auth_conditions(login: 'blahblah')
+
+    # login by email still works
+    email_user = create :user, username: 'blahblah2', email: 'not@an.email'
+    assert_equal email_user, User.find_first_by_auth_conditions(login: 'not@an.email')
+
+    # wat you can't do that hax0rs
+    assert_equal nil, User.find_first_by_auth_conditions(email: {'$acunetix' => 1})
+    # this used to raise a mysql error, now we sanitize it into a nonsense string
+  end
+
 end
