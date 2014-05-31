@@ -42,7 +42,8 @@ class ActivitiesController < ApplicationController
       user_level.save!
     end
 
-    if lines > 0 && Activity.passing?(test_result)
+    passed = Activity.passing?(test_result)
+    if lines > 0 && passed
       current_user.total_lines += lines
       current_user.save!
     end
@@ -52,7 +53,7 @@ class ActivitiesController < ApplicationController
     end
 
     begin
-      trophy_check(current_user)
+      trophy_check(current_user) if passed
     rescue Exception => e
       Rails.logger.error "Error updating trophy exception: #{e.inspect}"
     end
