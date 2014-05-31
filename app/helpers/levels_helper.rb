@@ -134,8 +134,8 @@ module LevelsHelper
     level = @level.properties.dup || {}
 
     # Set some specific values
-    level['puzzle_number'] = @script_level ? @script_level.game_chapter : 1
-    level['stage_total'] = @script ? @script.script_levels_from_game(@level.game_id).length : @level.game.levels.count
+    level['puzzle_number'] = @script_level ? @script_level.stage_or_game_position : 1
+    level['stage_total'] = @script_level ? @script_level.stage_or_game_total : @level.game.levels.count
     if @level.step_mode
       level['step'] = @level.step_mode == 1 || @level.step_mode == 2
       level['stepOnly'] = @level.step_mode == 2
