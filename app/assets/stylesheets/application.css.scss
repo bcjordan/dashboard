@@ -1106,6 +1106,18 @@ a.download-video {
     margin-left:0px;
     .emptyslot {
       background-color: #eee;
+      .giantmark {
+        $giantmark-font-size: 72px;
+        .gap {
+          height: $giantmark-font-size/2;
+        }
+        .text {
+          font-size: $giantmark-font-size;
+          line-height: $giantmark-font-size;
+          opacity: 0.8;
+          font-weight: 500;
+        }
+      }
     }
     .active {
       background-color: lightyellow;
