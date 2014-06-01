@@ -20,9 +20,9 @@
     email: #{@user.email}
     %br
     username: #{@user.username}
-    - if @user.birthday
+    - if @user.age
       %br
-      birthday: #{@user.birthday}
+      approximmate age: #{@user.age}
     - if @user.gender
       %br
       gender: #{@user.gender}

@@ -55,8 +55,6 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :teacher_prize_id, allow_nil: true
   validates_uniqueness_of :teacher_bonus_prize_id, allow_nil: true
 
-  validate :birthday_is_reasonable
-
   def self.from_omniauth(auth)
     where(auth.slice(:provider, :uid)).first_or_create do |user|
       user.provider = auth.provider
@@ -94,9 +92,11 @@ class User < ActiveRecord::Base
       super
     end
   end
-
-  def self.find_first_by_auth_conditions(warden_conditions)
-    conditions = warden_conditions.dup
+  
+  # overrides Devise::Authenticatable#find_first_by_auth_conditions
+  # see https://github.com/plataformatec/devise/blob/master/lib/devise/models/authenticatable.rb#L245
+  def self.find_first_by_auth_conditions(tainted_conditions)
+    conditions = devise_parameter_filter.filter(tainted_conditions.dup)
     if login = conditions.delete(:login)
       where(conditions).where(['username = :value OR email = :value', { :value => login.downcase }]).first
     else
@@ -260,10 +260,16 @@ SQL
     nil
   end
 
-  def birthday_is_reasonable
+  def age=(val)
+    val = val.to_i
+    return unless val > 0
+    return if val == age # don't change birthday if we want to stay the same age
+    self.birthday = val.years.ago
+  end
+
+  def age
     return unless birthday
-    
-    errors.add(:birthday, I18n.t('activerecord.attributes.user.error.future')) if birthday > Date.today
+    ((Date.today - birthday) / 365).to_i
   end
 
   def short_name

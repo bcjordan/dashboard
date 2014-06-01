@@ -134,9 +134,8 @@ module LevelsHelper
     level = @level.properties.dup || {}
 
     # Set some specific values
-    level['puzzle_number'] = @script_level ? @script_level.game_chapter : 1
-    level['is_k1'] = @level.is_k1
-    level['stage_total'] = @script ? @script.script_levels_from_game(@level.game_id).length : @level.game.levels.count
+    level['puzzle_number'] = @script_level ? @script_level.stage_or_game_position : 1
+    level['stage_total'] = @script_level ? @script_level.stage_or_game_total : @level.game.levels.count
     if @level.step_mode
       level['step'] = @level.step_mode == 1 || @level.step_mode == 2
       level['stepOnly'] = @level.step_mode == 2
@@ -156,6 +155,7 @@ module LevelsHelper
       y:initialY
       maze:map
       artist_builder:builder
+      is_k1:is_k1
     ).map{ |x| x.include?(':') ? x.split(':') : [x,x.camelize(:lower)]}]
     .each do |dashboard, blockly|
       # Select first valid value from 1. local_assigns, 2. property of @level object, 3. named instance variable, 4. properties json

@@ -50,7 +50,7 @@ class Script < ActiveRecord::Base
   end
 
   def script_levels_from_game(game_id)
-    self.script_levels.select { |sl| sl.level.game_id == game_id }
+    self.script_levels.joins(:level).where(levels: {game_id: game_id})
   end
 
   def multiple_games?
@@ -111,14 +111,14 @@ class Script < ActiveRecord::Base
       custom_scripts = custom_files.map do |script|
         script_data, i18n = ScriptDSL.parse_file(script)
         custom_i18n.deep_merge!(i18n)
-        add_script({name: File.basename(script, ".script"), trophies: false, hidden: true},
-          script_data.map{|stage| stage[:levels]}.flatten, true)
+        add_script({name: File.basename(script, '.script'), trophies: false, hidden: true},
+          script_data.map{|stage| stage[:levels]}.flatten)
       end
       [(default_scripts + custom_scripts), custom_i18n]
     end
   end
 
-  def self.add_script(options, data, custom=false)
+  def self.add_script(options, data)
     script = fetch_script(options)
     chapter = 0; game_chapter = Hash.new(0)
     # Clear positions in case script levels or stages are deleted.
@@ -133,12 +133,15 @@ class Script < ActiveRecord::Base
         (Concept.find_by_name(concept_name) || raise("missing concept '#{concept_name}'")).id
       end
 
-      # Reference one Level per element
-      level = custom ?
-        Level.find_by(name: row[:name]) :
-        Level.where(game: Game.find_by(name: row.delete(:game)), level_num: row[:level_num]).first_or_create
+      if row[:name].try(:start_with?, 'blockly:')
+        row[:name], row[:game], row[:level_num] = row.delete(:name).split(':')
+      end
 
-      raise "There does not exist a level with the name '#{row[:name]}'. From the row: #{row}" if level.nil?
+      # if :level_num is present, find/create the reference to the Blockly level.
+      level = row[:level_num] ?
+        Level.create_with(name: row.delete(:name)).find_or_create_by!(game: Game.find_by(name: row.delete(:game)), level_num: row[:level_num]) :
+        Level.find_by!(name: row.delete(:name))
+
       raise "Level #{level.to_json}, does not have a game." if level.game.nil?
       stage = row.delete(:stage)
       level.update(row)
@@ -183,7 +186,7 @@ class Script < ActiveRecord::Base
       transaction do
         script_data, i18n = ScriptDSL.parse(script_text, script_params[:name])
         Script.add_script({name: script_params[:name], trophies: false, hidden: true},
-          script_data.map { |stage| stage[:levels] }.flatten, true)
+          script_data.map { |stage| stage[:levels] }.flatten)
         Script.update_i18n(i18n)
       end
     rescue Exception => e

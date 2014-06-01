@@ -82,26 +82,50 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors.messages.length == 1, "username should be rejected as a dup"
   end
 
-  test "cannot create user with birthday in the future" do
-    assert_no_difference('User.count') do
-      # birthday in the future (this date is actually a mysql error)
-      user = User.create(@good_data.merge({birthday: '03/04/20140'}))
-      assert user.errors.messages.length == 1, "Invalid birthday should be rejected"
+  test "can create a user with age" do
+    assert_difference('User.count') do
+      user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
+      
+      assert_equal Date.new(Date.today.year - 7, Date.today.month, Date.today.day), user.birthday
+      assert_equal 7, user.age
     end
   end
 
-  test "trying to create a user with an invalid date as birthday creates user without a birthday" do
+
+  test "trying to create a user with age that's not a number creates user without a birthday" do
     assert_difference('User.count') do
-      user = User.create(@good_data.merge({birthday: 'xxxxx'}))
-      # if it's totally invalid just ignore it
+      user = User.create(@good_data.merge({age: 'old', username: 'anewone', email: 'new@email.com'}))
       assert_equal nil, user.birthday
+      assert_equal nil, user.age
     end
   end
 
-  test "can create a user with a birthday" do
+  test "trying to create a user with negative age creates user without a birthday" do
     assert_difference('User.count') do
-      user = User.create(@good_data.merge({birthday: '03/04/2010', username: 'anewone', email: 'new@email.com'}))
-      assert_equal Date.new(2010, 4, 3), user.birthday
+      user = User.create(@good_data.merge({age: -15, username: 'anewone', email: 'new@email.com'}))
+      assert_equal nil, user.birthday
+      assert_equal nil, user.age
+    end
+  end
+
+  test "can update a user with age" do
+    user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
+    assert_equal 7, user.age
+
+    user.update_attributes(age: '9')
+    assert_equal Date.new(Date.today.year - 9, Date.today.month, Date.today.day), user.birthday
+    assert_equal 9, user.age
+  end
+
+  test "does not update birthday if age is the same" do
+    user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
+    assert_equal 7, user.age
+    
+    Timecop.freeze(Date.today + 40) do
+      assert_no_difference('user.reload.birthday') do
+        user.update_attributes(age: '7')
+      end
+      assert_equal 7, user.age
     end
   end
 
@@ -113,7 +137,7 @@ class UserTest < ActiveSupport::TestCase
 
   test "cannot create teacher without email" do
     assert_no_difference('User.count') do
-      user = User.create(username: 'badteacher', user_type: 'teacher', name: 'Bad Teacher', password: 'xxxxxxxx', provider: 'manual')
+      User.create(username: 'badteacher', user_type: 'teacher', name: 'Bad Teacher', password: 'xxxxxxxx', provider: 'manual')
     end
   end
 
@@ -165,6 +189,20 @@ class UserTest < ActiveSupport::TestCase
     assert_equal '樊瑞', create(:user, :name => '樊瑞').short_name # ok, this isn't actually right but ok for now
     assert_equal 'Laurel', create(:user, :name => 'Laurel').short_name # just one name
     assert_equal 'some', create(:user, :name => '  some whitespace in front  ').short_name # whitespace in front
+  end
+
+  test "cannot call find_first_by_auth_conditions with nonsense" do
+    # login by username still works
+    user = create :user, username: 'blahblah'
+    assert_equal user, User.find_first_by_auth_conditions(login: 'blahblah')
+
+    # login by email still works
+    email_user = create :user, username: 'blahblah2', email: 'not@an.email'
+    assert_equal email_user, User.find_first_by_auth_conditions(login: 'not@an.email')
+
+    # wat you can't do that hax0rs
+    assert_equal nil, User.find_first_by_auth_conditions(email: {'$acunetix' => 1})
+    # this used to raise a mysql error, now we sanitize it into a nonsense string
   end
 
 end
