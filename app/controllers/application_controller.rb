@@ -113,15 +113,15 @@ class ApplicationController < ActionController::Base
         response[:hint] = experiment_hints[rand(experiment_hints.count)]
       end
 
-      # Record this activity only if we are in experiment mode
       if response[:hint]
+        # Record this activity only if we are in experiment mode
         if ActivityHint.is_experimenting_feedback? && options[:activity]
           ActivityHint.create!(
               activity_id: options[:activity].id,
               level_source_hint_id: response[:hint].id
           )
         end
-        response[:hint] = response[:hint].hint
+        response[:hint] = response[:hint].hint || Hint.find(response[:hint].hint_id).message
       end
     end
 
