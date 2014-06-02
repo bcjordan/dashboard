@@ -5,5 +5,3 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
-hint.create(message: 'hint1')
-Level_source_hint.create(level_source_id: 1, hint_id: 1)
