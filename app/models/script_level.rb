@@ -31,7 +31,7 @@ class ScriptLevel < ActiveRecord::Base
 
   def end_of_stage?
     stage ? (self.last?) :
-      level.game_id != next_level.level.game_id
+      next_level && (level.game_id != next_level.level.game_id)
   end
 
   def stage_position_str
@@ -56,7 +56,7 @@ class ScriptLevel < ActiveRecord::Base
     @@script_level_map[id]
   end
 
-  def solved(response, application)
+  def solved(response, application, current_user)
     new_level = next_level
     # If this is the end of the current script
     unless new_level
