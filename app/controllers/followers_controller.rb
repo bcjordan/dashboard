@@ -83,23 +83,6 @@ class FollowersController < ApplicationController
   def sections
     @sections = current_user.sections.order('name')
   end
-  
-  def create_student
-    student_params = params[:user].permit([:username, :name, :password, :gender, :birthday, :parent_email])
-    raise "no student data posted" if !student_params
-
-    @user = User.new(student_params)
-
-    if User.find_by_username(@user.username)
-      @user.errors.add(:username, I18n.t('follower.error.username_in_use', username: @user.username))
-    else
-      @user.provider = User::PROVIDER_MANUAL
-      if @user.save
-        Follower.find_or_create_by_user_id_and_student_user_id!(current_user.id, @user.id)
-        redirect_to followers_path, notice: "#{@user.name} added as your student"
-      end
-    end
-  end
 
   def accept
     # todo: add a guid/hash to prevent url hacking
@@ -201,7 +184,7 @@ SQL
 
   def student_register
     @section = Section.find_by_code(params[:section_code])
-    student_params = params[:user].permit([:username, :name, :password, :gender, :birthday, :parent_email])
+    student_params = params[:user].permit([:username, :name, :password, :gender, :age, :parent_email])
 
     @user = User.new(student_params)
 
@@ -212,6 +195,7 @@ SQL
         @user.errors.add(:username, I18n.t('follower.error.username_in_use', username: @user.username))
       else
         @user.provider = User::PROVIDER_MANUAL
+        @user.user_type = User::TYPE_STUDENT
         if @user.save
           Follower.create!(user_id: @section.user_id, student_user: @user, section: @section)
           # todo: authenticate new user

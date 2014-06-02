@@ -3,7 +3,7 @@ class TeacherController < ApplicationController
   before_filter :authenticate_teacher!
 
   def index
-    
+    @sections = current_user.sections.order('name')
   end
 
   protected

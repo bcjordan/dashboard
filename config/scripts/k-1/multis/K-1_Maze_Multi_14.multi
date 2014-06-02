@@ -1,8 +1,8 @@
 name 'K-1 Maze Multiple Choice 2’ 
 
 title ‘Maze’
-description ‘Solve the puzzle’
 banner '/script_assets/multis/K-1/K-1_Maze/prompt.png'
+description ‘Solve the puzzle’
 height '100'
 
 question ‘Pick the best answer’

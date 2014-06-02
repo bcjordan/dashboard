@@ -53,7 +53,7 @@ class ApplicationController < ActionController::Base
   protected
 
   PERMITTED_USER_FIELDS = [:name, :username, :email, :password, :password_confirmation, :locale, :gender, :login,
-      :remember_me, :birthday, :school, :full_address, :user_type]
+      :remember_me, :age, :school, :full_address, :user_type]
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.for(:account_update) do |u| u.permit PERMITTED_USER_FIELDS end
@@ -70,9 +70,7 @@ class ApplicationController < ActionController::Base
   def milestone_response(options)
     response = {}
     script_level = options[:script_level]
-    level = script_level.level
-    script = script_level.script
-    # figure out the previous level
+
     previous_level = script_level.previous_level
     if previous_level
       response[:previous_level] = build_script_level_path(previous_level)
@@ -81,43 +79,8 @@ class ApplicationController < ActionController::Base
     # if they solved it, figure out next level
     if options[:solved?]
       response[:total_lines] = options[:total_lines]
-
       response[:trophy_updates] = options[:trophy_updates] unless options[:trophy_updates].blank?
-
-      next_level = script_level.next_level
-      # If this is the end of the current script
-      if !next_level
-        # If the current script is hour of code, continue on to twenty-hour
-        if script_level.script.hoc?
-          next_level = Script.twenty_hour_script.get_script_level_by_chapter(script_level.chapter + 1)
-          redirect = current_user ? build_script_level_path(next_level) : "http://code.org/api/hour/finish"
-        else
-          response[:redirect] = root_path
-        end
-        # Get the wrap up video
-        video = script_level.script.wrapup_video
-        if video
-          video_info_response = video_info(video)
-          video_info_response[:redirect] = redirect
-          response[:video_info] = video_info_response
-        end
-        response[:message] = 'no more levels'
-      end
-      # Get the next_level setup
-      if next_level
-        response[:redirect] = build_script_level_path(next_level)
-
-        if (level.game_id != next_level.level.game_id)
-          response[:stage_changing] = {
-              previous: { number: level.game_id, name: data_t_suffix('script.name', script.name, level.game.name) },
-              new: { number: next_level.level.game_id, name: data_t_suffix('script.name', script.name, next_level.level.game.name) }
-          }
-        end
-
-        if (level.skin != next_level.level.skin)
-          response[:skin_changing] = { previous: level.skin, new: next_level.level.skin }
-        end
-      end
+      script_level.solved(response, self)
     else # not solved
       response[:message] = 'try again'
     end
@@ -134,7 +97,7 @@ class ApplicationController < ActionController::Base
     end
 
     # Check if the current level_source has program specific hint, use it if use is set.
-    if ActivityHint.is_experimenting_feedback? && options[:level_source]
+    if options[:level_source]
       experiment_hints = []
       options[:level_source].level_source_hints.each do |hint|
         if hint.selected?
@@ -150,9 +113,9 @@ class ApplicationController < ActionController::Base
         response[:hint] = experiment_hints[rand(experiment_hints.count)]
       end
 
-      # Record this activity
+      # Record this activity only if we are in experiment mode
       if response[:hint]
-        if options[:activity]
+        if ActivityHint.is_experimenting_feedback? && options[:activity]
           ActivityHint.create!(
               activity_id: options[:activity].id,
               level_source_hint_id: response[:hint].id

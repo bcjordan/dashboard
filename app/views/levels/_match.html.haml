@@ -14,23 +14,27 @@
     - begin shuffled_answers = data['answers'].shuffle end until (shuffled_answers && shuffled_answers != data['answers'])
 
   - height = data['height'] || '20'
-  - height += 'px'
+  - giantmark_height = height.to_i > 72 ? 72 : 20
+  - gap_height = height.to_i/2 - giantmark_height/2
 
   .mainblock
     .column
       %ul#questions
         - data['questions'].each do |question|
-          %li{style: "height: #{height}"}!= match_t(question['text'])
+          %li{style: "height: #{height}px"}!= match_t(question['text'])
     .column
       %ul#slots.draggablecolumn
         - shuffled_answers.each do |answer|
-          %li.emptyslot{style: "height: #{height}"}
+          %li.emptyslot{style: "height: #{height}px"}
+            .giantmark
+              .gap{style: "height: #{gap_height}px"}
+              .text{style: "font-size: #{giantmark_height}px; line-height: #{giantmark_height}px"}
+                ?
     .column
       %ul#answers.draggablecolumn
         - shuffled_answers.each do |answer|
-          %li.answer.answerlist{style: "height: #{height}", originalIndex: answer['index']}!= match_t(answer['text'])
+          %li.answer.answerlist{style: "height: #{height}px", originalIndex: answer['index']}!= match_t(answer['text'])
     .clear
-    %br/
     %div
       .buttons
         %a.btn.btn-primary.next-stage.submitButton

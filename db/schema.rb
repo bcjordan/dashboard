@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140515223058) do
+ActiveRecord::Schema.define(version: 20140530211735) do
 
   create_table "activities", force: true do |t|
     t.integer  "user_id"
@@ -113,6 +113,12 @@ ActiveRecord::Schema.define(version: 20140515223058) do
 
   add_index "games", ["intro_video_id"], name: "index_games_on_intro_video_id", using: :btree
 
+  create_table "hints", force: true do |t|
+    t.text     "message",    null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "level_source_hints", force: true do |t|
     t.integer  "level_source_id"
     t.text     "hint"
@@ -122,6 +128,7 @@ ActiveRecord::Schema.define(version: 20140515223058) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.string   "status"
+    t.integer  "hint_id"
   end
 
   create_table "level_source_images", force: true do |t|

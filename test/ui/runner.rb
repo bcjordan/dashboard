@@ -6,6 +6,17 @@ require 'optparse'
 require 'ostruct'
 require 'colorize'
 
+deployment_path = File.expand_path('../../../../deployment.rb', __FILE__)
+if File.file?(deployment_path)
+  require deployment_path
+  require deploy_dir 'aws/ci/hip_chat'
+else
+  class HipChat
+    def self.log(message,options={})
+    end
+  end
+end
+
 $options = OpenStruct.new
 $options.config = nil
 $options.browser = nil
@@ -120,6 +131,7 @@ browsers.each do |browser|
     next
   end
   testStartTime = Time.now
+  HipChat.log "Testing <b>dashboard</b> with <b>#{browser['name'] || browser.inspect}</b>..."
   puts "Running with: #{browser["description"] ? browser["description"] : browser.inspect}"
 
   ENV['SELENIUM_BROWSER'] = browser['browser']
@@ -161,6 +173,14 @@ browsers.each do |browser|
   suiteResultString = succeeded ? "succeeded".green : "failed".red
   testDuration = Time.now - testStartTime
 
+  minutes = (testDuration / 60).to_i
+  seconds = testDuration - (minutes * 60)
+  elapsed = "%.1d:%.2d minutes" % [minutes, seconds]
+  if succeeded
+    HipChat.log "<b>dashboard</b> passed with <b>#{browser['name'] || browser.inspect}</b> (#{elapsed})"
+  else
+    HipChat.log "<b>dashboard</b> failed with <b>#{browser['name'] || browser.inspect}</b> (#{elapsed})", color:'red'
+  end
   puts "  Result: " + suiteResultString + ".  Duration: " + testDuration.round(2).to_s + " seconds"
 end
 

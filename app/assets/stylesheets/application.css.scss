@@ -331,7 +331,7 @@ a.level_link:hover { color: white; font-weight: 400; background-color: black; te
 a.level_link:active { color: white; font-weight: 400; background-color: black; }
 
 /* This styling helps to push the footer to the bottom of a page. */
-$footer_height: 128px;
+$footer_height: 110px;
 $footer_padding-top: 20px;
 $footer_padding-bottom: 20px;
 $footer_fullheight: $footer_height + $footer_padding-top + $footer_padding-bottom;
@@ -353,15 +353,31 @@ html, body {
   font-size: 14px;
   background-color: $dark_color;
   color: $header_text;
-  a:link {font-weight: bold; color: white;}
-  a:visited {font-weight: bold; color: white;}
-  a:hover {font-weight: bold; color:white; background-color: transparent;   text-decoration: underline; }  /* mouse over link */
-  a:active {font-weight: bold; color:white; background-color: transparent;}  /* selected link */
-  select {width: auto}
+  a:link {font-weight: 400; color: white;}
+  a:visited {font-weight: 400; color: white;}
+  a:hover {font-weight: 400; color:white; background-color: transparent;   text-decoration: underline; }  /* mouse over link */
+  a:active {font-weight: 400; color:white; background-color: transparent;}  /* selected link */
+  select {
+    width: auto;
+    font-size:11px; 
+    height: 18px; 
+    margin-bottom: 4px
+    }
+  .fineprint {
+    a:link {font-weight:600;}
+    a:visited {font-weight:600;}
+    a:hover {font-weight:600;}
+    a:active {font-weight:600;}
+  }
+  .dim {
+    display: inline-block;
+    opacity: 0.5;
+  }
 }
 
 #locale {
   font-family: sans-serif;
+  height: 24px;
 }
 
 .header_separator {
@@ -1090,6 +1106,12 @@ a.download-video {
     margin-left:0px;
     .emptyslot {
       background-color: #eee;
+      .giantmark {
+        .text {
+          opacity: 0.8;
+          font-weight: 500;
+        }
+      }
     }
     .active {
       background-color: lightyellow;
@@ -1182,10 +1204,10 @@ div.gallery_activity {
 
 .multi {
   .mainblock {
-    margin-left: 20px;
+    margin-left: 0px;
   }
   .item {
-    padding: 25px;
+    padding: 10px;
     float: left;
   }
   input {
@@ -1209,7 +1231,7 @@ div.gallery_activity {
 
 .match {
   .mainblock {
-    margin-left: 20px; 
+    margin-left: 0px; 
   }
   .column {
     width: 260px; 
