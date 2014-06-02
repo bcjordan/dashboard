@@ -29,9 +29,10 @@ class ScriptLevel < ActiveRecord::Base
     end
   end
 
-  def end_of_stage?
+  def end_of_stage?(other_next_level = nil)
+    actual_next_level = other_next_level || next_level
     stage ? (self.last?) :
-      level.game_id != next_level.level.game_id
+      level.game_id != actual_next_level.level.game_id
   end
 
   def stage_position_str
@@ -56,14 +57,18 @@ class ScriptLevel < ActiveRecord::Base
     @@script_level_map[id]
   end
 
-  def solved(response, application)
+  def solved(response, application, current_user)
     new_level = next_level
     # If this is the end of the current script
     unless new_level
       # If the current script is hour of code, continue on to twenty-hour
       if script.hoc?
-        new_level = Script.twenty_hour_script.get_script_level_by_chapter(chapter + 1)
-        redirect = current_user ? application.build_script_level_path(new_level) : 'http://code.org/api/hour/finish'
+        if current_user
+          new_level = Script.twenty_hour_script.get_script_level_by_chapter(chapter + 1)
+          redirect = response[:redirect] = application.build_script_level_path(new_level)
+        else
+          redirect = response[:redirect] = 'http://code.org/api/hour/finish'
+        end
       else
         response[:redirect] = application.root_path
         redirect = nil
@@ -80,7 +85,7 @@ class ScriptLevel < ActiveRecord::Base
     # Get the new_level setup
     if new_level
       response[:redirect] = application.build_script_level_path(new_level)
-      if end_of_stage?
+      if end_of_stage?(new_level)
         response[:stage_changing] = {
           previous: { number: level.game_id, name: name },
           new: { number: new_level.level.game_id, name: new_level.name }

@@ -67,7 +67,67 @@ class ActivitiesControllerTest < ActionController::TestCase
 
     expected_response = {"previous_level"=>"/s/#{@script.id}/level/#{@script_level_prev.id}",
                          "total_lines"=>35,
-                         "redirect"=>"/s/#{@script.id}/level/#{@script_level_next.id}",
+                          "redirect"=>"/s/#{@script.id}/level/#{@script_level_next.id}",
+                          "level_source"=>"http://test.host/sh/#{assigns(:level_source).id}",
+                          "save_to_gallery_url"=>"/gallery?gallery_activity%5Bactivity_id%5D=#{assigns(:activity).id}",
+                          "design"=>"white_background"}
+
+    assert_equal expected_response, JSON.parse(@response.body)
+  end
+
+  test "anonymous milestone completing last level of hoc" do
+    sign_out @user
+    
+    # do all the logging
+    @controller.expects :log_milestone
+    @controller.expects :slog
+
+    last_hoc_level = ScriptLevel.find_by(script_id: Script::HOC_ID, chapter: 20)
+
+    assert_creates(LevelSource) do
+      assert_does_not_create(GalleryActivity, UserLevel, Activity) do
+        post :milestone, user_id: 0, script_level_id: last_hoc_level, :lines => 20, :attempt => "1", :result => "true", :testResult => "100", :time => "1000", :app => "test", :program => "<hey>"
+      end
+    end
+
+    assert_response :success
+
+    expected_response = {"previous_level"=>"/hoc/19",
+                         "total_lines"=>20,
+                         "video_info"=>{"src"=>"https://www.youtubeeducation.com/embed/98Wft30gUQE/?autoplay=1&iv_load_policy=3&modestbranding=1&rel=0&showinfo=1&v=98Wft30gUQE&wmode=transparent", "key"=>"hoc_wrapup", "name"=>"Hour of Code Wrapup", "download"=>"https://s3.amazonaws.com/cdo-videos/new/2f-HoC-wrap-up-final.mp4", "thumbnail"=>"/c/video_thumbnails/12.jpg", "enable_fallback"=>false, "redirect"=>"http://code.org/api/hour/finish"},
+                         "message"=>"no more levels",
+                         "redirect"=>"http://code.org/api/hour/finish",
+                         "level_source"=>"http://test.host/sh/#{assigns(:level_source).id}",
+                         "design"=>"white_background"}
+
+    assert_equal expected_response, JSON.parse(@response.body)
+  end
+
+  test "logged in milestone completing last level of hoc" do
+    # do all the logging
+    @controller.expects :log_milestone
+    @controller.expects :slog
+
+    @controller.expects(:trophy_check).with(@user)
+
+    last_hoc_level = ScriptLevel.find_by(script_id: Script::HOC_ID, chapter: 20)
+
+    assert_creates(LevelSource, Activity, UserLevel) do
+      assert_does_not_create(GalleryActivity) do
+        assert_difference('@user.reload.total_lines', 20) do # update total lines
+          post :milestone, user_id: @user, script_level_id: last_hoc_level, :lines => 20, :attempt => "1", :result => "true", :testResult => "100", :time => "1000", :app => "test", :program => "<hey>"
+        end
+      end
+    end
+
+    assert_response :success
+
+
+    expected_response = {"previous_level"=>"/hoc/19",
+                         "total_lines"=>35,
+                         "video_info"=>{"src"=>"https://www.youtubeeducation.com/embed/98Wft30gUQE/?autoplay=1&iv_load_policy=3&modestbranding=1&rel=0&showinfo=1&v=98Wft30gUQE&wmode=transparent", "key"=>"hoc_wrapup", "name"=>"Hour of Code Wrapup", "download"=>"https://s3.amazonaws.com/cdo-videos/new/2f-HoC-wrap-up-final.mp4", "thumbnail"=>"/c/video_thumbnails/12.jpg", "enable_fallback"=>false, "redirect"=>"/s/1/level/21"},
+                         "message"=>"no more levels",
+                         "redirect"=>"/s/1/level/21",
                          "level_source"=>"http://test.host/sh/#{assigns(:level_source).id}",
                          "save_to_gallery_url"=>"/gallery?gallery_activity%5Bactivity_id%5D=#{assigns(:activity).id}",
                          "design"=>"white_background"}
@@ -75,7 +135,6 @@ class ActivitiesControllerTest < ActionController::TestCase
 
     assert_equal expected_response, JSON.parse(@response.body)
   end
-
 
   test "logged in milestone should save to gallery when passing an impressive level" do
     # do all the logging
