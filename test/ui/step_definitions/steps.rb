@@ -61,6 +61,10 @@ When /^I press "([^"]*)" using jQuery$/ do |button|
   @browser.execute_script("$('#" + button + "').click()");
 end
 
+When /^I press dropdown item "([^"]*)"$/ do |index|
+  @browser.execute_script("$('.goog-menuitem').eq(#{index}).simulate('drag', function(){})");
+end
+
 When /^I press a button with xpath "([^"]*)"$/ do |xpath|
   @button = @browser.find_element(:xpath, xpath)
   @button.click
