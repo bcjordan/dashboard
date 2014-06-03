@@ -1,0 +1,13 @@
+name 'K-1 Maze Multiple Choice 2’ 
+
+title ‘Maze’
+banner '/script_assets/k_1_images/maze_multi_2_q.png'
+description ‘Solve the puzzle’
+height '100'
+
+question ‘Pick the best answer’
+wrong '/script_assets/k_1_images/maze_multi_2_d3.png'
+wrong '/script_assets/k_1_images/maze_multi_2_d2.png'
+wrong '/script_assets/k_1_images/maze_multi_2_d1.png'
+right '/script_assets/k_1_images/maze_multi_2_a.png'
+
