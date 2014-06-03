@@ -121,7 +121,7 @@ class ApplicationController < ActionController::Base
               level_source_hint_id: response[:hint].id
           )
         end
-        response[:hint] = response[:hint].hint || Hint.find(response[:hint].hint_id).message
+        response[:hint] = response[:hint].hint
       end
     end
 
