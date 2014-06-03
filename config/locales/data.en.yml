@@ -72,6 +72,9 @@ en:
         'step':
           desc: 'Maze (beta)'
           'MazeStep': 'Stage Step'
+        'wordsearch':
+          desc: 'Spelling Bee (beta)'
+          'WordSearch': 'Stage 1'
     game:
       name:
         'Unplug1': 'Introduction to Computer Science'
@@ -100,6 +103,7 @@ en:
         'Flappy': 'Flappy Bird'
         'Jigsaw': 'Jigsaw'
         'MazeStep': 'Maze Step Mode'
+        'Wordsearch': 'Wordsearch'
     trophy:
       name:
         'Bronze': 'Bronze'
@@ -286,6 +290,24 @@ en:
         'studio_k1_11': "Create your own story. When you're done, click Share to let friends try your story on their phones."
         'studio_99': "Create your own story. When you're done, click Share to let friends try your story on their phones."
         'studio_100': "Create your own story. When you're done, click Share to let friends try your story on their phones."
+        'wordsearch_k_1': "Find the word RUN"
+        'wordsearch_k_2': "Find the word SET"
+        'wordsearch_k_3': "Find the word MOVE"
+        'wordsearch_k_4': "Find the word ----"
+        'wordsearch_k_5': "Find the word ----"
+        'wordsearch_k_6': "Find the word ----"
+        'wordsearch_k_7': "Find the word ----"
+        'wordsearch_k_8': "Find the word ----"
+        'wordsearch_k_9': "Find the word ----"
+        'wordsearch_k_10': "Find the word ----"
+        'wordsearch_k_11': "Find the word ----"
+        'wordsearch_k_12': "Find the word ----"
+        'wordsearch_k_13': "Find the word ----"
+        'wordsearch_k_14': "Find the word ----"
+        'wordsearch_k_15': "Find the word ----"
+        'wordsearch_k_16': "Find the word ----"
+        'wordsearch_k_17': "Find the word ----"
+        'wordsearch_k_18': "Find the word ----"
       levelIncompleteError:
         # Keyed by "#{game.name}_#{level.level_num}" with fallback "#{game.app}_#{level.level_num}"
         'maze_2_8': "To solve this, find the pattern that repeats. Use a \"repeat\" block with these 3 blocks inside it: move, move, turn right."
