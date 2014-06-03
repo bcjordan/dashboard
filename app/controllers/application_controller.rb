@@ -67,6 +67,39 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def get_crowdsourced_hint (options)
+    # Check if the current level_source has program specific hint, use it if use is set.
+    if options[:level_source]
+      experiment_hints = []
+      options[:level_source].level_source_hints.each do |hint|
+        if hint.selected?
+          # Selected hint overwrites other hints
+          crowdsourced_hint = hint
+          break
+        elsif hint.experiment?
+          experiment_hints.push(hint)
+        end
+      end
+      # Randomly select one of the experimental hints
+      if crowdsourced_hint.nil? && experiment_hints.length > 0
+        crowdsourced_hint = experiment_hints[rand(experiment_hints.count)]
+      end
+
+      # Record this activity only if we are in experiment mode
+      crowdsourced_hint = crowdsourced_hint.hint if crowdsourced_hint
+    end
+  end
+
+  def get_best_next_hint (options)
+    if options[:level_source]
+      options[:level_source].level_source_hints.each do |level_source_hint|
+        if level_source_hint.hint_id
+          Hint.find(level_source_hint.hint_id).message
+        end
+      end
+    end
+  end
+
   def milestone_response(options)
     response = {}
     script_level = options[:script_level]
@@ -96,33 +129,25 @@ class ApplicationController < ActionController::Base
       response[:save_to_gallery_url] = gallery_activities_path(gallery_activity: {activity_id: options[:activity].id})
     end
 
-    # Check if the current level_source has program specific hint, use it if use is set.
-    if options[:level_source]
-      experiment_hints = []
-      options[:level_source].level_source_hints.each do |hint|
-        if hint.selected?
-          # Selected hint overwrites other hints
-          response[:hint] = hint
-          break
-        elsif hint.experiment?
-          experiment_hints.push(hint)
-        end
+      # Decide the type of feedback received by user
+    if current_user
+      case current_user.id % ExperimentActivity::TYPES_FEEDBACK_SOURCES.length
+        when ExperimentActivity::TYPE_FEEDBACK_CROWDSOURCED
+          response[:hint] = get_crowdsourced_hint(options)
+        when ExperimentActivity::TYPE_FEEDBACK_BEST_NEXT
+          response[:hint] = get_best_next_hint(options)
       end
-      # Randomly select one of the experimental hints
-      if response[:hint].nil? && experiment_hints.length > 0
-        response[:hint] = experiment_hints[rand(experiment_hints.count)]
-      end
+    else
+      # Un-logged in users receive crowdsoruced hints and best_next hints if available
+      response[:hint] = get_crowdsourced_hint(options) || get_best_next_hint(options)
+    end
 
-      # Record this activity only if we are in experiment mode
-      if response[:hint]
-        if ActivityHint.is_experimenting_feedback? && options[:activity]
-          ActivityHint.create!(
-              activity_id: options[:activity].id,
-              level_source_hint_id: response[:hint].id
-          )
-        end
-        response[:hint] = response[:hint].hint
-      end
+    # Record this activity only if we are in experimental mode
+    if ActivityHint.is_experimenting_feedback? && response[:hint] && options[:activity]
+      ActivityHint.create!(
+          activity_id: options[:activity].id,
+          level_source_hint_id: response[:hint].id
+      )
     end
 
     # Set up the background design
