@@ -14,6 +14,20 @@ namespace :seed do
     end
   end
 
+  task import_stanford_hints: :environment do
+    LevelSourceHint.transaction do
+      CSV.read('config/stanford-hint-ids.tsv', { col_sep: "\t" }).each do |row|
+        LevelSourceHint.create!(level_source_id: row[0], hint_id: row[1])
+      end
+    end
+    Hint.transaction do
+      Hint.reset_db
+      CSV.read('config/stanford-hint-messages.tsv', { col_sep: "\t" }).each do |row|
+        Hint.create!(id: row[0], message: row[1])
+      end
+    end
+  end
+
   task concepts: :environment do
     Concept.setup
   end
