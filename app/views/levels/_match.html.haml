@@ -43,14 +43,29 @@
   .clear
 
   %div{:style=>'display:none'}
-    #dialogcontent.modal-content
-      %p.dialog-title
-        =t("match.wrong_title")
-      %p
-        =t("match.wrong_body")
-      .farSide
-        %button#ok-button.secondary
-          =t("dialog.ok")
+    #error-dialogcontent
+      .modal-content
+        %p.dialog-title
+          =t("match.wrong_title")
+        %p
+          =t("match.wrong_body")
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
+    #pre-dialogcontent
+      - if data['pre_image']
+        .modal-image{style: "margin-top: 0px"}
+          != match_t(data['pre_image'])
+      .modal-content
+        %p.dialog-title
+          != match_t(data['pre_title']) if data['pre_title']
+        %p
+          != match_t(data['pre_body']) if data['pre_body']
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
 
 :javascript
 
@@ -65,12 +80,12 @@
     return this; 
   };
 
-  function showDialog()
+  function showDialog(type)
   {
     var dialog = new Dialog({ body: "" });
 
     // use our prefabricated dialog content
-    $(".modal-body").append($("#dialogcontent").clone(true));
+    $(".modal-body").append($("#" + type + "-dialogcontent").clone(true));
 
     // Standard css hack to center a div within the viewport
     var full_dialog = $(".dash_modal");
@@ -104,6 +119,13 @@
 
   $(function() 
   {
+    if ("#{data['pre_title']}")
+    {
+      setTimeout(function() {
+        showDialog("pre");
+        }, 1000);
+    }
+
     $("#answers li").draggable({ revert: "invalid", stack: ".answer" });  
 
     // set up the central list of empty slots.
@@ -198,7 +220,7 @@
 
       if (solution == "wrong") 
       {
-        showDialog();
+        showDialog("error");
       }
       
       if (solution != "none")

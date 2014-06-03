@@ -1969,7 +1969,7 @@ var generateXMLForBlocks = function(blocks) {
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash include="debounce,reject,map,value" --output build/js/lodash.js`
+ * Build: `lodash include="debounce,reject,map,range,value,without" --output build/js/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -1981,10 +1981,17 @@ var generateXMLForBlocks = function(blocks) {
   var undefined;
 
   /** Used to pool arrays and objects used internally */
-  var arrayPool = [];
+  var arrayPool = [],
+      objectPool = [];
 
   /** Used internally to indicate various things */
   var indicatorObject = {};
+
+  /** Used to prefix keys to avoid issues with `__proto__` and properties on `Object.prototype` */
+  var keyPrefix = +new Date + '';
+
+  /** Used as the size when optimizations are enabled for large arrays */
+  var largeArraySize = 75;
 
   /** Used as the max size of the `arrayPool` and `objectPool` */
   var maxPoolSize = 40;
@@ -2067,6 +2074,114 @@ var generateXMLForBlocks = function(blocks) {
   /*--------------------------------------------------------------------------*/
 
   /**
+   * The base implementation of `_.indexOf` without support for binary searches
+   * or `fromIndex` constraints.
+   *
+   * @private
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {number} [fromIndex=0] The index to search from.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   */
+  function baseIndexOf(array, value, fromIndex) {
+    var index = (fromIndex || 0) - 1,
+        length = array ? array.length : 0;
+
+    while (++index < length) {
+      if (array[index] === value) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * An implementation of `_.contains` for cache objects that mimics the return
+   * signature of `_.indexOf` by returning `0` if the value is found, else `-1`.
+   *
+   * @private
+   * @param {Object} cache The cache object to inspect.
+   * @param {*} value The value to search for.
+   * @returns {number} Returns `0` if `value` is found, else `-1`.
+   */
+  function cacheIndexOf(cache, value) {
+    var type = typeof value;
+    cache = cache.cache;
+
+    if (type == 'boolean' || value == null) {
+      return cache[value] ? 0 : -1;
+    }
+    if (type != 'number' && type != 'string') {
+      type = 'object';
+    }
+    var key = type == 'number' ? value : keyPrefix + value;
+    cache = (cache = cache[type]) && cache[key];
+
+    return type == 'object'
+      ? (cache && baseIndexOf(cache, value) > -1 ? 0 : -1)
+      : (cache ? 0 : -1);
+  }
+
+  /**
+   * Adds a given value to the corresponding cache object.
+   *
+   * @private
+   * @param {*} value The value to add to the cache.
+   */
+  function cachePush(value) {
+    var cache = this.cache,
+        type = typeof value;
+
+    if (type == 'boolean' || value == null) {
+      cache[value] = true;
+    } else {
+      if (type != 'number' && type != 'string') {
+        type = 'object';
+      }
+      var key = type == 'number' ? value : keyPrefix + value,
+          typeCache = cache[type] || (cache[type] = {});
+
+      if (type == 'object') {
+        (typeCache[key] || (typeCache[key] = [])).push(value);
+      } else {
+        typeCache[key] = true;
+      }
+    }
+  }
+
+  /**
+   * Creates a cache object to optimize linear searches of large arrays.
+   *
+   * @private
+   * @param {Array} [array=[]] The array to search.
+   * @returns {null|Object} Returns the cache object or `null` if caching should not be used.
+   */
+  function createCache(array) {
+    var index = -1,
+        length = array.length,
+        first = array[0],
+        mid = array[(length / 2) | 0],
+        last = array[length - 1];
+
+    if (first && typeof first == 'object' &&
+        mid && typeof mid == 'object' && last && typeof last == 'object') {
+      return false;
+    }
+    var cache = getObject();
+    cache['false'] = cache['null'] = cache['true'] = cache['undefined'] = false;
+
+    var result = getObject();
+    result.array = array;
+    result.cache = cache;
+    result.push = cachePush;
+
+    while (++index < length) {
+      result.push(array[index]);
+    }
+    return result;
+  }
+
+  /**
    * Gets an array from the array pool or creates a new one if the pool is empty.
    *
    * @private
@@ -2074,6 +2189,27 @@ var generateXMLForBlocks = function(blocks) {
    */
   function getArray() {
     return arrayPool.pop() || [];
+  }
+
+  /**
+   * Gets an object from the object pool or creates a new one if the pool is empty.
+   *
+   * @private
+   * @returns {Object} The object from the pool.
+   */
+  function getObject() {
+    return objectPool.pop() || {
+      'array': null,
+      'cache': null,
+      'false': false,
+      'null': false,
+      'number': null,
+      'object': null,
+      'push': null,
+      'string': null,
+      'true': false,
+      'undefined': false
+    };
   }
 
   /**
@@ -2099,6 +2235,23 @@ var generateXMLForBlocks = function(blocks) {
     array.length = 0;
     if (arrayPool.length < maxPoolSize) {
       arrayPool.push(array);
+    }
+  }
+
+  /**
+   * Releases the given object back to the object pool.
+   *
+   * @private
+   * @param {Object} [object] The object to release.
+   */
+  function releaseObject(object) {
+    var cache = object.cache;
+    if (cache) {
+      releaseObject(cache);
+    }
+    object.array = object.cache =object.object = object.number = object.string =null;
+    if (objectPool.length < maxPoolSize) {
+      objectPool.push(object);
     }
   }
 
@@ -2156,7 +2309,8 @@ var generateXMLForBlocks = function(blocks) {
   );
 
   /** Native method shortcuts */
-  var fnToString = Function.prototype.toString,
+  var ceil = Math.ceil,
+      fnToString = Function.prototype.toString,
       hasOwnProperty = objectProto.hasOwnProperty,
       push = arrayRef.push,
       propertyIsEnumerable = objectProto.propertyIsEnumerable,
@@ -2682,6 +2836,43 @@ var generateXMLForBlocks = function(blocks) {
   }
 
   /**
+   * The base implementation of `_.difference` that accepts a single array
+   * of values to exclude.
+   *
+   * @private
+   * @param {Array} array The array to process.
+   * @param {Array} [values] The array of values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   */
+  function baseDifference(array, values) {
+    var index = -1,
+        indexOf = getIndexOf(),
+        length = array ? array.length : 0,
+        isLarge = length >= largeArraySize && indexOf === baseIndexOf,
+        result = [];
+
+    if (isLarge) {
+      var cache = createCache(values);
+      if (cache) {
+        indexOf = cacheIndexOf;
+        values = cache;
+      } else {
+        isLarge = false;
+      }
+    }
+    while (++index < length) {
+      var value = array[index];
+      if (indexOf(values, value) < 0) {
+        result.push(value);
+      }
+    }
+    if (isLarge) {
+      releaseObject(values);
+    }
+    return result;
+  }
+
+  /**
    * The base implementation of `_.isEqual`, without support for `thisArg` binding,
    * that allows partial "_.where" style comparisons.
    *
@@ -2982,6 +3173,19 @@ var generateXMLForBlocks = function(blocks) {
       indicatorObject, isArguments, isArray, isString, iteratorData.keys, objectProto,
       objectTypes, nonEnumProps, stringClass, stringProto, toString
     );
+  }
+
+  /**
+   * Gets the appropriate "indexOf" function. If the `_.indexOf` method is
+   * customized, this method returns the custom method, otherwise it returns
+   * the `baseIndexOf` function.
+   *
+   * @private
+   * @returns {Function} Returns the "indexOf" function.
+   */
+  function getIndexOf() {
+    var result = (result = lodash.indexOf) === indexOf ? baseIndexOf : result;
+    return result;
   }
 
   /**
@@ -3497,6 +3701,180 @@ var generateXMLForBlocks = function(blocks) {
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Gets the index at which the first occurrence of `value` is found using
+   * strict equality for comparisons, i.e. `===`. If the array is already sorted
+   * providing `true` for `fromIndex` will run a faster binary search.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {boolean|number} [fromIndex=0] The index to search from or `true`
+   *  to perform a binary search on a sorted array.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   * @example
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2);
+   * // => 1
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
+   * // => 4
+   *
+   * _.indexOf([1, 1, 2, 2, 3, 3], 2, true);
+   * // => 2
+   */
+  function indexOf(array, value, fromIndex) {
+    if (typeof fromIndex == 'number') {
+      var length = array ? array.length : 0;
+      fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex || 0);
+    } else if (fromIndex) {
+      var index = sortedIndex(array, value);
+      return array[index] === value ? index : -1;
+    }
+    return baseIndexOf(array, value, fromIndex);
+  }
+
+  /**
+   * Creates an array of numbers (positive and/or negative) progressing from
+   * `start` up to but not including `end`. If `start` is less than `stop` a
+   * zero-length range is created unless a negative `step` is specified.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {number} [start=0] The start of the range.
+   * @param {number} end The end of the range.
+   * @param {number} [step=1] The value to increment or decrement by.
+   * @returns {Array} Returns a new range array.
+   * @example
+   *
+   * _.range(4);
+   * // => [0, 1, 2, 3]
+   *
+   * _.range(1, 5);
+   * // => [1, 2, 3, 4]
+   *
+   * _.range(0, 20, 5);
+   * // => [0, 5, 10, 15]
+   *
+   * _.range(0, -4, -1);
+   * // => [0, -1, -2, -3]
+   *
+   * _.range(1, 4, 0);
+   * // => [1, 1, 1]
+   *
+   * _.range(0);
+   * // => []
+   */
+  function range(start, end, step) {
+    start = +start || 0;
+    step = typeof step == 'number' ? step : (+step || 1);
+
+    if (end == null) {
+      end = start;
+      start = 0;
+    }
+    // use `Array(length)` so engines like Chakra and V8 avoid slower modes
+    // http://youtu.be/XAqIpGU8ZZk#t=17m25s
+    var index = -1,
+        length = nativeMax(0, ceil((end - start) / (step || 1))),
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = start;
+      start += step;
+    }
+    return result;
+  }
+
+  /**
+   * Uses a binary search to determine the smallest index at which a value
+   * should be inserted into a given sorted array in order to maintain the sort
+   * order of the array. If a callback is provided it will be executed for
+   * `value` and each element of `array` to compute their sort ranking. The
+   * callback is bound to `thisArg` and invoked with one argument; (value).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to inspect.
+   * @param {*} value The value to evaluate.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {number} Returns the index at which `value` should be inserted
+   *  into `array`.
+   * @example
+   *
+   * _.sortedIndex([20, 30, 50], 40);
+   * // => 2
+   *
+   * // using "_.pluck" callback shorthand
+   * _.sortedIndex([{ 'x': 20 }, { 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
+   * // => 2
+   *
+   * var dict = {
+   *   'wordToNumber': { 'twenty': 20, 'thirty': 30, 'fourty': 40, 'fifty': 50 }
+   * };
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return dict.wordToNumber[word];
+   * });
+   * // => 2
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return this.wordToNumber[word];
+   * }, dict);
+   * // => 2
+   */
+  function sortedIndex(array, value, callback, thisArg) {
+    var low = 0,
+        high = array ? array.length : low;
+
+    // explicitly reference `identity` for better inlining in Firefox
+    callback = callback ? lodash.createCallback(callback, thisArg, 1) : identity;
+    value = callback(value);
+
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      (callback(array[mid]) < value)
+        ? low = mid + 1
+        : high = mid;
+    }
+    return low;
+  }
+
+  /**
+   * Creates an array excluding all provided values using strict equality for
+   * comparisons, i.e. `===`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to filter.
+   * @param {...*} [value] The values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   * @example
+   *
+   * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
+   * // => [2, 3, 4]
+   */
+  function without(array) {
+    return baseDifference(array, slice(arguments, 1));
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
    * Creates a function that, when called, invokes `func` with the `this`
    * binding of `thisArg` and prepends any additional `bind` arguments to those
    * provided to the bound function.
@@ -3994,7 +4372,9 @@ var generateXMLForBlocks = function(blocks) {
   lodash.keys = keys;
   lodash.map = map;
   lodash.property = property;
+  lodash.range = range;
   lodash.reject = reject;
+  lodash.without = without;
 
   // add aliases
   lodash.collect = map;
@@ -4008,6 +4388,7 @@ var generateXMLForBlocks = function(blocks) {
   /*--------------------------------------------------------------------------*/
 
   lodash.identity = identity;
+  lodash.indexOf = indexOf;
   lodash.isArguments = isArguments;
   lodash.isArray = isArray;
   lodash.isFunction = isFunction;
@@ -4016,6 +4397,7 @@ var generateXMLForBlocks = function(blocks) {
   lodash.mixin = mixin;
   lodash.noop = noop;
   lodash.now = now;
+  lodash.sortedIndex = sortedIndex;
 
   mixin(function() {
     var source = {}
@@ -4617,23 +4999,29 @@ exports.wait = function(id, value) {
 'use strict';
 
 var msg = require('../../locale/pt_br/studio');
+var commonMsg = require('../../locale/pt_br/common');
 var codegen = require('../codegen');
 var tiles = require('./tiles');
+var studio = require('./studio');
+var _ = require('../lodash');
 
 var Direction = tiles.Direction;
 var Position = tiles.Position;
 var Emotions = tiles.Emotions;
 
+var RANDOM_VALUE = 'random';
+var HIDDEN_VALUE = '"hidden"';
+var VISIBLE_VALUE = '"visible"';
+var CAVE_VALUE = '"cave"';
+
 var generateSetterCode = function (opts) {
   var value = opts.ctx.getTitleValue('VALUE');
-  if (value === "random") {
-    var randomIndex = opts.random || 0;
-    // opts.random is the index of where the 'random' items is in beginning of
-    // the VALUES table (defaults to 0).
-    var allValues = opts.ctx.VALUES.slice(randomIndex + 1).map(function (item) {
-      return item[1];
-    });
-    value = 'Studio.random([' + allValues + '])';
+  if (value === RANDOM_VALUE) {
+    var possibleValues =
+      _(opts.ctx.VALUES)
+        .map(function (item) { return item[1]; })
+        .without(RANDOM_VALUE, HIDDEN_VALUE);
+    value = 'Studio.random([' + possibleValues + '])';
   }
 
   return 'Studio.' + opts.name + '(\'block_id_' + opts.ctx.id + '\', ' +
@@ -4655,7 +5043,29 @@ exports.install = function(blockly, blockInstallOptions) {
     return '\n';
   };
 
-  blockly.Blocks.studio_spriteCount = 6;
+  blockly.Blocks.studio_spriteCount = 6; // will be overridden
+
+  /**
+   * Creates a dropdown with options for each sprite number
+   * @param choices
+   * @returns {Blockly.FieldDropdown}
+   */
+  function spriteNumberTextDropdown(choices) {
+    var dropdownArray = choices.slice(0, blockly.Blocks.studio_spriteCount);
+    return new blockly.FieldDropdown(dropdownArray);
+  }
+
+  /**
+   * Creates a dropdown with thumbnails for each starting sprite
+   * @returns {Blockly.FieldImageDropdown}
+   */
+  function startingSpriteImageDropdown() {
+    var spriteNumbers = _.range(0, blockly.Blocks.studio_spriteCount);
+    var choices = _.map(spriteNumbers, function (index) {
+        return [ skin[studio.nthStartingSkin(index)].dropdownThumbnail, index.toString() ];
+    });
+    return new blockly.FieldImageDropdown(choices, skin.dropdownThumbnailWidth, skin.dropdownThumbnailHeight);
+  }
 
   blockly.Blocks.studio_whenLeft = {
     // Block to handle event when the Left arrow button is pressed.
@@ -4787,20 +5197,27 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block to handle event when sprite collides with another sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray1 =
-          this.SPRITE1.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdownArray2 =
-          this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdown2 = new blockly.FieldDropdown(dropdownArray2);
+      var dropdown1;
+      var dropdown2;
+      this.setHSV(140, 1.00, 0.74);
+
+      if (isK1) {
+        dropdown1 = startingSpriteImageDropdown();
+        dropdown2 = startingSpriteImageDropdown();
+        this.appendDummyInput().appendTitle(commonMsg.when())
+          .appendTitle(dropdown1, 'SPRITE1');
+        this.appendDummyInput().appendTitle(msg.whenSpriteCollidedWith())
+          .appendTitle(dropdown2, 'SPRITE2');
+      } else {
+        dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
+        dropdown2 = spriteNumberTextDropdown(this.SPRITE2);
+        this.appendDummyInput().appendTitle(dropdown1, 'SPRITE1');
+        this.appendDummyInput().appendTitle(dropdown2, 'SPRITE2');
+      }
       if (blockly.Blocks.studio_spriteCount > 1) {
-        dropdown2.setValue(dropdownArray2[1][1]); // default to 2
+        dropdown2.setValue(dropdown2.getOptions()[1][1]); // default second dropdown to second item
       }
 
-      this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(dropdownArray1), 'SPRITE1');
-      this.appendDummyInput()
-        .appendTitle(dropdown2, 'SPRITE2');
       this.setPreviousStatement(false);
       this.setInputsInline(true);
       this.setNextStatement(true);
@@ -4895,7 +5312,7 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSprite6(), '5']];
 
   blockly.Blocks.studio_setSpritePosition.VALUES =
-      [[msg.positionRandom(), 'random'],
+      [[msg.positionRandom(), RANDOM_VALUE],
        [msg.positionTopLeft(), Position.TOPLEFT.toString()],
        [msg.positionTopCenter(), Position.TOPCENTER.toString()],
        [msg.positionTopRight(), Position.TOPRIGHT.toString()],
@@ -4917,12 +5334,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for moving one frame a time.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.moveSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
         this.appendDummyInput()
           .appendTitle('\t');
       } else {
@@ -4963,12 +5383,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for moving/gliding a specific distance.
     block.helpUrl = '';
     block.init = function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.moveSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
         this.appendDummyInput()
           .appendTitle('\t');
       } else {
@@ -5176,7 +5599,7 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_setSpriteSpeed.VALUES =
-      [[msg.setSpriteSpeedRandom(), 'random'],
+      [[msg.setSpriteSpeedRandom(), RANDOM_VALUE],
        [msg.setSpriteSpeedVerySlow(), 'Studio.SpriteSpeed.VERY_SLOW'],
        [msg.setSpriteSpeedSlow(), 'Studio.SpriteSpeed.SLOW'],
        [msg.setSpriteSpeedNormal(), 'Studio.SpriteSpeed.NORMAL'],
@@ -5204,12 +5627,17 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_setBackground = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]);  // default to cave
-
       this.setHSV(312, 0.32, 0.62);
-      this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
+
+      var dropdown;
+      if (isK1) {
+        dropdown = new blockly.FieldImageDropdown(this.IMAGE_CHOICES, skin.dropdownThumbnailWidth, skin.dropdownThumbnailHeight);
+        this.appendDummyInput().appendTitle(msg.setBackground()).appendTitle(dropdown, 'VALUE');
+      } else {
+        dropdown = new blockly.FieldDropdown(this.VALUES);
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
+      dropdown.setValue(CAVE_VALUE);  // default to cave
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
@@ -5218,13 +5646,22 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_setBackground.VALUES =
-      [[msg.setBackgroundRandom(), 'random'],
-       [msg.setBackgroundCave(), '"cave"'],
+      [[msg.setBackgroundRandom(), RANDOM_VALUE],
+       [msg.setBackgroundCave(), CAVE_VALUE],
        [msg.setBackgroundNight(), '"night"'],
        [msg.setBackgroundCloudy(), '"cloudy"'],
        [msg.setBackgroundUnderwater(), '"underwater"'],
        [msg.setBackgroundHardcourt(), '"hardcourt"'],
        [msg.setBackgroundBlack(), '"black"']];
+
+  blockly.Blocks.studio_setBackground.IMAGE_CHOICES =
+      [[skin.cave.background, CAVE_VALUE],
+       [skin.night.background, '"night"'],
+       [skin.cloudy.background, '"cloudy"'],
+       [skin.underwater.background, '"underwater"'],
+       [skin.hardcourt.background, '"hardcourt"'],
+       [skin.black.background, '"black"'],
+       [skin.randomPurpleIcon, RANDOM_VALUE]];
 
   generator.studio_setBackground = function() {
     return generateSetterCode({ctx: this, name: 'setBackground'});
@@ -5302,18 +5739,12 @@ exports.install = function(blockly, blockInstallOptions) {
     blockly.Blocks.studio_setSprite = {
       helpUrl: '',
       init: function() {
-        var dropdown = new blockly.FieldDropdown(this.VALUES);
-        dropdown.setValue(this.VALUES[1][1]);  // default to visible
-
-        var dropdownArray =
-            this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
-        this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
         this.setHSV(312, 0.32, 0.62);
+        var visibilityTextDropdown = new blockly.FieldDropdown(this.VALUES);
+        visibilityTextDropdown.setValue(VISIBLE_VALUE);  // default to visible
+        this.appendDummyInput().appendTitle(visibilityTextDropdown, 'VALUE');
         if (blockly.Blocks.studio_spriteCount > 1) {
-          this.appendDummyInput()
-            .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+            this.appendDummyInput().appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         }
         this.setInputsInline(true);
         this.setPreviousStatement(true);
@@ -5331,8 +5762,8 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.sprite6(), '5']];
 
     blockly.Blocks.studio_setSprite.VALUES =
-        [[msg.setSpriteHideK1(), '"hidden"'],
-         [msg.setSpriteShowK1(), '"visible"']];
+        [[msg.setSpriteHideK1(), HIDDEN_VALUE],
+         [msg.setSpriteShowK1(), VISIBLE_VALUE]];
   } else {
     /**
      * setSprite
@@ -5372,8 +5803,8 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.setSprite6(), '5']];
 
     blockly.Blocks.studio_setSprite.VALUES =
-        [[msg.setSpriteHidden(), '"hidden"'],
-         [msg.setSpriteRandom(), 'random'],
+        [[msg.setSpriteHidden(), HIDDEN_VALUE],
+         [msg.setSpriteRandom(), RANDOM_VALUE],
          [msg.setSpriteWitch(), '"witch"'],
          [msg.setSpriteCat(), '"cat"'],
          [msg.setSpriteDinosaur(), '"dinosaur"'],
@@ -5386,8 +5817,8 @@ exports.install = function(blockly, blockInstallOptions) {
     var value = this.getTitleValue('VALUE');
     var indexString = this.getTitleValue('SPRITE') || '0';
     if (!blockly.Blocks.studio_firstSetSprite &&
-        'random' !== value &&
-        '"hidden"' !== value) {
+        RANDOM_VALUE !== value &&
+        HIDDEN_VALUE !== value) {
       // Store the params for the first non-random, non-hidden setSprite
       // call so we can auto-reference this sprite in showTitleScreen() later
       blockly.Blocks.studio_firstSetSprite = {
@@ -5397,7 +5828,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
     return generateSetterCode({
       ctx: this,
-      random: 1, // random may not be present for K1 block, but that's harmless
       extraParams: indexString,
       name: 'setSprite'});
   };
@@ -5408,13 +5838,15 @@ exports.install = function(blockly, blockInstallOptions) {
       var dropdown = new blockly.FieldDropdown(this.VALUES);
       dropdown.setValue(this.VALUES[1][1]);  // default to normal
 
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.setSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
@@ -5437,7 +5869,7 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSprite6(), '5']];
 
   blockly.Blocks.studio_setSpriteEmotion.VALUES =
-      [[msg.setSpriteEmotionRandom(), 'random'],
+      [[msg.setSpriteEmotionRandom(), RANDOM_VALUE],
        [msg.setSpriteEmotionNormal(), Emotions.NORMAL.toString()],
        [msg.setSpriteEmotionHappy(), Emotions.HAPPY.toString()],
        [msg.setSpriteEmotionAngry(), Emotions.ANGRY.toString()],
@@ -5454,12 +5886,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for waiting a specific amount of time.
     block.helpUrl = '';
     block.init = function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.saySprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.saySprite());
@@ -5512,7 +5947,7 @@ exports.install = function(blockly, blockInstallOptions) {
                (this.getTitleValue('SPRITE') || '0') + ', ' +
                textParam + ');\n';
   };
-  
+
   var initWaitBlock = function (block) {
     // Block for waiting a specific amount of time.
     block.helpUrl = '';
@@ -5560,7 +5995,6 @@ exports.install = function(blockly, blockInstallOptions) {
   generator.studio_wait = function() {
     return generateSetterCode({
       ctx: this,
-      random: 1,
       name: 'wait'});
   };
 
@@ -5574,7 +6008,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/pt_br/studio":37,"../codegen":6,"./tiles":21}],15:[function(require,module,exports){
+},{"../../locale/pt_br/common":36,"../../locale/pt_br/studio":37,"../codegen":6,"../lodash":9,"./studio":20,"./tiles":21}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6312,32 +6746,45 @@ exports.load = function(assetUrl, id) {
   skin.underwater = {
     background: skin.assetUrl('background_underwater.png'),
   };
+  /**
+   * Sprite thumbs generated with:
+   * `brew install graphicsmagick`
+   * `gm convert +adjoin -crop 200x200 -resize 100x100 *spritesheet* output%02d.png`
+   */
   skin.cat = {
     sprite: skin.assetUrl('cat_spritesheet_200px.png'),
-    spriteFlags: 28,
+    dropdownThumbnail: skin.assetUrl('cat_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
   };
   skin.dinosaur = {
     sprite: skin.assetUrl('dinosaur_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dinosaur_thumb.png'),
     spriteFlags: 28,
   };
   skin.dog = {
     sprite: skin.assetUrl('dog_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dog_thumb.png'),
     spriteFlags: 28,
   };
   skin.octopus = {
     sprite: skin.assetUrl('octopus_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('octopus_thumb.png'),
     spriteFlags: 28,
   };
   skin.penguin = {
     sprite: skin.assetUrl('penguin_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('penguin_thumb.png'),
     spriteFlags: 28,
+  };
+  skin.witch = {
+    spriteFlags: 28,
+    dropdownThumbnail: skin.assetUrl('witch_thumb.png'),
+    sprite: skin.assetUrl('witch_sprite_200px.png'),
   };
 
   // Images
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
-  skin.sprite = skin.assetUrl('witch_sprite_200px.png');
-  skin.spriteFlags = 28; // flags: emotions, animation, turns
   skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.approachingGoalAnimation =
       skin.assetUrl(config.approachingGoalAnimation);
@@ -6364,7 +6811,7 @@ exports.load = function(assetUrl, id) {
                     skin.assetUrl('1_wall_bounce.ogg')];
   skin.hitSound = [skin.assetUrl('2_wall_bounce.mp3'),
                    skin.assetUrl('2_wall_bounce.ogg')];
-  
+
   // Settings
   if (config.background !== undefined) {
     var index = Math.floor(Math.random() * config.background);
@@ -6375,6 +6822,8 @@ exports.load = function(assetUrl, id) {
   skin.spriteHeight = config.spriteHeight || 100;
   skin.spriteWidth = config.spriteWidth || 100;
   skin.spriteYOffset = config.spriteYOffset || 0;
+  skin.dropdownThumbnailWidth = 50;
+  skin.dropdownThumbnailHeight = 50;
   return skin;
 };
 
@@ -6451,6 +6900,15 @@ var Keycodes = {
 var level;
 var skin;
 var onSharePage;
+
+var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
+  "witch" ];
+
+Studio.nthStartingSkin = function(n) {
+  var skinStartOffset = Studio.spriteStartingImage || 0;
+  var numStartingSkins = spriteStartingSkins.length;
+  return spriteStartingSkins[(n + skinStartOffset) % numStartingSkins];
+};
 
 /**
  * Milliseconds between each animation frame.
@@ -7225,11 +7683,6 @@ BlocklyApps.reset = function(first) {
   // Reset the Globals object used to contain program variables:
   Studio.Globals = [];
 
-  var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
-                              "witch" ];
-  var numStartingSkins = spriteStartingSkins.length;
-  var skinBias = Studio.spriteStartingImage || 0;
-
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
@@ -7243,7 +7696,7 @@ BlocklyApps.reset = function(first) {
 
     var opts = {
         'index': i,
-        'value': spriteStartingSkins[(i + skinBias) % numStartingSkins]
+        'value': Studio.nthStartingSkin(i)
     };
     if (Studio.spritesHiddenToStart) {
       opts.forceHidden = true;
@@ -7693,13 +8146,6 @@ Studio.displayScore = function() {
   score.setAttribute('visibility', 'visible');
 };
 
-var skinTheme = function (value) {
-  if (value === 'witch') {
-    return skin;
-  }
-  return skin[value];
-};
-
 Studio.queueCmd = function (id, name, opts) {
   var cmd = {
       'id': id,
@@ -7825,7 +8271,7 @@ Studio.setScoreText = function (opts) {
 Studio.setBackground = function (opts) {
   var element = document.getElementById('background');
   element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-    skinTheme(opts.value).background);
+    skin[opts.value].background);
 };
 
 var computeSpriteFrameNums = function (index) {
@@ -7842,7 +8288,7 @@ Studio.setSprite = function (opts) {
   // Inherit some flags from the skin:
   if (opts.value !== 'hidden' && opts.value !== 'visible') {
     Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
-    Studio.sprite[opts.index].flags |= skinTheme(opts.value).spriteFlags;
+    Studio.sprite[opts.index].flags |= skin[opts.value].spriteFlags;
   }
   Studio.sprite[opts.index].value = opts.forceHidden ? 'hidden' : opts.value;
 
@@ -7852,7 +8298,7 @@ Studio.setSprite = function (opts) {
       (opts.value === 'hidden' || opts.forceHidden) ? 'hidden' : 'visible');
   if ((opts.value !== 'hidden') && (opts.value !== 'visible')) {
     element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-                           skinTheme(opts.value).sprite);
+                           skin[opts.value].sprite);
     element.setAttribute('width',
                          Studio.SPRITE_WIDTH * spriteTotalFrames(opts.index));
     computeSpriteFrameNums(opts.index);
@@ -9086,6 +9532,8 @@ exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the a
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
+exports.setBackground = function(d){return "set background"};
+
 exports.setBackgroundRandom = function(d){return "set random scene"};
 
 exports.setBackgroundBlack = function(d){return "set black background"};
@@ -9285,6 +9733,8 @@ exports.whenSpriteCollided5 = function(d){return "when character 5"};
 exports.whenSpriteCollided6 = function(d){return "when character 6"};
 
 exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
+
+exports.whenSpriteCollidedWith = function(d){return "touches"};
 
 exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
 

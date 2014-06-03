@@ -28,3 +28,7 @@ end
 Then /^the dropdown field has text "(.*?)"$/ do |text|
   element_has_text("[block-id='4'] .blocklyEditableText", text)
 end
+
+And /^I press the image dropdown$/ do
+  @browser.execute_script("$('.blocklyRectangularDropdownArrow').parent().siblings().filter('[fill-opacity]').simulate( 'drag', {handle: 'corner', dx: 0, dy: 0, moves: 5});")
+end
