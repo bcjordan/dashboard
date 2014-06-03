@@ -87,7 +87,9 @@ SQL
       @all_script_levels = Script.twenty_hour_script.script_levels.includes({ level: :game })
  
       @levels_attempted = User.joins(:user_levels).group(:level_id).where('best_result > 0').count
+      @levels_attempted.default = 0
       @levels_passed = User.joins(:user_levels).group(:level_id).where('best_result >= 20').count
+      @levels_passed.default = 0
 
       @stage_map = @all_script_levels.group_by { |sl| sl.level.game }
     end
