@@ -83,11 +83,13 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "can create a user with age" do
-    assert_difference('User.count') do
-      user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
+    Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
+      assert_difference('User.count') do
+        user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
       
-      assert_equal Date.new(Date.today.year - 7, Date.today.month, Date.today.day), user.birthday
-      assert_equal 7, user.age
+        assert_equal Date.new(Date.today.year - 7, Date.today.month, Date.today.day), user.birthday
+        assert_equal 7, user.age
+      end
     end
   end
 
@@ -109,12 +111,14 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "can update a user with age" do
-    user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
-    assert_equal 7, user.age
+    Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
+      user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
+      assert_equal 7, user.age
 
-    user.update_attributes(age: '9')
-    assert_equal Date.new(Date.today.year - 9, Date.today.month, Date.today.day), user.birthday
-    assert_equal 9, user.age
+      user.update_attributes(age: '9')
+      assert_equal Date.new(Date.today.year - 9, Date.today.month, Date.today.day), user.birthday
+      assert_equal 9, user.age
+    end
   end
 
   test "does not update birthday if age is the same" do
