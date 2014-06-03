@@ -13,8 +13,8 @@ class ScriptLevelsControllerTest < ActionController::TestCase
     @script_level = @script.script_levels.fifth
 
     @custom_script = create(:script, :name => 'laurel')
-    @custom_stage_1 = create(:stage, script: @custom_script, position: 1)
-    @custom_stage_2 = create(:stage, script: @custom_script, position: 2)
+    @custom_stage_1 = create(:stage, script: @custom_script, name: 'Laurel Stage 1', position: 1)
+    @custom_stage_2 = create(:stage, script: @custom_script, name: 'Laurel Stage 2', position: 2)
     @custom_s1_l1 = create(:script_level, script: @custom_script,
                            stage: @custom_stage_1, :position => 1)
     @custom_s2_l1 = create(:script_level, script: @custom_script,
@@ -222,5 +222,17 @@ class ScriptLevelsControllerTest < ActionController::TestCase
     next_script_level = ScriptLevel.where(level: Level.where(level_num: "3_9").first).first
     get :show, script_id: script_level.script.id, id: next_script_level.id
     assert_equal blocks, assigns["start_blocks"]
+  end
+
+  test 'should render title for puzzle in default script' do
+    get :show, script_id: @script.id, id: @script_level.id
+    assert_equal 'Code.org - The Maze #4',
+      Nokogiri::HTML(@response.body).css('title').text.strip
+  end
+
+  test 'should render title for puzzle in custom script' do
+    get :show, script_id: @custom_script.name, stage_id: @custom_s2_l1.stage, id: @custom_s2_l1.position
+    assert_equal 'Code.org - custom-script-laurel: laurel-stage-2 #1',
+      Nokogiri::HTML(@response.body).css('title').text.strip
   end
 end
