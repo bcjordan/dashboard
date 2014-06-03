@@ -34,14 +34,16 @@
         .games
           - sl_group = sl_group.sort_by {|sl| sl.stage_or_game_position}
           - sl_group.each do |sl|
-            - passed, link = level_info(user, sl)
-            - if passed
-              %a{ href: link, class: "level_link level_link_done"}
-                = check_mark_html
-            - else
-              %a{ href: link, class: "level_link"}
-                %span.puzzle-number
-                  #{sl.stage_or_game_position}
+            .level{title: defined?(admin_script) ? sl.level.name : ''}
+              - passed, link = level_info(user, sl)
+              %a{ href: link, class: "level_link#{passed ? ' level_link_done' : ''}"}
+                - if passed && !defined?(admin_script)
+                  = check_mark_html
+                - else
+                  %span.puzzle-number
+                    #{sl.stage_or_game_position}
+              -  if defined? admin_script
+                = link_to(t('crud.edit'), edit_game_level_path(sl.level.game, sl.level), style: 'display: block')
 
 -if (!defined? hide_trophies)
   -if (!defined? trophies_below) || trophies_below

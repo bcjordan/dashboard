@@ -92,4 +92,27 @@ class ScriptsControllerTest < ActionController::TestCase
       get :show, id: 'Hat'
     end
   end
+
+  test 'should destroy script if admin' do
+    script = create(:script, name: 'test destroy')
+    delete :destroy, id: script.id
+    assert_raises ActiveRecord::RecordNotFound do
+      get :show, id: script.id
+    end
+  end
+
+  test 'should not destroy script if not admin' do
+    script = create(:script, name: 'test destroy')
+
+    sign_out @admin
+    delete :destroy, id: script.id
+    assert_redirected_to_sign_in
+
+    sign_in @not_admin
+    delete :destroy, id: script.id
+    assert_response :forbidden
+
+    get :show, id: script.id
+    assert_response :success
+  end
 end

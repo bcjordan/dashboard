@@ -10,9 +10,18 @@ class ScriptsController < ApplicationController
     rake if params[:rake] == '1'
     # Show all the scripts that a user has created.
     @scripts = Script.all
+    @script_file_exists = {}
+    @scripts.each{|script| @script_file_exists[script] = File.exists?("config/scripts/#{script.name}.script")}
   end
 
   def show
+  end
+
+  def destroy
+    @script.destroy
+    respond_to do |format|
+      format.html { redirect_to scripts_path, notice: I18n.t('crud.destroyed', model: Script.model_name.human) }
+    end
   end
 
   def edit

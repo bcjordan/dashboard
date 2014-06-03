@@ -1,8 +1,9 @@
 %h3= t('landing.prerelease')
 
 %h2= @script.name
+= link_to I18n.t('crud.edit'), edit_script_path
 
-= render partial: 'shared/user_stats', locals: { user: current_user, hide_trophies: true, width: "100%"}
+= render partial: 'shared/user_stats', locals: { user: current_user, hide_trophies: true, width: "100%", admin_script: true}
 
 %div{style: "clear:both"}
 %br/
