@@ -462,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -2494,9 +2496,9 @@ Jigsaw.onPuzzleComplete = function() {
   Jigsaw.testResults = BlocklyApps.getTestResults();
 
   if (Jigsaw.testResults >= BlocklyApps.TestResults.FREE_PLAY) {
-    BlocklyApps.playAudio('win', {volume : 0.5});
+    BlocklyApps.playAudio('win');
   } else {
-    BlocklyApps.playAudio('failure', {volume : 0.5});
+    BlocklyApps.playAudio('failure');
   }
 
   if (level.failForOther1Star && !BlocklyApps.levelComplete) {
@@ -6354,6 +6356,15 @@ exports.executeIfConditional = function (conditional, fn) {
       return fn.apply(this, arguments);
     }
   };
+};
+
+/**
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
+ */
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
 };
 
 },{}],31:[function(require,module,exports){

@@ -462,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -8609,7 +8611,7 @@ Maze.execute = function(stepMode) {
   //    during execution, in which case we set ResultType to ERROR.
   // The animation should be fast if execution was successful, slow otherwise
   // to help the user see the mistake.
-  BlocklyApps.playAudio('start', {volume: 0.5});
+  BlocklyApps.playAudio('start');
   try {
     codegen.evalWith(code, {
       BlocklyApps: BlocklyApps,
@@ -8831,7 +8833,7 @@ function animateAction (action, stepMode) {
           break;
         default:
           timeoutList.setTimeout(function() {
-            BlocklyApps.playAudio('failure', {volume: 0.5});
+            BlocklyApps.playAudio('failure');
           }, stepSpeed);
           break;
       }
@@ -9003,11 +9005,10 @@ Maze.scheduleFail = function(forward) {
   var squareType = Maze.map[targetY] && Maze.map[targetY][targetX];
   if (squareType === SquareType.WALL || squareType === undefined) {
     // Play the sound
-    BlocklyApps.playAudio('wall', {volume: 0.5});
+    BlocklyApps.playAudio('wall');
     if (squareType !== undefined) {
       // Check which type of wall pegman is hitting
-      BlocklyApps.playAudio('wall' + Maze.wallMap[targetY][targetX],
-                            {volume: 0.5});
+      BlocklyApps.playAudio('wall' + Maze.wallMap[targetY][targetX]);
     }
 
     // Play the animation of hitting the wall
@@ -9037,7 +9038,7 @@ Maze.scheduleFail = function(forward) {
       Maze.displayPegman(Maze.pegmanX + deltaX / 4,
                          Maze.pegmanY + deltaY / 4,
                          frame);
-      BlocklyApps.playAudio('failure', {volume: 0.5});
+      BlocklyApps.playAudio('failure');
     }, stepSpeed * 2);
     timeoutList.setTimeout(function() {
       Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
@@ -9056,7 +9057,7 @@ Maze.scheduleFail = function(forward) {
     }
   } else if (squareType == SquareType.OBSTACLE) {
     // Play the sound
-    BlocklyApps.playAudio('obstacle', {volume: 0.5});
+    BlocklyApps.playAudio('obstacle');
 
     // Play the animation
     var obsId = targetX + Maze.COLS * targetY;
@@ -9088,7 +9089,7 @@ Maze.scheduleFail = function(forward) {
       }, stepSpeed * 2);
     }
     timeoutList.setTimeout(function() {
-      BlocklyApps.playAudio('failure', {volume: 0.5});
+      BlocklyApps.playAudio('failure');
     }, stepSpeed);
   }
 };
@@ -9135,13 +9136,13 @@ Maze.scheduleDance = function(sound) {
   // If sound == true, play the goal animation, else reset it
   var finishIcon = document.getElementById('finish');
   if (sound && finishIcon) {
-    BlocklyApps.playAudio('winGoal', {volume: 0.5});
+    BlocklyApps.playAudio('winGoal');
     finishIcon.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
                               skin.goalAnimation);
   }
 
   if (sound) {
-    BlocklyApps.playAudio('win', {volume: 0.5});
+    BlocklyApps.playAudio('win');
   }
 
   var danceSpeed = 150;  // Slow down victory animation a bit.
@@ -9193,7 +9194,7 @@ var scheduleDirtChange = function(options) {
   } else {
     Maze.updateDirt(row, col);
   }
-  BlocklyApps.playAudio(options.sound, {volume: 0.5});
+  BlocklyApps.playAudio(options.sound);
 };
 
 /**
@@ -10939,6 +10940,15 @@ exports.executeIfConditional = function (conditional, fn) {
       return fn.apply(this, arguments);
     }
   };
+};
+
+/**
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
+ */
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
 };
 
 },{}],48:[function(require,module,exports){

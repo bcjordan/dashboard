@@ -462,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -5115,6 +5117,7 @@ var commonMsg = require('../../locale/hr_hr/common');
 var codegen = require('../codegen');
 var tiles = require('./tiles');
 var studio = require('./studio');
+var utils = require('../utils');
 var _ = require('../lodash');
 
 var Direction = tiles.Direction;
@@ -5605,13 +5608,20 @@ exports.install = function(blockly, blockInstallOptions) {
         distParam + ');\n';
   };
 
+  function onSoundSelected(soundValue) {
+    if (soundValue === RANDOM_VALUE) {
+      return;
+    }
+    BlocklyApps.playAudio(utils.stripQuotes(soundValue));
+  }
+
   blockly.Blocks.studio_playSound = {
     // Block for playing sound.
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.SOUNDS), 'SOUND');
+          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected), 'SOUND');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
@@ -6120,7 +6130,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/hr_hr/common":36,"../../locale/hr_hr/studio":37,"../codegen":6,"../lodash":9,"./studio":20,"./tiles":21}],15:[function(require,module,exports){
+},{"../../locale/hr_hr/common":36,"../../locale/hr_hr/studio":37,"../codegen":6,"../lodash":9,"../utils":34,"./studio":20,"./tiles":21}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8037,7 +8047,7 @@ Studio.execute = function() {
                                    'SPRITE1',
                                    'SPRITE2');
 
-  BlocklyApps.playAudio('start', {volume: 0.5});
+  BlocklyApps.playAudio('start');
 
   BlocklyApps.reset(false);
 
@@ -8073,9 +8083,9 @@ Studio.onPuzzleComplete = function() {
   }
 
   if (Studio.testResults >= BlocklyApps.TestResults.FREE_PLAY) {
-    BlocklyApps.playAudio('win', {volume : 0.5});
+    BlocklyApps.playAudio('win');
   } else {
-    BlocklyApps.playAudio('failure', {volume : 0.5});
+    BlocklyApps.playAudio('failure');
   }
 
   if (level.editCode) {
@@ -8320,7 +8330,7 @@ Studio.callCmd = function (cmd) {
       break;
     case 'playSound':
       BlocklyApps.highlight(cmd.id);
-      BlocklyApps.playAudio(cmd.opts.soundName, {volume: 0.5});
+      BlocklyApps.playAudio(cmd.opts.soundName);
       Studio.playSoundCount++;
       break;
     case 'showTitleScreen':
@@ -8753,7 +8763,7 @@ Studio.allFinishesComplete = function() {
     }
     if (playSound && finished != Studio.spriteFinishCount) {
       // Play a sound unless we've hit the last flag
-      BlocklyApps.playAudio('flag', {volume: 0.5});
+      BlocklyApps.playAudio('flag');
     }
     return (finished == Studio.spriteFinishCount);
   }
@@ -9301,6 +9311,15 @@ exports.executeIfConditional = function (conditional, fn) {
       return fn.apply(this, arguments);
     }
   };
+};
+
+/**
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
+ */
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
 };
 
 },{}],35:[function(require,module,exports){

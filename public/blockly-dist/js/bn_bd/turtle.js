@@ -462,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -8068,7 +8070,7 @@ Turtle.execute = function() {
   // api.log now contains a transcript of all the user's actions.
   // Reset the graphic and animate the transcript.
   BlocklyApps.reset();
-  BlocklyApps.playAudio('start', {volume : 0.5, loop : true});
+  BlocklyApps.playAudio('start', {loop : true});
   Turtle.pid = window.setTimeout(Turtle.animate, 100);
 
   // Disable toolbox while running
@@ -8446,9 +8448,9 @@ Turtle.checkAnswer = function() {
   BlocklyApps.stopLoopingAudio('start');
   if (Turtle.testResults === BlocklyApps.TestResults.FREE_PLAY ||
       Turtle.testResults >= BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL) {
-    BlocklyApps.playAudio('win', {volume : 0.5});
+    BlocklyApps.playAudio('win');
   } else {
-    BlocklyApps.playAudio('failure', {volume : 0.5});
+    BlocklyApps.playAudio('failure');
   }
 
   var reportData = {
@@ -8577,6 +8579,15 @@ exports.executeIfConditional = function (conditional, fn) {
       return fn.apply(this, arguments);
     }
   };
+};
+
+/**
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
+ */
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
 };
 
 },{}],37:[function(require,module,exports){
