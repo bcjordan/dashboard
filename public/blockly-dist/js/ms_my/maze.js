@@ -5378,7 +5378,7 @@ exports.install = function(blockly, blockInstallOptions) {
         init: function () {
           this.setHSV(184, 1.00, 0.74);
           this.appendDummyInput()
-            .appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldLabel(directionConfig.letter, {fixedSize: {width: 12, height: 18}}))
             .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
