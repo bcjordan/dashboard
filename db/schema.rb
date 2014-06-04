@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140604004005) do
+ActiveRecord::Schema.define(version: 20140604221441) do
 
   create_table "activities", force: true do |t|
     t.integer  "user_id"
@@ -117,6 +117,7 @@ ActiveRecord::Schema.define(version: 20140604004005) do
     t.text     "message",    null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "source"
   end
 
   create_table "level_source_hints", force: true do |t|
