@@ -6,6 +6,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :authentication_keys => [:login]
 
   PROVIDER_MANUAL = 'manual'
+  PROVIDER_SPONSORED = 'sponsored'
 
   TYPE_STUDENT = 'student'
   TYPE_TEACHER = 'teacher'
@@ -43,13 +44,15 @@ class User < ActiveRecord::Base
   validates_format_of :email, with: Devise::email_regexp, allow_blank: true, on: :create
   validates_length_of :email, maximum: 255, allow_blank: true, on: :create
   # this is redundant to devise, but required for tests?
-  validates_uniqueness_of :email, allow_nil: true, allow_blank: true, case_sensitive: false
+  validates_uniqueness_of :email, allow_blank: true, case_sensitive: false
+  validates_presence_of :email, if: :email_required?
 
   validates_length_of :parent_email, maximum: 255
 
-  validates_length_of :username, within: 5..20
-  validates_format_of :username, with: /\A[a-z0-9\-\_\.]+\z/i, on: :create
-  validates_uniqueness_of :username, allow_nil: false, allow_blank: false, case_sensitive: false
+  validates_length_of :username, within: 5..20, allow_blank: true
+  validates_format_of :username, with: /\A[a-z0-9\-\_\.]+\z/i, on: :create, allow_blank: true
+  validates_uniqueness_of :username, allow_blank: true, case_sensitive: false
+  validates_presence_of :username, if: :username_required?
 
   validates_uniqueness_of :prize_id, allow_nil: true
   validates_uniqueness_of :teacher_prize_id, allow_nil: true
@@ -81,8 +84,15 @@ class User < ActiveRecord::Base
   end
 
   def email_required?
-    (User::PROVIDER_MANUAL != provider) ||
-      teacher? || admin?
+    return true if teacher? || admin?
+    return false if provider == User::PROVIDER_MANUAL
+    return false if provider == User::PROVIDER_SPONSORED
+    true
+  end
+
+  def username_required?
+    return false if provider == User::PROVIDER_SPONSORED
+    true
   end
 
   def update_with_password(params, *options)
@@ -299,5 +309,17 @@ SQL
     end
 
     return false
+  end
+
+  def scripts
+    # TODO just store this...
+    # the SQL that AR generates is actually pretty reasonable but it's still on the slow side
+    # User Load (0.4ms)  SELECT `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+    # (1.0ms)  SELECT DISTINCT script_id FROM `user_levels` LEFT OUTER JOIN `levels` ON `levels`.`id` = `user_levels`.`level_id` LEFT OUTER JOIN `script_levels` ON `script_levels`.`level_id` = `levels`.`id` LEFT OUTER JOIN `scripts` ON `scripts`.`id` = `script_levels`.`script_id` WHERE `user_levels`.`user_id` = 1 ORDER BY user_levels.id desc
+   # Script Load (0.4ms)  SELECT `scripts`.* FROM `scripts` WHERE `scripts`.`id` IN (23, 27, 6, 2, 1) ORDER BY field(id, 23,27,6,2,1)
+
+    script_ids = user_levels.includes(level: {script_levels: :script} ).order('user_levels.id desc').pluck('DISTINCT script_id')
+ 
+    Script.where(id: script_ids).order("field(id, #{script_ids.join(',')})",)
   end
 end
