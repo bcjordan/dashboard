@@ -16,6 +16,7 @@ namespace :seed do
 
   task import_stanford_hints: :environment do
     LevelSourceHint.transaction do
+      LevelSourceHint.delete_all("hint_id is not null")
       CSV.read('config/stanford-hint-ids.tsv', { col_sep: "\t" }).each do |row|
         LevelSourceHint.create!(level_source_id: row[0], hint_id: row[1])
       end
@@ -298,6 +299,6 @@ namespace :seed do
 
   task analyze_data: [:ideal_solutions, :frequent_level_sources]
 
-  task all: [:videos, :concepts, :scripts, :trophies, :prize_providers, :callouts]
+  task all: [:videos, :import_stanford_hints, :concepts, :scripts, :trophies, :prize_providers, :callouts]
 
 end
