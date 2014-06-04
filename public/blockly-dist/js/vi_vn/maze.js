@@ -8377,7 +8377,9 @@ BlocklyApps.reset = function(first) {
 
   Maze.pegmanD = Maze.startDirection;
   if (first) {
-    Maze.scheduleDance(false);
+    if (skin.danceOnLoad) {
+      Maze.scheduleDance(false);
+    }
     timeoutList.setTimeout(function() {
       stepSpeed = 100;
       Maze.scheduleTurn(Maze.startDirection);
@@ -9121,27 +9123,28 @@ Maze.setTileTransparent = function() {
 };
 
 /**
- * Schedule the animations and sound for a victory dance.
- * @param {boolean} sound Play the victory sound.
+ * Schedule the animations and sound for a dance.
+ * @param {boolean} victoryDance This is a victory dance after completing the
+ * puzzle (vs. dancing on load).
  */
-Maze.scheduleDance = function(sound) {
+Maze.scheduleDance = function(victoryDance) {
   var frame = tiles.directionToFrame(Maze.pegmanD);
   Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 16);
 
   // Setting the tiles to be transparent
-  if (sound && skin.transparentTileEnding) {
+  if (victoryDance && skin.transparentTileEnding) {
     Maze.executionInfo.queueAction('tile_transparent', null);
   }
 
-  // If sound == true, play the goal animation, else reset it
+  // If victoryDance == true, play the goal animation, else reset it
   var finishIcon = document.getElementById('finish');
-  if (sound && finishIcon) {
+  if (victoryDance && finishIcon) {
     BlocklyApps.playAudio('winGoal');
     finishIcon.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
                               skin.goalAnimation);
   }
 
-  if (sound) {
+  if (victoryDance) {
     BlocklyApps.playAudio('win');
   }
 
@@ -9158,9 +9161,11 @@ Maze.scheduleDance = function(sound) {
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 20);
   }, danceSpeed * 4);
-  timeoutList.setTimeout(function() {
-    Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
-  }, danceSpeed * 5);
+  if (!victoryDance) {
+    timeoutList.setTimeout(function() {
+      Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
+    }, danceSpeed * 5);
+  }
 };
 
 /**
@@ -9364,10 +9369,18 @@ var CONFIGS = {
     look: '#000',
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
+    idlePegmanAnimation: 'idle_avatar.gif',
+    wallPegmanAnimation: 'wall_avatar.png',
+    movePegmanAnimation: 'move_avatar.png',
+    movePegmanAnimationSpeedScale: 1.5,
+    movePegmanAnimationFrameNumber: 9,
     background: 4,
     dirtSound: true,
-    pegmanYOffset: -8,
-    tileSheetWidth: 5
+    tileSheetWidth: 5,
+    pegmanYOffset: 0,
+    pegmanHeight: 50,
+    pegmanWidth: 50,
+    danceOnLoad: false
   },
 
   farmer: {
@@ -9484,6 +9497,7 @@ exports.load = function(assetUrl, id) {
   skin.pegmanHeight = config.pegmanHeight || 52;
   skin.pegmanWidth = config.pegmanWidth || 49;
   skin.pegmanYOffset = config.pegmanYOffset || 0;
+  skin.danceOnLoad = (config.danceOnLoad === undefined) ? true : config.danceOnLoad;
   return skin;
 };
 

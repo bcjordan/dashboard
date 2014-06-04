@@ -55,6 +55,19 @@ class RegistrationsControllerTest < ActionController::TestCase
     assert_equal nil, assigns(:user).birthday
   end
 
+
+  test "create as student requires username" do
+    student_params = {username: nil,
+                      name: "A name",
+                      password: "apassword",
+                      email: 'an@email.address',
+                      user_type: 'student'}
+    
+    assert_does_not_create(User) do
+      post :create, user: student_params
+    end
+  end
+
   test "update student with age" do
     Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
       student = create :student_user, birthday: '1981/03/24'

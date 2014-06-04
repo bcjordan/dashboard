@@ -197,9 +197,9 @@ class SectionsControllerTest < ActionController::TestCase
     # "password"=>"[FILTERED]"}, {"name"=>"", "username"=>"",
     # "password"=>"[FILTERED]"}]}, "commit"=>"Save", "id"=>"2"}
 
-    students_attributes = [{name: 'Laurel T', username: 'laurelt', password: 'laurelt'},
-                           {name: 'Laurel X', username: 'laurelx', password: 'laurelx'},
-                           {name: '', username: '', password: ''} # form generates an empty row
+    students_attributes = [{name: 'Laurel T'},
+                           {name: 'Laurel X'},
+                           {name: ''} # form generates an empty row
                           ]
 
 
@@ -216,7 +216,7 @@ class SectionsControllerTest < ActionController::TestCase
 
   test "should not update students for section that belongs to another teacher" do
     assert_no_difference('User.count') do
-      patch :update_students, id: @chris_section, section: { students_attributes: [{name: 'Laurel T', username: 'laurelt', password: 'laurelt'} ] }
+      patch :update_students, id: @chris_section, section: { students_attributes: [{name: 'Laurel T'} ] }
     end
 
     # not updated
@@ -235,9 +235,9 @@ class SectionsControllerTest < ActionController::TestCase
     # "password"=>"[FILTERED]"}, {"name"=>"", "username"=>"",
     # "password"=>"[FILTERED]"}]}, "commit"=>"Save", "id"=>"2"}
 
-    students_attributes = [{name: 'Laurel T', username: 'laurelt', password: 'laurelt'},
-                           {name: 'Laurel X', username: 'lx', password: 'laurelx'}, # username too short
-                           {name: '', username: '', password: ''} # form generates an empty row
+    students_attributes = [{name: 'Laurel T'},
+                           {name: 'L' * 100 }, # name too long
+                           {name: ''} # form generates an empty row
                           ]
 
 
@@ -250,7 +250,7 @@ class SectionsControllerTest < ActionController::TestCase
     
     assert_equal @laurel_section_1, assigns(:section)
     # TODO improve error messaging
-    assert_equal ["Followers student user username is too short (minimum is 5 characters)"],
+    assert_equal ["Followers student user name is too long (maximum is 70 characters)"],
       assigns(:section).errors.full_messages
   end
 
