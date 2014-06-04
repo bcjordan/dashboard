@@ -299,6 +299,6 @@ namespace :seed do
 
   task analyze_data: [:ideal_solutions, :frequent_level_sources]
 
-  task all: [:videos, :import_stanford_hints, :concepts, :scripts, :trophies, :prize_providers, :callouts]
+  task all: [:videos, :concepts, :scripts, :trophies, :prize_providers, :callouts]
 
 end
