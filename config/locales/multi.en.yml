@@ -32,8 +32,10 @@ en:
         /script_assets/matches/images/head.jpg: /script_assets/matches/images/head.jpg
         This puzzle is all about selecting the correct flowers.: This puzzle is all
           about selecting the correct flowers.
-        Which flowers are yellow?: Which flowers are yellow?
+        Instructions: Instructions
+        Click the right answer, then submit.: Click the right answer, then submit.
         /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
+        Which flowers are yellow?: Which flowers are yellow?
         /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
         /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
         /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg

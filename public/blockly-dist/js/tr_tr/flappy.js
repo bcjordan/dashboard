@@ -462,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -2005,7 +2007,7 @@ exports.Gravity = {
 };
 
 exports.random = function (values) {
-  var key = Math.floor(Math.random() * values.length); 
+  var key = Math.floor(Math.random() * values.length);
   return values[key];
 };
 
@@ -2052,7 +2054,7 @@ exports.setSpeed = function (id, value) {
 
 exports.playSound = function(id, soundName) {
   BlocklyApps.highlight(id);
-  BlocklyApps.playAudio(soundName, {volume: 0.5});
+  BlocklyApps.playAudio(soundName);
 };
 
 exports.flap = function (id, amount) {
@@ -2083,6 +2085,7 @@ exports.incrementPlayerScore = function(id) {
 var msg = require('../../locale/tr_tr/flappy');
 var commonMsg = require('../../locale/tr_tr/common');
 var blockUtils = require('../block_utils');
+var utils = require('../utils');
 var _ = require('../lodash');
 
 var FLAPPY_VALUE = '"flappy"';
@@ -2276,11 +2279,18 @@ exports.install = function(blockly, blockInstallOptions) {
     return generateSetterCode(this, 'flap');
   };
 
+  function onSoundSelected(soundValue) {
+    if (soundValue === RANDOM_VALUE) {
+      return;
+    }
+    BlocklyApps.playAudio(utils.stripQuotes(soundValue));
+  }
+
   blockly.Blocks.flappy_playSound = {
     // Block for playing sound.
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
+      var dropdown = new blockly.FieldDropdown(this.VALUES, onSoundSelected);
       dropdown.setValue(this.VALUES[7][1]);
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
@@ -2680,7 +2690,7 @@ exports.install = function(blockly, blockInstallOptions) {
   delete blockly.Blocks.procedures_ifreturn;
 };
 
-},{"../../locale/tr_tr/common":35,"../../locale/tr_tr/flappy":36,"../block_utils":3,"../lodash":18}],11:[function(require,module,exports){
+},{"../../locale/tr_tr/common":35,"../../locale/tr_tr/flappy":36,"../block_utils":3,"../lodash":18,"../utils":33}],11:[function(require,module,exports){
 module.exports = {
   WORKSPACE_BUFFER: 20,
   WORKSPACE_COL_WIDTH: 210,
@@ -3514,7 +3524,7 @@ Flappy.execute = function() {
                                       Flappy: api } );
 
 
-  BlocklyApps.playAudio('start', {volume: 0.5});
+  BlocklyApps.playAudio('start');
 
   // BlocklyApps.reset(false);
 
@@ -3565,9 +3575,9 @@ Flappy.onPuzzleComplete = function() {
 
 
   if (Flappy.testResults >= BlocklyApps.TestResults.FREE_PLAY) {
-    BlocklyApps.playAudio('win', {volume : 0.5});
+    BlocklyApps.playAudio('win');
   } else {
-    BlocklyApps.playAudio('failure', {volume : 0.5});
+    BlocklyApps.playAudio('failure');
   }
 
   if (level.editCode) {
@@ -7340,18 +7350,18 @@ exports.load = function(assetUrl, id) {
     winAvatar: skinUrl('win_avatar.png'),
     failureAvatar: skinUrl('failure_avatar.png'),
     repeatImage: assetUrl('media/common_images/repeat-arrows.png'),
-    leftArrow: assetUrl('media/common_images/move-west-arrow.png'),
-    downArrow: assetUrl('media/common_images/move-south-arrow.png'),
-    upArrow: assetUrl('media/common_images/move-north-arrow.png'),
-    rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftArrow: assetUrl('media/common_images/moveleft.png'),
+    downArrow: assetUrl('media/common_images/movedown.png'),
+    upArrow: assetUrl('media/common_images/moveup.png'),
+    rightArrow: assetUrl('media/common_images/moveright.png'),
     leftArrowSmall: assetUrl('media/common_images/draw-west-arrow.png'),
     downArrowSmall: assetUrl('media/common_images/draw-south-arrow.png'),
     upArrowSmall: assetUrl('media/common_images/draw-north-arrow.png'),
     rightArrowSmall: assetUrl('media/common_images/draw-east-arrow.png'),
-    leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
-    downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
-    upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
-    rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
+    leftJumpArrow: assetUrl('media/common_images/jumpleft.png'),
+    downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
+    upJumpArrow: assetUrl('media/common_images/jumpup.png'),
+    rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
@@ -7899,6 +7909,15 @@ exports.executeIfConditional = function (conditional, fn) {
       return fn.apply(this, arguments);
     }
   };
+};
+
+/**
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
+ */
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
 };
 
 },{}],34:[function(require,module,exports){
