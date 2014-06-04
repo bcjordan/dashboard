@@ -15,7 +15,8 @@ PEGMAN_ID = 'pegman';
 PEGMAN_ORDERING_CLASS = 'pegman-location';
 
 function clipPathIDForImage(image) {
-  return $(image).attr('clip-path').match(/\(\#(.*)\)/)[1];
+  var clipPath = jQuery(image).attr('clip-path');
+  return clipPath ? clipPath.match(/\(\#(.*)\)/)[1] : undefined;
 }
 
 function wrapImageAndClipPathWithSVG(image, wrapperClass) {
