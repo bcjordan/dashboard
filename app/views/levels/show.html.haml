@@ -1,8 +1,4 @@
-- if (script = @script_level.try(:script)) && !(script.default_script?)
-  - @page_title = "#{data_t_suffix('script.name', script.name, 'desc')}: #{@script_level.name} ##{@script_level.stage_or_game_position}"
-- else
-  - @page_title = "#{data_t('game.name', @game.name)} ##{@script_level.try(:game_chapter) || @level.level_num} "
-
+- @page_title = level_title
 - content_for :head do
   - if @game.share_mobile_fullscreen?
     = tag('meta', :property => 'og:image', :content => show_image(:app => @game.app))
