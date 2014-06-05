@@ -11,6 +11,9 @@
   $purple: #7665a0;
 
   #teacher-nav {
+    overflow: hidden;
+    width: 100%;
+
     font-size: 16px;
     border-bottom: 5px solid $purple;
     .tab {
@@ -40,6 +43,16 @@
   }
 
 
+- teacher_mode = (controller_name == 'sections' || controller_name == 'users')
+
+%div{ id: 'teacher-nav' }
+  = link_to_unless teacher_mode, 'Classroom', sections_path, class: 'tab' do |name|
+    %span{class: 'tab'}= name
+  = link_to_if teacher_mode, 'Your progress', '/', class: 'tab' do |name|
+    %span{class: 'tab'}= name
+
+
+%br/
 
 - current ||= nil
 %div{ id: 'teacher-nav' }

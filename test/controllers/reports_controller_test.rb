@@ -16,6 +16,14 @@ class ReportsControllerTest < ActionController::TestCase
     @script_level2 = create(:script_level, script: @script, stage: @stage2)
     @script_level.move_to_bottom
     @script_level2.move_to_bottom
+
+    @teacher = create(:teacher)
+    @teacher_section = create(:section, :user => @teacher)
+
+    @student = create(:user)
+    @follower = Follower.create(:section => @teacher_section, :user => @teacher, :student_user => @student)
+
+    @other_student = create(:user)
   end
 
   test "should setup properly" do
@@ -38,6 +46,14 @@ class ReportsControllerTest < ActionController::TestCase
     sign_in @not_admin
 
     get :user_stats, :user_id => @not_admin.id
+
+    assert_response :success
+  end
+
+  test "should get user_stats for students if teacher" do
+    sign_in @teacher
+
+    get :user_stats, :user_id => @student.id
 
     assert_response :success
   end
@@ -71,6 +87,44 @@ class ReportsControllerTest < ActionController::TestCase
     assert_equal 20, css.count
   end
 
+
+  test "should get usage" do
+    get :usage, :user_id => @not_admin.id
+    assert_response :success
+  end
+
+  test "should not get usage if not signed in" do
+    sign_out @admin
+    get :usage, :user_id => @not_admin.id
+
+    assert_redirected_to_sign_in
+  end
+
+  test "should get usage for yourself if not admin" do
+    sign_in @not_admin
+
+    get :usage, :user_id => @not_admin.id
+
+    assert_response :success
+  end
+
+
+  test "should get usage for students if teacher" do
+    sign_in @teacher
+
+    get :usage, :user_id => @student.id
+
+    assert_response :success
+  end
+
+  test "should not get usage for other users if not admin or teacher" do
+    sign_in create(:user)
+
+    get :usage, :user_id => @not_admin.id
+
+    assert_response :forbidden
+  end
+
   test "should get header_stats" do
     get :header_stats
     assert_response :success
@@ -98,35 +152,6 @@ class ReportsControllerTest < ActionController::TestCase
     get :prizes
 
     assert_redirected_to_sign_in
-  end
-
-  test "should get usage" do
-    get :usage, :user_id => @not_admin.id
-    assert_response :success
-  end
-
-  test "should not get usage if not signed in" do
-    sign_out @admin
-    get :usage, :user_id => @not_admin.id
-
-    assert_redirected_to_sign_in
-  end
-
-  test "should get usage for yourself if not admin" do
-    sign_in @not_admin
-
-    get :usage, :user_id => @not_admin.id
-
-    assert_response :success
-  end
-
-  test "should get usage for other users if not admin" do
-    # hm. really?
-    sign_in create(:user)
-
-    get :usage, :user_id => @not_admin.id
-
-    assert_response :success
   end
 
   generate_admin_only_tests_for :all_usage

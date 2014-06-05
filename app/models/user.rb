@@ -319,7 +319,9 @@ SQL
    # Script Load (0.4ms)  SELECT `scripts`.* FROM `scripts` WHERE `scripts`.`id` IN (23, 27, 6, 2, 1) ORDER BY field(id, 23,27,6,2,1)
 
     script_ids = user_levels.includes(level: {script_levels: :script} ).order('user_levels.id desc').pluck('DISTINCT script_id')
- 
+
+    return [] if script_ids.empty?
+      
     Script.where(id: script_ids).order("field(id, #{script_ids.join(',')})",)
   end
 end
