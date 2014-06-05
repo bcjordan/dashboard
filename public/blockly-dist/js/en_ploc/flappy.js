@@ -784,7 +784,6 @@ BlocklyApps.TestResults = {
   // Two stars.  The level was solved in an acceptable, but not ideal, manner.
   TOO_MANY_BLOCKS_FAIL: 20,   // More than the ideal number of blocks were used.
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
-  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy app failure. TODO: Fold into prior case.
 
   // Other.
   FREE_PLAY: 30,              // The user is in free-play mode.
@@ -1428,84 +1427,85 @@ var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
   var message;
-  switch (options.feedbackType) {
-    case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
-      message = msg.emptyBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
-      message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
-      break;
-    case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
-      message = options.level.levelIncompleteError ||
-          msg.levelIncompleteError();
-      break;
-    case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
-      message = msg.extraTopBlocks();
-      break;
-    // For completing level, user gets at least one star.
-    case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
-      message = options.level.other1StarError || options.message;
-      break;
-    // Two stars for using too many blocks.
-    case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
-      message = msg.numBlocksNeeded({
-        numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
-        puzzleNumber: options.level.puzzle_number || 0
-      });
-      break;
-    case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
-      message = msg.tooMuchWork();
-      break;
-    case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
-      message = msg.flappySpecificFail();
-      break;
-    case BlocklyApps.TestResults.EDIT_BLOCKS:
-      message = options.level.edit_blocks_success;
-      break;
-    case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
-      /* fallthrough */
-    case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
-      message = msg.missingBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.ALL_PASS:
-      var finalLevel = (options.response &&
-          (options.response.message == "no more levels"));
-      var stageCompleted = null;
-      if (options.response && options.response.stage_changing) {
-        stageCompleted = options.response.stage_changing.previous.name;
-      }
-      var msgParams = {
-        numTrophies: options.numTrophies,
-        stageNumber: 0, // TODO: remove once localized strings have been fixed
-        stageName: stageCompleted,
-        puzzleNumber: options.level.puzzle_number || 0
-      };
-      if (options.numTrophies > 0) {
-        message = finalLevel ? msg.finalStageTrophies(msgParams) :
-                               stageCompleted ?
-                                  msg.nextStageTrophies(msgParams) :
-                                  msg.nextLevelTrophies(msgParams);
-      } else {
-        message = finalLevel ? msg.finalStage(msgParams) :
-                               stageCompleted ?
-                                   msg.nextStage(msgParams) :
-                                   msg.nextLevel(msgParams);
-      }
-      break;
-    // Free plays
-    case BlocklyApps.TestResults.FREE_PLAY:
-      message = options.appStrings.reinfFeedbackMsg;
-      break;
-  }
-  // Database hint overwrites the default hint.
+
+  // If there's a database hint, use that.
   if (options.response && options.response.hint) {
     message = options.response.hint;
+  } else {
+    // Otherwise, the message will depend on the test result.
+    switch (options.feedbackType) {
+      case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
+        message = msg.emptyBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
+        message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
+        break;
+      case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
+        message = options.level.levelIncompleteError ||
+            msg.levelIncompleteError();
+        break;
+      case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
+        message = msg.extraTopBlocks();
+        break;
+      // For completing level, user gets at least one star.
+      case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
+        message = options.level.other1StarError || options.message;
+        break;
+      // Two stars for using too many blocks.
+      case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
+        message = msg.numBlocksNeeded({
+          numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
+          puzzleNumber: options.level.puzzle_number || 0
+        });
+        break;
+      case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
+        message = msg.tooMuchWork();
+        break;
+      case BlocklyApps.TestResults.EDIT_BLOCKS:
+        message = options.level.edit_blocks_success;
+        break;
+      case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
+        /* fallthrough */
+      case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
+        message = msg.missingBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.ALL_PASS:
+        var finalLevel = (options.response &&
+            (options.response.message == "no more levels"));
+        var stageCompleted = null;
+        if (options.response && options.response.stage_changing) {
+          stageCompleted = options.response.stage_changing.previous.name;
+        }
+        var msgParams = {
+          numTrophies: options.numTrophies,
+          stageNumber: 0, // TODO: remove once localized strings have been fixed
+          stageName: stageCompleted,
+          puzzleNumber: options.level.puzzle_number || 0
+        };
+        if (options.numTrophies > 0) {
+          message = finalLevel ? msg.finalStageTrophies(msgParams) :
+                                 stageCompleted ?
+                                    msg.nextStageTrophies(msgParams) :
+                                    msg.nextLevelTrophies(msgParams);
+        } else {
+          message = finalLevel ? msg.finalStage(msgParams) :
+                                 stageCompleted ?
+                                     msg.nextStage(msgParams) :
+                                     msg.nextLevel(msgParams);
+        }
+        break;
+      // Free plays
+      case BlocklyApps.TestResults.FREE_PLAY:
+        message = options.appStrings.reinfFeedbackMsg;
+        break;
+    }
   }
+
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-   if (options.response && options.response.design &&
-       isFeedbackMessageCustomized(options)) {
+  if (options.response && options.response.design &&
+      isFeedbackMessageCustomized(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1536,7 +1536,9 @@ var isFeedbackMessageCustomized = function(options) {
       (options.feedbackType == BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL &&
        options.level.levelIncompleteError) ||
       (options.feedbackType == BlocklyApps.TestResults.OTHER_1_STAR_FAIL &&
-       options.level.other1StarError);
+       options.level.other1StarError) ||
+      (options.feedbackType == BlocklyApps.TestResults.OTHER_2_STAR_FAIL &&
+       options.level.other2StarError);
 };
 
 exports.createSharingDiv = function(options) {
@@ -3565,14 +3567,14 @@ Flappy.onPuzzleComplete = function() {
   }
 
   // Special case for Flappy level 1 where you have the right blocks, but you
-  // don't flap to the goal.  Note: this currently depends on us getting
-  // TOO_FEW_BLOCKS_FAIL, when really we should probably be getting
-  // LEVEL_INCOMPLETE_FAIL here. (see pivotal item 66362504)
+  // don't flap to the goal.  Note: See pivotal item 66362504 for why we
+  // check for both TOO_FEW_BLOCKS_FAIL and LEVEL_INCOMPLETE_FAIL here.
   if (level.id === "1" &&
-    Flappy.testResults === BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL) {
-    Flappy.testResults = BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL;
+    (Flappy.testResults === BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL ||
+     Flappy.testResults === BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL)) {
+    // Feedback message is found in level.other1StarError.
+    Flappy.testResults = BlocklyApps.TestResults.OTHER_1_STAR_FAIL;
   }
-
 
   if (Flappy.testResults >= BlocklyApps.TestResults.FREE_PLAY) {
     BlocklyApps.playAudio('win');
@@ -3763,6 +3765,7 @@ var checkFinished = function () {
 // todo - i think our prepoluated code counts as LOCs
 
 var constants = require('./constants');
+var flappyMsg = require('../../locale/en_ploc/flappy');
 var tb = require('../block_utils').createToolbox;
 var utils = require('../utils');
 
@@ -3845,7 +3848,9 @@ module.exports = {
     'toolbox':
       tb(flapBlock + playSoundBlock),
     'startBlocks':
-      eventBlock('flappy_whenClick')
+      eventBlock('flappy_whenClick'),
+    'other1StarError':
+      flappyMsg.flappySpecificFail()
   },
 
   '2': {
@@ -4329,7 +4334,7 @@ module.exports.k1_9 = {
     eventBlock('flappy_whenRunButtonClick', setSpeedBlock)
 };
 
-},{"../block_utils":3,"../utils":33,"./constants":11}],15:[function(require,module,exports){
+},{"../../locale/en_ploc/flappy":36,"../block_utils":3,"../utils":33,"./constants":11}],15:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Flappy = require('./flappy');
@@ -8048,8 +8053,6 @@ exports.tooManyBlocksMsg = function(d){return "!!-This puzzle can be solved with
 
 exports.tooMuchWork = function(d){return "!!-You made me do a lot of work!  Could you try repeating fewer times?-!!"};
 
-exports.flappySpecificFail = function(d){return "!!-Your code looks good - it will flap with each click. But you need to click many times to flap to the target.-!!"};
-
 exports.toolboxHeader = function(d){return "!!-Blocks-!!"};
 
 exports.openWorkspace = function(d){return "!!-How It Works-!!"};
@@ -8120,6 +8123,8 @@ exports.flapLarge = function(d){return "!!-flap a large amount-!!"};
 exports.flapVeryLarge = function(d){return "!!-flap a very large amount-!!"};
 
 exports.flapTooltip = function(d){return "!!-Fly Flappy upwards.-!!"};
+
+exports.flappySpecificFail = function(d){return "!!-Your code looks good - it will flap with each click. But you need to click many times to flap to the target.-!!"};
 
 exports.finish = function(d){return "!!-Finish-!!"};
 
