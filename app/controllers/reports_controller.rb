@@ -1,3 +1,7 @@
+# TODO: reorganize this so it's more obvious which actions are for
+# students, teachers, and admins (most likely move into more relevant
+# controllers)
+
 class ReportsController < ApplicationController
   before_filter :authenticate_user!, except: [:header_stats]
 
@@ -7,13 +11,8 @@ class ReportsController < ApplicationController
   include LevelSourceHintsHelper
 
   def user_stats
-    @user = User.find_by_id(params[:user_id])
+    @user = User.find(params[:user_id])
     authorize! :read, @user
-    if !@user || !(@user.id == current_user.id || @user.teachers.include?(current_user) || current_user.admin?)
-      # this may be redundant with the above authorize! check
-      head :forbidden
-      return
-    end
 
     #@recent_activity = Activity.where(['user_id = ?', user.id]).order('id desc').includes({level: :game}).limit(2)
     @recent_levels = UserLevel.find_by_sql(<<SQL)
@@ -35,7 +34,6 @@ SQL
   end
 
   def usage
-    # arbitrary way to find admins
     @user = User.find(params[:user_id])
     authorize! :read, @user
 
