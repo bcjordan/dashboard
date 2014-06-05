@@ -5198,12 +5198,7 @@ Bee.prototype.animateGetNectar = function () {
   }
 
   this.maze_.dirt_[row][col] -= 1;
-  // todo - i have an improvement for how updateDirt works on a different branch
-  if (this.maze_.dirt_[row][col] === 0) {
-    this.maze_.removeDirt(row, col);
-  } else {
-    this.maze_.updateDirt(row, col);
-  }
+  this.maze_.updateDirtImage(row, col);
 
   this.nectar_ += 1;
   this.totalNectar_ += 1;
@@ -5261,7 +5256,7 @@ Bee.prototype.animateMakeHoney = function () {
 
   this.makeHoneyAt(row, col);
 
-  this.maze_.updateDirt(row, col);
+  this.maze_.updateDirtImage(row, col);
 
   this.updateNectarImages_();
   this.updateHoneyImages_();
@@ -5311,9 +5306,8 @@ Bee.prototype.updateHoneyImages_ = function () {
 Bee.prototype.setTilesTransparent = function () {
   for (var row = 0; row < this.initialDirt_.length; row++) {
     for (var col = 0; col < this.initialDirt_[row].length; col++) {
-      if (this.isHive(row, col)) {
-        this.maze_.removeDirt(row, col);
-      }
+      this.maze_.dirt_[row][col] = 0;
+      this.maze_.updateDirtImage(row, col);
     }
   }
 };
@@ -5378,7 +5372,7 @@ exports.install = function(blockly, blockInstallOptions) {
         init: function () {
           this.setHSV(184, 1.00, 0.74);
           this.appendDummyInput()
-            .appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldLabel(directionConfig.letter, {fixedSize: {width: 12, height: 18}}))
             .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
@@ -8201,17 +8195,65 @@ function stepButtonClick() {
   }
 }
 
-var dirtPositionToIndex = function(row, col) {
-  return Maze.COLS * row + col;
+var cellId = function(prefix, row, col) {
+  return prefix + '_' + row + '_' + col;
 };
 
-var createDirt = function(row, col) {
+
+ // todo (brent) : The next set of dirt related methods probably belong in a single module
+
+
+function spriteIndexForDirt(val) {
+  var spriteIndex;
+
+  if (val < -Maze.DIRT_MAX) {
+    spriteIndex = 0;
+  } else if (val < 0) {
+    spriteIndex = Maze.DIRT_MAX + val + 1;
+  } else if (val > Maze.DIRT_MAX) {
+    spriteIndex = Maze.DIRT_COUNT - 1;
+  } else if (val > 0) {
+    spriteIndex = Maze.DIRT_MAX + val;
+  } else {
+    throw new Error('Expected non-zero dirt.');
+  }
+
+  return spriteIndex;
+}
+
+Maze.updateDirtImage = function (row, col) {
+  var val = Maze.dirt_[row][col];
+  var img = document.getElementById(cellId('dirt', row, col));
+  if (!img) {
+    // we don't need any image
+    if (val === 0) {
+      return;
+    }
+    // we want an image, so let's create one
+    img = createDirt(row, col);
+  }
+
+  img.setAttribute('visibility', val === 0 ? 'hidden' : 'visibile');
+  if (val !== 0) {
+    var spriteIndex = spriteIndexForDirt(val);
+
+    var x = Maze.SQUARE_SIZE * (col - spriteIndex + 0.5) - Maze.DIRT_HEIGHT / 2;
+    var y = Maze.SQUARE_SIZE * (row + 0.5) - Maze.DIRT_WIDTH / 2;
+    img.setAttribute('x', x);
+    img.setAttribute('y', y);
+  }
+};
+
+function createDirt (row, col) {
   var pegmanElement = document.getElementsByClassName('pegman-location')[0];
   var svg = document.getElementById('svgMaze');
-  var index = dirtPositionToIndex(row, col);
+
+  var clipId = cellId('dirtClip', row, col);
+  var imgId = cellId('dirt', row, col);
+
   // Create clip path.
   var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-  clip.setAttribute('id', 'dirtClip' + index);
+  clip.setAttribute('id', clipId);
   var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
   rect.setAttribute('x', col * Maze.DIRT_WIDTH);
   rect.setAttribute('y', row * Maze.DIRT_HEIGHT);
@@ -8225,51 +8267,12 @@ var createDirt = function(row, col) {
       'http://www.w3.org/1999/xlink', 'xlink:href', skin.dirt);
   img.setAttribute('height', Maze.DIRT_HEIGHT);
   img.setAttribute('width', Maze.DIRT_WIDTH * Maze.DIRT_COUNT);
-  img.setAttribute('clip-path', 'url(#dirtClip' + index + ')');
-  img.setAttribute('id', 'dirt' + index);
+  img.setAttribute('clip-path', 'url(#' + clipId + ')');
+  img.setAttribute('id', imgId);
   svg.insertBefore(img, pegmanElement);
-};
 
-/**
- * Set the image based on the amount of dirt at the location.
- * @param {number} row Row index.
- * @param {number} col Column index.
- */
-Maze.updateDirt = function(row, col) {
-  // Calculate spritesheet index.
-  var n = Maze.dirt_[row][col];
-  var spriteIndex;
-  if (n < -Maze.DIRT_MAX) {
-    spriteIndex = 0;
-  } else if (n < 0) {
-    spriteIndex = Maze.DIRT_MAX + n + 1;
-  } else if (n > Maze.DIRT_MAX) {
-    spriteIndex = Maze.DIRT_COUNT - 1;
-  } else if (n > 0) {
-    spriteIndex = Maze.DIRT_MAX + n;
-  } else {
-    throw new Error('Expected non-zero dirt.');
-  }
-  // Update dirt icon & clip path.
-  var dirtIndex = dirtPositionToIndex(row, col);
-  var img = document.getElementById('dirt' + dirtIndex);
-  var x = Maze.SQUARE_SIZE * (col - spriteIndex + 0.5) - Maze.DIRT_HEIGHT / 2;
-  var y = Maze.SQUARE_SIZE * (row + 0.5) - Maze.DIRT_WIDTH / 2;
-  img.setAttribute('x', x);
-  img.setAttribute('y', y);
-};
-
-Maze.removeDirt = function(row, col) {
-  var index = dirtPositionToIndex(row, col);
-  var img = document.getElementById('dirt' + index);
-  if (img) {
-    img.parentNode.removeChild(img);
-  }
-  var clip = document.getElementById('dirtClip' + index);
-  if (clip) {
-    clip.parentNode.removeChild(clip);
-  }
-};
+  return img;
+}
 
 /**
  * Calculate the y coordinates for pegman sprite.
@@ -8439,11 +8442,8 @@ BlocklyApps.reset = function(first) {
   resetDirt();
   for (var row = 0; row < Maze.ROWS; row++) {
     for (var col = 0; col < Maze.COLS; col++) {
-      Maze.removeDirt(row, col);
-      if (getTile(Maze.dirt_, col, row) !== 0 &&
-          getTile(Maze.dirt_, col, row) !== undefined) {
-        createDirt(row, col);
-        Maze.updateDirt(row, col);
+      if (getTile(Maze.dirt_, col, row) !== undefined) {
+        Maze.updateDirtImage(row, col);
       }
     }
   }
@@ -9188,17 +9188,8 @@ Maze.displayPegman = function(x, y, frame) {
 var scheduleDirtChange = function(options) {
   var col = Maze.pegmanX;
   var row = Maze.pegmanY;
-  var previous = Maze.dirt_[row][col];
-  var current = previous + options.amount;
-  Maze.dirt_[row][col] = current;
-  if (previous === 0 && current !== 0) {
-    createDirt(row, col);
-  }
-  if (current === 0) {
-    Maze.removeDirt(row, col);
-  } else {
-    Maze.updateDirt(row, col);
-  }
+  Maze.dirt_[row][col] += options.amount;
+  Maze.updateDirtImage(row, col);
   BlocklyApps.playAudio(options.sound);
 };
 
