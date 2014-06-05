@@ -59,26 +59,28 @@ class FollowersControllerTest < ActionController::TestCase
 
 
   test "student_register with age" do
-    sign_out @laurel
+    Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
+      sign_out @laurel
 
-    student_params = {username: 'student1',
-                      name: "A name",
-                      password: "apassword",
-                      gender: 'F',
-                      age: '13'}
-    
-    assert_creates(User, Follower) do
-      post :student_register, section_code: @chris_section.code, user: student_params
+      student_params = {username: 'student1',
+                        name: "A name",
+                        password: "apassword",
+                        gender: 'F',
+                        age: '13'}
+      
+      assert_creates(User, Follower) do
+        post :student_register, section_code: @chris_section.code, user: student_params
+      end
+
+      assert_redirected_to '/'
+
+      assert_equal 'student1', assigns(:user).username
+      assert_equal 'A name', assigns(:user).name
+      assert_equal 'F', assigns(:user).gender
+      assert_equal Date.today - 13.years, assigns(:user).birthday
+      assert_equal 'manual', assigns(:user).provider
+      assert_equal User::TYPE_STUDENT, assigns(:user).user_type
     end
-
-    assert_redirected_to '/'
-
-    assert_equal 'student1', assigns(:user).username
-    assert_equal 'A name', assigns(:user).name
-    assert_equal 'F', assigns(:user).gender
-    assert_equal Date.today - 13.years, assigns(:user).birthday
-    assert_equal 'manual', assigns(:user).provider
-    assert_equal User::TYPE_STUDENT, assigns(:user).user_type
   end
 
 end

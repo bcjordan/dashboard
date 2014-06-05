@@ -4,6 +4,10 @@ description '/script_assets/matches/images/head.jpg'
 banner 'This puzzle is all about selecting the correct flowers.'
 height '170'
 
+pre_title 'Instructions'
+pre_body 'Click the right answer, then submit.'
+pre_image '/script_assets/matches/images/a1.jpg'
+
 question 'Which flowers are yellow?'
 wrong '/script_assets/matches/images/a1.jpg'
 wrong '/script_assets/matches/images/a2.jpg'

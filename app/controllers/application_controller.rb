@@ -80,7 +80,7 @@ class ApplicationController < ActionController::Base
     if options[:solved?]
       response[:total_lines] = options[:total_lines]
       response[:trophy_updates] = options[:trophy_updates] unless options[:trophy_updates].blank?
-      script_level.solved(response, self)
+      script_level.solved(response, self, current_user)
     else # not solved
       response[:message] = 'try again'
     end

@@ -23,7 +23,6 @@
     .clear
 
     %br/
-    %br/
 
     .buttons
       %a.btn.btn-primary.next-stage.submitButton
@@ -35,14 +34,29 @@
   .clear
 
   %div{:style=>'display:none'}
-    #dialogcontent.modal-content
-      %p.dialog-title
-        =t("multi.wrong_title")
-      %p
-        =t("multi.wrong_body")
-      .farSide
-        %button#ok-button.secondary
-          =t("dialog.ok")
+    #error-dialogcontent
+      .modal-content
+        %p.dialog-title
+          =t("multi.wrong_title")
+        %p
+          =t("multi.wrong_body")
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
+
+    #pre-dialogcontent
+      - if data['pre_image']
+        .modal-image{style: "margin-top: 0px"}
+          != multi_t(data['pre_image'])
+      .modal-content
+        %p.dialog-title
+          != multi_t(data['pre_title']) if data['pre_title']
+        %p
+          != multi_t(data['pre_body']) if data['pre_body']
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
 
 :javascript
 
@@ -58,6 +72,13 @@
   $(function() 
   {
     enableButton(false);
+
+    if ("#{data['pre_title']}")
+    {
+      setTimeout(function() {
+        showDialog("pre");
+        }, 1000);
+    }
   });
 
   function enableButton(enable)
@@ -70,12 +91,12 @@
       $('.submitButton').addClass("disabled");
   }
 
-  function showDialog()
+  function showDialog(type)
   {
     var dialog = new Dialog({ body: "" });
 
     // use our prefabricated dialog content
-    $(".modal-body").append($("#dialogcontent").clone(true));
+    $(".modal-body").append($("#" + type + "-dialogcontent").clone(true));
 
     // Standard css hack to center a div within the viewport
     var full_dialog = $(".dash_modal");
@@ -102,7 +123,7 @@
 
       if (selection == "wrong") 
       {
-        showDialog();
+        showDialog("error");
       }
 
       if (selection != "none")

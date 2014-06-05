@@ -27,7 +27,6 @@
   %table{id: 'add-students-form'}
     %tr
       %th Name
-      %th Username
       %th Password
       %th
     - @section.students.each do |student|
@@ -37,16 +36,11 @@
             %td
               = user_f.text_field :name
             %td
-              = user_f.text_field :username
-            %td
-              = user_f.text_field :password
             %td
       - else
         %tr{class: cycle('odd', 'even')}
           %td
             = student.name
-          %td
-            = student.username
           %td
             = link_to "Change Password", ""
           %td
@@ -58,10 +52,6 @@
   %tr{id:"form-row-prototype", class: cycle('odd', 'even')}
     %td
       %input{class:"input-xlarge", class:"name", name:"section[students_attributes][][name]", placeholder:"eg. John Smith", type:"text"}
-    %td
-      %input{class:"input-xlarge", class:"username", name:"section[students_attributes][][username]", placeholder:"eg. johnsmith583", type:"text"}
-    %td
-      %input{class:"input-xlarge", class:"username", name:"section[students_attributes][][password]", placeholder:"eg. johnsmith583", type:"text"}
 
 :javascript
   function appendRow() {

@@ -50,12 +50,13 @@ class Script < ActiveRecord::Base
   end
 
   def script_levels_from_game(game_id)
-    self.script_levels.select { |sl| sl.level.game_id == game_id }
+    self.script_levels.joins(:level).where(levels: {game_id: game_id})
   end
 
   def multiple_games?
     # simplified check to see if we are in a script that has only one game (stage)
-    levels.first.game_id != levels.last.game_id
+    stages.many? ||
+      (stages.empty? && levels.first.game_id != levels.last.game_id)
   end
 
   def twenty_hour?

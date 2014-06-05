@@ -31,11 +31,11 @@ class ScriptLevel < ActiveRecord::Base
 
   def end_of_stage?
     stage ? (self.last?) :
-      level.game_id != next_level.level.game_id
+      next_level && (level.game_id != next_level.level.game_id)
   end
 
   def stage_position_str
-    "#{stage ? "#{I18n.t('stage')} #{stage.position}" : I18n.t("data.script.name.#{script.name}.#{level.game.name}")}"
+    stage ? I18n.t('stage') : I18n.t("data.script.name.#{script.name}.#{level.game.name}")
   end
 
   def name
@@ -46,12 +46,17 @@ class ScriptLevel < ActiveRecord::Base
     self.stage ? self.position : self.game_chapter
   end
 
+  def stage_or_game_total
+    stage ? stage.script_levels.count :
+    script.script_levels_from_game(level.game_id).count
+  end
+
   def self.cache_find(id)
     @@script_level_map ||= ScriptLevel.includes(:level, :script).index_by(&:id)
     @@script_level_map[id]
   end
 
-  def solved(response, application)
+  def solved(response, application, current_user)
     new_level = next_level
     # If this is the end of the current script
     unless new_level

@@ -12,7 +12,7 @@ Varnish uses a pool of back-end connection threads/fibers to service a much larg
 
 ### Where does Varnish run?
 
-Right now Varnish runs on the same AWS instances as our Ruby apps because everything fits. During CSEdWeek/HoC we ran Varnish on cheap stand-alone instances to increase horizontal capacity (tons of pipes, piles of bandwidth) at low cost. At that time there were three Varnish instances per Ruby server.
+Right now Varnish (version [3.0.4](https://www.varnish-cache.org/releases/varnish-cache-3.0.4)) runs on the same AWS instances as our Ruby apps because everything fits. During CSEdWeek/HoC we ran Varnish on cheap stand-alone instances to increase horizontal capacity (tons of pipes, piles of bandwidth) at low cost. At that time there were three Varnish instances per Ruby server.
 
 Currently with three ruby front ends we are almost bandwidth constrained but have plenty of CPU available. For the cost of 3/4 of a new Ruby instance we can deploy 3 Varnish instances doubling overall bandwidth in the system.
 
@@ -28,7 +28,9 @@ It is ALWAYS safe to flush a varnish cache. It's supposed to happen on every dep
 
 `$ ssh <server> 'sudo service varnish stop; sudo service varnish start'`
 
-You can peak at Varnish's state by ssh'ing to the maching and running varnishstat and varnishtop. They're somewhat hard to grok without Google.
+You can peek at Varnish's state by ssh'ing to the machine and running [varnishstat and varnishtop](https://www.varnish-cache.org/docs/3.0/tutorial/statistics.html). They're somewhat hard to grok without Google.
+
+We have also installed the [threelegs Varnish NewRelic plugin](https://github.com/threelegs/newrelic-plugins) that monitors our production servers and graphs output from varnishstat in our New Relic dashboard.
 
 ### How does Varnish decide what gets cached?
 

@@ -82,7 +82,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":29,"./utils":44}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":32,"./utils":47}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -115,6 +115,7 @@ var dom = require('./dom');
 var utils = require('./utils');
 var builder = require('./builder');
 var Slider = require('./slider');
+var _ = require('./lodash');
 
 //TODO: These should be members of a BlocklyApp instance.
 var onAttempt;
@@ -200,7 +201,7 @@ BlocklyApps.init = function(config) {
   container.innerHTML = config.html;
   var runButton = container.querySelector('#runButton');
   var resetButton = container.querySelector('#resetButton');
-  var throttledRunClick = utils.debounce(BlocklyApps.runButtonClick, 250, true);
+  var throttledRunClick = _.debounce(BlocklyApps.runButtonClick, 250, true);
   dom.addClickTouchEvent(runButton, throttledRunClick);
   dom.addClickTouchEvent(resetButton, BlocklyApps.resetButtonClick);
 
@@ -461,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -907,7 +910,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/ar_sa/common":46,"./builder":5,"./dom":7,"./feedback.js":9,"./slider":31,"./templates/buttons.html":33,"./templates/instructions.html":35,"./templates/learn.html":36,"./templates/makeYourOwn.html":37,"./utils":44,"./xml":45}],3:[function(require,module,exports){
+},{"../locale/ar_sa/common":49,"./builder":5,"./dom":7,"./feedback.js":9,"./lodash":11,"./slider":34,"./templates/buttons.html":36,"./templates/instructions.html":38,"./templates/learn.html":39,"./templates/makeYourOwn.html":40,"./utils":47,"./xml":48}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -994,7 +997,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":45}],4:[function(require,module,exports){
+},{"./xml":48}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1057,7 +1060,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":32,"./utils.js":44,"url":58}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":35,"./utils.js":47,"url":61}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
@@ -1359,8 +1362,13 @@ exports.displayFeedback = function(options) {
     feedback.className += " k1";
   }
 
-  feedback.appendChild(getFeedbackButtons(
-    options.feedbackType, options.level.showPreviousLevelButton));
+  feedback.appendChild(
+    getFeedbackButtons({
+      feedbackType: options.feedbackType,
+      showPreviousButton: options.level.showPreviousLevelButton,
+      isK1: options.level.is_k1
+    })
+  );
 
   var againButton = feedback.querySelector('#again-button');
   var previousLevelButton = feedback.querySelector('#back-button');
@@ -1490,16 +1498,18 @@ exports.getNumEnabledBlocks = function() {
   return getEnabledBlocks().length;
 };
 
-var getFeedbackButtons = function(feedbackType, showPreviousLevelButton) {
+var getFeedbackButtons = function(options) {
   var buttons = document.createElement('div');
   buttons.id = 'feedbackButtons';
   buttons.innerHTML = require('./templates/buttons.html')({
     data: {
       previousLevel:
-        !exports.canContinueToNextLevel(feedbackType) &&
-        showPreviousLevelButton,
-      tryAgain: feedbackType !== BlocklyApps.TestResults.ALL_PASS,
-      nextLevel: exports.canContinueToNextLevel(feedbackType)
+        !exports.canContinueToNextLevel(options.feedbackType) &&
+        options.showPreviousButton,
+      tryAgain: options.feedbackType !== BlocklyApps.TestResults.ALL_PASS,
+      nextLevel: exports.canContinueToNextLevel(options.feedbackType),
+      isK1: options.isK1,
+      assetUrl: BlocklyApps.assetUrl
     }
   });
 
@@ -2055,7 +2065,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/ar_sa/common":46,"./codegen":6,"./dom":7,"./templates/buttons.html":33,"./templates/code.html":34,"./templates/readonly.html":39,"./templates/sharing.html":40,"./templates/showCode.html":41,"./templates/trophy.html":42,"./utils":44}],10:[function(require,module,exports){
+},{"../locale/ar_sa/common":49,"./codegen":6,"./dom":7,"./templates/buttons.html":36,"./templates/code.html":37,"./templates/readonly.html":42,"./templates/sharing.html":43,"./templates/showCode.html":44,"./templates/trophy.html":45,"./utils":47}],10:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -2115,6 +2125,2674 @@ exports.define = function(name) {
 };
 
 },{}],11:[function(require,module,exports){
+(function (global){
+/**
+ * @license
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample" --output build/js/lodash.js`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+;(function() {
+
+  /** Used as a safe reference for `undefined` in pre ES5 environments */
+  var undefined;
+
+  /** Used to pool arrays and objects used internally */
+  var arrayPool = [],
+      objectPool = [];
+
+  /** Used internally to indicate various things */
+  var indicatorObject = {};
+
+  /** Used to prefix keys to avoid issues with `__proto__` and properties on `Object.prototype` */
+  var keyPrefix = +new Date + '';
+
+  /** Used as the size when optimizations are enabled for large arrays */
+  var largeArraySize = 75;
+
+  /** Used as the max size of the `arrayPool` and `objectPool` */
+  var maxPoolSize = 40;
+
+  /** Used to detected named functions */
+  var reFuncName = /^\s*function[ \n\r\t]+\w/;
+
+  /** Used to detect functions containing a `this` reference */
+  var reThis = /\bthis\b/;
+
+  /** Used to fix the JScript [[DontEnum]] bug */
+  var shadowedProps = [
+    'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+    'toLocaleString', 'toString', 'valueOf'
+  ];
+
+  /** `Object#toString` result shortcuts */
+  var argsClass = '[object Arguments]',
+      arrayClass = '[object Array]',
+      boolClass = '[object Boolean]',
+      dateClass = '[object Date]',
+      errorClass = '[object Error]',
+      funcClass = '[object Function]',
+      numberClass = '[object Number]',
+      objectClass = '[object Object]',
+      regexpClass = '[object RegExp]',
+      stringClass = '[object String]';
+
+  /** Used as the property descriptor for `__bindData__` */
+  var descriptor = {
+    'configurable': false,
+    'enumerable': false,
+    'value': null,
+    'writable': false
+  };
+
+  /** Used as the data object for `iteratorTemplate` */
+  var iteratorData = {
+    'args': '',
+    'array': null,
+    'bottom': '',
+    'firstArg': '',
+    'init': '',
+    'keys': null,
+    'loop': '',
+    'shadowedProps': null,
+    'support': null,
+    'top': '',
+    'useHas': false
+  };
+
+  /** Used to determine if values are of the language type Object */
+  var objectTypes = {
+    'boolean': false,
+    'function': true,
+    'object': true,
+    'number': false,
+    'string': false,
+    'undefined': false
+  };
+
+  /** Used as a reference to the global object */
+  var root = (objectTypes[typeof window] && window) || this;
+
+  /** Detect free variable `exports` */
+  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
+
+  /** Detect free variable `module` */
+  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
+
+  /** Detect the popular CommonJS extension `module.exports` */
+  var moduleExports = freeModule && freeModule.exports === freeExports && freeExports;
+
+  /** Detect free variable `global` from Node.js or Browserified code and use it as `root` */
+  var freeGlobal = objectTypes[typeof global] && global;
+  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal)) {
+    root = freeGlobal;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The base implementation of `_.indexOf` without support for binary searches
+   * or `fromIndex` constraints.
+   *
+   * @private
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {number} [fromIndex=0] The index to search from.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   */
+  function baseIndexOf(array, value, fromIndex) {
+    var index = (fromIndex || 0) - 1,
+        length = array ? array.length : 0;
+
+    while (++index < length) {
+      if (array[index] === value) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * An implementation of `_.contains` for cache objects that mimics the return
+   * signature of `_.indexOf` by returning `0` if the value is found, else `-1`.
+   *
+   * @private
+   * @param {Object} cache The cache object to inspect.
+   * @param {*} value The value to search for.
+   * @returns {number} Returns `0` if `value` is found, else `-1`.
+   */
+  function cacheIndexOf(cache, value) {
+    var type = typeof value;
+    cache = cache.cache;
+
+    if (type == 'boolean' || value == null) {
+      return cache[value] ? 0 : -1;
+    }
+    if (type != 'number' && type != 'string') {
+      type = 'object';
+    }
+    var key = type == 'number' ? value : keyPrefix + value;
+    cache = (cache = cache[type]) && cache[key];
+
+    return type == 'object'
+      ? (cache && baseIndexOf(cache, value) > -1 ? 0 : -1)
+      : (cache ? 0 : -1);
+  }
+
+  /**
+   * Adds a given value to the corresponding cache object.
+   *
+   * @private
+   * @param {*} value The value to add to the cache.
+   */
+  function cachePush(value) {
+    var cache = this.cache,
+        type = typeof value;
+
+    if (type == 'boolean' || value == null) {
+      cache[value] = true;
+    } else {
+      if (type != 'number' && type != 'string') {
+        type = 'object';
+      }
+      var key = type == 'number' ? value : keyPrefix + value,
+          typeCache = cache[type] || (cache[type] = {});
+
+      if (type == 'object') {
+        (typeCache[key] || (typeCache[key] = [])).push(value);
+      } else {
+        typeCache[key] = true;
+      }
+    }
+  }
+
+  /**
+   * Creates a cache object to optimize linear searches of large arrays.
+   *
+   * @private
+   * @param {Array} [array=[]] The array to search.
+   * @returns {null|Object} Returns the cache object or `null` if caching should not be used.
+   */
+  function createCache(array) {
+    var index = -1,
+        length = array.length,
+        first = array[0],
+        mid = array[(length / 2) | 0],
+        last = array[length - 1];
+
+    if (first && typeof first == 'object' &&
+        mid && typeof mid == 'object' && last && typeof last == 'object') {
+      return false;
+    }
+    var cache = getObject();
+    cache['false'] = cache['null'] = cache['true'] = cache['undefined'] = false;
+
+    var result = getObject();
+    result.array = array;
+    result.cache = cache;
+    result.push = cachePush;
+
+    while (++index < length) {
+      result.push(array[index]);
+    }
+    return result;
+  }
+
+  /**
+   * Gets an array from the array pool or creates a new one if the pool is empty.
+   *
+   * @private
+   * @returns {Array} The array from the pool.
+   */
+  function getArray() {
+    return arrayPool.pop() || [];
+  }
+
+  /**
+   * Gets an object from the object pool or creates a new one if the pool is empty.
+   *
+   * @private
+   * @returns {Object} The object from the pool.
+   */
+  function getObject() {
+    return objectPool.pop() || {
+      'array': null,
+      'cache': null,
+      'false': false,
+      'null': false,
+      'number': null,
+      'object': null,
+      'push': null,
+      'string': null,
+      'true': false,
+      'undefined': false
+    };
+  }
+
+  /**
+   * Checks if `value` is a DOM node in IE < 9.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a DOM node, else `false`.
+   */
+  function isNode(value) {
+    // IE < 9 presents DOM nodes as `Object` objects except they have `toString`
+    // methods that are `typeof` "string" and still can coerce nodes to strings
+    return typeof value.toString != 'function' && typeof (value + '') == 'string';
+  }
+
+  /**
+   * Releases the given array back to the array pool.
+   *
+   * @private
+   * @param {Array} [array] The array to release.
+   */
+  function releaseArray(array) {
+    array.length = 0;
+    if (arrayPool.length < maxPoolSize) {
+      arrayPool.push(array);
+    }
+  }
+
+  /**
+   * Releases the given object back to the object pool.
+   *
+   * @private
+   * @param {Object} [object] The object to release.
+   */
+  function releaseObject(object) {
+    var cache = object.cache;
+    if (cache) {
+      releaseObject(cache);
+    }
+    object.array = object.cache =object.object = object.number = object.string =null;
+    if (objectPool.length < maxPoolSize) {
+      objectPool.push(object);
+    }
+  }
+
+  /**
+   * Slices the `collection` from the `start` index up to, but not including,
+   * the `end` index.
+   *
+   * Note: This function is used instead of `Array#slice` to support node lists
+   * in IE < 9 and to ensure dense arrays are returned.
+   *
+   * @private
+   * @param {Array|Object|string} collection The collection to slice.
+   * @param {number} start The start index.
+   * @param {number} end The end index.
+   * @returns {Array} Returns the new array.
+   */
+  function slice(array, start, end) {
+    start || (start = 0);
+    if (typeof end == 'undefined') {
+      end = array ? array.length : 0;
+    }
+    var index = -1,
+        length = end - start || 0,
+        result = Array(length < 0 ? 0 : length);
+
+    while (++index < length) {
+      result[index] = array[start + index];
+    }
+    return result;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Used for `Array` method references.
+   *
+   * Normally `Array.prototype` would suffice, however, using an array literal
+   * avoids issues in Narwhal.
+   */
+  var arrayRef = [];
+
+  /** Used for native method references */
+  var errorProto = Error.prototype,
+      objectProto = Object.prototype,
+      stringProto = String.prototype;
+
+  /** Used to resolve the internal [[Class]] of values */
+  var toString = objectProto.toString;
+
+  /** Used to detect if a method is native */
+  var reNative = RegExp('^' +
+    String(toString)
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/toString| for [^\]]+/g, '.*?') + '$'
+  );
+
+  /** Native method shortcuts */
+  var ceil = Math.ceil,
+      floor = Math.floor,
+      fnToString = Function.prototype.toString,
+      hasOwnProperty = objectProto.hasOwnProperty,
+      push = arrayRef.push,
+      propertyIsEnumerable = objectProto.propertyIsEnumerable,
+      unshift = arrayRef.unshift;
+
+  /** Used to set meta data on functions */
+  var defineProperty = (function() {
+    // IE 8 only accepts DOM elements
+    try {
+      var o = {},
+          func = isNative(func = Object.defineProperty) && func,
+          result = func(o, o, o) && func;
+    } catch(e) { }
+    return result;
+  }());
+
+  /* Native method shortcuts for methods with the same name as other `lodash` methods */
+  var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate,
+      nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray,
+      nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys,
+      nativeMax = Math.max,
+      nativeMin = Math.min,
+      nativeRandom = Math.random;
+
+  /** Used to avoid iterating non-enumerable properties in IE < 9 */
+  var nonEnumProps = {};
+  nonEnumProps[arrayClass] = nonEnumProps[dateClass] = nonEnumProps[numberClass] = { 'constructor': true, 'toLocaleString': true, 'toString': true, 'valueOf': true };
+  nonEnumProps[boolClass] = nonEnumProps[stringClass] = { 'constructor': true, 'toString': true, 'valueOf': true };
+  nonEnumProps[errorClass] = nonEnumProps[funcClass] = nonEnumProps[regexpClass] = { 'constructor': true, 'toString': true };
+  nonEnumProps[objectClass] = { 'constructor': true };
+
+  (function() {
+    var length = shadowedProps.length;
+    while (length--) {
+      var key = shadowedProps[length];
+      for (var className in nonEnumProps) {
+        if (hasOwnProperty.call(nonEnumProps, className) && !hasOwnProperty.call(nonEnumProps[className], key)) {
+          nonEnumProps[className][key] = false;
+        }
+      }
+    }
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Creates a `lodash` object which wraps the given value to enable intuitive
+   * method chaining.
+   *
+   * In addition to Lo-Dash methods, wrappers also have the following `Array` methods:
+   * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`, `splice`,
+   * and `unshift`
+   *
+   * Chaining is supported in custom builds as long as the `value` method is
+   * implicitly or explicitly included in the build.
+   *
+   * The chainable wrapper functions are:
+   * `after`, `assign`, `bind`, `bindAll`, `bindKey`, `chain`, `compact`,
+   * `compose`, `concat`, `countBy`, `create`, `createCallback`, `curry`,
+   * `debounce`, `defaults`, `defer`, `delay`, `difference`, `filter`, `flatten`,
+   * `forEach`, `forEachRight`, `forIn`, `forInRight`, `forOwn`, `forOwnRight`,
+   * `functions`, `groupBy`, `indexBy`, `initial`, `intersection`, `invert`,
+   * `invoke`, `keys`, `map`, `max`, `memoize`, `merge`, `min`, `object`, `omit`,
+   * `once`, `pairs`, `partial`, `partialRight`, `pick`, `pluck`, `pull`, `push`,
+   * `range`, `reject`, `remove`, `rest`, `reverse`, `shuffle`, `slice`, `sort`,
+   * `sortBy`, `splice`, `tap`, `throttle`, `times`, `toArray`, `transform`,
+   * `union`, `uniq`, `unshift`, `unzip`, `values`, `where`, `without`, `wrap`,
+   * and `zip`
+   *
+   * The non-chainable wrapper functions are:
+   * `clone`, `cloneDeep`, `contains`, `escape`, `every`, `find`, `findIndex`,
+   * `findKey`, `findLast`, `findLastIndex`, `findLastKey`, `has`, `identity`,
+   * `indexOf`, `isArguments`, `isArray`, `isBoolean`, `isDate`, `isElement`,
+   * `isEmpty`, `isEqual`, `isFinite`, `isFunction`, `isNaN`, `isNull`, `isNumber`,
+   * `isObject`, `isPlainObject`, `isRegExp`, `isString`, `isUndefined`, `join`,
+   * `lastIndexOf`, `mixin`, `noConflict`, `parseInt`, `pop`, `random`, `reduce`,
+   * `reduceRight`, `result`, `shift`, `size`, `some`, `sortedIndex`, `runInContext`,
+   * `template`, `unescape`, `uniqueId`, and `value`
+   *
+   * The wrapper functions `first` and `last` return wrapped values when `n` is
+   * provided, otherwise they return unwrapped values.
+   *
+   * Explicit chaining can be enabled by using the `_.chain` method.
+   *
+   * @name _
+   * @constructor
+   * @category Chaining
+   * @param {*} value The value to wrap in a `lodash` instance.
+   * @returns {Object} Returns a `lodash` instance.
+   * @example
+   *
+   * var wrapped = _([1, 2, 3]);
+   *
+   * // returns an unwrapped value
+   * wrapped.reduce(function(sum, num) {
+   *   return sum + num;
+   * });
+   * // => 6
+   *
+   * // returns a wrapped value
+   * var squares = wrapped.map(function(num) {
+   *   return num * num;
+   * });
+   *
+   * _.isArray(squares);
+   * // => false
+   *
+   * _.isArray(squares.value());
+   * // => true
+   */
+  function lodash(value) {
+    // don't wrap if already wrapped, even if wrapped by a different `lodash` constructor
+    return (value && typeof value == 'object' && !isArray(value) && hasOwnProperty.call(value, '__wrapped__'))
+     ? value
+     : new lodashWrapper(value);
+  }
+
+  /**
+   * A fast path for creating `lodash` wrapper objects.
+   *
+   * @private
+   * @param {*} value The value to wrap in a `lodash` instance.
+   * @param {boolean} chainAll A flag to enable chaining for all methods
+   * @returns {Object} Returns a `lodash` instance.
+   */
+  function lodashWrapper(value, chainAll) {
+    this.__chain__ = !!chainAll;
+    this.__wrapped__ = value;
+  }
+  // ensure `new lodashWrapper` is an instance of `lodash`
+  lodashWrapper.prototype = lodash.prototype;
+
+  /**
+   * An object used to flag environments features.
+   *
+   * @static
+   * @memberOf _
+   * @type Object
+   */
+  var support = lodash.support = {};
+
+  (function() {
+    var ctor = function() { this.x = 1; },
+        object = { '0': 1, 'length': 1 },
+        props = [];
+
+    ctor.prototype = { 'valueOf': 1, 'y': 1 };
+    for (var key in new ctor) { props.push(key); }
+    for (key in arguments) { }
+
+    /**
+     * Detect if an `arguments` object's [[Class]] is resolvable (all but Firefox < 4, IE < 9).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.argsClass = toString.call(arguments) == argsClass;
+
+    /**
+     * Detect if `arguments` objects are `Object` objects (all but Narwhal and Opera < 10.5).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.argsObject = arguments.constructor == Object && !(arguments instanceof Array);
+
+    /**
+     * Detect if `name` or `message` properties of `Error.prototype` are
+     * enumerable by default. (IE < 9, Safari < 5.1)
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.enumErrorProps = propertyIsEnumerable.call(errorProto, 'message') || propertyIsEnumerable.call(errorProto, 'name');
+
+    /**
+     * Detect if `prototype` properties are enumerable by default.
+     *
+     * Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
+     * (if the prototype or a property on the prototype has been set)
+     * incorrectly sets a function's `prototype` property [[Enumerable]]
+     * value to `true`.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.enumPrototypes = propertyIsEnumerable.call(ctor, 'prototype');
+
+    /**
+     * Detect if functions can be decompiled by `Function#toString`
+     * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.funcDecomp = !isNative(root.WinRTError) && reThis.test(function() { return this; });
+
+    /**
+     * Detect if `Function#name` is supported (all but IE).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.funcNames = typeof Function.name == 'string';
+
+    /**
+     * Detect if `arguments` object indexes are non-enumerable
+     * (Firefox < 4, IE < 9, PhantomJS, Safari < 5.1).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.nonEnumArgs = key != 0;
+
+    /**
+     * Detect if properties shadowing those on `Object.prototype` are non-enumerable.
+     *
+     * In IE < 9 an objects own properties, shadowing non-enumerable ones, are
+     * made non-enumerable as well (a.k.a the JScript [[DontEnum]] bug).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.nonEnumShadows = !/valueOf/.test(props);
+
+    /**
+     * Detect if `Array#shift` and `Array#splice` augment array-like objects correctly.
+     *
+     * Firefox < 10, IE compatibility mode, and IE < 9 have buggy Array `shift()`
+     * and `splice()` functions that fail to remove the last element, `value[0]`,
+     * of array-like objects even though the `length` property is set to `0`.
+     * The `shift()` method is buggy in IE 8 compatibility mode, while `splice()`
+     * is buggy regardless of mode in IE < 9 and buggy in compatibility mode in IE 9.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.spliceObjects = (arrayRef.splice.call(object, 0, 1), !object[0]);
+
+    /**
+     * Detect lack of support for accessing string characters by index.
+     *
+     * IE < 8 can't access characters by index and IE 8 can only access
+     * characters by index on string literals.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.unindexedChars = ('x'[0] + Object('x')[0]) != 'xx';
+  }(1));
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The template used to create iterator functions.
+   *
+   * @private
+   * @param {Object} data The data object used to populate the text.
+   * @returns {string} Returns the interpolated text.
+   */
+  var iteratorTemplate = function(obj) {
+
+    var __p = 'var index, iterable = ' +
+    (obj.firstArg) +
+    ', result = ' +
+    (obj.init) +
+    ';\nif (!iterable) return result;\n' +
+    (obj.top) +
+    ';';
+     if (obj.array) {
+    __p += '\nvar length = iterable.length; index = -1;\nif (' +
+    (obj.array) +
+    ') {  ';
+     if (support.unindexedChars) {
+    __p += '\n  if (isString(iterable)) {\n    iterable = iterable.split(\'\')\n  }  ';
+     }
+    __p += '\n  while (++index < length) {\n    ' +
+    (obj.loop) +
+    ';\n  }\n}\nelse {  ';
+     } else if (support.nonEnumArgs) {
+    __p += '\n  var length = iterable.length; index = -1;\n  if (length && isArguments(iterable)) {\n    while (++index < length) {\n      index += \'\';\n      ' +
+    (obj.loop) +
+    ';\n    }\n  } else {  ';
+     }
+
+     if (support.enumPrototypes) {
+    __p += '\n  var skipProto = typeof iterable == \'function\';\n  ';
+     }
+
+     if (support.enumErrorProps) {
+    __p += '\n  var skipErrorProps = iterable === errorProto || iterable instanceof Error;\n  ';
+     }
+
+        var conditions = [];    if (support.enumPrototypes) { conditions.push('!(skipProto && index == "prototype")'); }    if (support.enumErrorProps)  { conditions.push('!(skipErrorProps && (index == "message" || index == "name"))'); }
+
+     if (obj.useHas && obj.keys) {
+    __p += '\n  var ownIndex = -1,\n      ownProps = objectTypes[typeof iterable] && keys(iterable),\n      length = ownProps ? ownProps.length : 0;\n\n  while (++ownIndex < length) {\n    index = ownProps[ownIndex];\n';
+        if (conditions.length) {
+    __p += '    if (' +
+    (conditions.join(' && ')) +
+    ') {\n  ';
+     }
+    __p +=
+    (obj.loop) +
+    ';    ';
+     if (conditions.length) {
+    __p += '\n    }';
+     }
+    __p += '\n  }  ';
+     } else {
+    __p += '\n  for (index in iterable) {\n';
+        if (obj.useHas) { conditions.push("hasOwnProperty.call(iterable, index)"); }    if (conditions.length) {
+    __p += '    if (' +
+    (conditions.join(' && ')) +
+    ') {\n  ';
+     }
+    __p +=
+    (obj.loop) +
+    ';    ';
+     if (conditions.length) {
+    __p += '\n    }';
+     }
+    __p += '\n  }    ';
+     if (support.nonEnumShadows) {
+    __p += '\n\n  if (iterable !== objectProto) {\n    var ctor = iterable.constructor,\n        isProto = iterable === (ctor && ctor.prototype),\n        className = iterable === stringProto ? stringClass : iterable === errorProto ? errorClass : toString.call(iterable),\n        nonEnum = nonEnumProps[className];\n      ';
+     for (k = 0; k < 7; k++) {
+    __p += '\n    index = \'' +
+    (obj.shadowedProps[k]) +
+    '\';\n    if ((!(isProto && nonEnum[index]) && hasOwnProperty.call(iterable, index))';
+            if (!obj.useHas) {
+    __p += ' || (!nonEnum[index] && iterable[index] !== objectProto[index])';
+     }
+    __p += ') {\n      ' +
+    (obj.loop) +
+    ';\n    }      ';
+     }
+    __p += '\n  }    ';
+     }
+
+     }
+
+     if (obj.array || support.nonEnumArgs) {
+    __p += '\n}';
+     }
+    __p +=
+    (obj.bottom) +
+    ';\nreturn result';
+
+    return __p
+  };
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The base implementation of `_.bind` that creates the bound function and
+   * sets its meta data.
+   *
+   * @private
+   * @param {Array} bindData The bind data array.
+   * @returns {Function} Returns the new bound function.
+   */
+  function baseBind(bindData) {
+    var func = bindData[0],
+        partialArgs = bindData[2],
+        thisArg = bindData[4];
+
+    function bound() {
+      // `Function#bind` spec
+      // http://es5.github.io/#x15.3.4.5
+      if (partialArgs) {
+        // avoid `arguments` object deoptimizations by using `slice` instead
+        // of `Array.prototype.slice.call` and not assigning `arguments` to a
+        // variable as a ternary expression
+        var args = slice(partialArgs);
+        push.apply(args, arguments);
+      }
+      // mimic the constructor's `return` behavior
+      // http://es5.github.io/#x13.2.2
+      if (this instanceof bound) {
+        // ensure `new bound` is an instance of `func`
+        var thisBinding = baseCreate(func.prototype),
+            result = func.apply(thisBinding, args || arguments);
+        return isObject(result) ? result : thisBinding;
+      }
+      return func.apply(thisArg, args || arguments);
+    }
+    setBindData(bound, bindData);
+    return bound;
+  }
+
+  /**
+   * The base implementation of `_.create` without support for assigning
+   * properties to the created object.
+   *
+   * @private
+   * @param {Object} prototype The object to inherit from.
+   * @returns {Object} Returns the new object.
+   */
+  function baseCreate(prototype, properties) {
+    return isObject(prototype) ? nativeCreate(prototype) : {};
+  }
+  // fallback for browsers without `Object.create`
+  if (!nativeCreate) {
+    baseCreate = (function() {
+      function Object() {}
+      return function(prototype) {
+        if (isObject(prototype)) {
+          Object.prototype = prototype;
+          var result = new Object;
+          Object.prototype = null;
+        }
+        return result || root.Object();
+      };
+    }());
+  }
+
+  /**
+   * The base implementation of `_.createCallback` without support for creating
+   * "_.pluck" or "_.where" style callbacks.
+   *
+   * @private
+   * @param {*} [func=identity] The value to convert to a callback.
+   * @param {*} [thisArg] The `this` binding of the created callback.
+   * @param {number} [argCount] The number of arguments the callback accepts.
+   * @returns {Function} Returns a callback function.
+   */
+  function baseCreateCallback(func, thisArg, argCount) {
+    if (typeof func != 'function') {
+      return identity;
+    }
+    // exit early for no `thisArg` or already bound by `Function#bind`
+    if (typeof thisArg == 'undefined' || !('prototype' in func)) {
+      return func;
+    }
+    var bindData = func.__bindData__;
+    if (typeof bindData == 'undefined') {
+      if (support.funcNames) {
+        bindData = !func.name;
+      }
+      bindData = bindData || !support.funcDecomp;
+      if (!bindData) {
+        var source = fnToString.call(func);
+        if (!support.funcNames) {
+          bindData = !reFuncName.test(source);
+        }
+        if (!bindData) {
+          // checks if `func` references the `this` keyword and stores the result
+          bindData = reThis.test(source);
+          setBindData(func, bindData);
+        }
+      }
+    }
+    // exit early if there are no `this` references or `func` is bound
+    if (bindData === false || (bindData !== true && bindData[1] & 1)) {
+      return func;
+    }
+    switch (argCount) {
+      case 1: return function(value) {
+        return func.call(thisArg, value);
+      };
+      case 2: return function(a, b) {
+        return func.call(thisArg, a, b);
+      };
+      case 3: return function(value, index, collection) {
+        return func.call(thisArg, value, index, collection);
+      };
+      case 4: return function(accumulator, value, index, collection) {
+        return func.call(thisArg, accumulator, value, index, collection);
+      };
+    }
+    return bind(func, thisArg);
+  }
+
+  /**
+   * The base implementation of `createWrapper` that creates the wrapper and
+   * sets its meta data.
+   *
+   * @private
+   * @param {Array} bindData The bind data array.
+   * @returns {Function} Returns the new function.
+   */
+  function baseCreateWrapper(bindData) {
+    var func = bindData[0],
+        bitmask = bindData[1],
+        partialArgs = bindData[2],
+        partialRightArgs = bindData[3],
+        thisArg = bindData[4],
+        arity = bindData[5];
+
+    var isBind = bitmask & 1,
+        isBindKey = bitmask & 2,
+        isCurry = bitmask & 4,
+        isCurryBound = bitmask & 8,
+        key = func;
+
+    function bound() {
+      var thisBinding = isBind ? thisArg : this;
+      if (partialArgs) {
+        var args = slice(partialArgs);
+        push.apply(args, arguments);
+      }
+      if (partialRightArgs || isCurry) {
+        args || (args = slice(arguments));
+        if (partialRightArgs) {
+          push.apply(args, partialRightArgs);
+        }
+        if (isCurry && args.length < arity) {
+          bitmask |= 16 & ~32;
+          return baseCreateWrapper([func, (isCurryBound ? bitmask : bitmask & ~3), args, null, thisArg, arity]);
+        }
+      }
+      args || (args = arguments);
+      if (isBindKey) {
+        func = thisBinding[key];
+      }
+      if (this instanceof bound) {
+        thisBinding = baseCreate(func.prototype);
+        var result = func.apply(thisBinding, args);
+        return isObject(result) ? result : thisBinding;
+      }
+      return func.apply(thisBinding, args);
+    }
+    setBindData(bound, bindData);
+    return bound;
+  }
+
+  /**
+   * The base implementation of `_.difference` that accepts a single array
+   * of values to exclude.
+   *
+   * @private
+   * @param {Array} array The array to process.
+   * @param {Array} [values] The array of values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   */
+  function baseDifference(array, values) {
+    var index = -1,
+        indexOf = getIndexOf(),
+        length = array ? array.length : 0,
+        isLarge = length >= largeArraySize && indexOf === baseIndexOf,
+        result = [];
+
+    if (isLarge) {
+      var cache = createCache(values);
+      if (cache) {
+        indexOf = cacheIndexOf;
+        values = cache;
+      } else {
+        isLarge = false;
+      }
+    }
+    while (++index < length) {
+      var value = array[index];
+      if (indexOf(values, value) < 0) {
+        result.push(value);
+      }
+    }
+    if (isLarge) {
+      releaseObject(values);
+    }
+    return result;
+  }
+
+  /**
+   * The base implementation of `_.isEqual`, without support for `thisArg` binding,
+   * that allows partial "_.where" style comparisons.
+   *
+   * @private
+   * @param {*} a The value to compare.
+   * @param {*} b The other value to compare.
+   * @param {Function} [callback] The function to customize comparing values.
+   * @param {Function} [isWhere=false] A flag to indicate performing partial comparisons.
+   * @param {Array} [stackA=[]] Tracks traversed `a` objects.
+   * @param {Array} [stackB=[]] Tracks traversed `b` objects.
+   * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+   */
+  function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
+    // used to indicate that when comparing objects, `a` has at least the properties of `b`
+    if (callback) {
+      var result = callback(a, b);
+      if (typeof result != 'undefined') {
+        return !!result;
+      }
+    }
+    // exit early for identical values
+    if (a === b) {
+      // treat `+0` vs. `-0` as not equal
+      return a !== 0 || (1 / a == 1 / b);
+    }
+    var type = typeof a,
+        otherType = typeof b;
+
+    // exit early for unlike primitive values
+    if (a === a &&
+        !(a && objectTypes[type]) &&
+        !(b && objectTypes[otherType])) {
+      return false;
+    }
+    // exit early for `null` and `undefined` avoiding ES3's Function#call behavior
+    // http://es5.github.io/#x15.3.4.4
+    if (a == null || b == null) {
+      return a === b;
+    }
+    // compare [[Class]] names
+    var className = toString.call(a),
+        otherClass = toString.call(b);
+
+    if (className == argsClass) {
+      className = objectClass;
+    }
+    if (otherClass == argsClass) {
+      otherClass = objectClass;
+    }
+    if (className != otherClass) {
+      return false;
+    }
+    switch (className) {
+      case boolClass:
+      case dateClass:
+        // coerce dates and booleans to numbers, dates to milliseconds and booleans
+        // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
+        return +a == +b;
+
+      case numberClass:
+        // treat `NaN` vs. `NaN` as equal
+        return (a != +a)
+          ? b != +b
+          // but treat `+0` vs. `-0` as not equal
+          : (a == 0 ? (1 / a == 1 / b) : a == +b);
+
+      case regexpClass:
+      case stringClass:
+        // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
+        // treat string primitives and their corresponding object instances as equal
+        return a == String(b);
+    }
+    var isArr = className == arrayClass;
+    if (!isArr) {
+      // unwrap any `lodash` wrapped values
+      var aWrapped = hasOwnProperty.call(a, '__wrapped__'),
+          bWrapped = hasOwnProperty.call(b, '__wrapped__');
+
+      if (aWrapped || bWrapped) {
+        return baseIsEqual(aWrapped ? a.__wrapped__ : a, bWrapped ? b.__wrapped__ : b, callback, isWhere, stackA, stackB);
+      }
+      // exit for functions and DOM nodes
+      if (className != objectClass) {
+        return false;
+      }
+      // in older versions of Opera, `arguments` objects have `Array` constructors
+      var ctorA = !support.argsObject && isArguments(a) ? Object : a.constructor,
+          ctorB = !support.argsObject && isArguments(b) ? Object : b.constructor;
+
+      // non `Object` object instances with different constructors are not equal
+      if (ctorA != ctorB &&
+            !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
+            ('constructor' in a && 'constructor' in b)
+          ) {
+        return false;
+      }
+    }
+    // assume cyclic structures are equal
+    // the algorithm for detecting cyclic structures is adapted from ES 5.1
+    // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
+    var initedStack = !stackA;
+    stackA || (stackA = getArray());
+    stackB || (stackB = getArray());
+
+    var length = stackA.length;
+    while (length--) {
+      if (stackA[length] == a) {
+        return stackB[length] == b;
+      }
+    }
+    var size = 0;
+    result = true;
+
+    // add `a` and `b` to the stack of traversed objects
+    stackA.push(a);
+    stackB.push(b);
+
+    // recursively compare objects and arrays (susceptible to call stack limits)
+    if (isArr) {
+      // compare lengths to determine if a deep comparison is necessary
+      length = a.length;
+      size = b.length;
+      result = size == length;
+
+      if (result || isWhere) {
+        // deep compare the contents, ignoring non-numeric properties
+        while (size--) {
+          var index = length,
+              value = b[size];
+
+          if (isWhere) {
+            while (index--) {
+              if ((result = baseIsEqual(a[index], value, callback, isWhere, stackA, stackB))) {
+                break;
+              }
+            }
+          } else if (!(result = baseIsEqual(a[size], value, callback, isWhere, stackA, stackB))) {
+            break;
+          }
+        }
+      }
+    }
+    else {
+      // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
+      // which, in this case, is more costly
+      forIn(b, function(value, key, b) {
+        if (hasOwnProperty.call(b, key)) {
+          // count the number of properties.
+          size++;
+          // deep compare each property value.
+          return (result = hasOwnProperty.call(a, key) && baseIsEqual(a[key], value, callback, isWhere, stackA, stackB));
+        }
+      });
+
+      if (result && !isWhere) {
+        // ensure both objects have the same number of properties
+        forIn(a, function(value, key, a) {
+          if (hasOwnProperty.call(a, key)) {
+            // `size` will be `-1` if `a` has more properties than `b`
+            return (result = --size > -1);
+          }
+        });
+      }
+    }
+    stackA.pop();
+    stackB.pop();
+
+    if (initedStack) {
+      releaseArray(stackA);
+      releaseArray(stackB);
+    }
+    return result;
+  }
+
+  /**
+   * The base implementation of `_.random` without argument juggling or support
+   * for returning floating-point numbers.
+   *
+   * @private
+   * @param {number} min The minimum possible value.
+   * @param {number} max The maximum possible value.
+   * @returns {number} Returns a random number.
+   */
+  function baseRandom(min, max) {
+    return min + floor(nativeRandom() * (max - min + 1));
+  }
+
+  /**
+   * Creates a function that, when called, either curries or invokes `func`
+   * with an optional `this` binding and partially applied arguments.
+   *
+   * @private
+   * @param {Function|string} func The function or method name to reference.
+   * @param {number} bitmask The bitmask of method flags to compose.
+   *  The bitmask may be composed of the following flags:
+   *  1 - `_.bind`
+   *  2 - `_.bindKey`
+   *  4 - `_.curry`
+   *  8 - `_.curry` (bound)
+   *  16 - `_.partial`
+   *  32 - `_.partialRight`
+   * @param {Array} [partialArgs] An array of arguments to prepend to those
+   *  provided to the new function.
+   * @param {Array} [partialRightArgs] An array of arguments to append to those
+   *  provided to the new function.
+   * @param {*} [thisArg] The `this` binding of `func`.
+   * @param {number} [arity] The arity of `func`.
+   * @returns {Function} Returns the new function.
+   */
+  function createWrapper(func, bitmask, partialArgs, partialRightArgs, thisArg, arity) {
+    var isBind = bitmask & 1,
+        isBindKey = bitmask & 2,
+        isCurry = bitmask & 4,
+        isCurryBound = bitmask & 8,
+        isPartial = bitmask & 16,
+        isPartialRight = bitmask & 32;
+
+    if (!isBindKey && !isFunction(func)) {
+      throw new TypeError;
+    }
+    if (isPartial && !partialArgs.length) {
+      bitmask &= ~16;
+      isPartial = partialArgs = false;
+    }
+    if (isPartialRight && !partialRightArgs.length) {
+      bitmask &= ~32;
+      isPartialRight = partialRightArgs = false;
+    }
+    var bindData = func && func.__bindData__;
+    if (bindData && bindData !== true) {
+      // clone `bindData`
+      bindData = slice(bindData);
+      if (bindData[2]) {
+        bindData[2] = slice(bindData[2]);
+      }
+      if (bindData[3]) {
+        bindData[3] = slice(bindData[3]);
+      }
+      // set `thisBinding` is not previously bound
+      if (isBind && !(bindData[1] & 1)) {
+        bindData[4] = thisArg;
+      }
+      // set if previously bound but not currently (subsequent curried functions)
+      if (!isBind && bindData[1] & 1) {
+        bitmask |= 8;
+      }
+      // set curried arity if not yet set
+      if (isCurry && !(bindData[1] & 4)) {
+        bindData[5] = arity;
+      }
+      // append partial left arguments
+      if (isPartial) {
+        push.apply(bindData[2] || (bindData[2] = []), partialArgs);
+      }
+      // append partial right arguments
+      if (isPartialRight) {
+        unshift.apply(bindData[3] || (bindData[3] = []), partialRightArgs);
+      }
+      // merge flags
+      bindData[1] |= bitmask;
+      return createWrapper.apply(null, bindData);
+    }
+    // fast path for `_.bind`
+    var creater = (bitmask == 1 || bitmask === 17) ? baseBind : baseCreateWrapper;
+    return creater([func, bitmask, partialArgs, partialRightArgs, thisArg, arity]);
+  }
+
+  /**
+   * Creates compiled iteration functions.
+   *
+   * @private
+   * @param {...Object} [options] The compile options object(s).
+   * @param {string} [options.array] Code to determine if the iterable is an array or array-like.
+   * @param {boolean} [options.useHas] Specify using `hasOwnProperty` checks in the object loop.
+   * @param {Function} [options.keys] A reference to `_.keys` for use in own property iteration.
+   * @param {string} [options.args] A comma separated string of iteration function arguments.
+   * @param {string} [options.top] Code to execute before the iteration branches.
+   * @param {string} [options.loop] Code to execute in the object loop.
+   * @param {string} [options.bottom] Code to execute after the iteration branches.
+   * @returns {Function} Returns the compiled function.
+   */
+  function createIterator() {
+    // data properties
+    iteratorData.shadowedProps = shadowedProps;
+
+    // iterator options
+    iteratorData.array = iteratorData.bottom = iteratorData.loop = iteratorData.top = '';
+    iteratorData.init = 'iterable';
+    iteratorData.useHas = true;
+
+    // merge options into a template data object
+    for (var object, index = 0; object = arguments[index]; index++) {
+      for (var key in object) {
+        iteratorData[key] = object[key];
+      }
+    }
+    var args = iteratorData.args;
+    iteratorData.firstArg = /^[^,]+/.exec(args)[0];
+
+    // create the function factory
+    var factory = Function(
+        'baseCreateCallback, errorClass, errorProto, hasOwnProperty, ' +
+        'indicatorObject, isArguments, isArray, isString, keys, objectProto, ' +
+        'objectTypes, nonEnumProps, stringClass, stringProto, toString',
+      'return function(' + args + ') {\n' + iteratorTemplate(iteratorData) + '\n}'
+    );
+
+    // return the compiled function
+    return factory(
+      baseCreateCallback, errorClass, errorProto, hasOwnProperty,
+      indicatorObject, isArguments, isArray, isString, iteratorData.keys, objectProto,
+      objectTypes, nonEnumProps, stringClass, stringProto, toString
+    );
+  }
+
+  /**
+   * Gets the appropriate "indexOf" function. If the `_.indexOf` method is
+   * customized, this method returns the custom method, otherwise it returns
+   * the `baseIndexOf` function.
+   *
+   * @private
+   * @returns {Function} Returns the "indexOf" function.
+   */
+  function getIndexOf() {
+    var result = (result = lodash.indexOf) === indexOf ? baseIndexOf : result;
+    return result;
+  }
+
+  /**
+   * Checks if `value` is a native function.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a native function, else `false`.
+   */
+  function isNative(value) {
+    return typeof value == 'function' && reNative.test(value);
+  }
+
+  /**
+   * Sets `this` binding data on a given function.
+   *
+   * @private
+   * @param {Function} func The function to set data on.
+   * @param {Array} value The data array to set.
+   */
+  var setBindData = !defineProperty ? noop : function(func, value) {
+    descriptor.value = value;
+    defineProperty(func, '__bindData__', descriptor);
+  };
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Checks if `value` is an `arguments` object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is an `arguments` object, else `false`.
+   * @example
+   *
+   * (function() { return _.isArguments(arguments); })(1, 2, 3);
+   * // => true
+   *
+   * _.isArguments([1, 2, 3]);
+   * // => false
+   */
+  function isArguments(value) {
+    return value && typeof value == 'object' && typeof value.length == 'number' &&
+      toString.call(value) == argsClass || false;
+  }
+  // fallback for browsers that can't detect `arguments` objects by [[Class]]
+  if (!support.argsClass) {
+    isArguments = function(value) {
+      return value && typeof value == 'object' && typeof value.length == 'number' &&
+        hasOwnProperty.call(value, 'callee') && !propertyIsEnumerable.call(value, 'callee') || false;
+    };
+  }
+
+  /**
+   * Checks if `value` is an array.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is an array, else `false`.
+   * @example
+   *
+   * (function() { return _.isArray(arguments); })();
+   * // => false
+   *
+   * _.isArray([1, 2, 3]);
+   * // => true
+   */
+  var isArray = nativeIsArray || function(value) {
+    return value && typeof value == 'object' && typeof value.length == 'number' &&
+      toString.call(value) == arrayClass || false;
+  };
+
+  /**
+   * A fallback implementation of `Object.keys` which produces an array of the
+   * given object's own enumerable property names.
+   *
+   * @private
+   * @type Function
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names.
+   */
+  var shimKeys = createIterator({
+    'args': 'object',
+    'init': '[]',
+    'top': 'if (!(objectTypes[typeof object])) return result',
+    'loop': 'result.push(index)'
+  });
+
+  /**
+   * Creates an array composed of the own enumerable property names of an object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names.
+   * @example
+   *
+   * _.keys({ 'one': 1, 'two': 2, 'three': 3 });
+   * // => ['one', 'two', 'three'] (property order is not guaranteed across environments)
+   */
+  var keys = !nativeKeys ? shimKeys : function(object) {
+    if (!isObject(object)) {
+      return [];
+    }
+    if ((support.enumPrototypes && typeof object == 'function') ||
+        (support.nonEnumArgs && object.length && isArguments(object))) {
+      return shimKeys(object);
+    }
+    return nativeKeys(object);
+  };
+
+  /** Reusable iterator options shared by `each`, `forIn`, and `forOwn` */
+  var eachIteratorOptions = {
+    'args': 'collection, callback, thisArg',
+    'top': "callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3)",
+    'array': "typeof length == 'number'",
+    'keys': keys,
+    'loop': 'if (callback(iterable[index], index, collection) === false) return result'
+  };
+
+  /** Reusable iterator options for `forIn` and `forOwn` */
+  var forOwnIteratorOptions = {
+    'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
+    'array': false
+  };
+
+  /**
+   * A function compiled to iterate `arguments` objects, arrays, objects, and
+   * strings consistenly across environments, executing the callback for each
+   * element in the collection. The callback is bound to `thisArg` and invoked
+   * with three arguments; (value, index|key, collection). Callbacks may exit
+   * iteration early by explicitly returning `false`.
+   *
+   * @private
+   * @type Function
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array|Object|string} Returns `collection`.
+   */
+  var baseEach = createIterator(eachIteratorOptions);
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Iterates over own and inherited enumerable properties of an object,
+   * executing the callback for each property. The callback is bound to `thisArg`
+   * and invoked with three arguments; (value, key, object). Callbacks may exit
+   * iteration early by explicitly returning `false`.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {Object} object The object to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * Shape.prototype.move = function(x, y) {
+   *   this.x += x;
+   *   this.y += y;
+   * };
+   *
+   * _.forIn(new Shape, function(value, key) {
+   *   console.log(key);
+   * });
+   * // => logs 'x', 'y', and 'move' (property order is not guaranteed across environments)
+   */
+  var forIn = createIterator(eachIteratorOptions, forOwnIteratorOptions, {
+    'useHas': false
+  });
+
+  /**
+   * Iterates over own enumerable properties of an object, executing the callback
+   * for each property. The callback is bound to `thisArg` and invoked with three
+   * arguments; (value, key, object). Callbacks may exit iteration early by
+   * explicitly returning `false`.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {Object} object The object to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * _.forOwn({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
+   *   console.log(key);
+   * });
+   * // => logs '0', '1', and 'length' (property order is not guaranteed across environments)
+   */
+  var forOwn = createIterator(eachIteratorOptions, forOwnIteratorOptions);
+
+  /**
+   * Creates a sorted array of property names of all enumerable properties,
+   * own and inherited, of `object` that have function values.
+   *
+   * @static
+   * @memberOf _
+   * @alias methods
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names that have function values.
+   * @example
+   *
+   * _.functions(_);
+   * // => ['all', 'any', 'bind', 'bindAll', 'clone', 'compact', 'compose', ...]
+   */
+  function functions(object) {
+    var result = [];
+    forIn(object, function(value, key) {
+      if (isFunction(value)) {
+        result.push(key);
+      }
+    });
+    return result.sort();
+  }
+
+  /**
+   * Checks if `value` is a function.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a function, else `false`.
+   * @example
+   *
+   * _.isFunction(_);
+   * // => true
+   */
+  function isFunction(value) {
+    return typeof value == 'function';
+  }
+  // fallback for older versions of Chrome and Safari
+  if (isFunction(/x/)) {
+    isFunction = function(value) {
+      return typeof value == 'function' && toString.call(value) == funcClass;
+    };
+  }
+
+  /**
+   * Checks if `value` is the language type of Object.
+   * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is an object, else `false`.
+   * @example
+   *
+   * _.isObject({});
+   * // => true
+   *
+   * _.isObject([1, 2, 3]);
+   * // => true
+   *
+   * _.isObject(1);
+   * // => false
+   */
+  function isObject(value) {
+    // check if the value is the ECMAScript language type of Object
+    // http://es5.github.io/#x8
+    // and avoid a V8 bug
+    // http://code.google.com/p/v8/issues/detail?id=2291
+    return !!(value && objectTypes[typeof value]);
+  }
+
+  /**
+   * Checks if `value` is a string.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a string, else `false`.
+   * @example
+   *
+   * _.isString('fred');
+   * // => true
+   */
+  function isString(value) {
+    return typeof value == 'string' ||
+      value && typeof value == 'object' && toString.call(value) == stringClass || false;
+  }
+
+  /**
+   * Creates an array composed of the own enumerable property values of `object`.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property values.
+   * @example
+   *
+   * _.values({ 'one': 1, 'two': 2, 'three': 3 });
+   * // => [1, 2, 3] (property order is not guaranteed across environments)
+   */
+  function values(object) {
+    var index = -1,
+        props = keys(object),
+        length = props.length,
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = object[props[index]];
+    }
+    return result;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Iterates over elements of a collection, returning an array of all elements
+   * the callback returns truey for. The callback is bound to `thisArg` and
+   * invoked with three arguments; (value, index|key, collection).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @alias select
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array} Returns a new array of elements that passed the callback check.
+   * @example
+   *
+   * var evens = _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+   * // => [2, 4, 6]
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36, 'blocked': false },
+   *   { 'name': 'fred',   'age': 40, 'blocked': true }
+   * ];
+   *
+   * // using "_.pluck" callback shorthand
+   * _.filter(characters, 'blocked');
+   * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
+   *
+   * // using "_.where" callback shorthand
+   * _.filter(characters, { 'age': 36 });
+   * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
+   */
+  function filter(collection, callback, thisArg) {
+    var result = [];
+    callback = lodash.createCallback(callback, thisArg, 3);
+
+    if (isArray(collection)) {
+      var index = -1,
+          length = collection.length;
+
+      while (++index < length) {
+        var value = collection[index];
+        if (callback(value, index, collection)) {
+          result.push(value);
+        }
+      }
+    } else {
+      baseEach(collection, function(value, index, collection) {
+        if (callback(value, index, collection)) {
+          result.push(value);
+        }
+      });
+    }
+    return result;
+  }
+
+  /**
+   * Iterates over elements of a collection, executing the callback for each
+   * element. The callback is bound to `thisArg` and invoked with three arguments;
+   * (value, index|key, collection). Callbacks may exit iteration early by
+   * explicitly returning `false`.
+   *
+   * Note: As with other "Collections" methods, objects with a `length` property
+   * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
+   * may be used for object iteration.
+   *
+   * @static
+   * @memberOf _
+   * @alias each
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array|Object|string} Returns `collection`.
+   * @example
+   *
+   * _([1, 2, 3]).forEach(function(num) { console.log(num); }).join(',');
+   * // => logs each number and returns '1,2,3'
+   *
+   * _.forEach({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { console.log(num); });
+   * // => logs each number and returns the object (property order is not guaranteed across environments)
+   */
+  function forEach(collection, callback, thisArg) {
+    if (callback && typeof thisArg == 'undefined' && isArray(collection)) {
+      var index = -1,
+          length = collection.length;
+
+      while (++index < length) {
+        if (callback(collection[index], index, collection) === false) {
+          break;
+        }
+      }
+    } else {
+      baseEach(collection, callback, thisArg);
+    }
+    return collection;
+  }
+
+  /**
+   * Creates an array of values by running each element in the collection
+   * through the callback. The callback is bound to `thisArg` and invoked with
+   * three arguments; (value, index|key, collection).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @alias collect
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array} Returns a new array of the results of each `callback` execution.
+   * @example
+   *
+   * _.map([1, 2, 3], function(num) { return num * 3; });
+   * // => [3, 6, 9]
+   *
+   * _.map({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { return num * 3; });
+   * // => [3, 6, 9] (property order is not guaranteed across environments)
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36 },
+   *   { 'name': 'fred',   'age': 40 }
+   * ];
+   *
+   * // using "_.pluck" callback shorthand
+   * _.map(characters, 'name');
+   * // => ['barney', 'fred']
+   */
+  function map(collection, callback, thisArg) {
+    var index = -1,
+        length = collection ? collection.length : 0,
+        result = Array(typeof length == 'number' ? length : 0);
+
+    callback = lodash.createCallback(callback, thisArg, 3);
+    if (isArray(collection)) {
+      while (++index < length) {
+        result[index] = callback(collection[index], index, collection);
+      }
+    } else {
+      baseEach(collection, function(value, key, collection) {
+        result[++index] = callback(value, key, collection);
+      });
+    }
+    return result;
+  }
+
+  /**
+   * The opposite of `_.filter` this method returns the elements of a
+   * collection that the callback does **not** return truey for.
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array} Returns a new array of elements that failed the callback check.
+   * @example
+   *
+   * var odds = _.reject([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+   * // => [1, 3, 5]
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36, 'blocked': false },
+   *   { 'name': 'fred',   'age': 40, 'blocked': true }
+   * ];
+   *
+   * // using "_.pluck" callback shorthand
+   * _.reject(characters, 'blocked');
+   * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
+   *
+   * // using "_.where" callback shorthand
+   * _.reject(characters, { 'age': 36 });
+   * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
+   */
+  function reject(collection, callback, thisArg) {
+    callback = lodash.createCallback(callback, thisArg, 3);
+    return filter(collection, function(value, index, collection) {
+      return !callback(value, index, collection);
+    });
+  }
+
+  /**
+   * Retrieves a random element or `n` random elements from a collection.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to sample.
+   * @param {number} [n] The number of elements to sample.
+   * @param- {Object} [guard] Allows working with functions like `_.map`
+   *  without using their `index` arguments as `n`.
+   * @returns {Array} Returns the random sample(s) of `collection`.
+   * @example
+   *
+   * _.sample([1, 2, 3, 4]);
+   * // => 2
+   *
+   * _.sample([1, 2, 3, 4], 2);
+   * // => [3, 1]
+   */
+  function sample(collection, n, guard) {
+    if (collection && typeof collection.length != 'number') {
+      collection = values(collection);
+    } else if (support.unindexedChars && isString(collection)) {
+      collection = collection.split('');
+    }
+    if (n == null || guard) {
+      return collection ? collection[baseRandom(0, collection.length - 1)] : undefined;
+    }
+    var result = shuffle(collection);
+    result.length = nativeMin(nativeMax(0, n), result.length);
+    return result;
+  }
+
+  /**
+   * Creates an array of shuffled values, using a version of the Fisher-Yates
+   * shuffle. See http://en.wikipedia.org/wiki/Fisher-Yates_shuffle.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to shuffle.
+   * @returns {Array} Returns a new shuffled collection.
+   * @example
+   *
+   * _.shuffle([1, 2, 3, 4, 5, 6]);
+   * // => [4, 1, 6, 3, 5, 2]
+   */
+  function shuffle(collection) {
+    var index = -1,
+        length = collection ? collection.length : 0,
+        result = Array(typeof length == 'number' ? length : 0);
+
+    forEach(collection, function(value) {
+      var rand = baseRandom(0, ++index);
+      result[index] = result[rand];
+      result[rand] = value;
+    });
+    return result;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Gets the index at which the first occurrence of `value` is found using
+   * strict equality for comparisons, i.e. `===`. If the array is already sorted
+   * providing `true` for `fromIndex` will run a faster binary search.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {boolean|number} [fromIndex=0] The index to search from or `true`
+   *  to perform a binary search on a sorted array.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   * @example
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2);
+   * // => 1
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
+   * // => 4
+   *
+   * _.indexOf([1, 1, 2, 2, 3, 3], 2, true);
+   * // => 2
+   */
+  function indexOf(array, value, fromIndex) {
+    if (typeof fromIndex == 'number') {
+      var length = array ? array.length : 0;
+      fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex || 0);
+    } else if (fromIndex) {
+      var index = sortedIndex(array, value);
+      return array[index] === value ? index : -1;
+    }
+    return baseIndexOf(array, value, fromIndex);
+  }
+
+  /**
+   * Creates an array of numbers (positive and/or negative) progressing from
+   * `start` up to but not including `end`. If `start` is less than `stop` a
+   * zero-length range is created unless a negative `step` is specified.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {number} [start=0] The start of the range.
+   * @param {number} end The end of the range.
+   * @param {number} [step=1] The value to increment or decrement by.
+   * @returns {Array} Returns a new range array.
+   * @example
+   *
+   * _.range(4);
+   * // => [0, 1, 2, 3]
+   *
+   * _.range(1, 5);
+   * // => [1, 2, 3, 4]
+   *
+   * _.range(0, 20, 5);
+   * // => [0, 5, 10, 15]
+   *
+   * _.range(0, -4, -1);
+   * // => [0, -1, -2, -3]
+   *
+   * _.range(1, 4, 0);
+   * // => [1, 1, 1]
+   *
+   * _.range(0);
+   * // => []
+   */
+  function range(start, end, step) {
+    start = +start || 0;
+    step = typeof step == 'number' ? step : (+step || 1);
+
+    if (end == null) {
+      end = start;
+      start = 0;
+    }
+    // use `Array(length)` so engines like Chakra and V8 avoid slower modes
+    // http://youtu.be/XAqIpGU8ZZk#t=17m25s
+    var index = -1,
+        length = nativeMax(0, ceil((end - start) / (step || 1))),
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = start;
+      start += step;
+    }
+    return result;
+  }
+
+  /**
+   * Uses a binary search to determine the smallest index at which a value
+   * should be inserted into a given sorted array in order to maintain the sort
+   * order of the array. If a callback is provided it will be executed for
+   * `value` and each element of `array` to compute their sort ranking. The
+   * callback is bound to `thisArg` and invoked with one argument; (value).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to inspect.
+   * @param {*} value The value to evaluate.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {number} Returns the index at which `value` should be inserted
+   *  into `array`.
+   * @example
+   *
+   * _.sortedIndex([20, 30, 50], 40);
+   * // => 2
+   *
+   * // using "_.pluck" callback shorthand
+   * _.sortedIndex([{ 'x': 20 }, { 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
+   * // => 2
+   *
+   * var dict = {
+   *   'wordToNumber': { 'twenty': 20, 'thirty': 30, 'fourty': 40, 'fifty': 50 }
+   * };
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return dict.wordToNumber[word];
+   * });
+   * // => 2
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return this.wordToNumber[word];
+   * }, dict);
+   * // => 2
+   */
+  function sortedIndex(array, value, callback, thisArg) {
+    var low = 0,
+        high = array ? array.length : low;
+
+    // explicitly reference `identity` for better inlining in Firefox
+    callback = callback ? lodash.createCallback(callback, thisArg, 1) : identity;
+    value = callback(value);
+
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      (callback(array[mid]) < value)
+        ? low = mid + 1
+        : high = mid;
+    }
+    return low;
+  }
+
+  /**
+   * Creates an array excluding all provided values using strict equality for
+   * comparisons, i.e. `===`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to filter.
+   * @param {...*} [value] The values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   * @example
+   *
+   * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
+   * // => [2, 3, 4]
+   */
+  function without(array) {
+    return baseDifference(array, slice(arguments, 1));
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Creates a function that, when called, invokes `func` with the `this`
+   * binding of `thisArg` and prepends any additional `bind` arguments to those
+   * provided to the bound function.
+   *
+   * @static
+   * @memberOf _
+   * @category Functions
+   * @param {Function} func The function to bind.
+   * @param {*} [thisArg] The `this` binding of `func`.
+   * @param {...*} [arg] Arguments to be partially applied.
+   * @returns {Function} Returns the new bound function.
+   * @example
+   *
+   * var func = function(greeting) {
+   *   return greeting + ' ' + this.name;
+   * };
+   *
+   * func = _.bind(func, { 'name': 'fred' }, 'hi');
+   * func();
+   * // => 'hi fred'
+   */
+  function bind(func, thisArg) {
+    return arguments.length > 2
+      ? createWrapper(func, 17, slice(arguments, 2), null, thisArg)
+      : createWrapper(func, 1, null, null, thisArg);
+  }
+
+  /**
+   * Creates a function that will delay the execution of `func` until after
+   * `wait` milliseconds have elapsed since the last time it was invoked.
+   * Provide an options object to indicate that `func` should be invoked on
+   * the leading and/or trailing edge of the `wait` timeout. Subsequent calls
+   * to the debounced function will return the result of the last `func` call.
+   *
+   * Note: If `leading` and `trailing` options are `true` `func` will be called
+   * on the trailing edge of the timeout only if the the debounced function is
+   * invoked more than once during the `wait` timeout.
+   *
+   * @static
+   * @memberOf _
+   * @category Functions
+   * @param {Function} func The function to debounce.
+   * @param {number} wait The number of milliseconds to delay.
+   * @param {Object} [options] The options object.
+   * @param {boolean} [options.leading=false] Specify execution on the leading edge of the timeout.
+   * @param {number} [options.maxWait] The maximum time `func` is allowed to be delayed before it's called.
+   * @param {boolean} [options.trailing=true] Specify execution on the trailing edge of the timeout.
+   * @returns {Function} Returns the new debounced function.
+   * @example
+   *
+   * // avoid costly calculations while the window size is in flux
+   * var lazyLayout = _.debounce(calculateLayout, 150);
+   * jQuery(window).on('resize', lazyLayout);
+   *
+   * // execute `sendMail` when the click event is fired, debouncing subsequent calls
+   * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
+   *   'leading': true,
+   *   'trailing': false
+   * });
+   *
+   * // ensure `batchLog` is executed once after 1 second of debounced calls
+   * var source = new EventSource('/stream');
+   * source.addEventListener('message', _.debounce(batchLog, 250, {
+   *   'maxWait': 1000
+   * }, false);
+   */
+  function debounce(func, wait, options) {
+    var args,
+        maxTimeoutId,
+        result,
+        stamp,
+        thisArg,
+        timeoutId,
+        trailingCall,
+        lastCalled = 0,
+        maxWait = false,
+        trailing = true;
+
+    if (!isFunction(func)) {
+      throw new TypeError;
+    }
+    wait = nativeMax(0, wait) || 0;
+    if (options === true) {
+      var leading = true;
+      trailing = false;
+    } else if (isObject(options)) {
+      leading = options.leading;
+      maxWait = 'maxWait' in options && (nativeMax(wait, options.maxWait) || 0);
+      trailing = 'trailing' in options ? options.trailing : trailing;
+    }
+    var delayed = function() {
+      var remaining = wait - (now() - stamp);
+      if (remaining <= 0) {
+        if (maxTimeoutId) {
+          clearTimeout(maxTimeoutId);
+        }
+        var isCalled = trailingCall;
+        maxTimeoutId = timeoutId = trailingCall = undefined;
+        if (isCalled) {
+          lastCalled = now();
+          result = func.apply(thisArg, args);
+          if (!timeoutId && !maxTimeoutId) {
+            args = thisArg = null;
+          }
+        }
+      } else {
+        timeoutId = setTimeout(delayed, remaining);
+      }
+    };
+
+    var maxDelayed = function() {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      maxTimeoutId = timeoutId = trailingCall = undefined;
+      if (trailing || (maxWait !== wait)) {
+        lastCalled = now();
+        result = func.apply(thisArg, args);
+        if (!timeoutId && !maxTimeoutId) {
+          args = thisArg = null;
+        }
+      }
+    };
+
+    return function() {
+      args = arguments;
+      stamp = now();
+      thisArg = this;
+      trailingCall = trailing && (timeoutId || !leading);
+
+      if (maxWait === false) {
+        var leadingCall = leading && !timeoutId;
+      } else {
+        if (!maxTimeoutId && !leading) {
+          lastCalled = stamp;
+        }
+        var remaining = maxWait - (stamp - lastCalled),
+            isCalled = remaining <= 0;
+
+        if (isCalled) {
+          if (maxTimeoutId) {
+            maxTimeoutId = clearTimeout(maxTimeoutId);
+          }
+          lastCalled = stamp;
+          result = func.apply(thisArg, args);
+        }
+        else if (!maxTimeoutId) {
+          maxTimeoutId = setTimeout(maxDelayed, remaining);
+        }
+      }
+      if (isCalled && timeoutId) {
+        timeoutId = clearTimeout(timeoutId);
+      }
+      else if (!timeoutId && wait !== maxWait) {
+        timeoutId = setTimeout(delayed, wait);
+      }
+      if (leadingCall) {
+        isCalled = true;
+        result = func.apply(thisArg, args);
+      }
+      if (isCalled && !timeoutId && !maxTimeoutId) {
+        args = thisArg = null;
+      }
+      return result;
+    };
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Produces a callback bound to an optional `thisArg`. If `func` is a property
+   * name the created callback will return the property value for a given element.
+   * If `func` is an object the created callback will return `true` for elements
+   * that contain the equivalent object properties, otherwise it will return `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {*} [func=identity] The value to convert to a callback.
+   * @param {*} [thisArg] The `this` binding of the created callback.
+   * @param {number} [argCount] The number of arguments the callback accepts.
+   * @returns {Function} Returns a callback function.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36 },
+   *   { 'name': 'fred',   'age': 40 }
+   * ];
+   *
+   * // wrap to create custom callback shorthands
+   * _.createCallback = _.wrap(_.createCallback, function(func, callback, thisArg) {
+   *   var match = /^(.+?)__([gl]t)(.+)$/.exec(callback);
+   *   return !match ? func(callback, thisArg) : function(object) {
+   *     return match[2] == 'gt' ? object[match[1]] > match[3] : object[match[1]] < match[3];
+   *   };
+   * });
+   *
+   * _.filter(characters, 'age__gt38');
+   * // => [{ 'name': 'fred', 'age': 40 }]
+   */
+  function createCallback(func, thisArg, argCount) {
+    var type = typeof func;
+    if (func == null || type == 'function') {
+      return baseCreateCallback(func, thisArg, argCount);
+    }
+    // handle "_.pluck" style callback shorthands
+    if (type != 'object') {
+      return property(func);
+    }
+    var props = keys(func),
+        key = props[0],
+        a = func[key];
+
+    // handle "_.where" style callback shorthands
+    if (props.length == 1 && a === a && !isObject(a)) {
+      // fast path the common case of providing an object with a single
+      // property containing a primitive value
+      return function(object) {
+        var b = object[key];
+        return a === b && (a !== 0 || (1 / a == 1 / b));
+      };
+    }
+    return function(object) {
+      var length = props.length,
+          result = false;
+
+      while (length--) {
+        if (!(result = baseIsEqual(object[props[length]], func[props[length]], null, true))) {
+          break;
+        }
+      }
+      return result;
+    };
+  }
+
+  /**
+   * This method returns the first argument provided to it.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {*} value Any value.
+   * @returns {*} Returns `value`.
+   * @example
+   *
+   * var object = { 'name': 'fred' };
+   * _.identity(object) === object;
+   * // => true
+   */
+  function identity(value) {
+    return value;
+  }
+
+  /**
+   * Adds function properties of a source object to the destination object.
+   * If `object` is a function methods will be added to its prototype as well.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {Function|Object} [object=lodash] object The destination object.
+   * @param {Object} source The object of functions to add.
+   * @param {Object} [options] The options object.
+   * @param {boolean} [options.chain=true] Specify whether the functions added are chainable.
+   * @example
+   *
+   * function capitalize(string) {
+   *   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+   * }
+   *
+   * _.mixin({ 'capitalize': capitalize });
+   * _.capitalize('fred');
+   * // => 'Fred'
+   *
+   * _('fred').capitalize().value();
+   * // => 'Fred'
+   *
+   * _.mixin({ 'capitalize': capitalize }, { 'chain': false });
+   * _('fred').capitalize();
+   * // => 'Fred'
+   */
+  function mixin(object, source, options) {
+    var chain = true,
+        methodNames = source && functions(source);
+
+    if (!source || (!options && !methodNames.length)) {
+      if (options == null) {
+        options = source;
+      }
+      ctor = lodashWrapper;
+      source = object;
+      object = lodash;
+      methodNames = functions(source);
+    }
+    if (options === false) {
+      chain = false;
+    } else if (isObject(options) && 'chain' in options) {
+      chain = options.chain;
+    }
+    var ctor = object,
+        isFunc = isFunction(ctor);
+
+    forEach(methodNames, function(methodName) {
+      var func = object[methodName] = source[methodName];
+      if (isFunc) {
+        ctor.prototype[methodName] = function() {
+          var chainAll = this.__chain__,
+              value = this.__wrapped__,
+              args = [value];
+
+          push.apply(args, arguments);
+          var result = func.apply(object, args);
+          if (chain || chainAll) {
+            if (value === result && isObject(result)) {
+              return this;
+            }
+            result = new ctor(result);
+            result.__chain__ = chainAll;
+          }
+          return result;
+        };
+      }
+    });
+  }
+
+  /**
+   * A no-operation function.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @example
+   *
+   * var object = { 'name': 'fred' };
+   * _.noop(object) === undefined;
+   * // => true
+   */
+  function noop() {
+    // no operation performed
+  }
+
+  /**
+   * Gets the number of milliseconds that have elapsed since the Unix epoch
+   * (1 January 1970 00:00:00 UTC).
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @example
+   *
+   * var stamp = _.now();
+   * _.defer(function() { console.log(_.now() - stamp); });
+   * // => logs the number of milliseconds it took for the deferred function to be called
+   */
+  var now = isNative(now = Date.now) && now || function() {
+    return new Date().getTime();
+  };
+
+  /**
+   * Creates a "_.pluck" style function, which returns the `key` value of a
+   * given object.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {string} key The name of the property to retrieve.
+   * @returns {Function} Returns the new function.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'fred',   'age': 40 },
+   *   { 'name': 'barney', 'age': 36 }
+   * ];
+   *
+   * var getName = _.property('name');
+   *
+   * _.map(characters, getName);
+   * // => ['barney', 'fred']
+   *
+   * _.sortBy(characters, getName);
+   * // => [{ 'name': 'barney', 'age': 36 }, { 'name': 'fred',   'age': 40 }]
+   */
+  function property(key) {
+    return function(object) {
+      return object[key];
+    };
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Creates a `lodash` object that wraps the given value with explicit
+   * method chaining enabled.
+   *
+   * @static
+   * @memberOf _
+   * @category Chaining
+   * @param {*} value The value to wrap.
+   * @returns {Object} Returns the wrapper object.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'barney',  'age': 36 },
+   *   { 'name': 'fred',    'age': 40 },
+   *   { 'name': 'pebbles', 'age': 1 }
+   * ];
+   *
+   * var youngest = _.chain(characters)
+   *     .sortBy('age')
+   *     .map(function(chr) { return chr.name + ' is ' + chr.age; })
+   *     .first()
+   *     .value();
+   * // => 'pebbles is 1'
+   */
+  function chain(value) {
+    value = new lodashWrapper(value);
+    value.__chain__ = true;
+    return value;
+  }
+
+  /**
+   * Enables explicit method chaining on the wrapper object.
+   *
+   * @name chain
+   * @memberOf _
+   * @category Chaining
+   * @returns {*} Returns the wrapper object.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36 },
+   *   { 'name': 'fred',   'age': 40 }
+   * ];
+   *
+   * // without explicit chaining
+   * _(characters).first();
+   * // => { 'name': 'barney', 'age': 36 }
+   *
+   * // with explicit chaining
+   * _(characters).chain()
+   *   .first()
+   *   .pick('age')
+   *   .value();
+   * // => { 'age': 36 }
+   */
+  function wrapperChain() {
+    this.__chain__ = true;
+    return this;
+  }
+
+  /**
+   * Produces the `toString` result of the wrapped value.
+   *
+   * @name toString
+   * @memberOf _
+   * @category Chaining
+   * @returns {string} Returns the string result.
+   * @example
+   *
+   * _([1, 2, 3]).toString();
+   * // => '1,2,3'
+   */
+  function wrapperToString() {
+    return String(this.__wrapped__);
+  }
+
+  /**
+   * Extracts the wrapped value.
+   *
+   * @name valueOf
+   * @memberOf _
+   * @alias value
+   * @category Chaining
+   * @returns {*} Returns the wrapped value.
+   * @example
+   *
+   * _([1, 2, 3]).valueOf();
+   * // => [1, 2, 3]
+   */
+  function wrapperValueOf() {
+    return this.__wrapped__;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  lodash.bind = bind;
+  lodash.chain = chain;
+  lodash.createCallback = createCallback;
+  lodash.debounce = debounce;
+  lodash.filter = filter;
+  lodash.forEach = forEach;
+  lodash.forIn = forIn;
+  lodash.forOwn = forOwn;
+  lodash.functions = functions;
+  lodash.keys = keys;
+  lodash.map = map;
+  lodash.property = property;
+  lodash.range = range;
+  lodash.reject = reject;
+  lodash.shuffle = shuffle;
+  lodash.values = values;
+  lodash.without = without;
+
+  // add aliases
+  lodash.collect = map;
+  lodash.each = forEach;
+  lodash.methods = functions;
+  lodash.select = filter;
+
+  // add functions to `lodash.prototype`
+  mixin(lodash);
+
+  /*--------------------------------------------------------------------------*/
+
+  lodash.identity = identity;
+  lodash.indexOf = indexOf;
+  lodash.isArguments = isArguments;
+  lodash.isArray = isArray;
+  lodash.isFunction = isFunction;
+  lodash.isObject = isObject;
+  lodash.isString = isString;
+  lodash.mixin = mixin;
+  lodash.noop = noop;
+  lodash.now = now;
+  lodash.sortedIndex = sortedIndex;
+
+  mixin(function() {
+    var source = {}
+    forOwn(lodash, function(func, methodName) {
+      if (!lodash.prototype[methodName]) {
+        source[methodName] = func;
+      }
+    });
+    return source;
+  }(), false);
+
+  /*--------------------------------------------------------------------------*/
+
+  lodash.sample = sample;
+
+  forOwn(lodash, function(func, methodName) {
+    var callbackable = methodName !== 'sample';
+    if (!lodash.prototype[methodName]) {
+      lodash.prototype[methodName]= function(n, guard) {
+        var chainAll = this.__chain__,
+            result = func(this.__wrapped__, n, guard);
+
+        return !chainAll && (n == null || (guard && !(callbackable && typeof n == 'function')))
+          ? result
+          : new lodashWrapper(result, chainAll);
+      };
+    }
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The semantic version number.
+   *
+   * @static
+   * @memberOf _
+   * @type string
+   */
+  lodash.VERSION = '2.4.1';
+
+  // add "Chaining" functions to the wrapper
+  lodash.prototype.chain = wrapperChain;
+  lodash.prototype.toString = wrapperToString;
+  lodash.prototype.value = wrapperValueOf;
+  lodash.prototype.valueOf = wrapperValueOf;
+
+  // add `Array` functions that return unwrapped values
+  baseEach(['join', 'pop', 'shift'], function(methodName) {
+    var func = arrayRef[methodName];
+    lodash.prototype[methodName] = function() {
+      var chainAll = this.__chain__,
+          result = func.apply(this.__wrapped__, arguments);
+
+      return chainAll
+        ? new lodashWrapper(result, chainAll)
+        : result;
+    };
+  });
+
+  // add `Array` functions that return the existing wrapped value
+  baseEach(['push', 'reverse', 'sort', 'unshift'], function(methodName) {
+    var func = arrayRef[methodName];
+    lodash.prototype[methodName] = function() {
+      func.apply(this.__wrapped__, arguments);
+      return this;
+    };
+  });
+
+  // add `Array` functions that return new wrapped values
+  baseEach(['concat', 'slice', 'splice'], function(methodName) {
+    var func = arrayRef[methodName];
+    lodash.prototype[methodName] = function() {
+      return new lodashWrapper(func.apply(this.__wrapped__, arguments), this.__chain__);
+    };
+  });
+
+  // avoid array-like object bugs with `Array#shift` and `Array#splice`
+  // in IE < 9, Firefox < 10, Narwhal, and RingoJS
+  if (!support.spliceObjects) {
+    baseEach(['pop', 'shift', 'splice'], function(methodName) {
+      var func = arrayRef[methodName],
+          isSplice = methodName == 'splice';
+
+      lodash.prototype[methodName] = function() {
+        var chainAll = this.__chain__,
+            value = this.__wrapped__,
+            result = func.apply(value, arguments);
+
+        if (value.length === 0) {
+          delete value[0];
+        }
+        return (chainAll || isSplice)
+          ? new lodashWrapper(result, chainAll)
+          : result;
+      };
+    });
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  // some AMD build optimizers like r.js check for condition patterns like the following:
+  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    // Expose Lo-Dash to the global object even when an AMD loader is present in
+    // case Lo-Dash is loaded with a RequireJS shim config.
+    // See http://requirejs.org/docs/api.html#config-shim
+    root._ = lodash;
+
+    // define as an anonymous module so, through path mapping, it can be
+    // referenced as the "underscore" module
+    define(function() {
+      return lodash;
+    });
+  }
+  // check for `exports` after `define` in case a build optimizer adds an `exports` object
+  else if (freeExports && freeModule) {
+    // in Node.js or RingoJS
+    if (moduleExports) {
+      (freeModule.exports = lodash)._ = lodash;
+    }
+    // in Narwhal or Rhino -require
+    else {
+      freeExports._ = lodash;
+    }
+  }
+  else {
+    // in a browser or Rhino
+    root._ = lodash;
+  }
+}.call(this));
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],12:[function(require,module,exports){
 var tiles = require('./tiles');
 var Direction = tiles.Direction;
 var MoveDirection = tiles.MoveDirection;
@@ -2372,7 +5050,7 @@ exports.honey = API_FUNCTION(function(id) {
   Maze.bee.makeHoney(id);
 });
 
-},{"../utils":44,"./tiles":23}],12:[function(require,module,exports){
+},{"../utils":47,"./tiles":24}],13:[function(require,module,exports){
 var utils = require('../utils');
 
 var Bee = function (maze, config) {
@@ -2520,12 +5198,7 @@ Bee.prototype.animateGetNectar = function () {
   }
 
   this.maze_.dirt_[row][col] -= 1;
-  // todo - i have an improvement for how updateDirt works on a different branch
-  if (this.maze_.dirt_[row][col] === 0) {
-    this.maze_.removeDirt(row, col);
-  } else {
-    this.maze_.updateDirt(row, col);
-  }
+  this.maze_.updateDirtImage(row, col);
 
   this.nectar_ += 1;
   this.totalNectar_ += 1;
@@ -2583,7 +5256,7 @@ Bee.prototype.animateMakeHoney = function () {
 
   this.makeHoneyAt(row, col);
 
-  this.maze_.updateDirt(row, col);
+  this.maze_.updateDirtImage(row, col);
 
   this.updateNectarImages_();
   this.updateHoneyImages_();
@@ -2633,14 +5306,13 @@ Bee.prototype.updateHoneyImages_ = function () {
 Bee.prototype.setTilesTransparent = function () {
   for (var row = 0; row < this.initialDirt_.length; row++) {
     for (var col = 0; col < this.initialDirt_[row].length; col++) {
-      if (this.isHive(row, col)) {
-        this.maze_.removeDirt(row, col);
-      }
+      this.maze_.dirt_[row][col] = 0;
+      this.maze_.updateDirtImage(row, col);
     }
   }
 };
 
-},{"../utils":44}],13:[function(require,module,exports){
+},{"../utils":47}],14:[function(require,module,exports){
 /**
  * Blockly Demo: Maze
  *
@@ -2700,7 +5372,7 @@ exports.install = function(blockly, blockInstallOptions) {
         init: function () {
           this.setHSV(184, 1.00, 0.74);
           this.appendDummyInput()
-            .appendTitle(directionConfig.letter)
+            .appendTitle(new blockly.FieldLabel(directionConfig.letter, {fixedSize: {width: 12, height: 18}}))
             .appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
@@ -3038,7 +5710,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/ar_sa/maze":47,"../block_utils":3,"../codegen":6}],14:[function(require,module,exports){
+},{"../../locale/ar_sa/maze":50,"../block_utils":3,"../codegen":6}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3059,7 +5731,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/maze":47,"ejs":48}],15:[function(require,module,exports){
+},{"../../locale/ar_sa/maze":50,"ejs":51}],16:[function(require,module,exports){
 /*jshint multistr: true */
 
 var levelBase = require('../level_base');
@@ -4302,7 +6974,7 @@ module.exports = {
   }
 };
 
-},{"../../locale/ar_sa/maze":47,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":16,"./tiles":23,"./toolboxes/karel1.xml":24,"./toolboxes/karel2.xml":25,"./toolboxes/karel3.xml":26}],16:[function(require,module,exports){
+},{"../../locale/ar_sa/maze":50,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":17,"./tiles":24,"./toolboxes/karel1.xml":25,"./toolboxes/karel2.xml":26,"./toolboxes/karel3.xml":27}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -4334,9 +7006,10 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/maze":47,"ejs":48}],17:[function(require,module,exports){
+},{"../../locale/ar_sa/maze":50,"ejs":51}],18:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
+var wordsearchLevels = require('./wordsearchLevels');
 var reqBlocks = require('./requiredBlocks');
 var blockUtils = require('../block_utils');
 var utils = require('../utils');
@@ -4949,6 +7622,11 @@ for (var levelId in karelLevels) {
   module.exports['karel_' + levelId] = karelLevels[levelId];
 }
 
+// Merge in Wordsearch levels.
+for (var levelId in wordsearchLevels) {
+  module.exports['wordsearch_' + levelId] = wordsearchLevels[levelId];
+}
+
 // Add some step levels
 function cloneWithStep(level, step, stepOnly) {
   var obj = utils.extend({}, module.exports[level]);
@@ -4964,7 +7642,7 @@ cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
 cloneWithStep('karel_2_9', true, false);
 
-},{"../block_utils":3,"../utils":44,"./karelLevels":15,"./requiredBlocks":20,"./startBlocks.xml":22,"./tiles":23,"./toolboxes/maze.xml":27}],18:[function(require,module,exports){
+},{"../block_utils":3,"../utils":47,"./karelLevels":16,"./requiredBlocks":21,"./startBlocks.xml":23,"./tiles":24,"./toolboxes/maze.xml":28,"./wordsearchLevels":31}],19:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -4983,7 +7661,7 @@ window.mazeMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":13,"./levels":17,"./maze":19,"./skins":21}],19:[function(require,module,exports){
+},{"../appMain":1,"./blocks":14,"./levels":18,"./maze":20,"./skins":22}],20:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -5022,6 +7700,7 @@ var dom = require('../dom');
 var utils = require('../utils');
 
 var Bee = require('./bee');
+var WordSearch = require('./wordsearch');
 
 var ExecutionInfo = require('../executionInfo');
 
@@ -5101,6 +7780,11 @@ var loadLevel = function() {
 };
 
 
+/**
+ * Initialize the wallMap.  For any cell at location x,y Maze.wallMap[y][x] will
+ * be the index of which wall tile to use for that cell.  If the cell is not a
+ * wall, Maze.wallMap[y][x] is undefined.
+ */
 var initWallMap = function() {
   Maze.wallMap = new Array(Maze.ROWS);
   for (var y = 0; y < Maze.ROWS; y++) {
@@ -5139,7 +7823,7 @@ var TILE_SHAPES = {
   'null4': [1, 3]
 };
 
-var drawMap = function() {
+function drawMap () {
   var svg = document.getElementById('svgMaze');
   var x, y, k, tile;
 
@@ -5180,112 +7864,10 @@ var drawMap = function() {
     svg.appendChild(tile);
   }
 
-  if (skin.graph) {
-    // Draw the grid lines.
-    // The grid lines are offset so that the lines pass through the centre of
-    // each square.  A half-pixel offset is also added to as standard SVG
-    // practice to avoid blurriness.
-    var offset = Maze.SQUARE_SIZE / 2 + 0.5;
-    for (k = 0; k < Maze.ROWS; k++) {
-      var h_line = document.createElementNS(Blockly.SVG_NS, 'line');
-      h_line.setAttribute('y1', k * Maze.SQUARE_SIZE + offset);
-      h_line.setAttribute('x2', Maze.MAZE_WIDTH);
-      h_line.setAttribute('y2', k * Maze.SQUARE_SIZE + offset);
-      h_line.setAttribute('stroke', skin.graph);
-      h_line.setAttribute('stroke-width', 1);
-      svg.appendChild(h_line);
-    }
-    for (k = 0; k < Maze.COLS; k++) {
-      var v_line = document.createElementNS(Blockly.SVG_NS, 'line');
-      v_line.setAttribute('x1', k * Maze.SQUARE_SIZE + offset);
-      v_line.setAttribute('x2', k * Maze.SQUARE_SIZE + offset);
-      v_line.setAttribute('y2', Maze.MAZE_HEIGHT);
-      v_line.setAttribute('stroke', skin.graph);
-      v_line.setAttribute('stroke-width', 1);
-      svg.appendChild(v_line);
-    }
-  }
-
-  // Draw the tiles making up the maze map.
-
-  // Return a value of '0' if the specified square is wall or out of bounds '1'
-  // otherwise (empty, obstacle, start, finish).
-  var normalize = function(x, y) {
-    return ((Maze.map[y] === undefined) ||
-            (Maze.map[y][x] === undefined) ||
-            (Maze.map[y][x] == SquareType.WALL)) ? '0' : '1';
-  };
-
-  // Compute and draw the tile for each square.
-  var tileId = 0;
-  for (y = 0; y < Maze.ROWS; y++) {
-    for (x = 0; x < Maze.COLS; x++) {
-      // Compute the tile index.
-      tile = normalize(x, y) +
-          normalize(x, y - 1) +  // North.
-          normalize(x + 1, y) +  // West.
-          normalize(x, y + 1) +  // South.
-          normalize(x - 1, y);   // East.
-
-      // Draw the tile.
-      if (!TILE_SHAPES[tile]) {
-        // Empty square.  Use null0 for large areas, with null1-4 for borders.
-        if (tile == '00000' && Math.random() > 0.3) {
-          Maze.wallMap[y][x] = 0;
-          tile = 'null0';
-        } else {
-          var wallIdx = Math.floor(1 + Math.random() * 4);
-          Maze.wallMap[y][x] = wallIdx;
-          tile = 'null' + wallIdx;
-        }
-
-        // For the first 3 levels in maze, only show the null0 image.
-        if (level.id == '2_1' || level.id == '2_2' || level.id == '2_3') {
-          Maze.wallMap[y][x] = 0;
-          tile = 'null0';
-        }
-      }
-      var left = TILE_SHAPES[tile][0];
-      var top = TILE_SHAPES[tile][1];
-      // Tile's clipPath element.
-      var tileClip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-      tileClip.setAttribute('id', 'tileClipPath' + tileId);
-      var tileClipRect = document.createElementNS(Blockly.SVG_NS, 'rect');
-      tileClipRect.setAttribute('width', Maze.SQUARE_SIZE);
-      tileClipRect.setAttribute('height', Maze.SQUARE_SIZE);
-
-      tileClipRect.setAttribute('x', x * Maze.SQUARE_SIZE);
-      tileClipRect.setAttribute('y', y * Maze.SQUARE_SIZE);
-
-      tileClip.appendChild(tileClipRect);
-      svg.appendChild(tileClip);
-      // Tile sprite.
-      var tileElement = document.createElementNS(Blockly.SVG_NS, 'image');
-      tileElement.setAttribute('id', 'tileElement' + tileId);
-      tileElement.setAttributeNS('http://www.w3.org/1999/xlink',
-                                 'xlink:href',
-                                 skin.tiles);
-      tileElement.setAttribute('height', Maze.SQUARE_SIZE * 4);
-      tileElement.setAttribute('width', Maze.SQUARE_SIZE * 5);
-      tileElement.setAttribute('clip-path',
-                               'url(#tileClipPath' + tileId + ')');
-      tileElement.setAttribute('x', (x - left) * Maze.SQUARE_SIZE);
-      tileElement.setAttribute('y', (y - top) * Maze.SQUARE_SIZE);
-      svg.appendChild(tileElement);
-      // Tile animation
-      var tileAnimation = document.createElementNS(Blockly.SVG_NS,
-                                                   'animate');
-      tileAnimation.setAttribute('id', 'tileAnimation' + tileId);
-      tileAnimation.setAttribute('attributeType', 'CSS');
-      tileAnimation.setAttribute('attributeName', 'opacity');
-      tileAnimation.setAttribute('from', 1);
-      tileAnimation.setAttribute('to', 0);
-      tileAnimation.setAttribute('dur', '1s');
-      tileAnimation.setAttribute('begin', 'indefinite');
-      tileElement.appendChild(tileAnimation);
-
-      tileId++;
-    }
+  if (Maze.wordSearch) {
+    Maze.wordSearch.drawMapTiles(svg);
+  } else {
+    drawMapTiles(svg);
   }
 
   // Pegman's clipPath element, whose (x, y) is reset by Maze.displayPegman
@@ -5381,7 +7963,103 @@ var drawMap = function() {
       numRowPegman: 9
     });
   }
+}
 
+function drawMapTiles(svg) {
+  // Draw the tiles making up the maze map.
+
+  // Return a value of '0' if the specified square is wall or out of bounds '1'
+  // otherwise (empty, obstacle, start, finish).
+  var normalize = function(x, y) {
+    return ((Maze.map[y] === undefined) ||
+            (Maze.map[y][x] === undefined) ||
+            (Maze.map[y][x] == SquareType.WALL)) ? '0' : '1';
+  };
+
+  // Compute and draw the tile for each square.
+  var tileId = 0;
+  var tile;
+  for (var y = 0; y < Maze.ROWS; y++) {
+    for (var x = 0; x < Maze.COLS; x++) {
+      // Compute the tile index.
+      tile = normalize(x, y) +
+        normalize(x, y - 1) +  // North.
+        normalize(x + 1, y) +  // West.
+        normalize(x, y + 1) +  // South.
+        normalize(x - 1, y);   // East.
+
+      // Draw the tile.
+      if (!TILE_SHAPES[tile]) {
+        // Empty square.  Use null0 for large areas, with null1-4 for borders.
+        if (tile == '00000' && Math.random() > 0.3) {
+          Maze.wallMap[y][x] = 0;
+          tile = 'null0';
+        } else {
+          var wallIdx = Math.floor(1 + Math.random() * 4);
+          Maze.wallMap[y][x] = wallIdx;
+          tile = 'null' + wallIdx;
+        }
+
+        // For the first 3 levels in maze, only show the null0 image.
+        if (level.id == '2_1' || level.id == '2_2' || level.id == '2_3') {
+          Maze.wallMap[y][x] = 0;
+          tile = 'null0';
+        }
+      }
+
+      Maze.drawTile(svg, TILE_SHAPES[tile], y, x, tileId);
+
+      tileId++;
+    }
+  }
+}
+
+/**
+ * Draw the given tile at row, col
+ */
+Maze.drawTile = function (svg, tileSheetLocation, row, col, tileId) {
+  var left = tileSheetLocation[0];
+  var top = tileSheetLocation[1];
+
+  var tileSheetWidth = Maze.SQUARE_SIZE * skin.tileSheetWidth;
+  var tileSheetHeight = Maze.SQUARE_SIZE * 4;
+
+  // Tile's clipPath element.
+  var tileClip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+  tileClip.setAttribute('id', 'tileClipPath' + tileId);
+  var tileClipRect = document.createElementNS(Blockly.SVG_NS, 'rect');
+  tileClipRect.setAttribute('width', Maze.SQUARE_SIZE);
+  tileClipRect.setAttribute('height', Maze.SQUARE_SIZE);
+
+  tileClipRect.setAttribute('x', col * Maze.SQUARE_SIZE);
+  tileClipRect.setAttribute('y', row * Maze.SQUARE_SIZE);
+
+  tileClip.appendChild(tileClipRect);
+  svg.appendChild(tileClip);
+  // Tile sprite.
+  var tileElement = document.createElementNS(Blockly.SVG_NS, 'image');
+  tileElement.setAttribute('id', 'tileElement' + tileId);
+  tileElement.setAttributeNS('http://www.w3.org/1999/xlink',
+                             'xlink:href',
+                             skin.tiles);
+  tileElement.setAttribute('height', tileSheetHeight);
+  tileElement.setAttribute('width', tileSheetWidth);
+  tileElement.setAttribute('clip-path',
+                           'url(#tileClipPath' + tileId + ')');
+  tileElement.setAttribute('x', (col - left) * Maze.SQUARE_SIZE);
+  tileElement.setAttribute('y', (row - top) * Maze.SQUARE_SIZE);
+  svg.appendChild(tileElement);
+  // Tile animation
+  var tileAnimation = document.createElementNS(Blockly.SVG_NS,
+                                               'animate');
+  tileAnimation.setAttribute('id', 'tileAnimation' + tileId);
+  tileAnimation.setAttribute('attributeType', 'CSS');
+  tileAnimation.setAttribute('attributeName', 'opacity');
+  tileAnimation.setAttribute('from', 1);
+  tileAnimation.setAttribute('to', 0);
+  tileAnimation.setAttribute('dur', '1s');
+  tileAnimation.setAttribute('begin', 'indefinite');
+  tileElement.appendChild(tileAnimation);
 };
 
 var resetDirt = function() {
@@ -5408,6 +8086,8 @@ Maze.init = function(config) {
 
   if (config.skinId === 'bee') {
     Maze.bee = new Bee(Maze, config);
+  } else if (config.skinId === 'letters') {
+    Maze.wordSearch = new WordSearch(level.map, Maze.drawTile);
   }
 
   loadLevel();
@@ -5469,11 +8149,13 @@ Maze.init = function(config) {
     // Locate the start and finish squares.
     for (var y = 0; y < Maze.ROWS; y++) {
       for (var x = 0; x < Maze.COLS; x++) {
-        if (Maze.map[y][x] == SquareType.START) {
+        var cell = Maze.map[y][x];
+        if (cell == SquareType.START) {
           Maze.start_ = {x: x, y: y};
-        } else if (Maze.map[y][x] == SquareType.FINISH) {
+        } else if (cell == SquareType.FINISH ||
+          (Maze.wordSearch && Maze.wordSearch.isFinishCell(cell))) {
           Maze.finish_ = {x: x, y: y};
-        } else if (Maze.map[y][x] == SquareType.STARTANDFINISH) {
+        } else if (cell == SquareType.STARTANDFINISH) {
           Maze.start_ = {x: x, y: y};
           Maze.finish_ = {x: x, y: y};
         }
@@ -5513,17 +8195,65 @@ function stepButtonClick() {
   }
 }
 
-var dirtPositionToIndex = function(row, col) {
-  return Maze.COLS * row + col;
+var cellId = function(prefix, row, col) {
+  return prefix + '_' + row + '_' + col;
 };
 
-var createDirt = function(row, col) {
+
+ // todo (brent) : The next set of dirt related methods probably belong in a single module
+
+
+function spriteIndexForDirt(val) {
+  var spriteIndex;
+
+  if (val < -Maze.DIRT_MAX) {
+    spriteIndex = 0;
+  } else if (val < 0) {
+    spriteIndex = Maze.DIRT_MAX + val + 1;
+  } else if (val > Maze.DIRT_MAX) {
+    spriteIndex = Maze.DIRT_COUNT - 1;
+  } else if (val > 0) {
+    spriteIndex = Maze.DIRT_MAX + val;
+  } else {
+    throw new Error('Expected non-zero dirt.');
+  }
+
+  return spriteIndex;
+}
+
+Maze.updateDirtImage = function (row, col) {
+  var val = Maze.dirt_[row][col];
+  var img = document.getElementById(cellId('dirt', row, col));
+  if (!img) {
+    // we don't need any image
+    if (val === 0) {
+      return;
+    }
+    // we want an image, so let's create one
+    img = createDirt(row, col);
+  }
+
+  img.setAttribute('visibility', val === 0 ? 'hidden' : 'visibile');
+  if (val !== 0) {
+    var spriteIndex = spriteIndexForDirt(val);
+
+    var x = Maze.SQUARE_SIZE * (col - spriteIndex + 0.5) - Maze.DIRT_HEIGHT / 2;
+    var y = Maze.SQUARE_SIZE * (row + 0.5) - Maze.DIRT_WIDTH / 2;
+    img.setAttribute('x', x);
+    img.setAttribute('y', y);
+  }
+};
+
+function createDirt (row, col) {
   var pegmanElement = document.getElementsByClassName('pegman-location')[0];
   var svg = document.getElementById('svgMaze');
-  var index = dirtPositionToIndex(row, col);
+
+  var clipId = cellId('dirtClip', row, col);
+  var imgId = cellId('dirt', row, col);
+
   // Create clip path.
   var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-  clip.setAttribute('id', 'dirtClip' + index);
+  clip.setAttribute('id', clipId);
   var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
   rect.setAttribute('x', col * Maze.DIRT_WIDTH);
   rect.setAttribute('y', row * Maze.DIRT_HEIGHT);
@@ -5537,51 +8267,12 @@ var createDirt = function(row, col) {
       'http://www.w3.org/1999/xlink', 'xlink:href', skin.dirt);
   img.setAttribute('height', Maze.DIRT_HEIGHT);
   img.setAttribute('width', Maze.DIRT_WIDTH * Maze.DIRT_COUNT);
-  img.setAttribute('clip-path', 'url(#dirtClip' + index + ')');
-  img.setAttribute('id', 'dirt' + index);
+  img.setAttribute('clip-path', 'url(#' + clipId + ')');
+  img.setAttribute('id', imgId);
   svg.insertBefore(img, pegmanElement);
-};
 
-/**
- * Set the image based on the amount of dirt at the location.
- * @param {number} row Row index.
- * @param {number} col Column index.
- */
-Maze.updateDirt = function(row, col) {
-  // Calculate spritesheet index.
-  var n = Maze.dirt_[row][col];
-  var spriteIndex;
-  if (n < -Maze.DIRT_MAX) {
-    spriteIndex = 0;
-  } else if (n < 0) {
-    spriteIndex = Maze.DIRT_MAX + n + 1;
-  } else if (n > Maze.DIRT_MAX) {
-    spriteIndex = Maze.DIRT_COUNT - 1;
-  } else if (n > 0) {
-    spriteIndex = Maze.DIRT_MAX + n;
-  } else {
-    throw new Error('Expected non-zero dirt.');
-  }
-  // Update dirt icon & clip path.
-  var dirtIndex = dirtPositionToIndex(row, col);
-  var img = document.getElementById('dirt' + dirtIndex);
-  var x = Maze.SQUARE_SIZE * (col - spriteIndex + 0.5) - Maze.DIRT_HEIGHT / 2;
-  var y = Maze.SQUARE_SIZE * (row + 0.5) - Maze.DIRT_WIDTH / 2;
-  img.setAttribute('x', x);
-  img.setAttribute('y', y);
-};
-
-Maze.removeDirt = function(row, col) {
-  var index = dirtPositionToIndex(row, col);
-  var img = document.getElementById('dirt' + index);
-  if (img) {
-    img.parentNode.removeChild(img);
-  }
-  var clip = document.getElementById('dirtClip' + index);
-  if (clip) {
-    clip.parentNode.removeChild(clip);
-  }
-};
+  return img;
+}
 
 /**
  * Calculate the y coordinates for pegman sprite.
@@ -5689,7 +8380,9 @@ BlocklyApps.reset = function(first) {
 
   Maze.pegmanD = Maze.startDirection;
   if (first) {
-    Maze.scheduleDance(false);
+    if (skin.danceOnLoad) {
+      Maze.scheduleDance(false);
+    }
     timeoutList.setTimeout(function() {
       stepSpeed = 100;
       Maze.scheduleTurn(Maze.startDirection);
@@ -5749,11 +8442,8 @@ BlocklyApps.reset = function(first) {
   resetDirt();
   for (var row = 0; row < Maze.ROWS; row++) {
     for (var col = 0; col < Maze.COLS; col++) {
-      Maze.removeDirt(row, col);
-      if (getTile(Maze.dirt_, col, row) !== 0 &&
-          getTile(Maze.dirt_, col, row) !== undefined) {
-        createDirt(row, col);
-        Maze.updateDirt(row, col);
+      if (getTile(Maze.dirt_, col, row) !== undefined) {
+        Maze.updateDirtImage(row, col);
       }
     }
   }
@@ -5923,7 +8613,7 @@ Maze.execute = function(stepMode) {
   //    during execution, in which case we set ResultType to ERROR.
   // The animation should be fast if execution was successful, slow otherwise
   // to help the user see the mistake.
-  BlocklyApps.playAudio('start', {volume: 0.5});
+  BlocklyApps.playAudio('start');
   try {
     codegen.evalWith(code, {
       BlocklyApps: BlocklyApps,
@@ -5940,7 +8630,6 @@ Maze.execute = function(stepMode) {
         case Infinity:
           // Detected an infinite loop.  Animate what we have as quickly as
           // possible
-          // todo - add a unit test
           Maze.result = ResultType.TIMEOUT;
           stepSpeed = 0;
           break;
@@ -6146,7 +8835,7 @@ function animateAction (action, stepMode) {
           break;
         default:
           timeoutList.setTimeout(function() {
-            BlocklyApps.playAudio('failure', {volume: 0.5});
+            BlocklyApps.playAudio('failure');
           }, stepSpeed);
           break;
       }
@@ -6318,11 +9007,10 @@ Maze.scheduleFail = function(forward) {
   var squareType = Maze.map[targetY] && Maze.map[targetY][targetX];
   if (squareType === SquareType.WALL || squareType === undefined) {
     // Play the sound
-    BlocklyApps.playAudio('wall', {volume: 0.5});
+    BlocklyApps.playAudio('wall');
     if (squareType !== undefined) {
       // Check which type of wall pegman is hitting
-      BlocklyApps.playAudio('wall' + Maze.wallMap[targetY][targetX],
-                            {volume: 0.5});
+      BlocklyApps.playAudio('wall' + Maze.wallMap[targetY][targetX]);
     }
 
     // Play the animation of hitting the wall
@@ -6352,7 +9040,7 @@ Maze.scheduleFail = function(forward) {
       Maze.displayPegman(Maze.pegmanX + deltaX / 4,
                          Maze.pegmanY + deltaY / 4,
                          frame);
-      BlocklyApps.playAudio('failure', {volume: 0.5});
+      BlocklyApps.playAudio('failure');
     }, stepSpeed * 2);
     timeoutList.setTimeout(function() {
       Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
@@ -6371,7 +9059,7 @@ Maze.scheduleFail = function(forward) {
     }
   } else if (squareType == SquareType.OBSTACLE) {
     // Play the sound
-    BlocklyApps.playAudio('obstacle', {volume: 0.5});
+    BlocklyApps.playAudio('obstacle');
 
     // Play the animation
     var obsId = targetX + Maze.COLS * targetY;
@@ -6403,7 +9091,7 @@ Maze.scheduleFail = function(forward) {
       }, stepSpeed * 2);
     }
     timeoutList.setTimeout(function() {
-      BlocklyApps.playAudio('failure', {volume: 0.5});
+      BlocklyApps.playAudio('failure');
     }, stepSpeed);
   }
 };
@@ -6435,28 +9123,29 @@ Maze.setTileTransparent = function() {
 };
 
 /**
- * Schedule the animations and sound for a victory dance.
- * @param {boolean} sound Play the victory sound.
+ * Schedule the animations and sound for a dance.
+ * @param {boolean} victoryDance This is a victory dance after completing the
+ * puzzle (vs. dancing on load).
  */
-Maze.scheduleDance = function(sound) {
+Maze.scheduleDance = function(victoryDance) {
   var frame = tiles.directionToFrame(Maze.pegmanD);
   Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 16);
 
   // Setting the tiles to be transparent
-  if (sound && skin.transparentTileEnding) {
+  if (victoryDance && skin.transparentTileEnding) {
     Maze.executionInfo.queueAction('tile_transparent', null);
   }
 
-  // If sound == true, play the goal animation, else reset it
+  // If victoryDance == true, play the goal animation, else reset it
   var finishIcon = document.getElementById('finish');
-  if (sound && finishIcon) {
-    BlocklyApps.playAudio('winGoal', {volume: 0.5});
+  if (victoryDance && finishIcon) {
+    BlocklyApps.playAudio('winGoal');
     finishIcon.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
                               skin.goalAnimation);
   }
 
-  if (sound) {
-    BlocklyApps.playAudio('win', {volume: 0.5});
+  if (victoryDance) {
+    BlocklyApps.playAudio('win');
   }
 
   var danceSpeed = 150;  // Slow down victory animation a bit.
@@ -6472,9 +9161,11 @@ Maze.scheduleDance = function(sound) {
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 20);
   }, danceSpeed * 4);
-  timeoutList.setTimeout(function() {
-    Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
-  }, danceSpeed * 5);
+  if (!victoryDance) {
+    timeoutList.setTimeout(function() {
+      Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
+    }, danceSpeed * 5);
+  }
 };
 
 /**
@@ -6497,18 +9188,9 @@ Maze.displayPegman = function(x, y, frame) {
 var scheduleDirtChange = function(options) {
   var col = Maze.pegmanX;
   var row = Maze.pegmanY;
-  var previous = Maze.dirt_[row][col];
-  var current = previous + options.amount;
-  Maze.dirt_[row][col] = current;
-  if (previous === 0 && current !== 0) {
-    createDirt(row, col);
-  }
-  if (current === 0) {
-    Maze.removeDirt(row, col);
-  } else {
-    Maze.updateDirt(row, col);
-  }
-  BlocklyApps.playAudio(options.sound, {volume: 0.5});
+  Maze.dirt_[row][col] += options.amount;
+  Maze.updateDirtImage(row, col);
+  BlocklyApps.playAudio(options.sound);
 };
 
 /**
@@ -6623,7 +9305,7 @@ Maze.checkSuccess = function() {
   return true;
 };
 
-},{"../../locale/ar_sa/common":46,"../../locale/ar_sa/maze":47,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":30,"../templates/page.html":38,"../timeoutList":43,"../utils":44,"./api":11,"./bee":12,"./controls.html":14,"./tiles":23,"./visualization.html":28}],20:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"../../locale/ar_sa/maze":50,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":33,"../templates/page.html":41,"../timeoutList":46,"../utils":47,"./api":12,"./bee":13,"./controls.html":15,"./tiles":24,"./visualization.html":29,"./wordsearch":30}],21:[function(require,module,exports){
 var requiredBlockUtils = require('../required_block_utils');
 
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
@@ -6651,7 +9333,7 @@ module.exports = {
   FOR_LOOP: FOR_LOOP
 };
 
-},{"../required_block_utils":29}],21:[function(require,module,exports){
+},{"../required_block_utils":32}],22:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -6659,20 +9341,37 @@ module.exports = {
 // goal: A 20x34 goal image.
 // background: Number of 400x400 background images. Randomly select one if
 // specified, otherwise, use background.png.
-// graph: Colour of optional grid lines, or false.
 // look: Colour of sonar-like look icon.
+// tileSheetWidth: How many tiles wide skin.tiles is
 
 var skinsBase = require('../skins');
 
 var CONFIGS = {
+  letters: {
+    look: '#FFF',
+    nonDisappearingPegmanHittingObstacle: true,
+    pegmanHeight: 68,
+    pegmanWidth: 51,
+    pegmanYOffset: -6,
+    tileSheetWidth: 7
+  },
 
   bee: {
     look: '#000',
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
+    idlePegmanAnimation: 'idle_avatar.gif',
+    wallPegmanAnimation: 'wall_avatar.png',
+    movePegmanAnimation: 'move_avatar.png',
+    movePegmanAnimationSpeedScale: 1.5,
+    movePegmanAnimationFrameNumber: 9,
     background: 4,
     dirtSound: true,
-    pegmanYOffset: -8
+    tileSheetWidth: 5,
+    pegmanYOffset: 0,
+    pegmanHeight: 50,
+    pegmanWidth: 50,
+    danceOnLoad: false
   },
 
   farmer: {
@@ -6681,7 +9380,8 @@ var CONFIGS = {
     nonDisappearingPegmanHittingObstacle: true,
     background: 4,
     dirtSound: true,
-    pegmanYOffset: -8
+    pegmanYOffset: -8,
+    tileSheetWidth: 5
   },
 
   farmer_night: {
@@ -6690,13 +9390,15 @@ var CONFIGS = {
     nonDisappearingPegmanHittingObstacle: true,
     background: 4,
     dirtSound: true,
-    pegmanYOffset: -8
+    pegmanYOffset: -8,
+    tileSheetWidth: 5
   },
 
   pvz: {
     look: '#FFF',
     obstacleScale: 1.4,
-    pegmanYOffset: -8
+    pegmanYOffset: -8,
+    tileSheetWidth: 5
   },
 
   birds: {
@@ -6713,7 +9415,8 @@ var CONFIGS = {
     approachingGoalAnimation: 'close_goal.png',
     pegmanHeight: 68,
     pegmanWidth: 51,
-    pegmanYOffset: -14
+    pegmanYOffset: -14,
+    tileSheetWidth: 5
   }
 
 };
@@ -6723,6 +9426,7 @@ exports.load = function(assetUrl, id) {
   var config = CONFIGS[skin.id];
   // Images
   skin.tiles = skin.assetUrl('tiles.png');
+  skin.tileSheetWidth = config.tileSheetWidth;
   skin.goal = skin.assetUrl('goal.png');
   skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.obstacle = skin.assetUrl('obstacle.png');
@@ -6771,7 +9475,6 @@ exports.load = function(assetUrl, id) {
   skin.additionalSound = config.additionalSound;
   skin.dirtSound = config.dirtSound;
   // Settings
-  skin.graph = config.graph;
   skin.look = config.look;
   skin.dirt = skin.assetUrl('dirt.png');
   skin.nectar = skin.assetUrl('nectar.png');
@@ -6785,10 +9488,11 @@ exports.load = function(assetUrl, id) {
   skin.pegmanHeight = config.pegmanHeight || 52;
   skin.pegmanWidth = config.pegmanWidth || 49;
   skin.pegmanYOffset = config.pegmanYOffset || 0;
+  skin.danceOnLoad = (config.danceOnLoad === undefined) ? true : config.danceOnLoad;
   return skin;
 };
 
-},{"../skins":30}],22:[function(require,module,exports){
+},{"../skins":33}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6809,7 +9513,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],23:[function(require,module,exports){
+},{"ejs":51}],24:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -6872,7 +9576,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":44}],24:[function(require,module,exports){
+},{"../utils":47}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6893,7 +9597,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],25:[function(require,module,exports){
+},{"ejs":51}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6919,7 +9623,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/ar_sa/common":46,"../../../locale/ar_sa/maze":47,"ejs":48}],26:[function(require,module,exports){
+},{"../../../locale/ar_sa/common":49,"../../../locale/ar_sa/maze":50,"ejs":51}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6953,7 +9657,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/ar_sa/common":46,"ejs":48}],27:[function(require,module,exports){
+},{"../../../locale/ar_sa/common":49,"ejs":51}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6974,7 +9678,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],28:[function(require,module,exports){
+},{"ejs":51}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6995,7 +9699,532 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],29:[function(require,module,exports){
+},{"ejs":51}],30:[function(require,module,exports){
+var _ = require('../lodash');
+
+var SquareType = require('./tiles').SquareType;
+
+var WordSearch = module.exports = function (map, drawTileFn) {
+  this.map_ = map;
+  this.drawTileFn_ = drawTileFn;
+};
+
+var TILE_SHAPES = {
+  'A': [0, 0],  // A
+  'B': [1, 0],  // B
+  'C': [2, 0],  // C
+  'D': [3, 0],  // D
+  'E': [4, 0],  // E
+  'F': [5, 0],  // F
+  'G': [6, 0],  // G
+  'H': [0, 1],  // H
+  'I': [1, 1],  // I
+  'J': [2, 1],  // J
+  'K': [3, 1],  // K
+  'L': [4, 1],  // L
+  'M': [5, 1],  // M
+  'N': [6, 1],  // N
+  'O': [0, 2],  // O
+  'P': [1, 2],  // P
+  'Q': [2, 2],  // Q
+  'R': [3, 2],  // R
+  'S': [4, 2],  // S
+  'T': [5, 2],  // T
+  'U': [6, 2],  // U
+  'V': [0, 3],  // V
+  'W': [1, 3],  // W
+  'X': [2, 3],  // X
+  'Y': [3, 3],  // Y
+  'Z': [4, 3],  // Z
+};
+TILE_SHAPES[SquareType.START] = [5, 3]; // START char
+
+var ALL_CHARS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
+  "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+/**
+ * Generate random tiles for walls (with some restrictions) and draw them to
+ * the svg.
+ */
+WordSearch.prototype.drawMapTiles = function (svg) {
+  var tileId = 0;
+  var tile;
+  var restricted;
+
+  for (var row = 0; row < this.map_.length; row++) {
+    for (var col = 0; col < this.map_[row].length; col++) {
+      var mapVal = this.map_[row][col];
+      if (mapVal === SquareType.WALL) {
+        restricted = this.restrictedValues_(row, col);
+        tile = TILE_SHAPES[randomLetter(restricted)];
+      } else {
+        tile = TILE_SHAPES[letterValue(mapVal, true)];
+      }
+
+      this.drawTileFn_(svg, tile, row, col, tileId);
+
+      tileId++;
+    }
+  }
+};
+
+/**
+ * In word search, we indicate the last letter in the world with the form Nx
+ * (where N is that last letter).
+ */
+WordSearch.prototype.isFinishCell = function (cell) {
+  return (/^[A-Z]x$/).test(cell);
+};
+
+/**
+ * Returns true if the given row,col is both on the grid and not a wall
+ */
+WordSearch.prototype.isOpen_ = function (row, col) {
+  var map = this.map_;
+  return ((map[row] !== undefined) &&
+    (map[row][col] !== undefined) &&
+    (map[row][col] !== SquareType.WALL));
+};
+
+/**
+ * Given a row and col, returns the row, col pair of any non-wall neighbors
+ */
+WordSearch.prototype.openNeighbors_ =function (row, col) {
+  var neighbors = [];
+  if (this.isOpen_(row + 1, col)) {
+    neighbors.push([row + 1, col]);
+  }
+  if (this.isOpen_(row - 1, col)) {
+    neighbors.push([row - 1, col]);
+  }
+  if (this.isOpen_(row, col + 1)) {
+    neighbors.push([row, col + 1]);
+  }
+  if (this.isOpen_(row, col - 1)) {
+    neighbors.push([row, col - 1]);
+  }
+
+  return neighbors;
+};
+
+/**
+ * We never want to have a branch where either direction gets you the next
+ * correct letter.  As such, a "wall" space should never have the same value as
+ * an open neighbor of an neighbor (i.e. if my non-wall neighbor has a non-wall
+ * neighbor whose value is E, I can't also be E)
+ */
+WordSearch.prototype.restrictedValues_ = function (row, col) {
+  var map = this.map_;
+  var neighbors = this.openNeighbors_(row, col);
+  var values = [];
+  for (var i = 0; i < neighbors.length; i ++) {
+    var secondNeighbors = this.openNeighbors_(neighbors[i][0], neighbors[i][1]);
+    for (var j = 0; j < secondNeighbors.length; j++) {
+      var neighborRow = secondNeighbors[j][0];
+      var neighborCol = secondNeighbors[j][1];
+      // push value to restricted list
+      var val = letterValue(map[neighborRow][neighborCol]);
+      values.push(val, false);
+    }
+  }
+  return values;
+};
+
+
+/**
+ * For wordsearch, values in Maze.map can take the form of a number (i.e. 2 means
+ * start), a letter ('A' means A), or a letter followed by x ('Nx' means N and
+ * that this is the finish.  This function will strip the x, and will ignore
+ * non-letter values unless includeNumbers is true
+ */
+function letterValue(val, includeNumbers) {
+  if (typeof(val) === "number") {
+    return includeNumbers ? val : undefined;
+  }
+
+  if (typeof(val) === "string") {
+    return val[0];
+  }
+
+  throw new Error("unexpected value for letterValue");
+}
+
+/**
+ * Return a random uppercase letter that isn't in the list of restrictions
+ */
+function randomLetter (restrictions) {
+  var letterPool;
+  if (restrictions) {
+    // args consists of ALL_CHARS followed by the set of restricted letters
+    var args = restrictions || [];
+    args.unshift(ALL_CHARS);
+    letterPool = _.without.apply(null, args);
+  } else {
+    letterPool = ALL_CHARS;
+  }
+
+  return _.sample(letterPool);
+}
+
+/* start-test-block */
+// export private function(s) to expose to unit testing
+WordSearch.__testonly__ = {
+  letterValue: letterValue,
+  randomLetter: randomLetter
+};
+/* end-test-block */
+
+},{"../lodash":11,"./tiles":24}],31:[function(require,module,exports){
+var Direction = require('./tiles').Direction;
+var reqBlocks = require('./requiredBlocks');
+var blockUtils = require('../block_utils');
+
+var wordSearchToolbox = function () {
+  return blockUtils.createToolbox(
+    blockUtils.blockOfType('maze_moveNorth') +
+    blockUtils.blockOfType('maze_moveSouth') +
+    blockUtils.blockOfType('maze_moveEast') +
+    blockUtils.blockOfType('maze_moveWest')
+  );
+};
+
+/*
+ * Configuration for all levels.
+ */
+module.exports = {
+
+  // Formerly Page 2
+
+  'k_1': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 3,
+    'requiredBlocks': [
+      [reqBlocks.moveEast],
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 'R', 'U', 'Nx', 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'startBlocks': blockUtils.blockOfType('maze_moveEast')
+  },
+  'k_2': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 3,
+    'requiredBlocks': [
+      [reqBlocks.moveSouth],
+    ],
+    'startDirection': Direction.SOUTH,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 2, 0, 0, 0, 0],
+      [0, 0, 0, 'S', 0, 0, 0, 0],
+      [0, 0, 0, 'E', 0, 0, 0, 0],
+      [0, 0, 0, 'Tx', 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'startBlocks': blockUtils.blockOfType('maze_moveSouth')
+  },
+  'k_3': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 4,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 'M', 'O', 'V', 'Ex', 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'startBlocks': blockUtils.blockOfType('maze_moveEast')
+  },
+  'k_4': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 4,
+    'requiredBlocks': [
+      [reqBlocks.moveSouth]
+    ],
+    'startDirection': Direction.SOUTH,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 0, 0, 0, 0, 0],
+      [0, 0, 12, 0, 0, 0, 0, 0],
+      [0, 0, 24, 0, 0, 0, 0, 0],
+      [0, 0, 13, 0, 0, 0, 0, 0],
+      [0, 0, 44, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_5': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 4,
+    'requiredBlocks': [
+      [reqBlocks.moveNorth],
+    ],
+    'startDirection': Direction.NORTH,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 62, 0, 0, 0, 0, 0, 0],
+      [0, 10, 0, 0, 0, 0, 0, 0],
+      [0, 27, 0, 0, 0, 0, 0, 0],
+      [0, 13, 0, 0, 0, 0, 0, 0],
+      [0, 2, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_6': {
+      'toolbox': wordSearchToolbox(),
+    'ideal': 4,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 19, 30, 22, 0, 0],
+      [0, 0, 0, 0, 0, 55, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_7': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 4,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 59, 0, 0, 0],
+      [0, 0, 0, 0, 33, 0, 0, 0],
+      [0, 0, 2, 23, 14, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_8': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 4,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 32, 0, 0, 0, 0],
+      [0, 0, 0, 14, 28, 59, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_9': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 4,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 28, 59, 0, 0, 0],
+      [0, 2, 14, 10, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_10': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 5,
+    'requiredBlocks': [
+      [reqBlocks.moveSouth],
+    ],
+    'startDirection': Direction.SOUTH,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 0, 0, 0, 0, 0],
+      [0, 0, 23, 0, 0, 0, 0, 0],
+      [0, 0, 24, 0, 0, 0, 0, 0],
+      [0, 0, 27, 0, 0, 0, 0, 0],
+      [0, 0, 29, 0, 0, 0, 0],
+      [0, 0, 47, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_11': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 5,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 28, 24, 0, 0, 0],
+      [0, 0, 0, 0, 30, 0, 0, 0],
+      [0, 0, 0, 0, 29, 0, 0, 0],
+      [0, 0, 0, 0, 47, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_12': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 5,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.NORTH,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 24, 21, 24, 57, 0, 0, 0],
+      [0, 12, 0, 0, 0, 0, 0, 0],
+      [0, 2, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_13': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 5,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 2, 13, 14, 0, 0, 0, 0],
+      [0, 0, 0, 11, 0, 0, 0, 0],
+      [0, 0, 0, 30, 46, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_14': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 5,
+    'requiredBlocks': [
+      [reqBlocks.moveEast],
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 28, 14, 59, 0, 0],
+      [0, 0, 0, 14, 0, 0, 0, 0],
+      [0, 0, 2, 27, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_15': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 5,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.SOUTH,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 0, 0, 0, 0, 0],
+      [0, 0, 10, 0, 0, 0, 0, 0],
+      [0, 0, 11, 24, 0, 0, 0, 0],
+      [0, 0, 0, 31, 44, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_16': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 5,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 62, 0, 0, 0],
+      [0, 0, 0, 0, 24, 0, 0, 0],
+      [0, 0, 0, 14, 21, 0, 0, 0],
+      [0, 0, 2, 11, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_17': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 6,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.SOUTH,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 2, 0, 0, 0, 0, 0],
+      [0, 0, 28, 26, 0, 0, 0, 0],
+      [0, 0, 0, 30, 10, 0, 0, 0],
+      [0, 0, 0, 0, 27, 0, 0, 0],
+      [0, 0, 0, 0, 44, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  },
+  'k_18': {
+    'toolbox': wordSearchToolbox(),
+    'ideal': 7,
+    'requiredBlocks': [
+      [reqBlocks.moveEast]
+    ],
+    'startDirection': Direction.EAST,
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 10, 52, 0],
+      [0, 0, 0, 0, 0, 27, 0, 0],
+      [0, 0, 0, 27, 24, 16, 0, 0],
+      [0, 0, 2, 25, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  }
+};
+
+},{"../block_utils":3,"./requiredBlocks":21,"./tiles":24}],32:[function(require,module,exports){
 var xml = require('./xml');
 var blockUtils = require('./block_utils');
 var utils = require('./utils');
@@ -7115,7 +10344,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":44,"./xml":45}],30:[function(require,module,exports){
+},{"./block_utils":3,"./utils":47,"./xml":48}],33:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -7139,18 +10368,18 @@ exports.load = function(assetUrl, id) {
     winAvatar: skinUrl('win_avatar.png'),
     failureAvatar: skinUrl('failure_avatar.png'),
     repeatImage: assetUrl('media/common_images/repeat-arrows.png'),
-    leftArrow: assetUrl('media/common_images/move-west-arrow.png'),
-    downArrow: assetUrl('media/common_images/move-south-arrow.png'),
-    upArrow: assetUrl('media/common_images/move-north-arrow.png'),
-    rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftArrow: assetUrl('media/common_images/moveleft.png'),
+    downArrow: assetUrl('media/common_images/movedown.png'),
+    upArrow: assetUrl('media/common_images/moveup.png'),
+    rightArrow: assetUrl('media/common_images/moveright.png'),
     leftArrowSmall: assetUrl('media/common_images/draw-west-arrow.png'),
     downArrowSmall: assetUrl('media/common_images/draw-south-arrow.png'),
     upArrowSmall: assetUrl('media/common_images/draw-north-arrow.png'),
     rightArrowSmall: assetUrl('media/common_images/draw-east-arrow.png'),
-    leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
-    downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
-    upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
-    rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
+    leftJumpArrow: assetUrl('media/common_images/jumpleft.png'),
+    downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
+    upJumpArrow: assetUrl('media/common_images/jumpup.png'),
+    rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
@@ -7165,7 +10394,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -7370,7 +10599,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],32:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7391,7 +10620,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],33:[function(require,module,exports){
+},{"ejs":51}],36:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7404,7 +10633,7 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/ar_sa/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  <button id="again-button" class="launch">\n    ', escape((14,  msg.tryAgain() )), '\n  </button>\n');16; }; buf.push('\n');17; if (data.nextLevel) {; buf.push('  <button id="continue-button" class="launch">\n    ', escape((18,  msg.continue() )), '\n  </button>\n');20; }; buf.push(''); })();
+ buf.push('');1; var msg = require('../../locale/ar_sa/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  ');13; if (data.isK1) {; buf.push('    <div id="again-button" class="launch arrow-container arrow-left">\n      <div class="arrow-head"><img src="', escape((14,  data.assetUrl('media/tryagain-arrow-head.png') )), '" alt="Arrowhead" width="67" height="130"/></div>\n      <div class="arrow-text">', escape((15,  msg.tryAgain() )), '</div>\n    </div>\n  ');17; } else {; buf.push('    <button id="again-button" class="launch">\n      ', escape((18,  msg.tryAgain() )), '\n    </button>\n  ');20; }; buf.push('');20; }; buf.push('\n');21; if (data.nextLevel) {; buf.push('  ');21; if (data.isK1) {; buf.push('    <div id="continue-button" class="launch arrow-container arrow-right">\n      <div class="arrow-head"><img src="', escape((22,  data.assetUrl('media/next-arrow-head.png') )), '" alt="Arrowhead" width="66" height="130"/></div>\n      <div class="arrow-text">', escape((23,  msg.continue() )), '</div>\n    </div>\n  ');25; } else {; buf.push('    <button id="continue-button" class="launch">\n      ', escape((26,  msg.continue() )), '\n    </button>\n  ');28; }; buf.push('');28; }; buf.push(''); })();
 } 
 return buf.join('');
 };
@@ -7412,7 +10641,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/common":46,"ejs":48}],34:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"ejs":51}],37:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7433,7 +10662,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],35:[function(require,module,exports){
+},{"ejs":51}],38:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7454,7 +10683,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/common":46,"ejs":48}],36:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"ejs":51}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7477,7 +10706,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/common":46,"ejs":48}],37:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"ejs":51}],40:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7498,7 +10727,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/common":46,"ejs":48}],38:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"ejs":51}],41:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7523,7 +10752,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/common":46,"ejs":48}],39:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"ejs":51}],42:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7545,7 +10774,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],40:[function(require,module,exports){
+},{"ejs":51}],43:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7566,7 +10795,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/common":46,"ejs":48}],41:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"ejs":51}],44:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7587,7 +10816,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ar_sa/common":46,"ejs":48}],42:[function(require,module,exports){
+},{"../../locale/ar_sa/common":49,"ejs":51}],45:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7608,7 +10837,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":48}],43:[function(require,module,exports){
+},{"ejs":51}],46:[function(require,module,exports){
 var list = [];
 
 /**
@@ -7626,7 +10855,7 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],44:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -7719,30 +10948,15 @@ exports.executeIfConditional = function (conditional, fn) {
 };
 
 /**
- * From underscore.js. Returns a function, that, as long as it continues to be invoked before the wait time,
- * will not be triggered. To use for a button to prevent double-clicks, for example,
- *  `var debouncedOnClick = utils.debounce(onClick, 1000, true);`
- * @param func function to run
- * @param wait time to require waiting before subsequent calls
- * @param immediate trigger the function call on the leading edge (immediately)
- * @returns {Function}
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
  */
-exports.debounce = function(func, wait, immediate) {
-  var timeout;
-  return function() {
-    var context = this, args = arguments;
-    var later = function() {
-      timeout = null;
-      if (!immediate) func.apply(context, args);
-    };
-    var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context, args);
-  };
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
 };
 
-},{}],45:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -7770,7 +10984,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],46:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ar = function(n) {
   if (n === 0) {
     return 'zero';
@@ -7930,7 +11144,7 @@ exports.signup = function(d){return "سجل لمشاهدة مقدمة الدور
 exports.hintHeader = function(d){return "وإليك نصيحة:"};
 
 
-},{"messageformat":59}],47:[function(require,module,exports){
+},{"messageformat":62}],50:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ar = function(n) {
   if (n === 0) {
     return 'zero';
@@ -8068,7 +11282,7 @@ exports.whileTooltip = function(d){return "أكرر الاجراءات المغ�
 exports.yes = function(d){return "نعم"};
 
 
-},{"messageformat":59}],48:[function(require,module,exports){
+},{"messageformat":62}],51:[function(require,module,exports){
 
 /*!
  * EJS
@@ -8427,7 +11641,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":49,"./utils":50,"fs":51,"path":53}],49:[function(require,module,exports){
+},{"./filters":52,"./utils":53,"fs":54,"path":56}],52:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -8630,7 +11844,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],50:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 
 /*!
  * EJS
@@ -8656,9 +11870,9 @@ exports.escape = function(html){
 };
  
 
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -8713,7 +11927,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],53:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8941,7 +12155,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":52}],54:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":55}],57:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -9452,7 +12666,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],55:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9538,7 +12752,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],56:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9625,13 +12839,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":55,"./encode":56}],58:[function(require,module,exports){
+},{"./decode":58,"./encode":59}],61:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -10264,7 +13478,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":54,"querystring":57}],59:[function(require,module,exports){
+},{"punycode":57,"querystring":60}],62:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -11847,4 +15061,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[18])
+},{}]},{},[19])

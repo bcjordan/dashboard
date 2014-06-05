@@ -1,0 +1,60 @@
+:scss
+  .new_progress {
+    .new_report_cell {
+      padding: 0px;
+      border: none;
+      span {
+        display: block;
+        height: 5px;
+        width: 5px;
+      }
+    }
+    .report_row {
+      border: none;
+    }
+  }
+
+- stage_map = @all_script_levels.group_by { |sl| sl.level.game }
+
+%table{ width: '100%' }
+  %tr
+    %td{ style: "vertical-align: middle; font-weight: 500; padding-right: 10px;" } Levels key
+    %td
+      .report_key.level_aced &nbsp;
+    %td.report_key_cell
+      Completed, perfect
+    %td
+      .report_key.level_done &nbsp;
+    %td.report_key_cell
+      Completed, but using too many blocks
+  %tr
+    %td
+    %td
+      .report_key.level_undone &nbsp;
+    %td.report_key_cell
+      Tried, but not completed
+    %td
+      .report_key.level_untried &nbsp;
+    %td.report_key_cell
+      Not tried yet
+
+%br/
+
+%table{ style: "width:#{(@all_script_levels.length) * 5 + 250}px; table-layout:fixed;", class: 'new_progress' }
+  %col{ width: '250px'}
+  - @all_script_levels.each do
+    %col{ width: '5px'}
+  - @section_map.each_pair do |section, students|
+    %tr.report_row
+      %th{ style: "white-space: nowrap; overflow: hidden; text-overflow:ellipsis;padding-left: 5px;"}
+      - @all_script_levels.each do
+        - stage_map.each_pair do |game, levels|
+          %th{ colspan: levels.length, style: "overflow: hidden;", title: game.name }= game.name
+    - students.each do |student|
+      %tr.report_row
+        %td.fixed_width_cell= link_to student.name, user_stats_path(student)
+        - level_map = student.user_levels.index_by {|ul| ul.level_id }
+        - @all_script_levels.each do |sl|
+          - ul = level_map[sl.level_id]
+          %td{ class: "new_report_cell", title: build_user_level_message(student, ul, sl) }
+            %span{ class: level_box_class(ul.try(:best_result))} &nbsp;

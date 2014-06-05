@@ -112,8 +112,6 @@ class ActivitiesControllerTest < ActionController::TestCase
     @controller.expects :log_milestone
     @controller.expects :slog
 
-    @controller.expects(:trophy_check).with(@user) # TODO we don't actually need to check if not passing
-
     assert_creates(LevelSource, Activity, UserLevel) do
       assert_does_not_create(GalleryActivity) do
           assert_no_difference('@user.reload.total_lines') do # don't update total lines
@@ -137,8 +135,6 @@ class ActivitiesControllerTest < ActionController::TestCase
     # do all the logging
     @controller.expects :log_milestone
     @controller.expects :slog
-
-    @controller.expects(:trophy_check) # TODO we don't actually need to check if not passing
 
     assert_creates(LevelSource, Activity, UserLevel, LevelSourceImage) do
       assert_does_not_create(GalleryActivity) do
@@ -578,6 +574,7 @@ class ActivitiesControllerTest < ActionController::TestCase
   end
 
   test 'milestone changes to next stage in custom script' do
+    ScriptLevel.class_variable_set(:@@script_level_map, nil)
     game = create(:game)
     levels = (1..3).map { |n| create(:level, :name => "Level #{n}", :game => game) }
     script_dsl = ScriptDSL.parse(

@@ -82,7 +82,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":9,"./utils":33}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":35}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -115,6 +115,7 @@ var dom = require('./dom');
 var utils = require('./utils');
 var builder = require('./builder');
 var Slider = require('./slider');
+var _ = require('./lodash');
 
 //TODO: These should be members of a BlocklyApp instance.
 var onAttempt;
@@ -200,7 +201,7 @@ BlocklyApps.init = function(config) {
   container.innerHTML = config.html;
   var runButton = container.querySelector('#runButton');
   var resetButton = container.querySelector('#resetButton');
-  var throttledRunClick = utils.debounce(BlocklyApps.runButtonClick, 250, true);
+  var throttledRunClick = _.debounce(BlocklyApps.runButtonClick, 250, true);
   dom.addClickTouchEvent(runButton, throttledRunClick);
   dom.addClickTouchEvent(resetButton, BlocklyApps.resetButtonClick);
 
@@ -461,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -907,7 +910,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/ro_ro/common":35,"./builder":5,"./dom":7,"./feedback.js":8,"./slider":11,"./templates/buttons.html":23,"./templates/instructions.html":25,"./templates/learn.html":26,"./templates/makeYourOwn.html":27,"./utils":33,"./xml":34}],3:[function(require,module,exports){
+},{"../locale/ro_ro/common":37,"./builder":5,"./dom":7,"./feedback.js":8,"./lodash":9,"./slider":12,"./templates/buttons.html":25,"./templates/instructions.html":27,"./templates/learn.html":28,"./templates/makeYourOwn.html":29,"./utils":35,"./xml":36}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -994,7 +997,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":34}],4:[function(require,module,exports){
+},{"./xml":36}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1057,7 +1060,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":22,"./utils.js":33,"url":47}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":24,"./utils.js":35,"url":49}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
@@ -1267,8 +1270,13 @@ exports.displayFeedback = function(options) {
     feedback.className += " k1";
   }
 
-  feedback.appendChild(getFeedbackButtons(
-    options.feedbackType, options.level.showPreviousLevelButton));
+  feedback.appendChild(
+    getFeedbackButtons({
+      feedbackType: options.feedbackType,
+      showPreviousButton: options.level.showPreviousLevelButton,
+      isK1: options.level.is_k1
+    })
+  );
 
   var againButton = feedback.querySelector('#again-button');
   var previousLevelButton = feedback.querySelector('#back-button');
@@ -1398,16 +1406,18 @@ exports.getNumEnabledBlocks = function() {
   return getEnabledBlocks().length;
 };
 
-var getFeedbackButtons = function(feedbackType, showPreviousLevelButton) {
+var getFeedbackButtons = function(options) {
   var buttons = document.createElement('div');
   buttons.id = 'feedbackButtons';
   buttons.innerHTML = require('./templates/buttons.html')({
     data: {
       previousLevel:
-        !exports.canContinueToNextLevel(feedbackType) &&
-        showPreviousLevelButton,
-      tryAgain: feedbackType !== BlocklyApps.TestResults.ALL_PASS,
-      nextLevel: exports.canContinueToNextLevel(feedbackType)
+        !exports.canContinueToNextLevel(options.feedbackType) &&
+        options.showPreviousButton,
+      tryAgain: options.feedbackType !== BlocklyApps.TestResults.ALL_PASS,
+      nextLevel: exports.canContinueToNextLevel(options.feedbackType),
+      isK1: options.isK1,
+      assetUrl: BlocklyApps.assetUrl
     }
   });
 
@@ -1963,7 +1973,2675 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/ro_ro/common":35,"./codegen":6,"./dom":7,"./templates/buttons.html":23,"./templates/code.html":24,"./templates/readonly.html":29,"./templates/sharing.html":30,"./templates/showCode.html":31,"./templates/trophy.html":32,"./utils":33}],9:[function(require,module,exports){
+},{"../locale/ro_ro/common":37,"./codegen":6,"./dom":7,"./templates/buttons.html":25,"./templates/code.html":26,"./templates/readonly.html":31,"./templates/sharing.html":32,"./templates/showCode.html":33,"./templates/trophy.html":34,"./utils":35}],9:[function(require,module,exports){
+(function (global){
+/**
+ * @license
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample" --output build/js/lodash.js`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+;(function() {
+
+  /** Used as a safe reference for `undefined` in pre ES5 environments */
+  var undefined;
+
+  /** Used to pool arrays and objects used internally */
+  var arrayPool = [],
+      objectPool = [];
+
+  /** Used internally to indicate various things */
+  var indicatorObject = {};
+
+  /** Used to prefix keys to avoid issues with `__proto__` and properties on `Object.prototype` */
+  var keyPrefix = +new Date + '';
+
+  /** Used as the size when optimizations are enabled for large arrays */
+  var largeArraySize = 75;
+
+  /** Used as the max size of the `arrayPool` and `objectPool` */
+  var maxPoolSize = 40;
+
+  /** Used to detected named functions */
+  var reFuncName = /^\s*function[ \n\r\t]+\w/;
+
+  /** Used to detect functions containing a `this` reference */
+  var reThis = /\bthis\b/;
+
+  /** Used to fix the JScript [[DontEnum]] bug */
+  var shadowedProps = [
+    'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+    'toLocaleString', 'toString', 'valueOf'
+  ];
+
+  /** `Object#toString` result shortcuts */
+  var argsClass = '[object Arguments]',
+      arrayClass = '[object Array]',
+      boolClass = '[object Boolean]',
+      dateClass = '[object Date]',
+      errorClass = '[object Error]',
+      funcClass = '[object Function]',
+      numberClass = '[object Number]',
+      objectClass = '[object Object]',
+      regexpClass = '[object RegExp]',
+      stringClass = '[object String]';
+
+  /** Used as the property descriptor for `__bindData__` */
+  var descriptor = {
+    'configurable': false,
+    'enumerable': false,
+    'value': null,
+    'writable': false
+  };
+
+  /** Used as the data object for `iteratorTemplate` */
+  var iteratorData = {
+    'args': '',
+    'array': null,
+    'bottom': '',
+    'firstArg': '',
+    'init': '',
+    'keys': null,
+    'loop': '',
+    'shadowedProps': null,
+    'support': null,
+    'top': '',
+    'useHas': false
+  };
+
+  /** Used to determine if values are of the language type Object */
+  var objectTypes = {
+    'boolean': false,
+    'function': true,
+    'object': true,
+    'number': false,
+    'string': false,
+    'undefined': false
+  };
+
+  /** Used as a reference to the global object */
+  var root = (objectTypes[typeof window] && window) || this;
+
+  /** Detect free variable `exports` */
+  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
+
+  /** Detect free variable `module` */
+  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
+
+  /** Detect the popular CommonJS extension `module.exports` */
+  var moduleExports = freeModule && freeModule.exports === freeExports && freeExports;
+
+  /** Detect free variable `global` from Node.js or Browserified code and use it as `root` */
+  var freeGlobal = objectTypes[typeof global] && global;
+  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal)) {
+    root = freeGlobal;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The base implementation of `_.indexOf` without support for binary searches
+   * or `fromIndex` constraints.
+   *
+   * @private
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {number} [fromIndex=0] The index to search from.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   */
+  function baseIndexOf(array, value, fromIndex) {
+    var index = (fromIndex || 0) - 1,
+        length = array ? array.length : 0;
+
+    while (++index < length) {
+      if (array[index] === value) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * An implementation of `_.contains` for cache objects that mimics the return
+   * signature of `_.indexOf` by returning `0` if the value is found, else `-1`.
+   *
+   * @private
+   * @param {Object} cache The cache object to inspect.
+   * @param {*} value The value to search for.
+   * @returns {number} Returns `0` if `value` is found, else `-1`.
+   */
+  function cacheIndexOf(cache, value) {
+    var type = typeof value;
+    cache = cache.cache;
+
+    if (type == 'boolean' || value == null) {
+      return cache[value] ? 0 : -1;
+    }
+    if (type != 'number' && type != 'string') {
+      type = 'object';
+    }
+    var key = type == 'number' ? value : keyPrefix + value;
+    cache = (cache = cache[type]) && cache[key];
+
+    return type == 'object'
+      ? (cache && baseIndexOf(cache, value) > -1 ? 0 : -1)
+      : (cache ? 0 : -1);
+  }
+
+  /**
+   * Adds a given value to the corresponding cache object.
+   *
+   * @private
+   * @param {*} value The value to add to the cache.
+   */
+  function cachePush(value) {
+    var cache = this.cache,
+        type = typeof value;
+
+    if (type == 'boolean' || value == null) {
+      cache[value] = true;
+    } else {
+      if (type != 'number' && type != 'string') {
+        type = 'object';
+      }
+      var key = type == 'number' ? value : keyPrefix + value,
+          typeCache = cache[type] || (cache[type] = {});
+
+      if (type == 'object') {
+        (typeCache[key] || (typeCache[key] = [])).push(value);
+      } else {
+        typeCache[key] = true;
+      }
+    }
+  }
+
+  /**
+   * Creates a cache object to optimize linear searches of large arrays.
+   *
+   * @private
+   * @param {Array} [array=[]] The array to search.
+   * @returns {null|Object} Returns the cache object or `null` if caching should not be used.
+   */
+  function createCache(array) {
+    var index = -1,
+        length = array.length,
+        first = array[0],
+        mid = array[(length / 2) | 0],
+        last = array[length - 1];
+
+    if (first && typeof first == 'object' &&
+        mid && typeof mid == 'object' && last && typeof last == 'object') {
+      return false;
+    }
+    var cache = getObject();
+    cache['false'] = cache['null'] = cache['true'] = cache['undefined'] = false;
+
+    var result = getObject();
+    result.array = array;
+    result.cache = cache;
+    result.push = cachePush;
+
+    while (++index < length) {
+      result.push(array[index]);
+    }
+    return result;
+  }
+
+  /**
+   * Gets an array from the array pool or creates a new one if the pool is empty.
+   *
+   * @private
+   * @returns {Array} The array from the pool.
+   */
+  function getArray() {
+    return arrayPool.pop() || [];
+  }
+
+  /**
+   * Gets an object from the object pool or creates a new one if the pool is empty.
+   *
+   * @private
+   * @returns {Object} The object from the pool.
+   */
+  function getObject() {
+    return objectPool.pop() || {
+      'array': null,
+      'cache': null,
+      'false': false,
+      'null': false,
+      'number': null,
+      'object': null,
+      'push': null,
+      'string': null,
+      'true': false,
+      'undefined': false
+    };
+  }
+
+  /**
+   * Checks if `value` is a DOM node in IE < 9.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a DOM node, else `false`.
+   */
+  function isNode(value) {
+    // IE < 9 presents DOM nodes as `Object` objects except they have `toString`
+    // methods that are `typeof` "string" and still can coerce nodes to strings
+    return typeof value.toString != 'function' && typeof (value + '') == 'string';
+  }
+
+  /**
+   * Releases the given array back to the array pool.
+   *
+   * @private
+   * @param {Array} [array] The array to release.
+   */
+  function releaseArray(array) {
+    array.length = 0;
+    if (arrayPool.length < maxPoolSize) {
+      arrayPool.push(array);
+    }
+  }
+
+  /**
+   * Releases the given object back to the object pool.
+   *
+   * @private
+   * @param {Object} [object] The object to release.
+   */
+  function releaseObject(object) {
+    var cache = object.cache;
+    if (cache) {
+      releaseObject(cache);
+    }
+    object.array = object.cache =object.object = object.number = object.string =null;
+    if (objectPool.length < maxPoolSize) {
+      objectPool.push(object);
+    }
+  }
+
+  /**
+   * Slices the `collection` from the `start` index up to, but not including,
+   * the `end` index.
+   *
+   * Note: This function is used instead of `Array#slice` to support node lists
+   * in IE < 9 and to ensure dense arrays are returned.
+   *
+   * @private
+   * @param {Array|Object|string} collection The collection to slice.
+   * @param {number} start The start index.
+   * @param {number} end The end index.
+   * @returns {Array} Returns the new array.
+   */
+  function slice(array, start, end) {
+    start || (start = 0);
+    if (typeof end == 'undefined') {
+      end = array ? array.length : 0;
+    }
+    var index = -1,
+        length = end - start || 0,
+        result = Array(length < 0 ? 0 : length);
+
+    while (++index < length) {
+      result[index] = array[start + index];
+    }
+    return result;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Used for `Array` method references.
+   *
+   * Normally `Array.prototype` would suffice, however, using an array literal
+   * avoids issues in Narwhal.
+   */
+  var arrayRef = [];
+
+  /** Used for native method references */
+  var errorProto = Error.prototype,
+      objectProto = Object.prototype,
+      stringProto = String.prototype;
+
+  /** Used to resolve the internal [[Class]] of values */
+  var toString = objectProto.toString;
+
+  /** Used to detect if a method is native */
+  var reNative = RegExp('^' +
+    String(toString)
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/toString| for [^\]]+/g, '.*?') + '$'
+  );
+
+  /** Native method shortcuts */
+  var ceil = Math.ceil,
+      floor = Math.floor,
+      fnToString = Function.prototype.toString,
+      hasOwnProperty = objectProto.hasOwnProperty,
+      push = arrayRef.push,
+      propertyIsEnumerable = objectProto.propertyIsEnumerable,
+      unshift = arrayRef.unshift;
+
+  /** Used to set meta data on functions */
+  var defineProperty = (function() {
+    // IE 8 only accepts DOM elements
+    try {
+      var o = {},
+          func = isNative(func = Object.defineProperty) && func,
+          result = func(o, o, o) && func;
+    } catch(e) { }
+    return result;
+  }());
+
+  /* Native method shortcuts for methods with the same name as other `lodash` methods */
+  var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate,
+      nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray,
+      nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys,
+      nativeMax = Math.max,
+      nativeMin = Math.min,
+      nativeRandom = Math.random;
+
+  /** Used to avoid iterating non-enumerable properties in IE < 9 */
+  var nonEnumProps = {};
+  nonEnumProps[arrayClass] = nonEnumProps[dateClass] = nonEnumProps[numberClass] = { 'constructor': true, 'toLocaleString': true, 'toString': true, 'valueOf': true };
+  nonEnumProps[boolClass] = nonEnumProps[stringClass] = { 'constructor': true, 'toString': true, 'valueOf': true };
+  nonEnumProps[errorClass] = nonEnumProps[funcClass] = nonEnumProps[regexpClass] = { 'constructor': true, 'toString': true };
+  nonEnumProps[objectClass] = { 'constructor': true };
+
+  (function() {
+    var length = shadowedProps.length;
+    while (length--) {
+      var key = shadowedProps[length];
+      for (var className in nonEnumProps) {
+        if (hasOwnProperty.call(nonEnumProps, className) && !hasOwnProperty.call(nonEnumProps[className], key)) {
+          nonEnumProps[className][key] = false;
+        }
+      }
+    }
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Creates a `lodash` object which wraps the given value to enable intuitive
+   * method chaining.
+   *
+   * In addition to Lo-Dash methods, wrappers also have the following `Array` methods:
+   * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`, `splice`,
+   * and `unshift`
+   *
+   * Chaining is supported in custom builds as long as the `value` method is
+   * implicitly or explicitly included in the build.
+   *
+   * The chainable wrapper functions are:
+   * `after`, `assign`, `bind`, `bindAll`, `bindKey`, `chain`, `compact`,
+   * `compose`, `concat`, `countBy`, `create`, `createCallback`, `curry`,
+   * `debounce`, `defaults`, `defer`, `delay`, `difference`, `filter`, `flatten`,
+   * `forEach`, `forEachRight`, `forIn`, `forInRight`, `forOwn`, `forOwnRight`,
+   * `functions`, `groupBy`, `indexBy`, `initial`, `intersection`, `invert`,
+   * `invoke`, `keys`, `map`, `max`, `memoize`, `merge`, `min`, `object`, `omit`,
+   * `once`, `pairs`, `partial`, `partialRight`, `pick`, `pluck`, `pull`, `push`,
+   * `range`, `reject`, `remove`, `rest`, `reverse`, `shuffle`, `slice`, `sort`,
+   * `sortBy`, `splice`, `tap`, `throttle`, `times`, `toArray`, `transform`,
+   * `union`, `uniq`, `unshift`, `unzip`, `values`, `where`, `without`, `wrap`,
+   * and `zip`
+   *
+   * The non-chainable wrapper functions are:
+   * `clone`, `cloneDeep`, `contains`, `escape`, `every`, `find`, `findIndex`,
+   * `findKey`, `findLast`, `findLastIndex`, `findLastKey`, `has`, `identity`,
+   * `indexOf`, `isArguments`, `isArray`, `isBoolean`, `isDate`, `isElement`,
+   * `isEmpty`, `isEqual`, `isFinite`, `isFunction`, `isNaN`, `isNull`, `isNumber`,
+   * `isObject`, `isPlainObject`, `isRegExp`, `isString`, `isUndefined`, `join`,
+   * `lastIndexOf`, `mixin`, `noConflict`, `parseInt`, `pop`, `random`, `reduce`,
+   * `reduceRight`, `result`, `shift`, `size`, `some`, `sortedIndex`, `runInContext`,
+   * `template`, `unescape`, `uniqueId`, and `value`
+   *
+   * The wrapper functions `first` and `last` return wrapped values when `n` is
+   * provided, otherwise they return unwrapped values.
+   *
+   * Explicit chaining can be enabled by using the `_.chain` method.
+   *
+   * @name _
+   * @constructor
+   * @category Chaining
+   * @param {*} value The value to wrap in a `lodash` instance.
+   * @returns {Object} Returns a `lodash` instance.
+   * @example
+   *
+   * var wrapped = _([1, 2, 3]);
+   *
+   * // returns an unwrapped value
+   * wrapped.reduce(function(sum, num) {
+   *   return sum + num;
+   * });
+   * // => 6
+   *
+   * // returns a wrapped value
+   * var squares = wrapped.map(function(num) {
+   *   return num * num;
+   * });
+   *
+   * _.isArray(squares);
+   * // => false
+   *
+   * _.isArray(squares.value());
+   * // => true
+   */
+  function lodash(value) {
+    // don't wrap if already wrapped, even if wrapped by a different `lodash` constructor
+    return (value && typeof value == 'object' && !isArray(value) && hasOwnProperty.call(value, '__wrapped__'))
+     ? value
+     : new lodashWrapper(value);
+  }
+
+  /**
+   * A fast path for creating `lodash` wrapper objects.
+   *
+   * @private
+   * @param {*} value The value to wrap in a `lodash` instance.
+   * @param {boolean} chainAll A flag to enable chaining for all methods
+   * @returns {Object} Returns a `lodash` instance.
+   */
+  function lodashWrapper(value, chainAll) {
+    this.__chain__ = !!chainAll;
+    this.__wrapped__ = value;
+  }
+  // ensure `new lodashWrapper` is an instance of `lodash`
+  lodashWrapper.prototype = lodash.prototype;
+
+  /**
+   * An object used to flag environments features.
+   *
+   * @static
+   * @memberOf _
+   * @type Object
+   */
+  var support = lodash.support = {};
+
+  (function() {
+    var ctor = function() { this.x = 1; },
+        object = { '0': 1, 'length': 1 },
+        props = [];
+
+    ctor.prototype = { 'valueOf': 1, 'y': 1 };
+    for (var key in new ctor) { props.push(key); }
+    for (key in arguments) { }
+
+    /**
+     * Detect if an `arguments` object's [[Class]] is resolvable (all but Firefox < 4, IE < 9).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.argsClass = toString.call(arguments) == argsClass;
+
+    /**
+     * Detect if `arguments` objects are `Object` objects (all but Narwhal and Opera < 10.5).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.argsObject = arguments.constructor == Object && !(arguments instanceof Array);
+
+    /**
+     * Detect if `name` or `message` properties of `Error.prototype` are
+     * enumerable by default. (IE < 9, Safari < 5.1)
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.enumErrorProps = propertyIsEnumerable.call(errorProto, 'message') || propertyIsEnumerable.call(errorProto, 'name');
+
+    /**
+     * Detect if `prototype` properties are enumerable by default.
+     *
+     * Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
+     * (if the prototype or a property on the prototype has been set)
+     * incorrectly sets a function's `prototype` property [[Enumerable]]
+     * value to `true`.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.enumPrototypes = propertyIsEnumerable.call(ctor, 'prototype');
+
+    /**
+     * Detect if functions can be decompiled by `Function#toString`
+     * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.funcDecomp = !isNative(root.WinRTError) && reThis.test(function() { return this; });
+
+    /**
+     * Detect if `Function#name` is supported (all but IE).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.funcNames = typeof Function.name == 'string';
+
+    /**
+     * Detect if `arguments` object indexes are non-enumerable
+     * (Firefox < 4, IE < 9, PhantomJS, Safari < 5.1).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.nonEnumArgs = key != 0;
+
+    /**
+     * Detect if properties shadowing those on `Object.prototype` are non-enumerable.
+     *
+     * In IE < 9 an objects own properties, shadowing non-enumerable ones, are
+     * made non-enumerable as well (a.k.a the JScript [[DontEnum]] bug).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.nonEnumShadows = !/valueOf/.test(props);
+
+    /**
+     * Detect if `Array#shift` and `Array#splice` augment array-like objects correctly.
+     *
+     * Firefox < 10, IE compatibility mode, and IE < 9 have buggy Array `shift()`
+     * and `splice()` functions that fail to remove the last element, `value[0]`,
+     * of array-like objects even though the `length` property is set to `0`.
+     * The `shift()` method is buggy in IE 8 compatibility mode, while `splice()`
+     * is buggy regardless of mode in IE < 9 and buggy in compatibility mode in IE 9.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.spliceObjects = (arrayRef.splice.call(object, 0, 1), !object[0]);
+
+    /**
+     * Detect lack of support for accessing string characters by index.
+     *
+     * IE < 8 can't access characters by index and IE 8 can only access
+     * characters by index on string literals.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.unindexedChars = ('x'[0] + Object('x')[0]) != 'xx';
+  }(1));
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The template used to create iterator functions.
+   *
+   * @private
+   * @param {Object} data The data object used to populate the text.
+   * @returns {string} Returns the interpolated text.
+   */
+  var iteratorTemplate = function(obj) {
+
+    var __p = 'var index, iterable = ' +
+    (obj.firstArg) +
+    ', result = ' +
+    (obj.init) +
+    ';\nif (!iterable) return result;\n' +
+    (obj.top) +
+    ';';
+     if (obj.array) {
+    __p += '\nvar length = iterable.length; index = -1;\nif (' +
+    (obj.array) +
+    ') {  ';
+     if (support.unindexedChars) {
+    __p += '\n  if (isString(iterable)) {\n    iterable = iterable.split(\'\')\n  }  ';
+     }
+    __p += '\n  while (++index < length) {\n    ' +
+    (obj.loop) +
+    ';\n  }\n}\nelse {  ';
+     } else if (support.nonEnumArgs) {
+    __p += '\n  var length = iterable.length; index = -1;\n  if (length && isArguments(iterable)) {\n    while (++index < length) {\n      index += \'\';\n      ' +
+    (obj.loop) +
+    ';\n    }\n  } else {  ';
+     }
+
+     if (support.enumPrototypes) {
+    __p += '\n  var skipProto = typeof iterable == \'function\';\n  ';
+     }
+
+     if (support.enumErrorProps) {
+    __p += '\n  var skipErrorProps = iterable === errorProto || iterable instanceof Error;\n  ';
+     }
+
+        var conditions = [];    if (support.enumPrototypes) { conditions.push('!(skipProto && index == "prototype")'); }    if (support.enumErrorProps)  { conditions.push('!(skipErrorProps && (index == "message" || index == "name"))'); }
+
+     if (obj.useHas && obj.keys) {
+    __p += '\n  var ownIndex = -1,\n      ownProps = objectTypes[typeof iterable] && keys(iterable),\n      length = ownProps ? ownProps.length : 0;\n\n  while (++ownIndex < length) {\n    index = ownProps[ownIndex];\n';
+        if (conditions.length) {
+    __p += '    if (' +
+    (conditions.join(' && ')) +
+    ') {\n  ';
+     }
+    __p +=
+    (obj.loop) +
+    ';    ';
+     if (conditions.length) {
+    __p += '\n    }';
+     }
+    __p += '\n  }  ';
+     } else {
+    __p += '\n  for (index in iterable) {\n';
+        if (obj.useHas) { conditions.push("hasOwnProperty.call(iterable, index)"); }    if (conditions.length) {
+    __p += '    if (' +
+    (conditions.join(' && ')) +
+    ') {\n  ';
+     }
+    __p +=
+    (obj.loop) +
+    ';    ';
+     if (conditions.length) {
+    __p += '\n    }';
+     }
+    __p += '\n  }    ';
+     if (support.nonEnumShadows) {
+    __p += '\n\n  if (iterable !== objectProto) {\n    var ctor = iterable.constructor,\n        isProto = iterable === (ctor && ctor.prototype),\n        className = iterable === stringProto ? stringClass : iterable === errorProto ? errorClass : toString.call(iterable),\n        nonEnum = nonEnumProps[className];\n      ';
+     for (k = 0; k < 7; k++) {
+    __p += '\n    index = \'' +
+    (obj.shadowedProps[k]) +
+    '\';\n    if ((!(isProto && nonEnum[index]) && hasOwnProperty.call(iterable, index))';
+            if (!obj.useHas) {
+    __p += ' || (!nonEnum[index] && iterable[index] !== objectProto[index])';
+     }
+    __p += ') {\n      ' +
+    (obj.loop) +
+    ';\n    }      ';
+     }
+    __p += '\n  }    ';
+     }
+
+     }
+
+     if (obj.array || support.nonEnumArgs) {
+    __p += '\n}';
+     }
+    __p +=
+    (obj.bottom) +
+    ';\nreturn result';
+
+    return __p
+  };
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The base implementation of `_.bind` that creates the bound function and
+   * sets its meta data.
+   *
+   * @private
+   * @param {Array} bindData The bind data array.
+   * @returns {Function} Returns the new bound function.
+   */
+  function baseBind(bindData) {
+    var func = bindData[0],
+        partialArgs = bindData[2],
+        thisArg = bindData[4];
+
+    function bound() {
+      // `Function#bind` spec
+      // http://es5.github.io/#x15.3.4.5
+      if (partialArgs) {
+        // avoid `arguments` object deoptimizations by using `slice` instead
+        // of `Array.prototype.slice.call` and not assigning `arguments` to a
+        // variable as a ternary expression
+        var args = slice(partialArgs);
+        push.apply(args, arguments);
+      }
+      // mimic the constructor's `return` behavior
+      // http://es5.github.io/#x13.2.2
+      if (this instanceof bound) {
+        // ensure `new bound` is an instance of `func`
+        var thisBinding = baseCreate(func.prototype),
+            result = func.apply(thisBinding, args || arguments);
+        return isObject(result) ? result : thisBinding;
+      }
+      return func.apply(thisArg, args || arguments);
+    }
+    setBindData(bound, bindData);
+    return bound;
+  }
+
+  /**
+   * The base implementation of `_.create` without support for assigning
+   * properties to the created object.
+   *
+   * @private
+   * @param {Object} prototype The object to inherit from.
+   * @returns {Object} Returns the new object.
+   */
+  function baseCreate(prototype, properties) {
+    return isObject(prototype) ? nativeCreate(prototype) : {};
+  }
+  // fallback for browsers without `Object.create`
+  if (!nativeCreate) {
+    baseCreate = (function() {
+      function Object() {}
+      return function(prototype) {
+        if (isObject(prototype)) {
+          Object.prototype = prototype;
+          var result = new Object;
+          Object.prototype = null;
+        }
+        return result || root.Object();
+      };
+    }());
+  }
+
+  /**
+   * The base implementation of `_.createCallback` without support for creating
+   * "_.pluck" or "_.where" style callbacks.
+   *
+   * @private
+   * @param {*} [func=identity] The value to convert to a callback.
+   * @param {*} [thisArg] The `this` binding of the created callback.
+   * @param {number} [argCount] The number of arguments the callback accepts.
+   * @returns {Function} Returns a callback function.
+   */
+  function baseCreateCallback(func, thisArg, argCount) {
+    if (typeof func != 'function') {
+      return identity;
+    }
+    // exit early for no `thisArg` or already bound by `Function#bind`
+    if (typeof thisArg == 'undefined' || !('prototype' in func)) {
+      return func;
+    }
+    var bindData = func.__bindData__;
+    if (typeof bindData == 'undefined') {
+      if (support.funcNames) {
+        bindData = !func.name;
+      }
+      bindData = bindData || !support.funcDecomp;
+      if (!bindData) {
+        var source = fnToString.call(func);
+        if (!support.funcNames) {
+          bindData = !reFuncName.test(source);
+        }
+        if (!bindData) {
+          // checks if `func` references the `this` keyword and stores the result
+          bindData = reThis.test(source);
+          setBindData(func, bindData);
+        }
+      }
+    }
+    // exit early if there are no `this` references or `func` is bound
+    if (bindData === false || (bindData !== true && bindData[1] & 1)) {
+      return func;
+    }
+    switch (argCount) {
+      case 1: return function(value) {
+        return func.call(thisArg, value);
+      };
+      case 2: return function(a, b) {
+        return func.call(thisArg, a, b);
+      };
+      case 3: return function(value, index, collection) {
+        return func.call(thisArg, value, index, collection);
+      };
+      case 4: return function(accumulator, value, index, collection) {
+        return func.call(thisArg, accumulator, value, index, collection);
+      };
+    }
+    return bind(func, thisArg);
+  }
+
+  /**
+   * The base implementation of `createWrapper` that creates the wrapper and
+   * sets its meta data.
+   *
+   * @private
+   * @param {Array} bindData The bind data array.
+   * @returns {Function} Returns the new function.
+   */
+  function baseCreateWrapper(bindData) {
+    var func = bindData[0],
+        bitmask = bindData[1],
+        partialArgs = bindData[2],
+        partialRightArgs = bindData[3],
+        thisArg = bindData[4],
+        arity = bindData[5];
+
+    var isBind = bitmask & 1,
+        isBindKey = bitmask & 2,
+        isCurry = bitmask & 4,
+        isCurryBound = bitmask & 8,
+        key = func;
+
+    function bound() {
+      var thisBinding = isBind ? thisArg : this;
+      if (partialArgs) {
+        var args = slice(partialArgs);
+        push.apply(args, arguments);
+      }
+      if (partialRightArgs || isCurry) {
+        args || (args = slice(arguments));
+        if (partialRightArgs) {
+          push.apply(args, partialRightArgs);
+        }
+        if (isCurry && args.length < arity) {
+          bitmask |= 16 & ~32;
+          return baseCreateWrapper([func, (isCurryBound ? bitmask : bitmask & ~3), args, null, thisArg, arity]);
+        }
+      }
+      args || (args = arguments);
+      if (isBindKey) {
+        func = thisBinding[key];
+      }
+      if (this instanceof bound) {
+        thisBinding = baseCreate(func.prototype);
+        var result = func.apply(thisBinding, args);
+        return isObject(result) ? result : thisBinding;
+      }
+      return func.apply(thisBinding, args);
+    }
+    setBindData(bound, bindData);
+    return bound;
+  }
+
+  /**
+   * The base implementation of `_.difference` that accepts a single array
+   * of values to exclude.
+   *
+   * @private
+   * @param {Array} array The array to process.
+   * @param {Array} [values] The array of values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   */
+  function baseDifference(array, values) {
+    var index = -1,
+        indexOf = getIndexOf(),
+        length = array ? array.length : 0,
+        isLarge = length >= largeArraySize && indexOf === baseIndexOf,
+        result = [];
+
+    if (isLarge) {
+      var cache = createCache(values);
+      if (cache) {
+        indexOf = cacheIndexOf;
+        values = cache;
+      } else {
+        isLarge = false;
+      }
+    }
+    while (++index < length) {
+      var value = array[index];
+      if (indexOf(values, value) < 0) {
+        result.push(value);
+      }
+    }
+    if (isLarge) {
+      releaseObject(values);
+    }
+    return result;
+  }
+
+  /**
+   * The base implementation of `_.isEqual`, without support for `thisArg` binding,
+   * that allows partial "_.where" style comparisons.
+   *
+   * @private
+   * @param {*} a The value to compare.
+   * @param {*} b The other value to compare.
+   * @param {Function} [callback] The function to customize comparing values.
+   * @param {Function} [isWhere=false] A flag to indicate performing partial comparisons.
+   * @param {Array} [stackA=[]] Tracks traversed `a` objects.
+   * @param {Array} [stackB=[]] Tracks traversed `b` objects.
+   * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+   */
+  function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
+    // used to indicate that when comparing objects, `a` has at least the properties of `b`
+    if (callback) {
+      var result = callback(a, b);
+      if (typeof result != 'undefined') {
+        return !!result;
+      }
+    }
+    // exit early for identical values
+    if (a === b) {
+      // treat `+0` vs. `-0` as not equal
+      return a !== 0 || (1 / a == 1 / b);
+    }
+    var type = typeof a,
+        otherType = typeof b;
+
+    // exit early for unlike primitive values
+    if (a === a &&
+        !(a && objectTypes[type]) &&
+        !(b && objectTypes[otherType])) {
+      return false;
+    }
+    // exit early for `null` and `undefined` avoiding ES3's Function#call behavior
+    // http://es5.github.io/#x15.3.4.4
+    if (a == null || b == null) {
+      return a === b;
+    }
+    // compare [[Class]] names
+    var className = toString.call(a),
+        otherClass = toString.call(b);
+
+    if (className == argsClass) {
+      className = objectClass;
+    }
+    if (otherClass == argsClass) {
+      otherClass = objectClass;
+    }
+    if (className != otherClass) {
+      return false;
+    }
+    switch (className) {
+      case boolClass:
+      case dateClass:
+        // coerce dates and booleans to numbers, dates to milliseconds and booleans
+        // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
+        return +a == +b;
+
+      case numberClass:
+        // treat `NaN` vs. `NaN` as equal
+        return (a != +a)
+          ? b != +b
+          // but treat `+0` vs. `-0` as not equal
+          : (a == 0 ? (1 / a == 1 / b) : a == +b);
+
+      case regexpClass:
+      case stringClass:
+        // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
+        // treat string primitives and their corresponding object instances as equal
+        return a == String(b);
+    }
+    var isArr = className == arrayClass;
+    if (!isArr) {
+      // unwrap any `lodash` wrapped values
+      var aWrapped = hasOwnProperty.call(a, '__wrapped__'),
+          bWrapped = hasOwnProperty.call(b, '__wrapped__');
+
+      if (aWrapped || bWrapped) {
+        return baseIsEqual(aWrapped ? a.__wrapped__ : a, bWrapped ? b.__wrapped__ : b, callback, isWhere, stackA, stackB);
+      }
+      // exit for functions and DOM nodes
+      if (className != objectClass) {
+        return false;
+      }
+      // in older versions of Opera, `arguments` objects have `Array` constructors
+      var ctorA = !support.argsObject && isArguments(a) ? Object : a.constructor,
+          ctorB = !support.argsObject && isArguments(b) ? Object : b.constructor;
+
+      // non `Object` object instances with different constructors are not equal
+      if (ctorA != ctorB &&
+            !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
+            ('constructor' in a && 'constructor' in b)
+          ) {
+        return false;
+      }
+    }
+    // assume cyclic structures are equal
+    // the algorithm for detecting cyclic structures is adapted from ES 5.1
+    // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
+    var initedStack = !stackA;
+    stackA || (stackA = getArray());
+    stackB || (stackB = getArray());
+
+    var length = stackA.length;
+    while (length--) {
+      if (stackA[length] == a) {
+        return stackB[length] == b;
+      }
+    }
+    var size = 0;
+    result = true;
+
+    // add `a` and `b` to the stack of traversed objects
+    stackA.push(a);
+    stackB.push(b);
+
+    // recursively compare objects and arrays (susceptible to call stack limits)
+    if (isArr) {
+      // compare lengths to determine if a deep comparison is necessary
+      length = a.length;
+      size = b.length;
+      result = size == length;
+
+      if (result || isWhere) {
+        // deep compare the contents, ignoring non-numeric properties
+        while (size--) {
+          var index = length,
+              value = b[size];
+
+          if (isWhere) {
+            while (index--) {
+              if ((result = baseIsEqual(a[index], value, callback, isWhere, stackA, stackB))) {
+                break;
+              }
+            }
+          } else if (!(result = baseIsEqual(a[size], value, callback, isWhere, stackA, stackB))) {
+            break;
+          }
+        }
+      }
+    }
+    else {
+      // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
+      // which, in this case, is more costly
+      forIn(b, function(value, key, b) {
+        if (hasOwnProperty.call(b, key)) {
+          // count the number of properties.
+          size++;
+          // deep compare each property value.
+          return (result = hasOwnProperty.call(a, key) && baseIsEqual(a[key], value, callback, isWhere, stackA, stackB));
+        }
+      });
+
+      if (result && !isWhere) {
+        // ensure both objects have the same number of properties
+        forIn(a, function(value, key, a) {
+          if (hasOwnProperty.call(a, key)) {
+            // `size` will be `-1` if `a` has more properties than `b`
+            return (result = --size > -1);
+          }
+        });
+      }
+    }
+    stackA.pop();
+    stackB.pop();
+
+    if (initedStack) {
+      releaseArray(stackA);
+      releaseArray(stackB);
+    }
+    return result;
+  }
+
+  /**
+   * The base implementation of `_.random` without argument juggling or support
+   * for returning floating-point numbers.
+   *
+   * @private
+   * @param {number} min The minimum possible value.
+   * @param {number} max The maximum possible value.
+   * @returns {number} Returns a random number.
+   */
+  function baseRandom(min, max) {
+    return min + floor(nativeRandom() * (max - min + 1));
+  }
+
+  /**
+   * Creates a function that, when called, either curries or invokes `func`
+   * with an optional `this` binding and partially applied arguments.
+   *
+   * @private
+   * @param {Function|string} func The function or method name to reference.
+   * @param {number} bitmask The bitmask of method flags to compose.
+   *  The bitmask may be composed of the following flags:
+   *  1 - `_.bind`
+   *  2 - `_.bindKey`
+   *  4 - `_.curry`
+   *  8 - `_.curry` (bound)
+   *  16 - `_.partial`
+   *  32 - `_.partialRight`
+   * @param {Array} [partialArgs] An array of arguments to prepend to those
+   *  provided to the new function.
+   * @param {Array} [partialRightArgs] An array of arguments to append to those
+   *  provided to the new function.
+   * @param {*} [thisArg] The `this` binding of `func`.
+   * @param {number} [arity] The arity of `func`.
+   * @returns {Function} Returns the new function.
+   */
+  function createWrapper(func, bitmask, partialArgs, partialRightArgs, thisArg, arity) {
+    var isBind = bitmask & 1,
+        isBindKey = bitmask & 2,
+        isCurry = bitmask & 4,
+        isCurryBound = bitmask & 8,
+        isPartial = bitmask & 16,
+        isPartialRight = bitmask & 32;
+
+    if (!isBindKey && !isFunction(func)) {
+      throw new TypeError;
+    }
+    if (isPartial && !partialArgs.length) {
+      bitmask &= ~16;
+      isPartial = partialArgs = false;
+    }
+    if (isPartialRight && !partialRightArgs.length) {
+      bitmask &= ~32;
+      isPartialRight = partialRightArgs = false;
+    }
+    var bindData = func && func.__bindData__;
+    if (bindData && bindData !== true) {
+      // clone `bindData`
+      bindData = slice(bindData);
+      if (bindData[2]) {
+        bindData[2] = slice(bindData[2]);
+      }
+      if (bindData[3]) {
+        bindData[3] = slice(bindData[3]);
+      }
+      // set `thisBinding` is not previously bound
+      if (isBind && !(bindData[1] & 1)) {
+        bindData[4] = thisArg;
+      }
+      // set if previously bound but not currently (subsequent curried functions)
+      if (!isBind && bindData[1] & 1) {
+        bitmask |= 8;
+      }
+      // set curried arity if not yet set
+      if (isCurry && !(bindData[1] & 4)) {
+        bindData[5] = arity;
+      }
+      // append partial left arguments
+      if (isPartial) {
+        push.apply(bindData[2] || (bindData[2] = []), partialArgs);
+      }
+      // append partial right arguments
+      if (isPartialRight) {
+        unshift.apply(bindData[3] || (bindData[3] = []), partialRightArgs);
+      }
+      // merge flags
+      bindData[1] |= bitmask;
+      return createWrapper.apply(null, bindData);
+    }
+    // fast path for `_.bind`
+    var creater = (bitmask == 1 || bitmask === 17) ? baseBind : baseCreateWrapper;
+    return creater([func, bitmask, partialArgs, partialRightArgs, thisArg, arity]);
+  }
+
+  /**
+   * Creates compiled iteration functions.
+   *
+   * @private
+   * @param {...Object} [options] The compile options object(s).
+   * @param {string} [options.array] Code to determine if the iterable is an array or array-like.
+   * @param {boolean} [options.useHas] Specify using `hasOwnProperty` checks in the object loop.
+   * @param {Function} [options.keys] A reference to `_.keys` for use in own property iteration.
+   * @param {string} [options.args] A comma separated string of iteration function arguments.
+   * @param {string} [options.top] Code to execute before the iteration branches.
+   * @param {string} [options.loop] Code to execute in the object loop.
+   * @param {string} [options.bottom] Code to execute after the iteration branches.
+   * @returns {Function} Returns the compiled function.
+   */
+  function createIterator() {
+    // data properties
+    iteratorData.shadowedProps = shadowedProps;
+
+    // iterator options
+    iteratorData.array = iteratorData.bottom = iteratorData.loop = iteratorData.top = '';
+    iteratorData.init = 'iterable';
+    iteratorData.useHas = true;
+
+    // merge options into a template data object
+    for (var object, index = 0; object = arguments[index]; index++) {
+      for (var key in object) {
+        iteratorData[key] = object[key];
+      }
+    }
+    var args = iteratorData.args;
+    iteratorData.firstArg = /^[^,]+/.exec(args)[0];
+
+    // create the function factory
+    var factory = Function(
+        'baseCreateCallback, errorClass, errorProto, hasOwnProperty, ' +
+        'indicatorObject, isArguments, isArray, isString, keys, objectProto, ' +
+        'objectTypes, nonEnumProps, stringClass, stringProto, toString',
+      'return function(' + args + ') {\n' + iteratorTemplate(iteratorData) + '\n}'
+    );
+
+    // return the compiled function
+    return factory(
+      baseCreateCallback, errorClass, errorProto, hasOwnProperty,
+      indicatorObject, isArguments, isArray, isString, iteratorData.keys, objectProto,
+      objectTypes, nonEnumProps, stringClass, stringProto, toString
+    );
+  }
+
+  /**
+   * Gets the appropriate "indexOf" function. If the `_.indexOf` method is
+   * customized, this method returns the custom method, otherwise it returns
+   * the `baseIndexOf` function.
+   *
+   * @private
+   * @returns {Function} Returns the "indexOf" function.
+   */
+  function getIndexOf() {
+    var result = (result = lodash.indexOf) === indexOf ? baseIndexOf : result;
+    return result;
+  }
+
+  /**
+   * Checks if `value` is a native function.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a native function, else `false`.
+   */
+  function isNative(value) {
+    return typeof value == 'function' && reNative.test(value);
+  }
+
+  /**
+   * Sets `this` binding data on a given function.
+   *
+   * @private
+   * @param {Function} func The function to set data on.
+   * @param {Array} value The data array to set.
+   */
+  var setBindData = !defineProperty ? noop : function(func, value) {
+    descriptor.value = value;
+    defineProperty(func, '__bindData__', descriptor);
+  };
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Checks if `value` is an `arguments` object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is an `arguments` object, else `false`.
+   * @example
+   *
+   * (function() { return _.isArguments(arguments); })(1, 2, 3);
+   * // => true
+   *
+   * _.isArguments([1, 2, 3]);
+   * // => false
+   */
+  function isArguments(value) {
+    return value && typeof value == 'object' && typeof value.length == 'number' &&
+      toString.call(value) == argsClass || false;
+  }
+  // fallback for browsers that can't detect `arguments` objects by [[Class]]
+  if (!support.argsClass) {
+    isArguments = function(value) {
+      return value && typeof value == 'object' && typeof value.length == 'number' &&
+        hasOwnProperty.call(value, 'callee') && !propertyIsEnumerable.call(value, 'callee') || false;
+    };
+  }
+
+  /**
+   * Checks if `value` is an array.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is an array, else `false`.
+   * @example
+   *
+   * (function() { return _.isArray(arguments); })();
+   * // => false
+   *
+   * _.isArray([1, 2, 3]);
+   * // => true
+   */
+  var isArray = nativeIsArray || function(value) {
+    return value && typeof value == 'object' && typeof value.length == 'number' &&
+      toString.call(value) == arrayClass || false;
+  };
+
+  /**
+   * A fallback implementation of `Object.keys` which produces an array of the
+   * given object's own enumerable property names.
+   *
+   * @private
+   * @type Function
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names.
+   */
+  var shimKeys = createIterator({
+    'args': 'object',
+    'init': '[]',
+    'top': 'if (!(objectTypes[typeof object])) return result',
+    'loop': 'result.push(index)'
+  });
+
+  /**
+   * Creates an array composed of the own enumerable property names of an object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names.
+   * @example
+   *
+   * _.keys({ 'one': 1, 'two': 2, 'three': 3 });
+   * // => ['one', 'two', 'three'] (property order is not guaranteed across environments)
+   */
+  var keys = !nativeKeys ? shimKeys : function(object) {
+    if (!isObject(object)) {
+      return [];
+    }
+    if ((support.enumPrototypes && typeof object == 'function') ||
+        (support.nonEnumArgs && object.length && isArguments(object))) {
+      return shimKeys(object);
+    }
+    return nativeKeys(object);
+  };
+
+  /** Reusable iterator options shared by `each`, `forIn`, and `forOwn` */
+  var eachIteratorOptions = {
+    'args': 'collection, callback, thisArg',
+    'top': "callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3)",
+    'array': "typeof length == 'number'",
+    'keys': keys,
+    'loop': 'if (callback(iterable[index], index, collection) === false) return result'
+  };
+
+  /** Reusable iterator options for `forIn` and `forOwn` */
+  var forOwnIteratorOptions = {
+    'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
+    'array': false
+  };
+
+  /**
+   * A function compiled to iterate `arguments` objects, arrays, objects, and
+   * strings consistenly across environments, executing the callback for each
+   * element in the collection. The callback is bound to `thisArg` and invoked
+   * with three arguments; (value, index|key, collection). Callbacks may exit
+   * iteration early by explicitly returning `false`.
+   *
+   * @private
+   * @type Function
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array|Object|string} Returns `collection`.
+   */
+  var baseEach = createIterator(eachIteratorOptions);
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Iterates over own and inherited enumerable properties of an object,
+   * executing the callback for each property. The callback is bound to `thisArg`
+   * and invoked with three arguments; (value, key, object). Callbacks may exit
+   * iteration early by explicitly returning `false`.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {Object} object The object to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * Shape.prototype.move = function(x, y) {
+   *   this.x += x;
+   *   this.y += y;
+   * };
+   *
+   * _.forIn(new Shape, function(value, key) {
+   *   console.log(key);
+   * });
+   * // => logs 'x', 'y', and 'move' (property order is not guaranteed across environments)
+   */
+  var forIn = createIterator(eachIteratorOptions, forOwnIteratorOptions, {
+    'useHas': false
+  });
+
+  /**
+   * Iterates over own enumerable properties of an object, executing the callback
+   * for each property. The callback is bound to `thisArg` and invoked with three
+   * arguments; (value, key, object). Callbacks may exit iteration early by
+   * explicitly returning `false`.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {Object} object The object to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * _.forOwn({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
+   *   console.log(key);
+   * });
+   * // => logs '0', '1', and 'length' (property order is not guaranteed across environments)
+   */
+  var forOwn = createIterator(eachIteratorOptions, forOwnIteratorOptions);
+
+  /**
+   * Creates a sorted array of property names of all enumerable properties,
+   * own and inherited, of `object` that have function values.
+   *
+   * @static
+   * @memberOf _
+   * @alias methods
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names that have function values.
+   * @example
+   *
+   * _.functions(_);
+   * // => ['all', 'any', 'bind', 'bindAll', 'clone', 'compact', 'compose', ...]
+   */
+  function functions(object) {
+    var result = [];
+    forIn(object, function(value, key) {
+      if (isFunction(value)) {
+        result.push(key);
+      }
+    });
+    return result.sort();
+  }
+
+  /**
+   * Checks if `value` is a function.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a function, else `false`.
+   * @example
+   *
+   * _.isFunction(_);
+   * // => true
+   */
+  function isFunction(value) {
+    return typeof value == 'function';
+  }
+  // fallback for older versions of Chrome and Safari
+  if (isFunction(/x/)) {
+    isFunction = function(value) {
+      return typeof value == 'function' && toString.call(value) == funcClass;
+    };
+  }
+
+  /**
+   * Checks if `value` is the language type of Object.
+   * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is an object, else `false`.
+   * @example
+   *
+   * _.isObject({});
+   * // => true
+   *
+   * _.isObject([1, 2, 3]);
+   * // => true
+   *
+   * _.isObject(1);
+   * // => false
+   */
+  function isObject(value) {
+    // check if the value is the ECMAScript language type of Object
+    // http://es5.github.io/#x8
+    // and avoid a V8 bug
+    // http://code.google.com/p/v8/issues/detail?id=2291
+    return !!(value && objectTypes[typeof value]);
+  }
+
+  /**
+   * Checks if `value` is a string.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a string, else `false`.
+   * @example
+   *
+   * _.isString('fred');
+   * // => true
+   */
+  function isString(value) {
+    return typeof value == 'string' ||
+      value && typeof value == 'object' && toString.call(value) == stringClass || false;
+  }
+
+  /**
+   * Creates an array composed of the own enumerable property values of `object`.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property values.
+   * @example
+   *
+   * _.values({ 'one': 1, 'two': 2, 'three': 3 });
+   * // => [1, 2, 3] (property order is not guaranteed across environments)
+   */
+  function values(object) {
+    var index = -1,
+        props = keys(object),
+        length = props.length,
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = object[props[index]];
+    }
+    return result;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Iterates over elements of a collection, returning an array of all elements
+   * the callback returns truey for. The callback is bound to `thisArg` and
+   * invoked with three arguments; (value, index|key, collection).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @alias select
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array} Returns a new array of elements that passed the callback check.
+   * @example
+   *
+   * var evens = _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+   * // => [2, 4, 6]
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36, 'blocked': false },
+   *   { 'name': 'fred',   'age': 40, 'blocked': true }
+   * ];
+   *
+   * // using "_.pluck" callback shorthand
+   * _.filter(characters, 'blocked');
+   * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
+   *
+   * // using "_.where" callback shorthand
+   * _.filter(characters, { 'age': 36 });
+   * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
+   */
+  function filter(collection, callback, thisArg) {
+    var result = [];
+    callback = lodash.createCallback(callback, thisArg, 3);
+
+    if (isArray(collection)) {
+      var index = -1,
+          length = collection.length;
+
+      while (++index < length) {
+        var value = collection[index];
+        if (callback(value, index, collection)) {
+          result.push(value);
+        }
+      }
+    } else {
+      baseEach(collection, function(value, index, collection) {
+        if (callback(value, index, collection)) {
+          result.push(value);
+        }
+      });
+    }
+    return result;
+  }
+
+  /**
+   * Iterates over elements of a collection, executing the callback for each
+   * element. The callback is bound to `thisArg` and invoked with three arguments;
+   * (value, index|key, collection). Callbacks may exit iteration early by
+   * explicitly returning `false`.
+   *
+   * Note: As with other "Collections" methods, objects with a `length` property
+   * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
+   * may be used for object iteration.
+   *
+   * @static
+   * @memberOf _
+   * @alias each
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array|Object|string} Returns `collection`.
+   * @example
+   *
+   * _([1, 2, 3]).forEach(function(num) { console.log(num); }).join(',');
+   * // => logs each number and returns '1,2,3'
+   *
+   * _.forEach({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { console.log(num); });
+   * // => logs each number and returns the object (property order is not guaranteed across environments)
+   */
+  function forEach(collection, callback, thisArg) {
+    if (callback && typeof thisArg == 'undefined' && isArray(collection)) {
+      var index = -1,
+          length = collection.length;
+
+      while (++index < length) {
+        if (callback(collection[index], index, collection) === false) {
+          break;
+        }
+      }
+    } else {
+      baseEach(collection, callback, thisArg);
+    }
+    return collection;
+  }
+
+  /**
+   * Creates an array of values by running each element in the collection
+   * through the callback. The callback is bound to `thisArg` and invoked with
+   * three arguments; (value, index|key, collection).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @alias collect
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array} Returns a new array of the results of each `callback` execution.
+   * @example
+   *
+   * _.map([1, 2, 3], function(num) { return num * 3; });
+   * // => [3, 6, 9]
+   *
+   * _.map({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { return num * 3; });
+   * // => [3, 6, 9] (property order is not guaranteed across environments)
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36 },
+   *   { 'name': 'fred',   'age': 40 }
+   * ];
+   *
+   * // using "_.pluck" callback shorthand
+   * _.map(characters, 'name');
+   * // => ['barney', 'fred']
+   */
+  function map(collection, callback, thisArg) {
+    var index = -1,
+        length = collection ? collection.length : 0,
+        result = Array(typeof length == 'number' ? length : 0);
+
+    callback = lodash.createCallback(callback, thisArg, 3);
+    if (isArray(collection)) {
+      while (++index < length) {
+        result[index] = callback(collection[index], index, collection);
+      }
+    } else {
+      baseEach(collection, function(value, key, collection) {
+        result[++index] = callback(value, key, collection);
+      });
+    }
+    return result;
+  }
+
+  /**
+   * The opposite of `_.filter` this method returns the elements of a
+   * collection that the callback does **not** return truey for.
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to iterate over.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Array} Returns a new array of elements that failed the callback check.
+   * @example
+   *
+   * var odds = _.reject([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+   * // => [1, 3, 5]
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36, 'blocked': false },
+   *   { 'name': 'fred',   'age': 40, 'blocked': true }
+   * ];
+   *
+   * // using "_.pluck" callback shorthand
+   * _.reject(characters, 'blocked');
+   * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
+   *
+   * // using "_.where" callback shorthand
+   * _.reject(characters, { 'age': 36 });
+   * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
+   */
+  function reject(collection, callback, thisArg) {
+    callback = lodash.createCallback(callback, thisArg, 3);
+    return filter(collection, function(value, index, collection) {
+      return !callback(value, index, collection);
+    });
+  }
+
+  /**
+   * Retrieves a random element or `n` random elements from a collection.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to sample.
+   * @param {number} [n] The number of elements to sample.
+   * @param- {Object} [guard] Allows working with functions like `_.map`
+   *  without using their `index` arguments as `n`.
+   * @returns {Array} Returns the random sample(s) of `collection`.
+   * @example
+   *
+   * _.sample([1, 2, 3, 4]);
+   * // => 2
+   *
+   * _.sample([1, 2, 3, 4], 2);
+   * // => [3, 1]
+   */
+  function sample(collection, n, guard) {
+    if (collection && typeof collection.length != 'number') {
+      collection = values(collection);
+    } else if (support.unindexedChars && isString(collection)) {
+      collection = collection.split('');
+    }
+    if (n == null || guard) {
+      return collection ? collection[baseRandom(0, collection.length - 1)] : undefined;
+    }
+    var result = shuffle(collection);
+    result.length = nativeMin(nativeMax(0, n), result.length);
+    return result;
+  }
+
+  /**
+   * Creates an array of shuffled values, using a version of the Fisher-Yates
+   * shuffle. See http://en.wikipedia.org/wiki/Fisher-Yates_shuffle.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to shuffle.
+   * @returns {Array} Returns a new shuffled collection.
+   * @example
+   *
+   * _.shuffle([1, 2, 3, 4, 5, 6]);
+   * // => [4, 1, 6, 3, 5, 2]
+   */
+  function shuffle(collection) {
+    var index = -1,
+        length = collection ? collection.length : 0,
+        result = Array(typeof length == 'number' ? length : 0);
+
+    forEach(collection, function(value) {
+      var rand = baseRandom(0, ++index);
+      result[index] = result[rand];
+      result[rand] = value;
+    });
+    return result;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Gets the index at which the first occurrence of `value` is found using
+   * strict equality for comparisons, i.e. `===`. If the array is already sorted
+   * providing `true` for `fromIndex` will run a faster binary search.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {boolean|number} [fromIndex=0] The index to search from or `true`
+   *  to perform a binary search on a sorted array.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   * @example
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2);
+   * // => 1
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
+   * // => 4
+   *
+   * _.indexOf([1, 1, 2, 2, 3, 3], 2, true);
+   * // => 2
+   */
+  function indexOf(array, value, fromIndex) {
+    if (typeof fromIndex == 'number') {
+      var length = array ? array.length : 0;
+      fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex || 0);
+    } else if (fromIndex) {
+      var index = sortedIndex(array, value);
+      return array[index] === value ? index : -1;
+    }
+    return baseIndexOf(array, value, fromIndex);
+  }
+
+  /**
+   * Creates an array of numbers (positive and/or negative) progressing from
+   * `start` up to but not including `end`. If `start` is less than `stop` a
+   * zero-length range is created unless a negative `step` is specified.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {number} [start=0] The start of the range.
+   * @param {number} end The end of the range.
+   * @param {number} [step=1] The value to increment or decrement by.
+   * @returns {Array} Returns a new range array.
+   * @example
+   *
+   * _.range(4);
+   * // => [0, 1, 2, 3]
+   *
+   * _.range(1, 5);
+   * // => [1, 2, 3, 4]
+   *
+   * _.range(0, 20, 5);
+   * // => [0, 5, 10, 15]
+   *
+   * _.range(0, -4, -1);
+   * // => [0, -1, -2, -3]
+   *
+   * _.range(1, 4, 0);
+   * // => [1, 1, 1]
+   *
+   * _.range(0);
+   * // => []
+   */
+  function range(start, end, step) {
+    start = +start || 0;
+    step = typeof step == 'number' ? step : (+step || 1);
+
+    if (end == null) {
+      end = start;
+      start = 0;
+    }
+    // use `Array(length)` so engines like Chakra and V8 avoid slower modes
+    // http://youtu.be/XAqIpGU8ZZk#t=17m25s
+    var index = -1,
+        length = nativeMax(0, ceil((end - start) / (step || 1))),
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = start;
+      start += step;
+    }
+    return result;
+  }
+
+  /**
+   * Uses a binary search to determine the smallest index at which a value
+   * should be inserted into a given sorted array in order to maintain the sort
+   * order of the array. If a callback is provided it will be executed for
+   * `value` and each element of `array` to compute their sort ranking. The
+   * callback is bound to `thisArg` and invoked with one argument; (value).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to inspect.
+   * @param {*} value The value to evaluate.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {number} Returns the index at which `value` should be inserted
+   *  into `array`.
+   * @example
+   *
+   * _.sortedIndex([20, 30, 50], 40);
+   * // => 2
+   *
+   * // using "_.pluck" callback shorthand
+   * _.sortedIndex([{ 'x': 20 }, { 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
+   * // => 2
+   *
+   * var dict = {
+   *   'wordToNumber': { 'twenty': 20, 'thirty': 30, 'fourty': 40, 'fifty': 50 }
+   * };
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return dict.wordToNumber[word];
+   * });
+   * // => 2
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return this.wordToNumber[word];
+   * }, dict);
+   * // => 2
+   */
+  function sortedIndex(array, value, callback, thisArg) {
+    var low = 0,
+        high = array ? array.length : low;
+
+    // explicitly reference `identity` for better inlining in Firefox
+    callback = callback ? lodash.createCallback(callback, thisArg, 1) : identity;
+    value = callback(value);
+
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      (callback(array[mid]) < value)
+        ? low = mid + 1
+        : high = mid;
+    }
+    return low;
+  }
+
+  /**
+   * Creates an array excluding all provided values using strict equality for
+   * comparisons, i.e. `===`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to filter.
+   * @param {...*} [value] The values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   * @example
+   *
+   * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
+   * // => [2, 3, 4]
+   */
+  function without(array) {
+    return baseDifference(array, slice(arguments, 1));
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Creates a function that, when called, invokes `func` with the `this`
+   * binding of `thisArg` and prepends any additional `bind` arguments to those
+   * provided to the bound function.
+   *
+   * @static
+   * @memberOf _
+   * @category Functions
+   * @param {Function} func The function to bind.
+   * @param {*} [thisArg] The `this` binding of `func`.
+   * @param {...*} [arg] Arguments to be partially applied.
+   * @returns {Function} Returns the new bound function.
+   * @example
+   *
+   * var func = function(greeting) {
+   *   return greeting + ' ' + this.name;
+   * };
+   *
+   * func = _.bind(func, { 'name': 'fred' }, 'hi');
+   * func();
+   * // => 'hi fred'
+   */
+  function bind(func, thisArg) {
+    return arguments.length > 2
+      ? createWrapper(func, 17, slice(arguments, 2), null, thisArg)
+      : createWrapper(func, 1, null, null, thisArg);
+  }
+
+  /**
+   * Creates a function that will delay the execution of `func` until after
+   * `wait` milliseconds have elapsed since the last time it was invoked.
+   * Provide an options object to indicate that `func` should be invoked on
+   * the leading and/or trailing edge of the `wait` timeout. Subsequent calls
+   * to the debounced function will return the result of the last `func` call.
+   *
+   * Note: If `leading` and `trailing` options are `true` `func` will be called
+   * on the trailing edge of the timeout only if the the debounced function is
+   * invoked more than once during the `wait` timeout.
+   *
+   * @static
+   * @memberOf _
+   * @category Functions
+   * @param {Function} func The function to debounce.
+   * @param {number} wait The number of milliseconds to delay.
+   * @param {Object} [options] The options object.
+   * @param {boolean} [options.leading=false] Specify execution on the leading edge of the timeout.
+   * @param {number} [options.maxWait] The maximum time `func` is allowed to be delayed before it's called.
+   * @param {boolean} [options.trailing=true] Specify execution on the trailing edge of the timeout.
+   * @returns {Function} Returns the new debounced function.
+   * @example
+   *
+   * // avoid costly calculations while the window size is in flux
+   * var lazyLayout = _.debounce(calculateLayout, 150);
+   * jQuery(window).on('resize', lazyLayout);
+   *
+   * // execute `sendMail` when the click event is fired, debouncing subsequent calls
+   * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
+   *   'leading': true,
+   *   'trailing': false
+   * });
+   *
+   * // ensure `batchLog` is executed once after 1 second of debounced calls
+   * var source = new EventSource('/stream');
+   * source.addEventListener('message', _.debounce(batchLog, 250, {
+   *   'maxWait': 1000
+   * }, false);
+   */
+  function debounce(func, wait, options) {
+    var args,
+        maxTimeoutId,
+        result,
+        stamp,
+        thisArg,
+        timeoutId,
+        trailingCall,
+        lastCalled = 0,
+        maxWait = false,
+        trailing = true;
+
+    if (!isFunction(func)) {
+      throw new TypeError;
+    }
+    wait = nativeMax(0, wait) || 0;
+    if (options === true) {
+      var leading = true;
+      trailing = false;
+    } else if (isObject(options)) {
+      leading = options.leading;
+      maxWait = 'maxWait' in options && (nativeMax(wait, options.maxWait) || 0);
+      trailing = 'trailing' in options ? options.trailing : trailing;
+    }
+    var delayed = function() {
+      var remaining = wait - (now() - stamp);
+      if (remaining <= 0) {
+        if (maxTimeoutId) {
+          clearTimeout(maxTimeoutId);
+        }
+        var isCalled = trailingCall;
+        maxTimeoutId = timeoutId = trailingCall = undefined;
+        if (isCalled) {
+          lastCalled = now();
+          result = func.apply(thisArg, args);
+          if (!timeoutId && !maxTimeoutId) {
+            args = thisArg = null;
+          }
+        }
+      } else {
+        timeoutId = setTimeout(delayed, remaining);
+      }
+    };
+
+    var maxDelayed = function() {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      maxTimeoutId = timeoutId = trailingCall = undefined;
+      if (trailing || (maxWait !== wait)) {
+        lastCalled = now();
+        result = func.apply(thisArg, args);
+        if (!timeoutId && !maxTimeoutId) {
+          args = thisArg = null;
+        }
+      }
+    };
+
+    return function() {
+      args = arguments;
+      stamp = now();
+      thisArg = this;
+      trailingCall = trailing && (timeoutId || !leading);
+
+      if (maxWait === false) {
+        var leadingCall = leading && !timeoutId;
+      } else {
+        if (!maxTimeoutId && !leading) {
+          lastCalled = stamp;
+        }
+        var remaining = maxWait - (stamp - lastCalled),
+            isCalled = remaining <= 0;
+
+        if (isCalled) {
+          if (maxTimeoutId) {
+            maxTimeoutId = clearTimeout(maxTimeoutId);
+          }
+          lastCalled = stamp;
+          result = func.apply(thisArg, args);
+        }
+        else if (!maxTimeoutId) {
+          maxTimeoutId = setTimeout(maxDelayed, remaining);
+        }
+      }
+      if (isCalled && timeoutId) {
+        timeoutId = clearTimeout(timeoutId);
+      }
+      else if (!timeoutId && wait !== maxWait) {
+        timeoutId = setTimeout(delayed, wait);
+      }
+      if (leadingCall) {
+        isCalled = true;
+        result = func.apply(thisArg, args);
+      }
+      if (isCalled && !timeoutId && !maxTimeoutId) {
+        args = thisArg = null;
+      }
+      return result;
+    };
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Produces a callback bound to an optional `thisArg`. If `func` is a property
+   * name the created callback will return the property value for a given element.
+   * If `func` is an object the created callback will return `true` for elements
+   * that contain the equivalent object properties, otherwise it will return `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {*} [func=identity] The value to convert to a callback.
+   * @param {*} [thisArg] The `this` binding of the created callback.
+   * @param {number} [argCount] The number of arguments the callback accepts.
+   * @returns {Function} Returns a callback function.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36 },
+   *   { 'name': 'fred',   'age': 40 }
+   * ];
+   *
+   * // wrap to create custom callback shorthands
+   * _.createCallback = _.wrap(_.createCallback, function(func, callback, thisArg) {
+   *   var match = /^(.+?)__([gl]t)(.+)$/.exec(callback);
+   *   return !match ? func(callback, thisArg) : function(object) {
+   *     return match[2] == 'gt' ? object[match[1]] > match[3] : object[match[1]] < match[3];
+   *   };
+   * });
+   *
+   * _.filter(characters, 'age__gt38');
+   * // => [{ 'name': 'fred', 'age': 40 }]
+   */
+  function createCallback(func, thisArg, argCount) {
+    var type = typeof func;
+    if (func == null || type == 'function') {
+      return baseCreateCallback(func, thisArg, argCount);
+    }
+    // handle "_.pluck" style callback shorthands
+    if (type != 'object') {
+      return property(func);
+    }
+    var props = keys(func),
+        key = props[0],
+        a = func[key];
+
+    // handle "_.where" style callback shorthands
+    if (props.length == 1 && a === a && !isObject(a)) {
+      // fast path the common case of providing an object with a single
+      // property containing a primitive value
+      return function(object) {
+        var b = object[key];
+        return a === b && (a !== 0 || (1 / a == 1 / b));
+      };
+    }
+    return function(object) {
+      var length = props.length,
+          result = false;
+
+      while (length--) {
+        if (!(result = baseIsEqual(object[props[length]], func[props[length]], null, true))) {
+          break;
+        }
+      }
+      return result;
+    };
+  }
+
+  /**
+   * This method returns the first argument provided to it.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {*} value Any value.
+   * @returns {*} Returns `value`.
+   * @example
+   *
+   * var object = { 'name': 'fred' };
+   * _.identity(object) === object;
+   * // => true
+   */
+  function identity(value) {
+    return value;
+  }
+
+  /**
+   * Adds function properties of a source object to the destination object.
+   * If `object` is a function methods will be added to its prototype as well.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {Function|Object} [object=lodash] object The destination object.
+   * @param {Object} source The object of functions to add.
+   * @param {Object} [options] The options object.
+   * @param {boolean} [options.chain=true] Specify whether the functions added are chainable.
+   * @example
+   *
+   * function capitalize(string) {
+   *   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+   * }
+   *
+   * _.mixin({ 'capitalize': capitalize });
+   * _.capitalize('fred');
+   * // => 'Fred'
+   *
+   * _('fred').capitalize().value();
+   * // => 'Fred'
+   *
+   * _.mixin({ 'capitalize': capitalize }, { 'chain': false });
+   * _('fred').capitalize();
+   * // => 'Fred'
+   */
+  function mixin(object, source, options) {
+    var chain = true,
+        methodNames = source && functions(source);
+
+    if (!source || (!options && !methodNames.length)) {
+      if (options == null) {
+        options = source;
+      }
+      ctor = lodashWrapper;
+      source = object;
+      object = lodash;
+      methodNames = functions(source);
+    }
+    if (options === false) {
+      chain = false;
+    } else if (isObject(options) && 'chain' in options) {
+      chain = options.chain;
+    }
+    var ctor = object,
+        isFunc = isFunction(ctor);
+
+    forEach(methodNames, function(methodName) {
+      var func = object[methodName] = source[methodName];
+      if (isFunc) {
+        ctor.prototype[methodName] = function() {
+          var chainAll = this.__chain__,
+              value = this.__wrapped__,
+              args = [value];
+
+          push.apply(args, arguments);
+          var result = func.apply(object, args);
+          if (chain || chainAll) {
+            if (value === result && isObject(result)) {
+              return this;
+            }
+            result = new ctor(result);
+            result.__chain__ = chainAll;
+          }
+          return result;
+        };
+      }
+    });
+  }
+
+  /**
+   * A no-operation function.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @example
+   *
+   * var object = { 'name': 'fred' };
+   * _.noop(object) === undefined;
+   * // => true
+   */
+  function noop() {
+    // no operation performed
+  }
+
+  /**
+   * Gets the number of milliseconds that have elapsed since the Unix epoch
+   * (1 January 1970 00:00:00 UTC).
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @example
+   *
+   * var stamp = _.now();
+   * _.defer(function() { console.log(_.now() - stamp); });
+   * // => logs the number of milliseconds it took for the deferred function to be called
+   */
+  var now = isNative(now = Date.now) && now || function() {
+    return new Date().getTime();
+  };
+
+  /**
+   * Creates a "_.pluck" style function, which returns the `key` value of a
+   * given object.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {string} key The name of the property to retrieve.
+   * @returns {Function} Returns the new function.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'fred',   'age': 40 },
+   *   { 'name': 'barney', 'age': 36 }
+   * ];
+   *
+   * var getName = _.property('name');
+   *
+   * _.map(characters, getName);
+   * // => ['barney', 'fred']
+   *
+   * _.sortBy(characters, getName);
+   * // => [{ 'name': 'barney', 'age': 36 }, { 'name': 'fred',   'age': 40 }]
+   */
+  function property(key) {
+    return function(object) {
+      return object[key];
+    };
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Creates a `lodash` object that wraps the given value with explicit
+   * method chaining enabled.
+   *
+   * @static
+   * @memberOf _
+   * @category Chaining
+   * @param {*} value The value to wrap.
+   * @returns {Object} Returns the wrapper object.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'barney',  'age': 36 },
+   *   { 'name': 'fred',    'age': 40 },
+   *   { 'name': 'pebbles', 'age': 1 }
+   * ];
+   *
+   * var youngest = _.chain(characters)
+   *     .sortBy('age')
+   *     .map(function(chr) { return chr.name + ' is ' + chr.age; })
+   *     .first()
+   *     .value();
+   * // => 'pebbles is 1'
+   */
+  function chain(value) {
+    value = new lodashWrapper(value);
+    value.__chain__ = true;
+    return value;
+  }
+
+  /**
+   * Enables explicit method chaining on the wrapper object.
+   *
+   * @name chain
+   * @memberOf _
+   * @category Chaining
+   * @returns {*} Returns the wrapper object.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36 },
+   *   { 'name': 'fred',   'age': 40 }
+   * ];
+   *
+   * // without explicit chaining
+   * _(characters).first();
+   * // => { 'name': 'barney', 'age': 36 }
+   *
+   * // with explicit chaining
+   * _(characters).chain()
+   *   .first()
+   *   .pick('age')
+   *   .value();
+   * // => { 'age': 36 }
+   */
+  function wrapperChain() {
+    this.__chain__ = true;
+    return this;
+  }
+
+  /**
+   * Produces the `toString` result of the wrapped value.
+   *
+   * @name toString
+   * @memberOf _
+   * @category Chaining
+   * @returns {string} Returns the string result.
+   * @example
+   *
+   * _([1, 2, 3]).toString();
+   * // => '1,2,3'
+   */
+  function wrapperToString() {
+    return String(this.__wrapped__);
+  }
+
+  /**
+   * Extracts the wrapped value.
+   *
+   * @name valueOf
+   * @memberOf _
+   * @alias value
+   * @category Chaining
+   * @returns {*} Returns the wrapped value.
+   * @example
+   *
+   * _([1, 2, 3]).valueOf();
+   * // => [1, 2, 3]
+   */
+  function wrapperValueOf() {
+    return this.__wrapped__;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  lodash.bind = bind;
+  lodash.chain = chain;
+  lodash.createCallback = createCallback;
+  lodash.debounce = debounce;
+  lodash.filter = filter;
+  lodash.forEach = forEach;
+  lodash.forIn = forIn;
+  lodash.forOwn = forOwn;
+  lodash.functions = functions;
+  lodash.keys = keys;
+  lodash.map = map;
+  lodash.property = property;
+  lodash.range = range;
+  lodash.reject = reject;
+  lodash.shuffle = shuffle;
+  lodash.values = values;
+  lodash.without = without;
+
+  // add aliases
+  lodash.collect = map;
+  lodash.each = forEach;
+  lodash.methods = functions;
+  lodash.select = filter;
+
+  // add functions to `lodash.prototype`
+  mixin(lodash);
+
+  /*--------------------------------------------------------------------------*/
+
+  lodash.identity = identity;
+  lodash.indexOf = indexOf;
+  lodash.isArguments = isArguments;
+  lodash.isArray = isArray;
+  lodash.isFunction = isFunction;
+  lodash.isObject = isObject;
+  lodash.isString = isString;
+  lodash.mixin = mixin;
+  lodash.noop = noop;
+  lodash.now = now;
+  lodash.sortedIndex = sortedIndex;
+
+  mixin(function() {
+    var source = {}
+    forOwn(lodash, function(func, methodName) {
+      if (!lodash.prototype[methodName]) {
+        source[methodName] = func;
+      }
+    });
+    return source;
+  }(), false);
+
+  /*--------------------------------------------------------------------------*/
+
+  lodash.sample = sample;
+
+  forOwn(lodash, function(func, methodName) {
+    var callbackable = methodName !== 'sample';
+    if (!lodash.prototype[methodName]) {
+      lodash.prototype[methodName]= function(n, guard) {
+        var chainAll = this.__chain__,
+            result = func(this.__wrapped__, n, guard);
+
+        return !chainAll && (n == null || (guard && !(callbackable && typeof n == 'function')))
+          ? result
+          : new lodashWrapper(result, chainAll);
+      };
+    }
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The semantic version number.
+   *
+   * @static
+   * @memberOf _
+   * @type string
+   */
+  lodash.VERSION = '2.4.1';
+
+  // add "Chaining" functions to the wrapper
+  lodash.prototype.chain = wrapperChain;
+  lodash.prototype.toString = wrapperToString;
+  lodash.prototype.value = wrapperValueOf;
+  lodash.prototype.valueOf = wrapperValueOf;
+
+  // add `Array` functions that return unwrapped values
+  baseEach(['join', 'pop', 'shift'], function(methodName) {
+    var func = arrayRef[methodName];
+    lodash.prototype[methodName] = function() {
+      var chainAll = this.__chain__,
+          result = func.apply(this.__wrapped__, arguments);
+
+      return chainAll
+        ? new lodashWrapper(result, chainAll)
+        : result;
+    };
+  });
+
+  // add `Array` functions that return the existing wrapped value
+  baseEach(['push', 'reverse', 'sort', 'unshift'], function(methodName) {
+    var func = arrayRef[methodName];
+    lodash.prototype[methodName] = function() {
+      func.apply(this.__wrapped__, arguments);
+      return this;
+    };
+  });
+
+  // add `Array` functions that return new wrapped values
+  baseEach(['concat', 'slice', 'splice'], function(methodName) {
+    var func = arrayRef[methodName];
+    lodash.prototype[methodName] = function() {
+      return new lodashWrapper(func.apply(this.__wrapped__, arguments), this.__chain__);
+    };
+  });
+
+  // avoid array-like object bugs with `Array#shift` and `Array#splice`
+  // in IE < 9, Firefox < 10, Narwhal, and RingoJS
+  if (!support.spliceObjects) {
+    baseEach(['pop', 'shift', 'splice'], function(methodName) {
+      var func = arrayRef[methodName],
+          isSplice = methodName == 'splice';
+
+      lodash.prototype[methodName] = function() {
+        var chainAll = this.__chain__,
+            value = this.__wrapped__,
+            result = func.apply(value, arguments);
+
+        if (value.length === 0) {
+          delete value[0];
+        }
+        return (chainAll || isSplice)
+          ? new lodashWrapper(result, chainAll)
+          : result;
+      };
+    });
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  // some AMD build optimizers like r.js check for condition patterns like the following:
+  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    // Expose Lo-Dash to the global object even when an AMD loader is present in
+    // case Lo-Dash is loaded with a RequireJS shim config.
+    // See http://requirejs.org/docs/api.html#config-shim
+    root._ = lodash;
+
+    // define as an anonymous module so, through path mapping, it can be
+    // referenced as the "underscore" module
+    define(function() {
+      return lodash;
+    });
+  }
+  // check for `exports` after `define` in case a build optimizer adds an `exports` object
+  else if (freeExports && freeModule) {
+    // in Node.js or RingoJS
+    if (moduleExports) {
+      (freeModule.exports = lodash)._ = lodash;
+    }
+    // in Narwhal or Rhino -require
+    else {
+      freeExports._ = lodash;
+    }
+  }
+  else {
+    // in a browser or Rhino
+    root._ = lodash;
+  }
+}.call(this));
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],10:[function(require,module,exports){
 var xml = require('./xml');
 var blockUtils = require('./block_utils');
 var utils = require('./utils');
@@ -2083,7 +4761,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":33,"./xml":34}],10:[function(require,module,exports){
+},{"./block_utils":3,"./utils":35,"./xml":36}],11:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -2107,18 +4785,18 @@ exports.load = function(assetUrl, id) {
     winAvatar: skinUrl('win_avatar.png'),
     failureAvatar: skinUrl('failure_avatar.png'),
     repeatImage: assetUrl('media/common_images/repeat-arrows.png'),
-    leftArrow: assetUrl('media/common_images/move-west-arrow.png'),
-    downArrow: assetUrl('media/common_images/move-south-arrow.png'),
-    upArrow: assetUrl('media/common_images/move-north-arrow.png'),
-    rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftArrow: assetUrl('media/common_images/moveleft.png'),
+    downArrow: assetUrl('media/common_images/movedown.png'),
+    upArrow: assetUrl('media/common_images/moveup.png'),
+    rightArrow: assetUrl('media/common_images/moveright.png'),
     leftArrowSmall: assetUrl('media/common_images/draw-west-arrow.png'),
     downArrowSmall: assetUrl('media/common_images/draw-south-arrow.png'),
     upArrowSmall: assetUrl('media/common_images/draw-north-arrow.png'),
     rightArrowSmall: assetUrl('media/common_images/draw-east-arrow.png'),
-    leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
-    downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
-    upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
-    rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
+    leftJumpArrow: assetUrl('media/common_images/jumpleft.png'),
+    downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
+    upJumpArrow: assetUrl('media/common_images/jumpup.png'),
+    rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
@@ -2133,7 +4811,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -2338,7 +5016,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var tiles = require('./tiles');
 var xFromPosition = tiles.xFromPosition;
 var yFromPosition = tiles.yFromPosition;
@@ -2402,6 +5080,20 @@ exports.stop = function(id, spriteIndex) {
   Studio.queueCmd(id, 'stop', {'spriteIndex': spriteIndex});
 };
 
+exports.throwProjectile = function(id, spriteIndex, dir, className) {
+  Studio.queueCmd(id,
+                  'throwProjectile',
+                  {'spriteIndex': spriteIndex,
+                   'dir': dir,
+                   'className': className});
+};
+
+exports.makeProjectile = function(id, className, action) {
+  Studio.queueCmd(id,
+                  'makeProjectile',
+                  {'className': className, 'action': action});
+};
+
 exports.move = function(id, spriteIndex, dir) {
   Studio.queueCmd(id, 'move', {'spriteIndex': spriteIndex, 'dir': dir});
 };
@@ -2425,7 +5117,7 @@ exports.wait = function(id, value) {
   Studio.queueCmd(id, 'wait', {'value': value});
 };
 
-},{"./tiles":20}],13:[function(require,module,exports){
+},{"./tiles":22}],14:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -2435,23 +5127,30 @@ exports.wait = function(id, value) {
 'use strict';
 
 var msg = require('../../locale/ro_ro/studio');
+var commonMsg = require('../../locale/ro_ro/common');
 var codegen = require('../codegen');
 var tiles = require('./tiles');
+var studio = require('./studio');
+var utils = require('../utils');
+var _ = require('../lodash');
 
 var Direction = tiles.Direction;
 var Position = tiles.Position;
 var Emotions = tiles.Emotions;
 
+var RANDOM_VALUE = 'random';
+var HIDDEN_VALUE = '"hidden"';
+var VISIBLE_VALUE = '"visible"';
+var CAVE_VALUE = '"cave"';
+
 var generateSetterCode = function (opts) {
   var value = opts.ctx.getTitleValue('VALUE');
-  if (value === "random") {
-    var randomIndex = opts.random || 0;
-    // opts.random is the index of where the 'random' items is in beginning of
-    // the VALUES table (defaults to 0).
-    var allValues = opts.ctx.VALUES.slice(randomIndex + 1).map(function (item) {
-      return item[1];
-    });
-    value = 'Studio.random([' + allValues + '])';
+  if (value === RANDOM_VALUE) {
+    var possibleValues =
+      _(opts.ctx.VALUES)
+        .map(function (item) { return item[1]; })
+        .without(RANDOM_VALUE, HIDDEN_VALUE);
+    value = 'Studio.random([' + possibleValues + '])';
   }
 
   return 'Studio.' + opts.name + '(\'block_id_' + opts.ctx.id + '\', ' +
@@ -2460,6 +5159,10 @@ var generateSetterCode = function (opts) {
 
 exports.setSpriteCount = function(blockly, count) {
   blockly.Blocks.studio_spriteCount = count;
+};
+
+exports.enableProjectileCollisions = function(blockly) {
+  blockly.Blocks.studio_projectileCollisions = true;
 };
 
 // Install extensions to Blockly's language and JavaScript generator.
@@ -2473,7 +5176,34 @@ exports.install = function(blockly, blockInstallOptions) {
     return '\n';
   };
 
-  blockly.Blocks.studio_spriteCount = 6;
+  blockly.Blocks.studio_spriteCount = 6; // will be overridden
+  blockly.Blocks.studio_projectileCollisions = false;
+
+  /**
+   * Creates a dropdown with options for each sprite number
+   * @param choices
+   * @returns {Blockly.FieldDropdown}
+   */
+  function spriteNumberTextDropdown(choices) {
+    var dropdownArray = choices.slice(0, blockly.Blocks.studio_spriteCount);
+    return new blockly.FieldDropdown(dropdownArray);
+  }
+
+  /**
+   * Creates a dropdown with thumbnails for each starting sprite
+   * @returns {Blockly.FieldImageDropdown}
+   */
+  function startingSpriteImageDropdown() {
+    var spriteNumbers = _.range(0, blockly.Blocks.studio_spriteCount);
+    var choices = _.map(spriteNumbers, function (index) {
+        return [ skin[studio.nthStartingSkin(index)].dropdownThumbnail,
+                 index.toString() ];
+    });
+    return new blockly.FieldImageDropdown(
+                        choices,
+                        skin.dropdownThumbnailWidth,
+                        skin.dropdownThumbnailHeight);
+  }
 
   blockly.Blocks.studio_whenLeft = {
     // Block to handle event when the Left arrow button is pressed.
@@ -2605,20 +5335,36 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block to handle event when sprite collides with another sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray1 =
-          this.SPRITE1.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdownArray2 =
-          this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdown2 = new blockly.FieldDropdown(dropdownArray2);
+      var dropdown1;
+      var dropdown2;
+      this.setHSV(140, 1.00, 0.74);
+
+      if (isK1) {
+        // NOTE: K1 block does not yet support projectile collisions
+        dropdown1 = startingSpriteImageDropdown();
+        dropdown2 = startingSpriteImageDropdown();
+        this.appendDummyInput().appendTitle(commonMsg.when())
+          .appendTitle(dropdown1, 'SPRITE1');
+        this.appendDummyInput().appendTitle(msg.whenSpriteCollidedWith())
+          .appendTitle(dropdown2, 'SPRITE2');
+      } else {
+        dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
+        var dropdownArray2 =
+            this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
+        if (blockly.Blocks.studio_projectileCollisions) {
+          dropdownArray2.push(
+              [msg.whenSpriteCollidedWithFireball(), 'fireball']);
+          dropdownArray2.push(
+              [msg.whenSpriteCollidedWithFlower(), 'flower']);
+        }
+        dropdown2 = new blockly.FieldDropdown(dropdownArray2);
+        this.appendDummyInput().appendTitle(dropdown1, 'SPRITE1');
+        this.appendDummyInput().appendTitle(dropdown2, 'SPRITE2');
+      }
       if (blockly.Blocks.studio_spriteCount > 1) {
-        dropdown2.setValue(dropdownArray2[1][1]); // default to 2
+        dropdown2.setValue(dropdown2.getOptions()[1][1]); // default second dropdown to second item
       }
 
-      this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(dropdownArray1), 'SPRITE1');
-      this.appendDummyInput()
-        .appendTitle(dropdown2, 'SPRITE2');
       this.setPreviousStatement(false);
       this.setInputsInline(true);
       this.setNextStatement(true);
@@ -2679,6 +5425,110 @@ exports.install = function(blockly, blockInstallOptions) {
         (this.getTitleValue('SPRITE') || '0') + ');\n';
   };
 
+  blockly.Blocks.studio_throw = {
+    // Block for throwing a projectile from a sprite.
+    helpUrl: '',
+    init: function() {
+      var dropdownArray =
+          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
+      this.setHSV(184, 1.00, 0.74);
+      if (blockly.Blocks.studio_spriteCount > 1) {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.throwSprite());
+      }
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      this.appendDummyInput()
+        .appendTitle('\t');
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+      this.setPreviousStatement(true);
+      this.setInputsInline(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.throwTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_throw.SPRITE =
+      [[msg.throwSprite1(), '0'],
+       [msg.throwSprite2(), '1'],
+       [msg.throwSprite3(), '2'],
+       [msg.throwSprite4(), '3'],
+       [msg.throwSprite5(), '4'],
+       [msg.throwSprite6(), '5']];
+
+  blockly.Blocks.studio_throw.DIR =
+        [[msg.moveDirectionUp(), Direction.NORTH.toString()],
+         [msg.moveDirectionDown(), Direction.SOUTH.toString()],
+         [msg.moveDirectionLeft(), Direction.WEST.toString()],
+         [msg.moveDirectionRight(), Direction.EAST.toString()],
+         [msg.moveDirectionRandom(), 'random']];
+
+  blockly.Blocks.studio_throw.VALUES =
+        [[msg.projectileFireball(), '"fireball"'],
+         [msg.projectileFlower(), '"flower"'],
+         [msg.projectileRandom(), 'random']];
+
+  generator.studio_throw = function() {
+    // Generate JavaScript for throwing a projectile from a sprite.
+    var allDirections = this.DIR.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var dirParam = this.getTitleValue('DIR');
+    if (dirParam === 'random') {
+      dirParam = 'Studio.random([' + allDirections + '])';
+    }
+    var allValues = this.VALUES.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var valParam = this.getTitleValue('VALUE');
+    if (valParam === 'random') {
+      valParam = 'Studio.random([' + allValues + '])';
+    }
+
+    return 'Studio.throwProjectile(\'block_id_' + this.id +
+        '\', ' +
+        (this.getTitleValue('SPRITE') || '0') + ', ' +
+        dirParam + ', ' +
+        valParam + ');\n';
+  };
+
+  blockly.Blocks.studio_makeProjectile = {
+    // Block for making a projectile bounce or disappear.
+    helpUrl: '',
+    init: function() {
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      this.appendDummyInput()
+        .appendTitle('\t');
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.ACTIONS), 'ACTION');
+      this.setPreviousStatement(true);
+      this.setInputsInline(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.makeProjectileTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_makeProjectile.VALUES =
+      [[msg.makeProjectileFireball(), '"fireball"'],
+       [msg.makeProjectileFlower(), '"flower"']];
+
+  blockly.Blocks.studio_makeProjectile.ACTIONS =
+        [[msg.makeProjectileBounce(), '"bounce"'],
+         [msg.makeProjectileDisappear(), '"disappear"']];
+
+  generator.studio_makeProjectile = function() {
+    // Generate JavaScript for making a projectile bounce or disappear.
+    return 'Studio.makeProjectile(\'block_id_' + this.id + '\', ' +
+        this.getTitleValue('VALUE') + ', ' +
+        this.getTitleValue('ACTION') + ');\n';
+  };
+
   blockly.Blocks.studio_setSpritePosition = {
     // Block for jumping a sprite to different position.
     helpUrl: '',
@@ -2713,7 +5563,7 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSprite6(), '5']];
 
   blockly.Blocks.studio_setSpritePosition.VALUES =
-      [[msg.positionRandom(), 'random'],
+      [[msg.positionRandom(), RANDOM_VALUE],
        [msg.positionTopLeft(), Position.TOPLEFT.toString()],
        [msg.positionTopCenter(), Position.TOPCENTER.toString()],
        [msg.positionTopRight(), Position.TOPRIGHT.toString()],
@@ -2735,12 +5585,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for moving one frame a time.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.moveSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
         this.appendDummyInput()
           .appendTitle('\t');
       } else {
@@ -2781,12 +5634,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for moving/gliding a specific distance.
     block.helpUrl = '';
     block.init = function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.moveSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
         this.appendDummyInput()
           .appendTitle('\t');
       } else {
@@ -2888,13 +5744,20 @@ exports.install = function(blockly, blockInstallOptions) {
         distParam + ');\n';
   };
 
+  function onSoundSelected(soundValue) {
+    if (soundValue === RANDOM_VALUE) {
+      return;
+    }
+    BlocklyApps.playAudio(utils.stripQuotes(soundValue));
+  }
+
   blockly.Blocks.studio_playSound = {
     // Block for playing sound.
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.SOUNDS), 'SOUND');
+          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected), 'SOUND');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
@@ -2994,7 +5857,7 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_setSpriteSpeed.VALUES =
-      [[msg.setSpriteSpeedRandom(), 'random'],
+      [[msg.setSpriteSpeedRandom(), RANDOM_VALUE],
        [msg.setSpriteSpeedVerySlow(), 'Studio.SpriteSpeed.VERY_SLOW'],
        [msg.setSpriteSpeedSlow(), 'Studio.SpriteSpeed.SLOW'],
        [msg.setSpriteSpeedNormal(), 'Studio.SpriteSpeed.NORMAL'],
@@ -3022,12 +5885,17 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_setBackground = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]);  // default to cave
-
       this.setHSV(312, 0.32, 0.62);
-      this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
+
+      var dropdown;
+      if (isK1) {
+        dropdown = new blockly.FieldImageDropdown(this.IMAGE_CHOICES, skin.dropdownThumbnailWidth, skin.dropdownThumbnailHeight);
+        this.appendDummyInput().appendTitle(msg.setBackground()).appendTitle(dropdown, 'VALUE');
+      } else {
+        dropdown = new blockly.FieldDropdown(this.VALUES);
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
+      dropdown.setValue(CAVE_VALUE);  // default to cave
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
@@ -3036,13 +5904,22 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_setBackground.VALUES =
-      [[msg.setBackgroundRandom(), 'random'],
-       [msg.setBackgroundCave(), '"cave"'],
+      [[msg.setBackgroundRandom(), RANDOM_VALUE],
+       [msg.setBackgroundCave(), CAVE_VALUE],
        [msg.setBackgroundNight(), '"night"'],
        [msg.setBackgroundCloudy(), '"cloudy"'],
        [msg.setBackgroundUnderwater(), '"underwater"'],
        [msg.setBackgroundHardcourt(), '"hardcourt"'],
        [msg.setBackgroundBlack(), '"black"']];
+
+  blockly.Blocks.studio_setBackground.IMAGE_CHOICES =
+      [[skin.cave.background, CAVE_VALUE],
+       [skin.night.background, '"night"'],
+       [skin.cloudy.background, '"cloudy"'],
+       [skin.underwater.background, '"underwater"'],
+       [skin.hardcourt.background, '"hardcourt"'],
+       [skin.black.background, '"black"'],
+       [skin.randomPurpleIcon, RANDOM_VALUE]];
 
   generator.studio_setBackground = function() {
     return generateSetterCode({ctx: this, name: 'setBackground'});
@@ -3120,18 +5997,12 @@ exports.install = function(blockly, blockInstallOptions) {
     blockly.Blocks.studio_setSprite = {
       helpUrl: '',
       init: function() {
-        var dropdown = new blockly.FieldDropdown(this.VALUES);
-        dropdown.setValue(this.VALUES[1][1]);  // default to visible
-
-        var dropdownArray =
-            this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
-        this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
         this.setHSV(312, 0.32, 0.62);
+        var visibilityTextDropdown = new blockly.FieldDropdown(this.VALUES);
+        visibilityTextDropdown.setValue(VISIBLE_VALUE);  // default to visible
+        this.appendDummyInput().appendTitle(visibilityTextDropdown, 'VALUE');
         if (blockly.Blocks.studio_spriteCount > 1) {
-          this.appendDummyInput()
-            .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+            this.appendDummyInput().appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         }
         this.setInputsInline(true);
         this.setPreviousStatement(true);
@@ -3149,8 +6020,8 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.sprite6(), '5']];
 
     blockly.Blocks.studio_setSprite.VALUES =
-        [[msg.setSpriteHideK1(), '"hidden"'],
-         [msg.setSpriteShowK1(), '"visible"']];
+        [[msg.setSpriteHideK1(), HIDDEN_VALUE],
+         [msg.setSpriteShowK1(), VISIBLE_VALUE]];
   } else {
     /**
      * setSprite
@@ -3190,8 +6061,8 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.setSprite6(), '5']];
 
     blockly.Blocks.studio_setSprite.VALUES =
-        [[msg.setSpriteHidden(), '"hidden"'],
-         [msg.setSpriteRandom(), 'random'],
+        [[msg.setSpriteHidden(), HIDDEN_VALUE],
+         [msg.setSpriteRandom(), RANDOM_VALUE],
          [msg.setSpriteWitch(), '"witch"'],
          [msg.setSpriteCat(), '"cat"'],
          [msg.setSpriteDinosaur(), '"dinosaur"'],
@@ -3204,8 +6075,8 @@ exports.install = function(blockly, blockInstallOptions) {
     var value = this.getTitleValue('VALUE');
     var indexString = this.getTitleValue('SPRITE') || '0';
     if (!blockly.Blocks.studio_firstSetSprite &&
-        'random' !== value &&
-        '"hidden"' !== value) {
+        RANDOM_VALUE !== value &&
+        HIDDEN_VALUE !== value) {
       // Store the params for the first non-random, non-hidden setSprite
       // call so we can auto-reference this sprite in showTitleScreen() later
       blockly.Blocks.studio_firstSetSprite = {
@@ -3215,7 +6086,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
     return generateSetterCode({
       ctx: this,
-      random: 1, // random may not be present for K1 block, but that's harmless
       extraParams: indexString,
       name: 'setSprite'});
   };
@@ -3226,13 +6096,15 @@ exports.install = function(blockly, blockInstallOptions) {
       var dropdown = new blockly.FieldDropdown(this.VALUES);
       dropdown.setValue(this.VALUES[1][1]);  // default to normal
 
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.setSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
@@ -3255,7 +6127,7 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSprite6(), '5']];
 
   blockly.Blocks.studio_setSpriteEmotion.VALUES =
-      [[msg.setSpriteEmotionRandom(), 'random'],
+      [[msg.setSpriteEmotionRandom(), RANDOM_VALUE],
        [msg.setSpriteEmotionNormal(), Emotions.NORMAL.toString()],
        [msg.setSpriteEmotionHappy(), Emotions.HAPPY.toString()],
        [msg.setSpriteEmotionAngry(), Emotions.ANGRY.toString()],
@@ -3272,12 +6144,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for waiting a specific amount of time.
     block.helpUrl = '';
     block.init = function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.saySprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.saySprite());
@@ -3330,7 +6205,7 @@ exports.install = function(blockly, blockInstallOptions) {
                (this.getTitleValue('SPRITE') || '0') + ', ' +
                textParam + ');\n';
   };
-  
+
   var initWaitBlock = function (block) {
     // Block for waiting a specific amount of time.
     block.helpUrl = '';
@@ -3378,7 +6253,6 @@ exports.install = function(blockly, blockInstallOptions) {
   generator.studio_wait = function() {
     return generateSetterCode({
       ctx: this,
-      random: 1,
       name: 'wait'});
   };
 
@@ -3392,7 +6266,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/ro_ro/studio":36,"../codegen":6,"./tiles":20}],14:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"../../locale/ro_ro/studio":38,"../codegen":6,"../lodash":9,"../utils":35,"./studio":21,"./tiles":22}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3413,7 +6287,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/studio":36,"ejs":37}],15:[function(require,module,exports){
+},{"../../locale/ro_ro/studio":38,"ejs":39}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -3434,7 +6308,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/studio":36,"ejs":37}],16:[function(require,module,exports){
+},{"../../locale/ro_ro/studio":38,"ejs":39}],17:[function(require,module,exports){
 /*jshint multistr: true */
 
 var msg = require('../../locale/ro_ro/studio');
@@ -3894,6 +6768,7 @@ module.exports = {
       'upButton'
     ],
     'minWorkspaceHeight': 1300,
+    'enableProjectileCollisions': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3926,6 +6801,8 @@ module.exports = {
          blockOfType('studio_incrementScore') +
          blockOfType('studio_saySprite') +
          blockOfType('studio_setSpritePosition') +
+         blockOfType('studio_throw') +
+         blockOfType('studio_makeProjectile') +
          blockOfType('studio_setSpriteSpeed') +
          blockOfType('studio_setSpriteEmotion')),
     'startBlocks':
@@ -3944,6 +6821,7 @@ module.exports = {
       'upButton'
     ],
     'minWorkspaceHeight': 1000,
+    'enableProjectileCollisions': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -3983,6 +6861,8 @@ module.exports = {
                           <value name="TEXT"><block type="text"></block> \
                           </value></block>' +
                           blockOfType('studio_setSpritePosition') +
+                          blockOfType('studio_throw') +
+                          blockOfType('studio_makeProjectile') +
                           blockOfType('studio_setSpriteSpeed') +
                           blockOfType('studio_setSpriteEmotion')) +
          createCategory(msg.catEvents(),
@@ -4075,7 +6955,7 @@ module.exports.k1_7 = utils.extend(module.exports['9'],  {'is_k1': true});
 module.exports.k1_8 = utils.extend(module.exports['10'], {'is_k1': true});
 module.exports.k1_11 = utils.extend(module.exports['13'], {'is_k1': true});
 
-},{"../../locale/ro_ro/studio":36,"../block_utils":3,"../utils":33,"./tiles":20}],17:[function(require,module,exports){
+},{"../../locale/ro_ro/studio":38,"../block_utils":3,"../utils":35,"./tiles":22}],18:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Studio = require('./studio');
@@ -4093,7 +6973,7 @@ window.studioMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":13,"./levels":16,"./skins":18,"./studio":19}],18:[function(require,module,exports){
+},{"../appMain":1,"./blocks":14,"./levels":17,"./skins":19,"./studio":21}],19:[function(require,module,exports){
 /**
  * Load Skin for Studio.
  */
@@ -4130,32 +7010,45 @@ exports.load = function(assetUrl, id) {
   skin.underwater = {
     background: skin.assetUrl('background_underwater.png'),
   };
+  /**
+   * Sprite thumbs generated with:
+   * `brew install graphicsmagick`
+   * `gm convert +adjoin -crop 200x200 -resize 100x100 *spritesheet* output%02d.png`
+   */
   skin.cat = {
     sprite: skin.assetUrl('cat_spritesheet_200px.png'),
-    spriteFlags: 28,
+    dropdownThumbnail: skin.assetUrl('cat_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
   };
   skin.dinosaur = {
     sprite: skin.assetUrl('dinosaur_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dinosaur_thumb.png'),
     spriteFlags: 28,
   };
   skin.dog = {
     sprite: skin.assetUrl('dog_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dog_thumb.png'),
     spriteFlags: 28,
   };
   skin.octopus = {
     sprite: skin.assetUrl('octopus_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('octopus_thumb.png'),
     spriteFlags: 28,
   };
   skin.penguin = {
     sprite: skin.assetUrl('penguin_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('penguin_thumb.png'),
     spriteFlags: 28,
+  };
+  skin.witch = {
+    spriteFlags: 28,
+    dropdownThumbnail: skin.assetUrl('witch_thumb.png'),
+    sprite: skin.assetUrl('witch_sprite_200px.png'),
   };
 
   // Images
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
-  skin.sprite = skin.assetUrl('witch_sprite_200px.png');
-  skin.spriteFlags = 28; // flags: emotions, animation, turns
   skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.approachingGoalAnimation =
       skin.assetUrl(config.approachingGoalAnimation);
@@ -4182,7 +7075,7 @@ exports.load = function(assetUrl, id) {
                     skin.assetUrl('1_wall_bounce.ogg')];
   skin.hitSound = [skin.assetUrl('2_wall_bounce.mp3'),
                    skin.assetUrl('2_wall_bounce.ogg')];
-  
+
   // Settings
   if (config.background !== undefined) {
     var index = Math.floor(Math.random() * config.background);
@@ -4193,10 +7086,158 @@ exports.load = function(assetUrl, id) {
   skin.spriteHeight = config.spriteHeight || 100;
   skin.spriteWidth = config.spriteWidth || 100;
   skin.spriteYOffset = config.spriteYOffset || 0;
+  skin.dropdownThumbnailWidth = 50;
+  skin.dropdownThumbnailHeight = 50;
   return skin;
 };
 
-},{"../skins":10}],19:[function(require,module,exports){
+},{"../skins":11}],20:[function(require,module,exports){
+/**
+ * Blockly App: Studio
+ *
+ * Copyright 2014 Code.org
+ *
+ */
+
+'use strict';
+
+var Studio = require('./studio');
+var tiles = require('./tiles');
+var Direction = tiles.Direction;
+
+//
+// Sprite constructor (currently used for Studio projectiles only)
+//
+// opts.image (URL)
+// opts.width (pixels)
+// opts.height (pixels)
+// opts.x (x position)
+// opts.y (y position)
+// opts.dir (direction)
+// opts.speed (speed)
+//
+
+exports.Sprite = function (opts) {
+  for (var prop in opts) {
+    this[prop] = opts[prop];
+  }
+  this.flags = 0;
+  this.collisionMask = 0;
+  this.widthCoord = this.width / Studio.SQUARE_SIZE;
+  this.heightCoord = this.height / Studio.SQUARE_SIZE;
+};
+
+exports.Sprite.prototype.createElement = function (parentElement) {
+  this.element = document.createElementNS(Blockly.SVG_NS, 'image');
+  this.element.setAttributeNS('http://www.w3.org/1999/xlink',
+                              'xlink:href',
+                              this.image);
+  this.element.setAttribute('height', this.height);
+  this.element.setAttribute('width', this.width);
+  this.element.setAttribute('visibility', 'hidden');
+  parentElement.appendChild(this.element);
+};
+
+exports.Sprite.prototype.removeElement = function () {
+  if (this.element) {
+    this.element.parentElement.removeChild(this.element);
+    this.element = null;
+  }
+};
+
+exports.Sprite.prototype.setPosition = function (x, y) {
+  this.x = x;
+  this.y = y;
+};
+
+exports.Sprite.prototype.setDirection = function (dir) {
+  this.dir = dir;
+};
+
+exports.Sprite.prototype.setSpeed = function (speed) {
+  this.speed = speed;
+};
+
+exports.Sprite.prototype.startCollision = function (i) {
+  if (0 === (this.collisionMask & Math.pow(2, i))) {
+    this.collisionMask |= Math.pow(2, i);
+    return true;
+  }
+  return false;
+};
+
+exports.Sprite.prototype.markNotColliding = function (i) {
+  this.collisionMask &= ~(Math.pow(2, i));
+};
+
+var calcMoveDistance = function (sprite, yAxis) {
+  var scaleFactor;
+  switch (sprite.dir) {
+    case Direction.NORTH:
+      scaleFactor = yAxis ? -1 : 0;
+      break;
+    case Direction.WEST:
+      scaleFactor = yAxis ? 0: -1;
+      break;
+    case Direction.SOUTH:
+      scaleFactor = yAxis ? 1 : 0;
+      break;
+    case Direction.EAST:
+      scaleFactor = yAxis ? 0: 1;
+      break;
+  }
+  return sprite.speed * scaleFactor;
+};
+
+exports.Sprite.prototype.getNextPosition = function (yAxis) {
+  var curPos = yAxis ? this.y : this.x;
+  return curPos + calcMoveDistance(this, yAxis);
+};
+
+exports.Sprite.prototype.moveToNextPosition = function () {
+  this.x = this.getNextPosition(false);
+  this.y = this.getNextPosition(true);
+};
+
+exports.Sprite.prototype.bounce = function () {
+  switch (this.dir) {
+    case Direction.NORTH:
+      this.dir = Direction.SOUTH;
+      break;
+    case Direction.WEST:
+      this.dir = Direction.EAST;
+      break;
+    case Direction.SOUTH:
+      this.dir = Direction.NORTH;
+      break;
+    case Direction.EAST:
+      this.dir = Direction.WEST;
+      break;
+  }
+};
+
+exports.Sprite.prototype.outOfBounds = function () {
+  return (this.x < -(this.widthCoord / 2)) ||
+         (this.x > Studio.COLS + (this.widthCoord / 2)) ||
+         (this.y < -(this.heightCoord / 2)) ||
+         (this.y > Studio.ROWS + (this.heightCoord / 2));
+};
+
+exports.Sprite.prototype.display = function () {
+  var xCoord = (this.x - (this.widthCoord / 2)) * Studio.SQUARE_SIZE;
+  var yCoord = (this.y - (this.heightCoord / 2)) * Studio.SQUARE_SIZE;
+
+  this.element.setAttribute('x', xCoord);
+  this.element.setAttribute('y', yCoord);
+
+  if (!this.visible) {
+    this.element.setAttribute('visibility', 'visible');
+    this.visible = true;
+  }
+};
+
+
+},{"./studio":21,"./tiles":22}],21:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -4217,6 +7258,7 @@ var blocks = require('./blocks');
 var page = require('../templates/page.html');
 var feedback = require('../feedback.js');
 var dom = require('../dom');
+var Sprite = require('./sprite').Sprite;
 
 var Direction = tiles.Direction;
 var NextTurn = tiles.NextTurn;
@@ -4266,9 +7308,23 @@ var Keycodes = {
   DOWN: 40
 };
 
+var ProjectileClassNames = [
+  'fireball',
+  'flower'
+];
+
 var level;
 var skin;
 var onSharePage;
+
+var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
+  "witch" ];
+
+Studio.nthStartingSkin = function(n) {
+  var skinStartOffset = Studio.spriteStartingImage || 0;
+  var numStartingSkins = spriteStartingSkins.length;
+  return spriteStartingSkins[(n + skinStartOffset) % numStartingSkins];
+};
 
 /**
  * Milliseconds between each animation frame.
@@ -4353,7 +7409,6 @@ var loadLevel = function() {
 
   Studio.MAZE_WIDTH = Studio.SQUARE_SIZE * Studio.COLS;
   Studio.MAZE_HEIGHT = Studio.SQUARE_SIZE * Studio.ROWS;
-  Studio.PATH_WIDTH = Studio.SQUARE_SIZE / 3;
 };
 
 var drawMap = function() {
@@ -4674,13 +7729,16 @@ var setSvgText = function(opts) {
 // Execute the code for all of the event handlers that match an event name
 //
 
-var callHandler = function (name) {
+var callHandler = function (name, allowQueueExtension) {
   Studio.eventHandlers.forEach(function (handler) {
     // Note: we skip executing the code if we have not completed executing
     // the cmdQueue on this handler (checking for non-zero length)
     if (handler.name === name &&
-        (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
-      handler.cmdQueue = [];
+        (allowQueueExtension ||
+         (!handler.cmdQueue || 0 === handler.cmdQueue.length))) {
+      if (!handler.cmdQueue) {
+        handler.cmdQueue = [];
+      }
       Studio.currentCmdQueue = handler.cmdQueue;
       try { handler.func(BlocklyApps, api, Studio.Globals); } catch (e) { }
       Studio.currentCmdQueue = null;
@@ -4752,15 +7810,22 @@ Studio.onTick = function() {
   // Check for collisions (note that we use the positions they are about
   // to attain with queued moves - this allows the moves to be canceled before
   // the actual movements take place):
+
+  var executeCollisionQueueForClass = function (className) {
+    Studio.executeQueue('whenSpriteCollided-' + i + '-' + className);
+  };
+
   for (i = 0; i < Studio.spriteCount; i++) {
+    var nextXPos_i = getNextPosition(i, false, false);
+    var nextYPos_i = getNextPosition(i, true, false);
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i == j) {
         continue;
       }
-      if (essentiallyEqual(getNextPosition(i, false, false),
+      if (essentiallyEqual(nextXPos_i,
                            getNextPosition(j, false, false),
                            tiles.SPRITE_COLLIDE_DISTANCE) &&
-          essentiallyEqual(getNextPosition(i, true, false),
+          essentiallyEqual(nextYPos_i,
                            getNextPosition(j, true, false),
                            tiles.SPRITE_COLLIDE_DISTANCE)) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
@@ -4772,6 +7837,30 @@ Studio.onTick = function() {
       }
       Studio.executeQueue('whenSpriteCollided-' + i + '-' + j);
     }
+    var xCenter = nextXPos_i + 1;
+    var yCenter = nextYPos_i + 1;
+    for (j = 0; j < Studio.projectiles.length; j++) {
+      if (essentiallyEqual(xCenter,
+                           Studio.projectiles[j].getNextPosition(false),
+                           tiles.PROJECTILE_COLLIDE_DISTANCE) &&
+          essentiallyEqual(yCenter,
+                           Studio.projectiles[j].getNextPosition(true),
+                           tiles.PROJECTILE_COLLIDE_DISTANCE)) {
+        if (Studio.projectiles[j].startCollision(i)) {
+          Studio.currentEventParams = { projectile: Studio.projectiles[j] };
+          // Allow cmdQueue extension (pass true) since this handler
+          // may be called for multiple projectiles before executing the queue
+          // below
+          callHandler('whenSpriteCollided-' + i + '-' +
+                        Studio.projectiles[j].className,
+                      true);
+          Studio.currentEventParams = null;
+        }
+      } else {
+        Studio.projectiles[j].markNotColliding(i);
+      }
+    }
+    ProjectileClassNames.forEach(executeCollisionQueueForClass);
   }
 
   for (i = 0; i < Studio.spriteCount; i++) {
@@ -4779,6 +7868,19 @@ Studio.onTick = function() {
 
     // Display sprite:
     Studio.displaySprite(i);
+  }
+
+  for (i = 0; i < Studio.projectiles.length; i++) {
+    Studio.projectiles[i].moveToNextPosition();
+    if (Studio.projectiles[i].outOfBounds()) {
+      Studio.projectiles[i].removeElement();
+      Studio.projectiles.splice(i, 1);
+      // decrement i because we just removed an item from the array. We want to
+      // keep i as the same value for the next iteration through this loop
+      i--;
+    } else {
+      Studio.projectiles[i].display();
+    }
   }
 
   if (checkFinished()) {
@@ -4944,6 +8046,7 @@ Studio.init = function(config) {
   Studio.spriteFinishCount = 0;
   Studio.spriteCount = 0;
   Studio.sprite = [];
+  Studio.projectiles = [];
 
   // Locate the start and finish squares.
   for (var y = 0; y < Studio.ROWS; y++) {
@@ -4967,6 +8070,10 @@ Studio.init = function(config) {
 
   // Update the sprite count in the blocks:
   blocks.setSpriteCount(Blockly, Studio.spriteCount);
+
+  if (level.enableProjectileCollisions) {
+    blocks.enableProjectileCollisions(Blockly);
+  }
 
   BlocklyApps.init(config);
 
@@ -5021,6 +8128,12 @@ BlocklyApps.reset = function(first) {
     softButtonsCell.className = 'soft-buttons-' + softButtonCount;
   }
 
+  // Reset the dynamic sprites list
+  while (Studio.projectiles.length) {
+    var projectile = Studio.projectiles.pop();
+    projectile.removeElement();
+  }
+
   // Reset the score and title screen.
   Studio.playerScore = 0;
   Studio.opponentScore = 0;
@@ -5043,11 +8156,6 @@ BlocklyApps.reset = function(first) {
   // Reset the Globals object used to contain program variables:
   Studio.Globals = [];
 
-  var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
-                              "witch" ];
-  var numStartingSkins = spriteStartingSkins.length;
-  var skinBias = Studio.spriteStartingImage || 0;
-
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
@@ -5061,7 +8169,7 @@ BlocklyApps.reset = function(first) {
 
     var opts = {
         'index': i,
-        'value': spriteStartingSkins[(i + skinBias) % numStartingSkins]
+        'value': Studio.nthStartingSkin(i)
     };
     if (Studio.spritesHiddenToStart) {
       opts.forceHidden = true;
@@ -5185,9 +8293,9 @@ var registerHandlers =
     var block = blocks[x];
     if (block.type === blockName &&
         (!nameParam1 ||
-         matchParam1Val === parseInt(block.getTitleValue(nameParam1), 10)) &&
+         matchParam1Val === block.getTitleValue(nameParam1)) &&
         (!nameParam2 ||
-         matchParam2Val === parseInt(block.getTitleValue(nameParam2), 10))) {
+         matchParam2Val === block.getTitleValue(nameParam2))) {
       var code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
       if (code) {
         var func = codegen.functionFromCode(code, {
@@ -5214,9 +8322,20 @@ var registerHandlersWithSpriteParam =
   }
 };
 
+
 var registerHandlersWithSpriteParams =
       function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
-  for (var i = 0; i < Studio.spriteCount; i++) {
+  var i;
+  var registerHandlersForClassName = function (className) {
+    registerHandlers(handlers,
+                     blockName,
+                     eventNameBase,
+                     blockParam1,
+                     String(i),
+                     blockParam2,
+                     className);
+  };
+  for (i = 0; i < Studio.spriteCount; i++) {
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i === j) {
         continue;
@@ -5225,10 +8344,11 @@ var registerHandlersWithSpriteParams =
                        blockName,
                        eventNameBase,
                        blockParam1,
-                       i,
+                       String(i),
                        blockParam2,
-                       j);
+                       String(j));
     }
+    ProjectileClassNames.forEach(registerHandlersForClassName);
   }
 };
 
@@ -5290,7 +8410,7 @@ Studio.execute = function() {
                                    'SPRITE1',
                                    'SPRITE2');
 
-  BlocklyApps.playAudio('start', {volume: 0.5});
+  BlocklyApps.playAudio('start');
 
   BlocklyApps.reset(false);
 
@@ -5326,9 +8446,9 @@ Studio.onPuzzleComplete = function() {
   }
 
   if (Studio.testResults >= BlocklyApps.TestResults.FREE_PLAY) {
-    BlocklyApps.playAudio('win', {volume : 0.5});
+    BlocklyApps.playAudio('win');
   } else {
-    BlocklyApps.playAudio('failure', {volume : 0.5});
+    BlocklyApps.playAudio('failure');
   }
 
   if (level.editCode) {
@@ -5511,19 +8631,17 @@ Studio.displayScore = function() {
   score.setAttribute('visibility', 'visible');
 };
 
-var skinTheme = function (value) {
-  if (value === 'witch') {
-    return skin;
-  }
-  return skin[value];
-};
-
 Studio.queueCmd = function (id, name, opts) {
   var cmd = {
       'id': id,
       'name': name,
       'opts': opts,
   };
+  if (Studio.currentEventParams) {
+    for (var prop in Studio.currentEventParams) {
+      cmd.opts[prop] = Studio.currentEventParams[prop];
+    }
+  }
   Studio.currentCmdQueue.push(cmd);
 };
 
@@ -5580,7 +8698,7 @@ Studio.callCmd = function (cmd) {
       break;
     case 'playSound':
       BlocklyApps.highlight(cmd.id);
-      BlocklyApps.playAudio(cmd.opts.soundName, {volume: 0.5});
+      BlocklyApps.playAudio(cmd.opts.soundName);
       Studio.playSoundCount++;
       break;
     case 'showTitleScreen':
@@ -5600,6 +8718,14 @@ Studio.callCmd = function (cmd) {
     case 'stop':
       BlocklyApps.highlight(cmd.id);
       Studio.stop(cmd.opts);
+      break;
+    case 'throwProjectile':
+      BlocklyApps.highlight(cmd.id);
+      Studio.throwProjectile(cmd.opts);
+      break;
+    case 'makeProjectile':
+      BlocklyApps.highlight(cmd.id);
+      Studio.makeProjectile(cmd.opts);
       break;
     case 'incrementScore':
       BlocklyApps.highlight(cmd.id);
@@ -5643,7 +8769,7 @@ Studio.setScoreText = function (opts) {
 Studio.setBackground = function (opts) {
   var element = document.getElementById('background');
   element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-    skinTheme(opts.value).background);
+    skin[opts.value].background);
 };
 
 var computeSpriteFrameNums = function (index) {
@@ -5660,7 +8786,7 @@ Studio.setSprite = function (opts) {
   // Inherit some flags from the skin:
   if (opts.value !== 'hidden' && opts.value !== 'visible') {
     Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
-    Studio.sprite[opts.index].flags |= skinTheme(opts.value).spriteFlags;
+    Studio.sprite[opts.index].flags |= skin[opts.value].spriteFlags;
   }
   Studio.sprite[opts.index].value = opts.forceHidden ? 'hidden' : opts.value;
 
@@ -5670,7 +8796,7 @@ Studio.setSprite = function (opts) {
       (opts.value === 'hidden' || opts.forceHidden) ? 'hidden' : 'visible');
   if ((opts.value !== 'hidden') && (opts.value !== 'visible')) {
     element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-                           skinTheme(opts.value).sprite);
+                           skin[opts.value].sprite);
     element.setAttribute('width',
                          Studio.SPRITE_WIDTH * spriteTotalFrames(opts.index));
     computeSpriteFrameNums(opts.index);
@@ -5928,6 +9054,87 @@ Studio.stop = function (opts) {
   }
 };
 
+Studio.throwProjectile = function (opts) {
+  var optsInit = {
+    className: opts.className,
+    height: 50,
+    width: 50,
+    dir: opts.dir,
+    speed: tiles.DEFAULT_SPRITE_SPEED
+  };
+
+  var fromSprite = Studio.sprite[opts.spriteIndex];
+  optsInit.image = opts.className === "fireball" ? skin.goal : skin.goalSuccess;
+
+  // Choose point of origin based on direction
+  // assumes fromSprite is always 2x2 in size
+  // assumes projectile is always 1x1 in size
+  // fromSprite coords are left, top
+  // projectile coords are center, center
+  switch (opts.dir) {
+    case Direction.NORTH:
+      optsInit.x = fromSprite.x + 1;
+      optsInit.y = fromSprite.y - 0.5;
+      break;
+    case Direction.WEST:
+      optsInit.x = fromSprite.x - 0.5;
+      optsInit.y = fromSprite.y + 1;
+      break;
+    case Direction.SOUTH:
+      optsInit.x = fromSprite.x + 1;
+      optsInit.y = fromSprite.y + 2.5;
+      break;
+    case Direction.EAST:
+      optsInit.x = fromSprite.x + 2.5;
+      optsInit.y = fromSprite.y + 1;
+      break;
+  }
+
+  var projectile = new Sprite(optsInit);
+  projectile.createElement(document.getElementById('svgStudio'));
+  Studio.projectiles.push(projectile);
+};
+
+//
+// Internal helper to handle makeProjectile calls on a single projectile
+//
+// Return value: true if projectile was removed from the projectiles array
+//
+
+var doMakeProjectile = function (projectile, action) {
+  if (action === 'bounce') {
+    projectile.bounce();
+  } else if (action === 'disappear') {
+    projectile.removeElement();
+    var pos = Studio.projectiles.indexOf(projectile);
+    if (-1 !== pos) {
+      Studio.projectiles.splice(pos, 1);
+      return true;
+    }
+  } else {
+    throw "unknown action in doMakeProjectile";
+  }
+  return false;
+};
+
+Studio.makeProjectile = function (opts) {
+  if (opts.projectile) {
+    doMakeProjectile(opts.projectile, opts.action);
+  } else {
+    // No "current" projectile, so apply action to all of them of this class
+    for (var i = 0; i < Studio.projectiles.length; i++) {
+      if (Studio.projectiles[i].className === opts.className &&
+          doMakeProjectile(Studio.projectiles[i], opts.action)) {
+        // if this returned true, the projectile was deleted
+
+        // decrement i because we just removed an item from the array. We want
+        // to keep i as the same value for the next iteration through this loop
+        i--;
+      }
+    }
+  }
+};
+
 Studio.setSpritePosition = function (opts) {
   var sprite = Studio.sprite[opts.spriteIndex];
   var samePosition = (sprite.x === opts.x && sprite.y === opts.y);
@@ -6013,7 +9220,7 @@ Studio.allFinishesComplete = function() {
     }
     if (playSound && finished != Studio.spriteFinishCount) {
       // Play a sound unless we've hit the last flag
-      BlocklyApps.playAudio('flag', {volume: 0.5});
+      BlocklyApps.playAudio('flag');
     }
     return (finished == Studio.spriteFinishCount);
   }
@@ -6046,7 +9253,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/ro_ro/common":35,"../../locale/ro_ro/studio":36,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":10,"../templates/page.html":28,"./api":12,"./blocks":13,"./controls.html":14,"./extraControlRows.html":15,"./tiles":20,"./visualization.html":21}],20:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"../../locale/ro_ro/studio":38,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":11,"../templates/page.html":30,"./api":13,"./blocks":14,"./controls.html":15,"./extraControlRows.html":16,"./sprite":20,"./tiles":22,"./visualization.html":23}],22:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
@@ -6199,6 +9406,7 @@ exports.Emotions = {
 
 exports.FINISH_COLLIDE_DISTANCE = 1.5;
 exports.SPRITE_COLLIDE_DISTANCE = 1.8;
+exports.PROJECTILE_COLLIDE_DISTANCE = 1.3;
 exports.DEFAULT_SPRITE_SPEED = 0.1;
 
 /**
@@ -6212,7 +9420,7 @@ exports.SquareType = {
   SPRITESTART: 16,
 };
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6233,7 +9441,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":37}],22:[function(require,module,exports){
+},{"ejs":39}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6254,7 +9462,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":37}],23:[function(require,module,exports){
+},{"ejs":39}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6267,7 +9475,7 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/ro_ro/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  <button id="again-button" class="launch">\n    ', escape((14,  msg.tryAgain() )), '\n  </button>\n');16; }; buf.push('\n');17; if (data.nextLevel) {; buf.push('  <button id="continue-button" class="launch">\n    ', escape((18,  msg.continue() )), '\n  </button>\n');20; }; buf.push(''); })();
+ buf.push('');1; var msg = require('../../locale/ro_ro/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  ');13; if (data.isK1) {; buf.push('    <div id="again-button" class="launch arrow-container arrow-left">\n      <div class="arrow-head"><img src="', escape((14,  data.assetUrl('media/tryagain-arrow-head.png') )), '" alt="Arrowhead" width="67" height="130"/></div>\n      <div class="arrow-text">', escape((15,  msg.tryAgain() )), '</div>\n    </div>\n  ');17; } else {; buf.push('    <button id="again-button" class="launch">\n      ', escape((18,  msg.tryAgain() )), '\n    </button>\n  ');20; }; buf.push('');20; }; buf.push('\n');21; if (data.nextLevel) {; buf.push('  ');21; if (data.isK1) {; buf.push('    <div id="continue-button" class="launch arrow-container arrow-right">\n      <div class="arrow-head"><img src="', escape((22,  data.assetUrl('media/next-arrow-head.png') )), '" alt="Arrowhead" width="66" height="130"/></div>\n      <div class="arrow-text">', escape((23,  msg.continue() )), '</div>\n    </div>\n  ');25; } else {; buf.push('    <button id="continue-button" class="launch">\n      ', escape((26,  msg.continue() )), '\n    </button>\n  ');28; }; buf.push('');28; }; buf.push(''); })();
 } 
 return buf.join('');
 };
@@ -6275,7 +9483,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/common":35,"ejs":37}],24:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"ejs":39}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6296,7 +9504,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":37}],25:[function(require,module,exports){
+},{"ejs":39}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6317,7 +9525,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/common":35,"ejs":37}],26:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"ejs":39}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6340,7 +9548,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/common":35,"ejs":37}],27:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"ejs":39}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6361,7 +9569,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/common":35,"ejs":37}],28:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"ejs":39}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6386,7 +9594,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/common":35,"ejs":37}],29:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"ejs":39}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6408,7 +9616,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":37}],30:[function(require,module,exports){
+},{"ejs":39}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6429,7 +9637,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/common":35,"ejs":37}],31:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"ejs":39}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6450,7 +9658,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ro_ro/common":35,"ejs":37}],32:[function(require,module,exports){
+},{"../../locale/ro_ro/common":37,"ejs":39}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6471,7 +9679,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":37}],33:[function(require,module,exports){
+},{"ejs":39}],35:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -6564,30 +9772,15 @@ exports.executeIfConditional = function (conditional, fn) {
 };
 
 /**
- * From underscore.js. Returns a function, that, as long as it continues to be invoked before the wait time,
- * will not be triggered. To use for a button to prevent double-clicks, for example,
- *  `var debouncedOnClick = utils.debounce(onClick, 1000, true);`
- * @param func function to run
- * @param wait time to require waiting before subsequent calls
- * @param immediate trigger the function call on the leading edge (immediately)
- * @returns {Function}
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
  */
-exports.debounce = function(func, wait, immediate) {
-  var timeout;
-  return function() {
-    var context = this, args = arguments;
-    var later = function() {
-      timeout = null;
-      if (!immediate) func.apply(context, args);
-    };
-    var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context, args);
-  };
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
 };
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -6615,7 +9808,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ro = function (n) {
   if (n == 1) {
     return 'one';
@@ -6767,7 +9960,7 @@ exports.signup = function(d){return "Înscrie-te la cursul introductiv"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":48}],36:[function(require,module,exports){
+},{"messageformat":50}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ro = function (n) {
   if (n == 1) {
     return 'one';
@@ -6805,6 +9998,16 @@ exports.incrementOpponentScore = function(d){return "increment opponent score"};
 exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
 
 exports.incrementPlayerScore = function(d){return "increment player score"};
+
+exports.makeProjectileDisappear = function(d){return "disappear"};
+
+exports.makeProjectileBounce = function(d){return "bounce"};
+
+exports.makeProjectileFireball = function(d){return "make fireball"};
+
+exports.makeProjectileFlower = function(d){return "make flower"};
+
+exports.makeProjectileTooltip = function(d){return "Make the projectile that just collided disappear or bounce."};
 
 exports.makeYourOwn = function(d){return "Make Your Own Story"};
 
@@ -6920,6 +10123,12 @@ exports.positionBottomRight = function(d){return "to the bottom right position"}
 
 exports.positionRandom = function(d){return "to the random position"};
 
+exports.projectileFireball = function(d){return "fireball"};
+
+exports.projectileFlower = function(d){return "flower"};
+
+exports.projectileRandom = function(d){return "random"};
+
 exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
 
 exports.repeatForever = function(d){return "repeat forever"};
@@ -6945,6 +10154,8 @@ exports.saySprite6 = function(d){return "character 6 say"};
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+
+exports.setBackground = function(d){return "set background"};
 
 exports.setBackgroundRandom = function(d){return "set random scene"};
 
@@ -7078,6 +10289,22 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
+exports.throwSprite = function(d){return "throw"};
+
+exports.throwSprite1 = function(d){return "actor 1 throw"};
+
+exports.throwSprite2 = function(d){return "actor 2 throw"};
+
+exports.throwSprite3 = function(d){return "actor 3 throw"};
+
+exports.throwSprite4 = function(d){return "actor 4 throw"};
+
+exports.throwSprite5 = function(d){return "actor 5 throw"};
+
+exports.throwSprite6 = function(d){return "actor 6 throw"};
+
+exports.throwTooltip = function(d){return "Throws a projectile from the specified actor."};
+
 exports.waitFor = function(d){return "wait for"};
 
 exports.waitSeconds = function(d){return "seconds"};
@@ -7146,6 +10373,8 @@ exports.whenSpriteCollided6 = function(d){return "when character 6"};
 
 exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
 
+exports.whenSpriteCollidedWith = function(d){return "touches"};
+
 exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
 
 exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
@@ -7158,6 +10387,10 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
+exports.whenSpriteCollidedWithFireball = function(d){return "touches fireball"};
+
+exports.whenSpriteCollidedWithFlower = function(d){return "touches flower"};
+
 exports.whenUp = function(d){return "cand sageata in sus"};
 
 exports.whenUpTooltip = function(d){return "Executa actiunile de mai jos atunci cand tasta sageata in sus este apasata."};
@@ -7165,7 +10398,7 @@ exports.whenUpTooltip = function(d){return "Executa actiunile de mai jos atunci 
 exports.yes = function(d){return "Da"};
 
 
-},{"messageformat":48}],37:[function(require,module,exports){
+},{"messageformat":50}],39:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7524,7 +10757,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":38,"./utils":39,"fs":40,"path":42}],38:[function(require,module,exports){
+},{"./filters":40,"./utils":41,"fs":42,"path":44}],40:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -7727,7 +10960,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 
 /*!
  * EJS
@@ -7753,9 +10986,9 @@ exports.escape = function(html){
 };
  
 
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7810,7 +11043,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],42:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8038,7 +11271,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":41}],43:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":43}],45:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -8549,7 +11782,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],44:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8635,7 +11868,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8722,13 +11955,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":44,"./encode":45}],47:[function(require,module,exports){
+},{"./decode":46,"./encode":47}],49:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -9361,7 +12594,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":43,"querystring":46}],48:[function(require,module,exports){
+},{"punycode":45,"querystring":48}],50:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -10944,4 +14177,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[17])
+},{}]},{},[18])

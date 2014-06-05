@@ -377,6 +377,7 @@ html, body {
 
 #locale {
   font-family: sans-serif;
+  height: 24px;
 }
 
 .header_separator {
@@ -1105,6 +1106,12 @@ a.download-video {
     margin-left:0px;
     .emptyslot {
       background-color: #eee;
+      .giantmark {
+        .text {
+          opacity: 0.8;
+          font-weight: 500;
+        }
+      }
     }
     .active {
       background-color: lightyellow;
@@ -1197,10 +1204,10 @@ div.gallery_activity {
 
 .multi {
   .mainblock {
-    margin-left: 20px;
+    margin-left: 0px;
   }
   .item {
-    padding: 25px;
+    padding: 10px;
     float: left;
   }
   input {
@@ -1224,7 +1231,7 @@ div.gallery_activity {
 
 .match {
   .mainblock {
-    margin-left: 20px; 
+    margin-left: 0px; 
   }
   .column {
     width: 260px; 

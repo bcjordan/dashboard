@@ -365,6 +365,15 @@ input[type="radio"] {
 
 .blocklyRectangularDropdownMenu .goog-menuitem-highlight, .blocklyRectangularDropdownMenu .goog-menuitem-hover {
   background-color: rgba(255, 255, 255, 0.35); }
+.blocklyRectangularDropdownMenu.blocklyGridDropdownMenu {
+  background-color: white !important;
+  padding-top: 5px !important; }
+  .blocklyRectangularDropdownMenu.blocklyGridDropdownMenu .goog-menuitem {
+    display: inline-block;
+    margin-left: 4px;
+    margin-top: 4px; }
+  .blocklyRectangularDropdownMenu.blocklyGridDropdownMenu .goog-menuitem-highlight, .blocklyRectangularDropdownMenu.blocklyGridDropdownMenu .goog-menuitem-hover {
+    margin: -4px -4px 0 0 !important; }
 
 .generated-code-container {
   margin-top: 10px; }
@@ -446,41 +455,58 @@ input[type="radio"] {
   color: white;
   min-width: 100px; }
 
-#again-button {
+.arrow-container {
+  clear: left;
+  background-color: white !important; }
+
+.arrow-container.arrow-left {
+  float: left; }
+
+.arrow-container.arrow-right {
+  float: right; }
+
+.arrow-head, .arrow-text {
+  float: left;
+  line-height: normal;
+  margin-bottom: 25px;
+  cursor: pointer; }
+
+.arrow-right .arrow-head {
+  float: right; }
+
+.arrow-left .arrow-head {
+  margin-right: -10px; }
+
+.arrow-left .arrow-text {
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px 10px 0;
+  background-color: #babf33; }
+
+.arrow-right .arrow-text {
+  margin-right: -10px;
+  border-radius: 8px 0 0 8px;
+  padding: 10px 0 10px 14px;
+  background-color: #ffbb00; }
+
+.arrow-text {
+  color: white;
+  font-size: 35px;
+  margin-top: 35px;
+  height: 44px; }
+
+#again-button:not(.arrow-container) {
   background-color: #b9bf15;
   border: 1px solid #b9bf15;
   color: white;
   margin-left: 0px;
   margin-right: 10px; }
-  .k1 #again-button {
-    text-align: center;
-    border: none;
-    background: white url("/blockly/media/common_images/tryagain-button-arrow.png");
-    width: 204px;
-    height: 118px;
-    font-size: 27px; }
-    .k1 #again-button:hover {
-      box-shadow: none; }
-  .k1 #again-button {
-    text-align: right; }
 
-#continue-button {
+#continue-button:not(.arrow-container) {
   background-color: #ffa400;
   border: 1px solid #ffa400;
   color: white;
   margin-left: 0px;
   margin-right: 10px; }
-  .k1 #continue-button {
-    text-align: center;
-    border: none;
-    background: white url("/blockly/media/common_images/next-button-arrow.png");
-    width: 171px;
-    height: 118px;
-    font-size: 27px; }
-    .k1 #continue-button:hover {
-      box-shadow: none; }
-  .k1 #continue-button {
-    text-align: left; }
 
 #save-to-gallery-button {
   background-color: #7665a0;

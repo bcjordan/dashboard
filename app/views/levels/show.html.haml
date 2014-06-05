@@ -1,5 +1,4 @@
-- @page_title = "#{data_t('game.name', @game.name)} ##{@script_level.try(:game_chapter) || @level.level_num} "
-
+- @page_title = level_title
 - content_for :head do
   - if @game.share_mobile_fullscreen?
     = tag('meta', :property => 'og:image', :content => show_image(:app => @game.app))

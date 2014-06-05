@@ -83,11 +83,13 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "can create a user with age" do
-    assert_difference('User.count') do
-      user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
+    Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
+      assert_difference('User.count') do
+        user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
       
-      assert_equal Date.new(Date.today.year - 7, Date.today.month, Date.today.day), user.birthday
-      assert_equal 7, user.age
+        assert_equal Date.new(Date.today.year - 7, Date.today.month, Date.today.day), user.birthday
+        assert_equal 7, user.age
+      end
     end
   end
 
@@ -109,12 +111,14 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "can update a user with age" do
-    user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
-    assert_equal 7, user.age
+    Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
+      user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
+      assert_equal 7, user.age
 
-    user.update_attributes(age: '9')
-    assert_equal Date.new(Date.today.year - 9, Date.today.month, Date.today.day), user.birthday
-    assert_equal 9, user.age
+      user.update_attributes(age: '9')
+      assert_equal Date.new(Date.today.year - 9, Date.today.month, Date.today.day), user.birthday
+      assert_equal 9, user.age
+    end
   end
 
   test "does not update birthday if age is the same" do
@@ -189,6 +193,20 @@ class UserTest < ActiveSupport::TestCase
     assert_equal '樊瑞', create(:user, :name => '樊瑞').short_name # ok, this isn't actually right but ok for now
     assert_equal 'Laurel', create(:user, :name => 'Laurel').short_name # just one name
     assert_equal 'some', create(:user, :name => '  some whitespace in front  ').short_name # whitespace in front
+  end
+
+  test "cannot call find_first_by_auth_conditions with nonsense" do
+    # login by username still works
+    user = create :user, username: 'blahblah'
+    assert_equal user, User.find_first_by_auth_conditions(login: 'blahblah')
+
+    # login by email still works
+    email_user = create :user, username: 'blahblah2', email: 'not@an.email'
+    assert_equal email_user, User.find_first_by_auth_conditions(login: 'not@an.email')
+
+    # wat you can't do that hax0rs
+    assert_equal nil, User.find_first_by_auth_conditions(email: {'$acunetix' => 1})
+    # this used to raise a mysql error, now we sanitize it into a nonsense string
   end
 
 end
