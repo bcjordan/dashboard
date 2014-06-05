@@ -60,6 +60,7 @@ en:
         'events':
           desc: 'Bounce (beta)'
           'Bounce': 'Stage 1'
+          'Studio': 'Stage 2'
         'builder':
           desc: 'User-Created Puzzles (beta)'
           'Custom': 'Stage 1'
