@@ -68,6 +68,7 @@ class ApplicationController < ActionController::Base
   end
 
   def get_crowdsourced_hint (options)
+    crowdsourced_hint = nil
     # Check if the current level_source has program specific hint, use it if use is set.
     if options[:level_source]
       experiment_hints = []
@@ -91,13 +92,15 @@ class ApplicationController < ActionController::Base
   end
 
   def get_best_next_hint (options)
+    best_next_hint = nil
     if options[:level_source]
       options[:level_source].level_source_hints.each do |level_source_hint|
-        if level_source_hint.hint_id
-          Hint.find(level_source_hint.hint_id).message
+        if level_source_hint.hint_id && Hint.find(level_source_hint.hint_id)
+          best_next_hint = Hint.find(level_source_hint.hint_id).message
         end
       end
     end
+    best_next_hint
   end
 
   def milestone_response(options)
@@ -133,14 +136,16 @@ class ApplicationController < ActionController::Base
     if current_user
       case current_user.id % ExperimentActivity::TYPES_FEEDBACK_SOURCES.length
         when ExperimentActivity::TYPE_FEEDBACK_CROWDSOURCED
-          response[:hint] = get_crowdsourced_hint(options)
+          hint = get_crowdsourced_hint(options)
         when ExperimentActivity::TYPE_FEEDBACK_BEST_NEXT
-          response[:hint] = get_best_next_hint(options)
+          hint = get_best_next_hint(options)
       end
     else
       # Un-logged in users receive crowdsoruced hints and best_next hints if available
-      response[:hint] = get_crowdsourced_hint(options) || get_best_next_hint(options)
+      hint = get_crowdsourced_hint(options) || get_best_next_hint(options)
     end
+
+    response[:hint] = hint if hint
 
     # Record this activity only if we are in experimental mode
     if ActivityHint.is_experimenting_feedback? && response[:hint] && options[:activity]
