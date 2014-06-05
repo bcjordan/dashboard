@@ -9,3 +9,7 @@ en:
         Milestone Script:
           Milestone Stage 1: milestone-stage-1
           Milestone Stage 2: milestone-stage-2
+        laurel:
+          desc: custom-script-laurel
+          Laurel Stage 1: laurel-stage-1
+          Laurel Stage 2: laurel-stage-2

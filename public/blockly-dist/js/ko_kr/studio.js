@@ -82,7 +82,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":34}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":35}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -462,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -908,7 +910,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/ko_kr/common":36,"./builder":5,"./dom":7,"./feedback.js":8,"./lodash":9,"./slider":12,"./templates/buttons.html":24,"./templates/instructions.html":26,"./templates/learn.html":27,"./templates/makeYourOwn.html":28,"./utils":34,"./xml":35}],3:[function(require,module,exports){
+},{"../locale/ko_kr/common":37,"./builder":5,"./dom":7,"./feedback.js":8,"./lodash":9,"./slider":12,"./templates/buttons.html":25,"./templates/instructions.html":27,"./templates/learn.html":28,"./templates/makeYourOwn.html":29,"./utils":35,"./xml":36}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -995,7 +997,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":35}],4:[function(require,module,exports){
+},{"./xml":36}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1058,7 +1060,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":23,"./utils.js":34,"url":48}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":24,"./utils.js":35,"url":49}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
@@ -1268,8 +1270,13 @@ exports.displayFeedback = function(options) {
     feedback.className += " k1";
   }
 
-  feedback.appendChild(getFeedbackButtons(
-    options.feedbackType, options.level.showPreviousLevelButton));
+  feedback.appendChild(
+    getFeedbackButtons({
+      feedbackType: options.feedbackType,
+      showPreviousButton: options.level.showPreviousLevelButton,
+      isK1: options.level.is_k1
+    })
+  );
 
   var againButton = feedback.querySelector('#again-button');
   var previousLevelButton = feedback.querySelector('#back-button');
@@ -1399,16 +1406,18 @@ exports.getNumEnabledBlocks = function() {
   return getEnabledBlocks().length;
 };
 
-var getFeedbackButtons = function(feedbackType, showPreviousLevelButton) {
+var getFeedbackButtons = function(options) {
   var buttons = document.createElement('div');
   buttons.id = 'feedbackButtons';
   buttons.innerHTML = require('./templates/buttons.html')({
     data: {
       previousLevel:
-        !exports.canContinueToNextLevel(feedbackType) &&
-        showPreviousLevelButton,
-      tryAgain: feedbackType !== BlocklyApps.TestResults.ALL_PASS,
-      nextLevel: exports.canContinueToNextLevel(feedbackType)
+        !exports.canContinueToNextLevel(options.feedbackType) &&
+        options.showPreviousButton,
+      tryAgain: options.feedbackType !== BlocklyApps.TestResults.ALL_PASS,
+      nextLevel: exports.canContinueToNextLevel(options.feedbackType),
+      isK1: options.isK1,
+      assetUrl: BlocklyApps.assetUrl
     }
   });
 
@@ -1964,12 +1973,12 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/ko_kr/common":36,"./codegen":6,"./dom":7,"./templates/buttons.html":24,"./templates/code.html":25,"./templates/readonly.html":30,"./templates/sharing.html":31,"./templates/showCode.html":32,"./templates/trophy.html":33,"./utils":34}],9:[function(require,module,exports){
+},{"../locale/ko_kr/common":37,"./codegen":6,"./dom":7,"./templates/buttons.html":25,"./templates/code.html":26,"./templates/readonly.html":31,"./templates/sharing.html":32,"./templates/showCode.html":33,"./templates/trophy.html":34,"./utils":35}],9:[function(require,module,exports){
 (function (global){
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash include="debounce,reject,map,range,value,without" --output build/js/lodash.js`
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample" --output build/js/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -2310,6 +2319,7 @@ var generateXMLForBlocks = function(blocks) {
 
   /** Native method shortcuts */
   var ceil = Math.ceil,
+      floor = Math.floor,
       fnToString = Function.prototype.toString,
       hasOwnProperty = objectProto.hasOwnProperty,
       push = arrayRef.push,
@@ -2331,7 +2341,9 @@ var generateXMLForBlocks = function(blocks) {
   var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate,
       nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray,
       nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys,
-      nativeMax = Math.max;
+      nativeMax = Math.max,
+      nativeMin = Math.min,
+      nativeRandom = Math.random;
 
   /** Used to avoid iterating non-enumerable properties in IE < 9 */
   var nonEnumProps = {};
@@ -3048,6 +3060,19 @@ var generateXMLForBlocks = function(blocks) {
   }
 
   /**
+   * The base implementation of `_.random` without argument juggling or support
+   * for returning floating-point numbers.
+   *
+   * @private
+   * @param {number} min The minimum possible value.
+   * @param {number} max The maximum possible value.
+   * @returns {number} Returns a random number.
+   */
+  function baseRandom(min, max) {
+    return min + floor(nativeRandom() * (max - min + 1));
+  }
+
+  /**
    * Creates a function that, when called, either curries or invokes `func`
    * with an optional `this` binding and partially applied arguments.
    *
@@ -3488,6 +3513,31 @@ var generateXMLForBlocks = function(blocks) {
       value && typeof value == 'object' && toString.call(value) == stringClass || false;
   }
 
+  /**
+   * Creates an array composed of the own enumerable property values of `object`.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property values.
+   * @example
+   *
+   * _.values({ 'one': 1, 'two': 2, 'three': 3 });
+   * // => [1, 2, 3] (property order is not guaranteed across environments)
+   */
+  function values(object) {
+    var index = -1,
+        props = keys(object),
+        length = props.length,
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = object[props[index]];
+    }
+    return result;
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -3696,6 +3746,66 @@ var generateXMLForBlocks = function(blocks) {
     return filter(collection, function(value, index, collection) {
       return !callback(value, index, collection);
     });
+  }
+
+  /**
+   * Retrieves a random element or `n` random elements from a collection.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to sample.
+   * @param {number} [n] The number of elements to sample.
+   * @param- {Object} [guard] Allows working with functions like `_.map`
+   *  without using their `index` arguments as `n`.
+   * @returns {Array} Returns the random sample(s) of `collection`.
+   * @example
+   *
+   * _.sample([1, 2, 3, 4]);
+   * // => 2
+   *
+   * _.sample([1, 2, 3, 4], 2);
+   * // => [3, 1]
+   */
+  function sample(collection, n, guard) {
+    if (collection && typeof collection.length != 'number') {
+      collection = values(collection);
+    } else if (support.unindexedChars && isString(collection)) {
+      collection = collection.split('');
+    }
+    if (n == null || guard) {
+      return collection ? collection[baseRandom(0, collection.length - 1)] : undefined;
+    }
+    var result = shuffle(collection);
+    result.length = nativeMin(nativeMax(0, n), result.length);
+    return result;
+  }
+
+  /**
+   * Creates an array of shuffled values, using a version of the Fisher-Yates
+   * shuffle. See http://en.wikipedia.org/wiki/Fisher-Yates_shuffle.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to shuffle.
+   * @returns {Array} Returns a new shuffled collection.
+   * @example
+   *
+   * _.shuffle([1, 2, 3, 4, 5, 6]);
+   * // => [4, 1, 6, 3, 5, 2]
+   */
+  function shuffle(collection) {
+    var index = -1,
+        length = collection ? collection.length : 0,
+        result = Array(typeof length == 'number' ? length : 0);
+
+    forEach(collection, function(value) {
+      var rand = baseRandom(0, ++index);
+      result[index] = result[rand];
+      result[rand] = value;
+    });
+    return result;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -4374,6 +4484,8 @@ var generateXMLForBlocks = function(blocks) {
   lodash.property = property;
   lodash.range = range;
   lodash.reject = reject;
+  lodash.shuffle = shuffle;
+  lodash.values = values;
   lodash.without = without;
 
   // add aliases
@@ -4410,6 +4522,8 @@ var generateXMLForBlocks = function(blocks) {
   }(), false);
 
   /*--------------------------------------------------------------------------*/
+
+  lodash.sample = sample;
 
   forOwn(lodash, function(func, methodName) {
     var callbackable = methodName !== 'sample';
@@ -4647,7 +4761,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":34,"./xml":35}],11:[function(require,module,exports){
+},{"./block_utils":3,"./utils":35,"./xml":36}],11:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -4671,18 +4785,18 @@ exports.load = function(assetUrl, id) {
     winAvatar: skinUrl('win_avatar.png'),
     failureAvatar: skinUrl('failure_avatar.png'),
     repeatImage: assetUrl('media/common_images/repeat-arrows.png'),
-    leftArrow: assetUrl('media/common_images/move-west-arrow.png'),
-    downArrow: assetUrl('media/common_images/move-south-arrow.png'),
-    upArrow: assetUrl('media/common_images/move-north-arrow.png'),
-    rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftArrow: assetUrl('media/common_images/moveleft.png'),
+    downArrow: assetUrl('media/common_images/movedown.png'),
+    upArrow: assetUrl('media/common_images/moveup.png'),
+    rightArrow: assetUrl('media/common_images/moveright.png'),
     leftArrowSmall: assetUrl('media/common_images/draw-west-arrow.png'),
     downArrowSmall: assetUrl('media/common_images/draw-south-arrow.png'),
     upArrowSmall: assetUrl('media/common_images/draw-north-arrow.png'),
     rightArrowSmall: assetUrl('media/common_images/draw-east-arrow.png'),
-    leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
-    downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
-    upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
-    rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
+    leftJumpArrow: assetUrl('media/common_images/jumpleft.png'),
+    downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
+    upJumpArrow: assetUrl('media/common_images/jumpup.png'),
+    rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
@@ -4966,6 +5080,20 @@ exports.stop = function(id, spriteIndex) {
   Studio.queueCmd(id, 'stop', {'spriteIndex': spriteIndex});
 };
 
+exports.throwProjectile = function(id, spriteIndex, dir, className) {
+  Studio.queueCmd(id,
+                  'throwProjectile',
+                  {'spriteIndex': spriteIndex,
+                   'dir': dir,
+                   'className': className});
+};
+
+exports.makeProjectile = function(id, className, action) {
+  Studio.queueCmd(id,
+                  'makeProjectile',
+                  {'className': className, 'action': action});
+};
+
 exports.move = function(id, spriteIndex, dir) {
   Studio.queueCmd(id, 'move', {'spriteIndex': spriteIndex, 'dir': dir});
 };
@@ -4989,7 +5117,7 @@ exports.wait = function(id, value) {
   Studio.queueCmd(id, 'wait', {'value': value});
 };
 
-},{"./tiles":21}],14:[function(require,module,exports){
+},{"./tiles":22}],14:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -5003,6 +5131,7 @@ var commonMsg = require('../../locale/ko_kr/common');
 var codegen = require('../codegen');
 var tiles = require('./tiles');
 var studio = require('./studio');
+var utils = require('../utils');
 var _ = require('../lodash');
 
 var Direction = tiles.Direction;
@@ -5032,6 +5161,10 @@ exports.setSpriteCount = function(blockly, count) {
   blockly.Blocks.studio_spriteCount = count;
 };
 
+exports.enableProjectileCollisions = function(blockly) {
+  blockly.Blocks.studio_projectileCollisions = true;
+};
+
 // Install extensions to Blockly's language and JavaScript generator.
 exports.install = function(blockly, blockInstallOptions) {
   var skin = blockInstallOptions.skin;
@@ -5044,6 +5177,7 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_spriteCount = 6; // will be overridden
+  blockly.Blocks.studio_projectileCollisions = false;
 
   /**
    * Creates a dropdown with options for each sprite number
@@ -5062,9 +5196,13 @@ exports.install = function(blockly, blockInstallOptions) {
   function startingSpriteImageDropdown() {
     var spriteNumbers = _.range(0, blockly.Blocks.studio_spriteCount);
     var choices = _.map(spriteNumbers, function (index) {
-        return [ skin[studio.nthStartingSkin(index)].dropdownThumbnail, index.toString() ];
+        return [ skin[studio.nthStartingSkin(index)].dropdownThumbnail,
+                 index.toString() ];
     });
-    return new blockly.FieldImageDropdown(choices, skin.dropdownThumbnailWidth, skin.dropdownThumbnailHeight);
+    return new blockly.FieldImageDropdown(
+                        choices,
+                        skin.dropdownThumbnailWidth,
+                        skin.dropdownThumbnailHeight);
   }
 
   blockly.Blocks.studio_whenLeft = {
@@ -5202,6 +5340,7 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(140, 1.00, 0.74);
 
       if (isK1) {
+        // NOTE: K1 block does not yet support projectile collisions
         dropdown1 = startingSpriteImageDropdown();
         dropdown2 = startingSpriteImageDropdown();
         this.appendDummyInput().appendTitle(commonMsg.when())
@@ -5210,7 +5349,15 @@ exports.install = function(blockly, blockInstallOptions) {
           .appendTitle(dropdown2, 'SPRITE2');
       } else {
         dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
-        dropdown2 = spriteNumberTextDropdown(this.SPRITE2);
+        var dropdownArray2 =
+            this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
+        if (blockly.Blocks.studio_projectileCollisions) {
+          dropdownArray2.push(
+              [msg.whenSpriteCollidedWithFireball(), 'fireball']);
+          dropdownArray2.push(
+              [msg.whenSpriteCollidedWithFlower(), 'flower']);
+        }
+        dropdown2 = new blockly.FieldDropdown(dropdownArray2);
         this.appendDummyInput().appendTitle(dropdown1, 'SPRITE1');
         this.appendDummyInput().appendTitle(dropdown2, 'SPRITE2');
       }
@@ -5276,6 +5423,110 @@ exports.install = function(blockly, blockInstallOptions) {
     // Generate JavaScript for stopping the movement of a sprite.
     return 'Studio.stop(\'block_id_' + this.id + '\', ' +
         (this.getTitleValue('SPRITE') || '0') + ');\n';
+  };
+
+  blockly.Blocks.studio_throw = {
+    // Block for throwing a projectile from a sprite.
+    helpUrl: '',
+    init: function() {
+      var dropdownArray =
+          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
+      this.setHSV(184, 1.00, 0.74);
+      if (blockly.Blocks.studio_spriteCount > 1) {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.throwSprite());
+      }
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      this.appendDummyInput()
+        .appendTitle('\t');
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+      this.setPreviousStatement(true);
+      this.setInputsInline(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.throwTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_throw.SPRITE =
+      [[msg.throwSprite1(), '0'],
+       [msg.throwSprite2(), '1'],
+       [msg.throwSprite3(), '2'],
+       [msg.throwSprite4(), '3'],
+       [msg.throwSprite5(), '4'],
+       [msg.throwSprite6(), '5']];
+
+  blockly.Blocks.studio_throw.DIR =
+        [[msg.moveDirectionUp(), Direction.NORTH.toString()],
+         [msg.moveDirectionDown(), Direction.SOUTH.toString()],
+         [msg.moveDirectionLeft(), Direction.WEST.toString()],
+         [msg.moveDirectionRight(), Direction.EAST.toString()],
+         [msg.moveDirectionRandom(), 'random']];
+
+  blockly.Blocks.studio_throw.VALUES =
+        [[msg.projectileFireball(), '"fireball"'],
+         [msg.projectileFlower(), '"flower"'],
+         [msg.projectileRandom(), 'random']];
+
+  generator.studio_throw = function() {
+    // Generate JavaScript for throwing a projectile from a sprite.
+    var allDirections = this.DIR.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var dirParam = this.getTitleValue('DIR');
+    if (dirParam === 'random') {
+      dirParam = 'Studio.random([' + allDirections + '])';
+    }
+    var allValues = this.VALUES.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var valParam = this.getTitleValue('VALUE');
+    if (valParam === 'random') {
+      valParam = 'Studio.random([' + allValues + '])';
+    }
+
+    return 'Studio.throwProjectile(\'block_id_' + this.id +
+        '\', ' +
+        (this.getTitleValue('SPRITE') || '0') + ', ' +
+        dirParam + ', ' +
+        valParam + ');\n';
+  };
+
+  blockly.Blocks.studio_makeProjectile = {
+    // Block for making a projectile bounce or disappear.
+    helpUrl: '',
+    init: function() {
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      this.appendDummyInput()
+        .appendTitle('\t');
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.ACTIONS), 'ACTION');
+      this.setPreviousStatement(true);
+      this.setInputsInline(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.makeProjectileTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_makeProjectile.VALUES =
+      [[msg.makeProjectileFireball(), '"fireball"'],
+       [msg.makeProjectileFlower(), '"flower"']];
+
+  blockly.Blocks.studio_makeProjectile.ACTIONS =
+        [[msg.makeProjectileBounce(), '"bounce"'],
+         [msg.makeProjectileDisappear(), '"disappear"']];
+
+  generator.studio_makeProjectile = function() {
+    // Generate JavaScript for making a projectile bounce or disappear.
+    return 'Studio.makeProjectile(\'block_id_' + this.id + '\', ' +
+        this.getTitleValue('VALUE') + ', ' +
+        this.getTitleValue('ACTION') + ');\n';
   };
 
   blockly.Blocks.studio_setSpritePosition = {
@@ -5493,13 +5744,20 @@ exports.install = function(blockly, blockInstallOptions) {
         distParam + ');\n';
   };
 
+  function onSoundSelected(soundValue) {
+    if (soundValue === RANDOM_VALUE) {
+      return;
+    }
+    BlocklyApps.playAudio(utils.stripQuotes(soundValue));
+  }
+
   blockly.Blocks.studio_playSound = {
     // Block for playing sound.
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.SOUNDS), 'SOUND');
+          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected), 'SOUND');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
@@ -6008,7 +6266,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/ko_kr/common":36,"../../locale/ko_kr/studio":37,"../codegen":6,"../lodash":9,"./studio":20,"./tiles":21}],15:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"../../locale/ko_kr/studio":38,"../codegen":6,"../lodash":9,"../utils":35,"./studio":21,"./tiles":22}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6029,7 +6287,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/studio":37,"ejs":38}],16:[function(require,module,exports){
+},{"../../locale/ko_kr/studio":38,"ejs":39}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6050,7 +6308,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/studio":37,"ejs":38}],17:[function(require,module,exports){
+},{"../../locale/ko_kr/studio":38,"ejs":39}],17:[function(require,module,exports){
 /*jshint multistr: true */
 
 var msg = require('../../locale/ko_kr/studio');
@@ -6510,6 +6768,7 @@ module.exports = {
       'upButton'
     ],
     'minWorkspaceHeight': 1300,
+    'enableProjectileCollisions': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -6542,6 +6801,8 @@ module.exports = {
          blockOfType('studio_incrementScore') +
          blockOfType('studio_saySprite') +
          blockOfType('studio_setSpritePosition') +
+         blockOfType('studio_throw') +
+         blockOfType('studio_makeProjectile') +
          blockOfType('studio_setSpriteSpeed') +
          blockOfType('studio_setSpriteEmotion')),
     'startBlocks':
@@ -6560,6 +6821,7 @@ module.exports = {
       'upButton'
     ],
     'minWorkspaceHeight': 1000,
+    'enableProjectileCollisions': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -6599,6 +6861,8 @@ module.exports = {
                           <value name="TEXT"><block type="text"></block> \
                           </value></block>' +
                           blockOfType('studio_setSpritePosition') +
+                          blockOfType('studio_throw') +
+                          blockOfType('studio_makeProjectile') +
                           blockOfType('studio_setSpriteSpeed') +
                           blockOfType('studio_setSpriteEmotion')) +
          createCategory(msg.catEvents(),
@@ -6691,7 +6955,7 @@ module.exports.k1_7 = utils.extend(module.exports['9'],  {'is_k1': true});
 module.exports.k1_8 = utils.extend(module.exports['10'], {'is_k1': true});
 module.exports.k1_11 = utils.extend(module.exports['13'], {'is_k1': true});
 
-},{"../../locale/ko_kr/studio":37,"../block_utils":3,"../utils":34,"./tiles":21}],18:[function(require,module,exports){
+},{"../../locale/ko_kr/studio":38,"../block_utils":3,"../utils":35,"./tiles":22}],18:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Studio = require('./studio');
@@ -6709,7 +6973,7 @@ window.studioMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":14,"./levels":17,"./skins":19,"./studio":20}],19:[function(require,module,exports){
+},{"../appMain":1,"./blocks":14,"./levels":17,"./skins":19,"./studio":21}],19:[function(require,module,exports){
 /**
  * Load Skin for Studio.
  */
@@ -6837,6 +7101,152 @@ exports.load = function(assetUrl, id) {
 
 'use strict';
 
+var Studio = require('./studio');
+var tiles = require('./tiles');
+var Direction = tiles.Direction;
+
+//
+// Sprite constructor (currently used for Studio projectiles only)
+//
+// opts.image (URL)
+// opts.width (pixels)
+// opts.height (pixels)
+// opts.x (x position)
+// opts.y (y position)
+// opts.dir (direction)
+// opts.speed (speed)
+//
+
+exports.Sprite = function (opts) {
+  for (var prop in opts) {
+    this[prop] = opts[prop];
+  }
+  this.flags = 0;
+  this.collisionMask = 0;
+  this.widthCoord = this.width / Studio.SQUARE_SIZE;
+  this.heightCoord = this.height / Studio.SQUARE_SIZE;
+};
+
+exports.Sprite.prototype.createElement = function (parentElement) {
+  this.element = document.createElementNS(Blockly.SVG_NS, 'image');
+  this.element.setAttributeNS('http://www.w3.org/1999/xlink',
+                              'xlink:href',
+                              this.image);
+  this.element.setAttribute('height', this.height);
+  this.element.setAttribute('width', this.width);
+  this.element.setAttribute('visibility', 'hidden');
+  parentElement.appendChild(this.element);
+};
+
+exports.Sprite.prototype.removeElement = function () {
+  if (this.element) {
+    this.element.parentElement.removeChild(this.element);
+    this.element = null;
+  }
+};
+
+exports.Sprite.prototype.setPosition = function (x, y) {
+  this.x = x;
+  this.y = y;
+};
+
+exports.Sprite.prototype.setDirection = function (dir) {
+  this.dir = dir;
+};
+
+exports.Sprite.prototype.setSpeed = function (speed) {
+  this.speed = speed;
+};
+
+exports.Sprite.prototype.startCollision = function (i) {
+  if (0 === (this.collisionMask & Math.pow(2, i))) {
+    this.collisionMask |= Math.pow(2, i);
+    return true;
+  }
+  return false;
+};
+
+exports.Sprite.prototype.markNotColliding = function (i) {
+  this.collisionMask &= ~(Math.pow(2, i));
+};
+
+var calcMoveDistance = function (sprite, yAxis) {
+  var scaleFactor;
+  switch (sprite.dir) {
+    case Direction.NORTH:
+      scaleFactor = yAxis ? -1 : 0;
+      break;
+    case Direction.WEST:
+      scaleFactor = yAxis ? 0: -1;
+      break;
+    case Direction.SOUTH:
+      scaleFactor = yAxis ? 1 : 0;
+      break;
+    case Direction.EAST:
+      scaleFactor = yAxis ? 0: 1;
+      break;
+  }
+  return sprite.speed * scaleFactor;
+};
+
+exports.Sprite.prototype.getNextPosition = function (yAxis) {
+  var curPos = yAxis ? this.y : this.x;
+  return curPos + calcMoveDistance(this, yAxis);
+};
+
+exports.Sprite.prototype.moveToNextPosition = function () {
+  this.x = this.getNextPosition(false);
+  this.y = this.getNextPosition(true);
+};
+
+exports.Sprite.prototype.bounce = function () {
+  switch (this.dir) {
+    case Direction.NORTH:
+      this.dir = Direction.SOUTH;
+      break;
+    case Direction.WEST:
+      this.dir = Direction.EAST;
+      break;
+    case Direction.SOUTH:
+      this.dir = Direction.NORTH;
+      break;
+    case Direction.EAST:
+      this.dir = Direction.WEST;
+      break;
+  }
+};
+
+exports.Sprite.prototype.outOfBounds = function () {
+  return (this.x < -(this.widthCoord / 2)) ||
+         (this.x > Studio.COLS + (this.widthCoord / 2)) ||
+         (this.y < -(this.heightCoord / 2)) ||
+         (this.y > Studio.ROWS + (this.heightCoord / 2));
+};
+
+exports.Sprite.prototype.display = function () {
+  var xCoord = (this.x - (this.widthCoord / 2)) * Studio.SQUARE_SIZE;
+  var yCoord = (this.y - (this.heightCoord / 2)) * Studio.SQUARE_SIZE;
+
+  this.element.setAttribute('x', xCoord);
+  this.element.setAttribute('y', yCoord);
+
+  if (!this.visible) {
+    this.element.setAttribute('visibility', 'visible');
+    this.visible = true;
+  }
+};
+
+
+},{"./studio":21,"./tiles":22}],21:[function(require,module,exports){
+/**
+ * Blockly App: Studio
+ *
+ * Copyright 2014 Code.org
+ *
+ */
+
+'use strict';
+
 var BlocklyApps = require('../base');
 var commonMsg = require('../../locale/ko_kr/common');
 var studioMsg = require('../../locale/ko_kr/studio');
@@ -6848,6 +7258,7 @@ var blocks = require('./blocks');
 var page = require('../templates/page.html');
 var feedback = require('../feedback.js');
 var dom = require('../dom');
+var Sprite = require('./sprite').Sprite;
 
 var Direction = tiles.Direction;
 var NextTurn = tiles.NextTurn;
@@ -6896,6 +7307,11 @@ var Keycodes = {
   RIGHT: 39,
   DOWN: 40
 };
+
+var ProjectileClassNames = [
+  'fireball',
+  'flower'
+];
 
 var level;
 var skin;
@@ -6993,7 +7409,6 @@ var loadLevel = function() {
 
   Studio.MAZE_WIDTH = Studio.SQUARE_SIZE * Studio.COLS;
   Studio.MAZE_HEIGHT = Studio.SQUARE_SIZE * Studio.ROWS;
-  Studio.PATH_WIDTH = Studio.SQUARE_SIZE / 3;
 };
 
 var drawMap = function() {
@@ -7314,13 +7729,16 @@ var setSvgText = function(opts) {
 // Execute the code for all of the event handlers that match an event name
 //
 
-var callHandler = function (name) {
+var callHandler = function (name, allowQueueExtension) {
   Studio.eventHandlers.forEach(function (handler) {
     // Note: we skip executing the code if we have not completed executing
     // the cmdQueue on this handler (checking for non-zero length)
     if (handler.name === name &&
-        (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
-      handler.cmdQueue = [];
+        (allowQueueExtension ||
+         (!handler.cmdQueue || 0 === handler.cmdQueue.length))) {
+      if (!handler.cmdQueue) {
+        handler.cmdQueue = [];
+      }
       Studio.currentCmdQueue = handler.cmdQueue;
       try { handler.func(BlocklyApps, api, Studio.Globals); } catch (e) { }
       Studio.currentCmdQueue = null;
@@ -7392,15 +7810,22 @@ Studio.onTick = function() {
   // Check for collisions (note that we use the positions they are about
   // to attain with queued moves - this allows the moves to be canceled before
   // the actual movements take place):
+
+  var executeCollisionQueueForClass = function (className) {
+    Studio.executeQueue('whenSpriteCollided-' + i + '-' + className);
+  };
+
   for (i = 0; i < Studio.spriteCount; i++) {
+    var nextXPos_i = getNextPosition(i, false, false);
+    var nextYPos_i = getNextPosition(i, true, false);
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i == j) {
         continue;
       }
-      if (essentiallyEqual(getNextPosition(i, false, false),
+      if (essentiallyEqual(nextXPos_i,
                            getNextPosition(j, false, false),
                            tiles.SPRITE_COLLIDE_DISTANCE) &&
-          essentiallyEqual(getNextPosition(i, true, false),
+          essentiallyEqual(nextYPos_i,
                            getNextPosition(j, true, false),
                            tiles.SPRITE_COLLIDE_DISTANCE)) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
@@ -7412,6 +7837,30 @@ Studio.onTick = function() {
       }
       Studio.executeQueue('whenSpriteCollided-' + i + '-' + j);
     }
+    var xCenter = nextXPos_i + 1;
+    var yCenter = nextYPos_i + 1;
+    for (j = 0; j < Studio.projectiles.length; j++) {
+      if (essentiallyEqual(xCenter,
+                           Studio.projectiles[j].getNextPosition(false),
+                           tiles.PROJECTILE_COLLIDE_DISTANCE) &&
+          essentiallyEqual(yCenter,
+                           Studio.projectiles[j].getNextPosition(true),
+                           tiles.PROJECTILE_COLLIDE_DISTANCE)) {
+        if (Studio.projectiles[j].startCollision(i)) {
+          Studio.currentEventParams = { projectile: Studio.projectiles[j] };
+          // Allow cmdQueue extension (pass true) since this handler
+          // may be called for multiple projectiles before executing the queue
+          // below
+          callHandler('whenSpriteCollided-' + i + '-' +
+                        Studio.projectiles[j].className,
+                      true);
+          Studio.currentEventParams = null;
+        }
+      } else {
+        Studio.projectiles[j].markNotColliding(i);
+      }
+    }
+    ProjectileClassNames.forEach(executeCollisionQueueForClass);
   }
 
   for (i = 0; i < Studio.spriteCount; i++) {
@@ -7419,6 +7868,19 @@ Studio.onTick = function() {
 
     // Display sprite:
     Studio.displaySprite(i);
+  }
+
+  for (i = 0; i < Studio.projectiles.length; i++) {
+    Studio.projectiles[i].moveToNextPosition();
+    if (Studio.projectiles[i].outOfBounds()) {
+      Studio.projectiles[i].removeElement();
+      Studio.projectiles.splice(i, 1);
+      // decrement i because we just removed an item from the array. We want to
+      // keep i as the same value for the next iteration through this loop
+      i--;
+    } else {
+      Studio.projectiles[i].display();
+    }
   }
 
   if (checkFinished()) {
@@ -7584,6 +8046,7 @@ Studio.init = function(config) {
   Studio.spriteFinishCount = 0;
   Studio.spriteCount = 0;
   Studio.sprite = [];
+  Studio.projectiles = [];
 
   // Locate the start and finish squares.
   for (var y = 0; y < Studio.ROWS; y++) {
@@ -7607,6 +8070,10 @@ Studio.init = function(config) {
 
   // Update the sprite count in the blocks:
   blocks.setSpriteCount(Blockly, Studio.spriteCount);
+
+  if (level.enableProjectileCollisions) {
+    blocks.enableProjectileCollisions(Blockly);
+  }
 
   BlocklyApps.init(config);
 
@@ -7659,6 +8126,12 @@ BlocklyApps.reset = function(first) {
   if (softButtonCount) {
     var softButtonsCell = document.getElementById('soft-buttons');
     softButtonsCell.className = 'soft-buttons-' + softButtonCount;
+  }
+
+  // Reset the dynamic sprites list
+  while (Studio.projectiles.length) {
+    var projectile = Studio.projectiles.pop();
+    projectile.removeElement();
   }
 
   // Reset the score and title screen.
@@ -7820,9 +8293,9 @@ var registerHandlers =
     var block = blocks[x];
     if (block.type === blockName &&
         (!nameParam1 ||
-         matchParam1Val === parseInt(block.getTitleValue(nameParam1), 10)) &&
+         matchParam1Val === block.getTitleValue(nameParam1)) &&
         (!nameParam2 ||
-         matchParam2Val === parseInt(block.getTitleValue(nameParam2), 10))) {
+         matchParam2Val === block.getTitleValue(nameParam2))) {
       var code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
       if (code) {
         var func = codegen.functionFromCode(code, {
@@ -7849,9 +8322,20 @@ var registerHandlersWithSpriteParam =
   }
 };
 
+
 var registerHandlersWithSpriteParams =
       function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
-  for (var i = 0; i < Studio.spriteCount; i++) {
+  var i;
+  var registerHandlersForClassName = function (className) {
+    registerHandlers(handlers,
+                     blockName,
+                     eventNameBase,
+                     blockParam1,
+                     String(i),
+                     blockParam2,
+                     className);
+  };
+  for (i = 0; i < Studio.spriteCount; i++) {
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i === j) {
         continue;
@@ -7860,10 +8344,11 @@ var registerHandlersWithSpriteParams =
                        blockName,
                        eventNameBase,
                        blockParam1,
-                       i,
+                       String(i),
                        blockParam2,
-                       j);
+                       String(j));
     }
+    ProjectileClassNames.forEach(registerHandlersForClassName);
   }
 };
 
@@ -7925,7 +8410,7 @@ Studio.execute = function() {
                                    'SPRITE1',
                                    'SPRITE2');
 
-  BlocklyApps.playAudio('start', {volume: 0.5});
+  BlocklyApps.playAudio('start');
 
   BlocklyApps.reset(false);
 
@@ -7961,9 +8446,9 @@ Studio.onPuzzleComplete = function() {
   }
 
   if (Studio.testResults >= BlocklyApps.TestResults.FREE_PLAY) {
-    BlocklyApps.playAudio('win', {volume : 0.5});
+    BlocklyApps.playAudio('win');
   } else {
-    BlocklyApps.playAudio('failure', {volume : 0.5});
+    BlocklyApps.playAudio('failure');
   }
 
   if (level.editCode) {
@@ -8152,6 +8637,11 @@ Studio.queueCmd = function (id, name, opts) {
       'name': name,
       'opts': opts,
   };
+  if (Studio.currentEventParams) {
+    for (var prop in Studio.currentEventParams) {
+      cmd.opts[prop] = Studio.currentEventParams[prop];
+    }
+  }
   Studio.currentCmdQueue.push(cmd);
 };
 
@@ -8208,7 +8698,7 @@ Studio.callCmd = function (cmd) {
       break;
     case 'playSound':
       BlocklyApps.highlight(cmd.id);
-      BlocklyApps.playAudio(cmd.opts.soundName, {volume: 0.5});
+      BlocklyApps.playAudio(cmd.opts.soundName);
       Studio.playSoundCount++;
       break;
     case 'showTitleScreen':
@@ -8228,6 +8718,14 @@ Studio.callCmd = function (cmd) {
     case 'stop':
       BlocklyApps.highlight(cmd.id);
       Studio.stop(cmd.opts);
+      break;
+    case 'throwProjectile':
+      BlocklyApps.highlight(cmd.id);
+      Studio.throwProjectile(cmd.opts);
+      break;
+    case 'makeProjectile':
+      BlocklyApps.highlight(cmd.id);
+      Studio.makeProjectile(cmd.opts);
       break;
     case 'incrementScore':
       BlocklyApps.highlight(cmd.id);
@@ -8556,6 +9054,87 @@ Studio.stop = function (opts) {
   }
 };
 
+Studio.throwProjectile = function (opts) {
+  var optsInit = {
+    className: opts.className,
+    height: 50,
+    width: 50,
+    dir: opts.dir,
+    speed: tiles.DEFAULT_SPRITE_SPEED
+  };
+
+  var fromSprite = Studio.sprite[opts.spriteIndex];
+  optsInit.image = opts.className === "fireball" ? skin.goal : skin.goalSuccess;
+
+  // Choose point of origin based on direction
+  // assumes fromSprite is always 2x2 in size
+  // assumes projectile is always 1x1 in size
+  // fromSprite coords are left, top
+  // projectile coords are center, center
+  switch (opts.dir) {
+    case Direction.NORTH:
+      optsInit.x = fromSprite.x + 1;
+      optsInit.y = fromSprite.y - 0.5;
+      break;
+    case Direction.WEST:
+      optsInit.x = fromSprite.x - 0.5;
+      optsInit.y = fromSprite.y + 1;
+      break;
+    case Direction.SOUTH:
+      optsInit.x = fromSprite.x + 1;
+      optsInit.y = fromSprite.y + 2.5;
+      break;
+    case Direction.EAST:
+      optsInit.x = fromSprite.x + 2.5;
+      optsInit.y = fromSprite.y + 1;
+      break;
+  }
+
+  var projectile = new Sprite(optsInit);
+  projectile.createElement(document.getElementById('svgStudio'));
+  Studio.projectiles.push(projectile);
+};
+
+//
+// Internal helper to handle makeProjectile calls on a single projectile
+//
+// Return value: true if projectile was removed from the projectiles array
+//
+
+var doMakeProjectile = function (projectile, action) {
+  if (action === 'bounce') {
+    projectile.bounce();
+  } else if (action === 'disappear') {
+    projectile.removeElement();
+    var pos = Studio.projectiles.indexOf(projectile);
+    if (-1 !== pos) {
+      Studio.projectiles.splice(pos, 1);
+      return true;
+    }
+  } else {
+    throw "unknown action in doMakeProjectile";
+  }
+  return false;
+};
+
+Studio.makeProjectile = function (opts) {
+  if (opts.projectile) {
+    doMakeProjectile(opts.projectile, opts.action);
+  } else {
+    // No "current" projectile, so apply action to all of them of this class
+    for (var i = 0; i < Studio.projectiles.length; i++) {
+      if (Studio.projectiles[i].className === opts.className &&
+          doMakeProjectile(Studio.projectiles[i], opts.action)) {
+        // if this returned true, the projectile was deleted
+
+        // decrement i because we just removed an item from the array. We want
+        // to keep i as the same value for the next iteration through this loop
+        i--;
+      }
+    }
+  }
+};
+
 Studio.setSpritePosition = function (opts) {
   var sprite = Studio.sprite[opts.spriteIndex];
   var samePosition = (sprite.x === opts.x && sprite.y === opts.y);
@@ -8641,7 +9220,7 @@ Studio.allFinishesComplete = function() {
     }
     if (playSound && finished != Studio.spriteFinishCount) {
       // Play a sound unless we've hit the last flag
-      BlocklyApps.playAudio('flag', {volume: 0.5});
+      BlocklyApps.playAudio('flag');
     }
     return (finished == Studio.spriteFinishCount);
   }
@@ -8674,7 +9253,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/ko_kr/common":36,"../../locale/ko_kr/studio":37,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":11,"../templates/page.html":29,"./api":13,"./blocks":14,"./controls.html":15,"./extraControlRows.html":16,"./tiles":21,"./visualization.html":22}],21:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"../../locale/ko_kr/studio":38,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":11,"../templates/page.html":30,"./api":13,"./blocks":14,"./controls.html":15,"./extraControlRows.html":16,"./sprite":20,"./tiles":22,"./visualization.html":23}],22:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
@@ -8827,6 +9406,7 @@ exports.Emotions = {
 
 exports.FINISH_COLLIDE_DISTANCE = 1.5;
 exports.SPRITE_COLLIDE_DISTANCE = 1.8;
+exports.PROJECTILE_COLLIDE_DISTANCE = 1.3;
 exports.DEFAULT_SPRITE_SPEED = 0.1;
 
 /**
@@ -8840,7 +9420,7 @@ exports.SquareType = {
   SPRITESTART: 16,
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8861,7 +9441,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],23:[function(require,module,exports){
+},{"ejs":39}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8882,7 +9462,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],24:[function(require,module,exports){
+},{"ejs":39}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8895,7 +9475,7 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/ko_kr/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  <button id="again-button" class="launch">\n    ', escape((14,  msg.tryAgain() )), '\n  </button>\n');16; }; buf.push('\n');17; if (data.nextLevel) {; buf.push('  <button id="continue-button" class="launch">\n    ', escape((18,  msg.continue() )), '\n  </button>\n');20; }; buf.push(''); })();
+ buf.push('');1; var msg = require('../../locale/ko_kr/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  ');13; if (data.isK1) {; buf.push('    <div id="again-button" class="launch arrow-container arrow-left">\n      <div class="arrow-head"><img src="', escape((14,  data.assetUrl('media/tryagain-arrow-head.png') )), '" alt="Arrowhead" width="67" height="130"/></div>\n      <div class="arrow-text">', escape((15,  msg.tryAgain() )), '</div>\n    </div>\n  ');17; } else {; buf.push('    <button id="again-button" class="launch">\n      ', escape((18,  msg.tryAgain() )), '\n    </button>\n  ');20; }; buf.push('');20; }; buf.push('\n');21; if (data.nextLevel) {; buf.push('  ');21; if (data.isK1) {; buf.push('    <div id="continue-button" class="launch arrow-container arrow-right">\n      <div class="arrow-head"><img src="', escape((22,  data.assetUrl('media/next-arrow-head.png') )), '" alt="Arrowhead" width="66" height="130"/></div>\n      <div class="arrow-text">', escape((23,  msg.continue() )), '</div>\n    </div>\n  ');25; } else {; buf.push('    <button id="continue-button" class="launch">\n      ', escape((26,  msg.continue() )), '\n    </button>\n  ');28; }; buf.push('');28; }; buf.push(''); })();
 } 
 return buf.join('');
 };
@@ -8903,7 +9483,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":36,"ejs":38}],25:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"ejs":39}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8924,7 +9504,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],26:[function(require,module,exports){
+},{"ejs":39}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8945,7 +9525,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":36,"ejs":38}],27:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"ejs":39}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8968,7 +9548,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":36,"ejs":38}],28:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"ejs":39}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8989,7 +9569,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":36,"ejs":38}],29:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"ejs":39}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9014,7 +9594,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":36,"ejs":38}],30:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"ejs":39}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9036,7 +9616,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],31:[function(require,module,exports){
+},{"ejs":39}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9057,7 +9637,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":36,"ejs":38}],32:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"ejs":39}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9078,7 +9658,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ko_kr/common":36,"ejs":38}],33:[function(require,module,exports){
+},{"../../locale/ko_kr/common":37,"ejs":39}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9099,7 +9679,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],34:[function(require,module,exports){
+},{"ejs":39}],35:[function(require,module,exports){
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -9191,7 +9771,16 @@ exports.executeIfConditional = function (conditional, fn) {
   };
 };
 
-},{}],35:[function(require,module,exports){
+/**
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
+ */
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
+};
+
+},{}],36:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -9219,7 +9808,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ko=function(n){return "other"}
 exports.blocklyMessage = function(d){return "Blockly(블러클리)"};
 
@@ -9362,7 +9951,7 @@ exports.signup = function(d){return "샘플 코스를 위해 가입하기"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":49}],37:[function(require,module,exports){
+},{"messageformat":50}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ko=function(n){return "other"}
 exports.catActions = function(d){return "Actions"};
 
@@ -9391,6 +9980,16 @@ exports.incrementOpponentScore = function(d){return "increment opponent score"};
 exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
 
 exports.incrementPlayerScore = function(d){return "increment player score"};
+
+exports.makeProjectileDisappear = function(d){return "disappear"};
+
+exports.makeProjectileBounce = function(d){return "bounce"};
+
+exports.makeProjectileFireball = function(d){return "make fireball"};
+
+exports.makeProjectileFlower = function(d){return "make flower"};
+
+exports.makeProjectileTooltip = function(d){return "Make the projectile that just collided disappear or bounce."};
 
 exports.makeYourOwn = function(d){return "Make Your Own Story"};
 
@@ -9505,6 +10104,12 @@ exports.positionBottomCenter = function(d){return "to the bottom center position
 exports.positionBottomRight = function(d){return "to the bottom right position"};
 
 exports.positionRandom = function(d){return "to the random position"};
+
+exports.projectileFireball = function(d){return "fireball"};
+
+exports.projectileFlower = function(d){return "flower"};
+
+exports.projectileRandom = function(d){return "random"};
 
 exports.reinfFeedbackMsg = function(d){return "You can press the \"Try again\" button to go back to playing your story."};
 
@@ -9666,6 +10271,22 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
+exports.throwSprite = function(d){return "throw"};
+
+exports.throwSprite1 = function(d){return "actor 1 throw"};
+
+exports.throwSprite2 = function(d){return "actor 2 throw"};
+
+exports.throwSprite3 = function(d){return "actor 3 throw"};
+
+exports.throwSprite4 = function(d){return "actor 4 throw"};
+
+exports.throwSprite5 = function(d){return "actor 5 throw"};
+
+exports.throwSprite6 = function(d){return "actor 6 throw"};
+
+exports.throwTooltip = function(d){return "Throws a projectile from the specified actor."};
+
 exports.waitFor = function(d){return "wait for"};
 
 exports.waitSeconds = function(d){return "seconds"};
@@ -9748,6 +10369,10 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
+exports.whenSpriteCollidedWithFireball = function(d){return "touches fireball"};
+
+exports.whenSpriteCollidedWithFlower = function(d){return "touches flower"};
+
 exports.whenUp = function(d){return "when Up arrow"};
 
 exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
@@ -9755,7 +10380,7 @@ exports.whenUpTooltip = function(d){return "Execute the actions below when the U
 exports.yes = function(d){return "예"};
 
 
-},{"messageformat":49}],38:[function(require,module,exports){
+},{"messageformat":50}],39:[function(require,module,exports){
 
 /*!
  * EJS
@@ -10114,7 +10739,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":39,"./utils":40,"fs":41,"path":43}],39:[function(require,module,exports){
+},{"./filters":40,"./utils":41,"fs":42,"path":44}],40:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -10317,7 +10942,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 
 /*!
  * EJS
@@ -10343,9 +10968,9 @@ exports.escape = function(html){
 };
  
 
-},{}],41:[function(require,module,exports){
-
 },{}],42:[function(require,module,exports){
+
+},{}],43:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -10400,7 +11025,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10628,7 +11253,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":42}],44:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":43}],45:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -11139,7 +11764,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11225,7 +11850,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11312,13 +11937,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":45,"./encode":46}],48:[function(require,module,exports){
+},{"./decode":46,"./encode":47}],49:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -11951,7 +12576,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":44,"querystring":47}],49:[function(require,module,exports){
+},{"punycode":45,"querystring":48}],50:[function(require,module,exports){
 /**
  * messageformat.js
  *

@@ -239,4 +239,9 @@ class ReportsControllerTest < ActionController::TestCase
     assert_select 'div.stage', /\Areport-stage-\d\z/
   end
 
+  test 'should get admin progress' do
+    get :admin_progress
+    assert_select 'h1', 'Admin progress'
+  end
+
 end

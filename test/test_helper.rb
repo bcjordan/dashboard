@@ -110,5 +110,9 @@ class ActionController::TestCase
       assert_response :forbidden
     end
   end
+
+  def css(selector)
+    Nokogiri::HTML(@response.body).css(selector)
+  end
 end
 

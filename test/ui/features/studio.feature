@@ -1,7 +1,7 @@
 Feature: Visiting a studio page
 
 Scenario: Using a studio dropdown
-  Given I am on "http://learn.code.org/s/k-1/stage/8/puzzle/2"
+  Given I am on "http://learn.code.org/s/k-1/stage/9/puzzle/2"
   And I rotate to landscape
   And I press "x-close"
   Then there's an SVG image "studio/dog_thumb.png"

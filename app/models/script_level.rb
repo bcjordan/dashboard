@@ -35,7 +35,7 @@ class ScriptLevel < ActiveRecord::Base
   end
 
   def stage_position_str
-    "#{stage ? "#{I18n.t('stage')} #{stage.position}" : I18n.t("data.script.name.#{script.name}.#{level.game.name}")}"
+    stage ? I18n.t('stage') : I18n.t("data.script.name.#{script.name}.#{level.game.name}")
   end
 
   def name

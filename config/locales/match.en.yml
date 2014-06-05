@@ -13,11 +13,13 @@ en:
         Matching Images Two: Matching Images Two
         /script_assets/matches/images/head.jpg: /script_assets/matches/images/head.jpg
         Match up all the flowers by colour!: Match up all the flowers by colour!
+        Instructions: Instructions
+        Drag the images from right to center.: Drag the images from right to center.
+        /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
         /script_assets/matches/images/q1.jpg: /script_assets/matches/images/q1.jpg
         /script_assets/matches/images/q2.jpg: /script_assets/matches/images/q2.jpg
         /script_assets/matches/images/q3.jpg: /script_assets/matches/images/q3.jpg
         /script_assets/matches/images/q4.jpg: /script_assets/matches/images/q4.jpg
-        /script_assets/matches/images/a1.jpg: /script_assets/matches/images/a1.jpg
         /script_assets/matches/images/a2.jpg: /script_assets/matches/images/a2.jpg
         /script_assets/matches/images/a3.jpg: /script_assets/matches/images/a3.jpg
         /script_assets/matches/images/a4.jpg: /script_assets/matches/images/a4.jpg
