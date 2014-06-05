@@ -165,6 +165,8 @@ level 'blockly:Studio:k1_5'
 level 'blockly:Studio:k1_6'
 level 'blockly:Studio:k1_7'
 level 'blockly:Studio:k1_8'
+level 'blockly:Studio:k1_9'
+level 'blockly:Studio:k1_10'
 level 'blockly:Studio:k1_11'
 
 stage 'Multi & Match'
