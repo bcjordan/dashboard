@@ -5107,8 +5107,8 @@ exports.moveDistance = function(id, spriteIndex, dir, distance) {
       {'spriteIndex': spriteIndex, 'dir': dir, 'distance': distance});
 };
 
-exports.incrementScore = function(id, player) {
-  Studio.queueCmd(id, 'incrementScore', {'player': player});
+exports.changeScore = function(id, value) {
+  Studio.queueCmd(id, 'changeScore', {'value': value});
 };
 
 exports.setScoreText = function(id, text) {
@@ -5786,27 +5786,34 @@ exports.install = function(blockly, blockInstallOptions) {
                this.getTitleValue('SOUND') + '\');\n';
   };
 
-  blockly.Blocks.studio_incrementScore = {
-    // Block for incrementing the score.
+  blockly.Blocks.studio_changeScore = {
+    // Block for changing the score.
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.PLAYERS), 'PLAYER');
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(msg.incrementPlayerScore());
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
-      this.setTooltip(msg.incrementScoreTooltip());
+      this.setTooltip(isK1 ?
+                        msg.changeScoreTooltipK1() :
+                        msg.changeScoreTooltip());
     }
   };
 
-  blockly.Blocks.studio_incrementScore.PLAYERS =
-      [[msg.incrementPlayerScore(), 'player'],
-       [msg.incrementOpponentScore(), 'opponent']];
+  blockly.Blocks.studio_changeScore.VALUES =
+      [[msg.incrementPlayerScore(), '1'],
+       [msg.decrementPlayerScore(), '-1']];
 
-  generator.studio_incrementScore = function() {
-    // Generate JavaScript for incrementing the score.
-    return 'Studio.incrementScore(\'block_id_' + this.id + '\', \'' +
-                this.getTitleValue('PLAYER') + '\');\n';
+  generator.studio_changeScore = function() {
+    // Generate JavaScript for changing the score.
+    return 'Studio.changeScore(\'block_id_' + this.id + '\', \'' +
+                (this.getTitleValue('VALUE') || '1') + '\');\n';
   };
 
   blockly.Blocks.studio_setScoreText = {
@@ -6713,7 +6720,7 @@ module.exports = {
   },
   '11': {
     'requiredBlocks': [
-      [{'test': 'incrementScore', 'type': 'studio_incrementScore'}],
+      [{'test': 'changeScore', 'type': 'studio_changeScore'}],
     ],
     'scale': {
       'snapRadius': 2
@@ -6750,7 +6757,7 @@ module.exports = {
            <title name="SPRITE">1</title></block>' +
          '<block type="studio_playSound"> \
            <title name="SOUND">crunch</title></block>' +
-         blockOfType('studio_incrementScore')),
+         blockOfType('studio_changeScore')),
     'startBlocks':
      '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
         <next><block type="studio_move"> \
@@ -6827,7 +6834,7 @@ module.exports = {
            <title name="SPRITE">1</title></block>' +
          '<block type="studio_playSound"> \
            <title name="SOUND">crunch</title></block>' +
-         blockOfType('studio_incrementScore') +
+         blockOfType('studio_changeScore') +
          '<block type="studio_setSpriteSpeed"> \
           <title name="VALUE">Studio.SpriteSpeed.VERY_FAST</title></block>'),
     'startBlocks':
@@ -6864,7 +6871,7 @@ module.exports = {
         </next></block> \
       <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1000"> \
        <title name="SPRITE2">2</title> \
-        <next><block type="studio_incrementScore"></block> \
+        <next><block type="studio_changeScore"></block> \
         </next></block>'
   },
   '13': {
@@ -6905,7 +6912,7 @@ module.exports = {
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_playSound') +
-         blockOfType('studio_incrementScore') +
+         blockOfType('studio_changeScore') +
          blockOfType('studio_saySprite') +
          blockOfType('studio_setSpriteSpeed') +
          blockOfType('studio_setSpriteEmotion')),
@@ -6955,7 +6962,7 @@ module.exports = {
          blockOfType('studio_stop') +
          blockOfType('studio_wait') +
          blockOfType('studio_playSound') +
-         blockOfType('studio_incrementScore') +
+         blockOfType('studio_changeScore') +
          blockOfType('studio_saySprite') +
          blockOfType('studio_setSpritePosition') +
          blockOfType('studio_throw') +
@@ -8295,7 +8302,6 @@ BlocklyApps.reset = function(first) {
 
   // Reset the score and title screen.
   Studio.playerScore = 0;
-  Studio.opponentScore = 0;
   Studio.scoreText = null;
   document.getElementById('score')
     .setAttribute('visibility', 'hidden');
@@ -8391,7 +8397,7 @@ BlocklyApps.runButtonClick = function() {
     shareCell.className = 'share-cell-enabled';
   }
 
-  if (level.showZeroZeroScore) {
+  if (level.showZeroScore) {
     Studio.displayScore();
   }
 };
@@ -8783,8 +8789,7 @@ Studio.displayScore = function() {
     score.textContent = Studio.scoreText;
   } else {
     score.textContent = studioMsg.scoreText({
-      playerScore: Studio.playerScore,
-      opponentScore: Studio.opponentScore
+      playerScore: Studio.playerScore
     });
   }
   score.setAttribute('visibility', 'visible');
@@ -8886,9 +8891,9 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       Studio.makeProjectile(cmd.opts);
       break;
-    case 'incrementScore':
+    case 'changeScore':
       BlocklyApps.highlight(cmd.id);
-      Studio.incrementScore(cmd.opts);
+      Studio.changeScore(cmd.opts);
       break;
     case 'setScoreText':
       BlocklyApps.highlight(cmd.id);
@@ -8911,12 +8916,8 @@ Studio.setSpriteSpeed = function (opts) {
   Studio.sprite[opts.spriteIndex].speed = opts.value;
 };
 
-Studio.incrementScore = function (opts) {
-  if (opts.player == "opponent") {
-    Studio.opponentScore++;
-  } else {
-    Studio.playerScore++;
-  }
+Studio.changeScore = function (opts) {
+  Studio.playerScore += Number(opts.value);
   Studio.displayScore();
 };
 
@@ -10126,15 +10127,17 @@ exports.catText = function(d){return "Text"};
 
 exports.catVariables = function(d){return "Variables"};
 
+exports.changeScoreTooltip = function(d){return "Add or remove a point to the score."};
+
+exports.changeScoreTooltipK1 = function(d){return "Add a point to the score."};
+
 exports.continue = function(d){return "Vazhdo"};
+
+exports.decrementPlayerScore = function(d){return "remove point"};
 
 exports.defaultSayText = function(d){return "type here"};
 
 exports.finalLevel = function(d){return "Urime! Ju keni perfunduar enigmen perfundimatare."};
-
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
-
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
 
 exports.incrementPlayerScore = function(d){return "increment player score"};
 
