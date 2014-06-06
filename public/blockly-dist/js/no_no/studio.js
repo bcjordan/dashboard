@@ -7566,8 +7566,8 @@ var loadLevel = function() {
   Studio.COLS = Studio.map[0].length;
   // Pixel height and width of each maze square (i.e. tile).
   Studio.SQUARE_SIZE = 50;
-  Studio.SPRITE_HEIGHT = skin.spriteHeight;
-  Studio.SPRITE_WIDTH = skin.spriteWidth;
+  Studio.DEFAULT_SPRITE_HEIGHT = skin.spriteHeight;
+  Studio.DEFAULT_SPRITE_WIDTH = skin.spriteWidth;
   Studio.SPRITE_Y_OFFSET = skin.spriteYOffset;
   // Height and width of the goal and obstacles.
   Studio.MARKER_HEIGHT = 100;
@@ -7620,20 +7620,18 @@ var drawMap = function() {
 
   if (Studio.spriteStart_) {
     for (i = 0; i < Studio.spriteCount; i++) {
-      // Sprite clipPath element, whose (x, y) is reset by Studio.displaySprite
+      // Sprite clipPath element
+      // (not setting x, y, height, or width until displaySprite)
       var spriteClip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
       spriteClip.setAttribute('id', 'spriteClipPath' + i);
       var spriteClipRect = document.createElementNS(Blockly.SVG_NS, 'rect');
       spriteClipRect.setAttribute('id', 'spriteClipRect' + i);
-      spriteClipRect.setAttribute('width', Studio.SPRITE_WIDTH);
-      spriteClipRect.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteClip.appendChild(spriteClipRect);
       svg.appendChild(spriteClip);
 
-      // Add sprite (not setting href attribute or width until displaySprite).
+      // Add sprite (not setting href, height, or width until displaySprite).
       var spriteIcon = document.createElementNS(Blockly.SVG_NS, 'image');
       spriteIcon.setAttribute('id', 'sprite' + i);
-      spriteIcon.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteIcon.setAttribute('clip-path', 'url(#spriteClipPath' + i + ')');
       svg.appendChild(spriteIcon);
 
@@ -7724,9 +7722,8 @@ var drawMap = function() {
   svg.appendChild(titleScreenTextGroup);
 };
 
-var essentiallyEqual = function(float1, float2, opt_variance) {
-  var variance = opt_variance || 0.01;
-  return (Math.abs(float1 - float2) < variance);
+var collisionTest = function(x1, x2, xVariance, y1, y2, yVariance) {
+  return (Math.abs(x1 - x2) < xVariance) && (Math.abs(y1 - y2) < yVariance);
 };
 
 /**
@@ -7812,7 +7809,9 @@ var performQueuedMoves = function (i) {
   // Make queued moves in the X axis (fixed to .01 values):
   var nextX = getNextPosition(i, false, true);
   // Clamp nextX to boundaries as newX:
-  var newX = Math.min(Studio.COLS - 2, Math.max(0, nextX));
+  var newX = Math.min(
+                Studio.COLS - (Studio.sprite[i].width / Studio.SQUARE_SIZE),
+                Math.max(0, nextX));
   if (nextX != newX) {
     cancelQueuedMovements(i, false);
   }
@@ -7821,7 +7820,9 @@ var performQueuedMoves = function (i) {
   // Make queued moves in the Y axis (fixed to .01 values):
   var nextY = getNextPosition(i, true, true);
   // Clamp nextY to boundaries as newY:
-  var newY = Math.min(Studio.ROWS - 2, Math.max(0, nextY));
+  var newY = Math.min(
+                Studio.ROWS - (Studio.sprite[i].height / Studio.SQUARE_SIZE),
+                Math.max(0, nextY));
   if (nextY != newY) {
     cancelQueuedMovements(i, true);
   }
@@ -7981,19 +7982,40 @@ Studio.onTick = function() {
     Studio.executeQueue('whenSpriteCollided-' + i + '-' + className);
   };
 
+  var spriteCollisionDistance = function (i1, i2, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[i1].height : Studio.sprite[i1].width;
+    var dim2 = yAxis ? Studio.sprite[i2].height : Studio.sprite[i2].width;
+    return tiles.SPRITE_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
+  var projectileCollisionDistance = function (iS, iP, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[iS].height : Studio.sprite[iS].width;
+    var dim2 = yAxis ?
+                  Studio.projectiles[iP].height :
+                  Studio.projectiles[iP].width;
+    return tiles.SPRITE_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
+
   for (i = 0; i < Studio.spriteCount; i++) {
-    var nextXPos_i = getNextPosition(i, false, false);
-    var nextYPos_i = getNextPosition(i, true, false);
+    var iXCenter = getNextPosition(i, false, false) +
+                    Studio.sprite[i].width / (Studio.SQUARE_SIZE * 2);
+    var iYCenter = getNextPosition(i, true, false) +
+                    Studio.sprite[i].height / (Studio.SQUARE_SIZE * 2);
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i == j) {
         continue;
       }
-      if (essentiallyEqual(nextXPos_i,
-                           getNextPosition(j, false, false),
-                           tiles.SPRITE_COLLIDE_DISTANCE) &&
-          essentiallyEqual(nextYPos_i,
-                           getNextPosition(j, true, false),
-                           tiles.SPRITE_COLLIDE_DISTANCE)) {
+      var jXCenter = getNextPosition(j, false, false) +
+                      Studio.sprite[j].width / (Studio.SQUARE_SIZE * 2);
+      var jYCenter = getNextPosition(j, true, false) +
+                      Studio.sprite[j].height / (Studio.SQUARE_SIZE * 2);
+      if (collisionTest(iXCenter,
+                        jXCenter,
+                        spriteCollisionDistance(i, j, false),
+                        iYCenter,
+                        jYCenter,
+                        spriteCollisionDistance(i, j, true))) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
           Studio.sprite[i].collisionMask |= Math.pow(2, j);
           callHandler('whenSpriteCollided-' + i + '-' + j);
@@ -8003,15 +8025,13 @@ Studio.onTick = function() {
       }
       Studio.executeQueue('whenSpriteCollided-' + i + '-' + j);
     }
-    var xCenter = nextXPos_i + 1;
-    var yCenter = nextYPos_i + 1;
     for (j = 0; j < Studio.projectiles.length; j++) {
-      if (essentiallyEqual(xCenter,
-                           Studio.projectiles[j].getNextPosition(false),
-                           tiles.PROJECTILE_COLLIDE_DISTANCE) &&
-          essentiallyEqual(yCenter,
-                           Studio.projectiles[j].getNextPosition(true),
-                           tiles.PROJECTILE_COLLIDE_DISTANCE)) {
+      if (collisionTest(iXCenter,
+                        Studio.projectiles[j].getNextPosition(false),
+                        projectileCollisionDistance(i, j, false),
+                        iYCenter,
+                        Studio.projectiles[j].getNextPosition(true),
+                        projectileCollisionDistance(i, j, true))) {
         if (Studio.projectiles[j].startCollision(i)) {
           Studio.currentEventParams = { projectile: Studio.projectiles[j] };
           // Allow cmdQueue extension (pass true) since this handler
@@ -8483,7 +8503,7 @@ var registerHandlers =
 var registerHandlersWithSpriteParam =
       function (handlers, blockName, eventNameBase, blockParam) {
   for (var i = 0; i < Studio.spriteCount; i++) {
-    registerHandlers(handlers, blockName, eventNameBase, blockParam, i);
+    registerHandlers(handlers, blockName, eventNameBase, blockParam, String(i));
   }
 };
 
@@ -8709,10 +8729,11 @@ var updateSpeechBubblePath = function (element) {
 };
 
 Studio.displaySprite = function(i) {
-  var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
-  var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
+  var sprite = Studio.sprite[i];
+  var xCoord = sprite.x * Studio.SQUARE_SIZE;
+  var yCoord = sprite.y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
 
-  var xOffset = Studio.SPRITE_WIDTH * spriteFrameNumber(i);
+  var xOffset = sprite.width * spriteFrameNumber(i);
 
   var spriteIcon = document.getElementById('sprite' + i);
   var spriteClipRect = document.getElementById('spriteClipRect' + i);
@@ -8720,31 +8741,30 @@ Studio.displaySprite = function(i) {
   var xCoordPrev = spriteClipRect.getAttribute('x');
   var yCoordPrev = spriteClipRect.getAttribute('y');
 
-  var dirPrev = Studio.sprite[i].dir;
+  var dirPrev = sprite.dir;
   if (dirPrev === Direction.NONE) {
     // direction not yet set, start at SOUTH (forward facing)
-    Studio.sprite[i].dir = Direction.SOUTH;
+    sprite.dir = Direction.SOUTH;
   }
   else if ((xCoord != xCoordPrev) || (yCoord != yCoordPrev)) {
-    Studio.sprite[i].dir = Direction.NONE;
+    sprite.dir = Direction.NONE;
     if (xCoord < xCoordPrev) {
-      Studio.sprite[i].dir |= Direction.WEST;
+      sprite.dir |= Direction.WEST;
     } else if (xCoord > xCoordPrev) {
-      Studio.sprite[i].dir |= Direction.EAST;
+      sprite.dir |= Direction.EAST;
     }
     if (yCoord < yCoordPrev) {
-      Studio.sprite[i].dir |= Direction.NORTH;
+      sprite.dir |= Direction.NORTH;
     } else if (yCoord > yCoordPrev) {
-      Studio.sprite[i].dir |= Direction.SOUTH;
+      sprite.dir |= Direction.SOUTH;
     }
   }
 
-  if (Studio.sprite[i].dir !== Studio.sprite[i].displayDir) {
+  if (sprite.dir !== sprite.displayDir) {
     // Every other frame, assign a new displayDir from state table
     // (only one turn at a time):
     if (Studio.tickCount && (0 === Studio.tickCount % 2)) {
-      Studio.sprite[i].displayDir =
-          NextTurn[Studio.sprite[i].displayDir][Studio.sprite[i].dir];
+      sprite.displayDir = NextTurn[sprite.displayDir][sprite.dir];
     }
   }
 
@@ -8763,12 +8783,12 @@ Studio.displaySprite = function(i) {
   var nowOnRight = true;
   var ySpeech = yCoord - (bblHeight + SPEECH_BUBBLE_PADDING);
   if (ySpeech < 0) {
-    ySpeech = yCoord + Studio.SPRITE_HEIGHT + SPEECH_BUBBLE_PADDING;
+    ySpeech = yCoord + sprite.height + SPEECH_BUBBLE_PADDING;
     nowOnTop = false;
   }
   var xSpeech = xCoord + SPEECH_BUBBLE_H_OFFSET;
   if (xSpeech > Studio.MAZE_WIDTH - SPEECH_BUBBLE_WIDTH) {
-    xSpeech = xCoord + Studio.SPRITE_WIDTH -
+    xSpeech = xCoord + sprite.width -
                 (SPEECH_BUBBLE_WIDTH + SPEECH_BUBBLE_H_OFFSET);
     nowOnRight = false;
   }
@@ -8943,22 +8963,33 @@ var computeSpriteFrameNums = function (index) {
 };
 
 Studio.setSprite = function (opts) {
-  // Inherit some flags from the skin:
+  var sprite = Studio.sprite[opts.index];
   if (opts.value !== 'hidden' && opts.value !== 'visible') {
-    Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
-    Studio.sprite[opts.index].flags |= skin[opts.value].spriteFlags;
+    // Inherit some flags from the skin:
+    sprite.flags &= ~SF_SKINS_MASK;
+    sprite.flags |= skin[opts.value].spriteFlags;
+    // Reset height and width:
+    sprite.height =
+        skin[opts.value].spriteHeight || Studio.DEFAULT_SPRITE_HEIGHT;
+    sprite.width = skin[opts.value].spriteWidth || Studio.DEFAULT_SPRITE_WIDTH;
   }
-  Studio.sprite[opts.index].value = opts.forceHidden ? 'hidden' : opts.value;
+  sprite.value = opts.forceHidden ? 'hidden' : opts.value;
 
-  var element = document.getElementById('sprite' + opts.index);
-  element.setAttribute(
+  var spriteIcon = document.getElementById('sprite' + opts.index);
+  spriteIcon.setAttribute(
       'visibility',
       (opts.value === 'hidden' || opts.forceHidden) ? 'hidden' : 'visible');
   if ((opts.value !== 'hidden') && (opts.value !== 'visible')) {
-    element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-                           skin[opts.value].sprite);
-    element.setAttribute('width',
-                         Studio.SPRITE_WIDTH * spriteTotalFrames(opts.index));
+    var spriteClipRect = document.getElementById('spriteClipRect' + opts.index);
+    spriteClipRect.setAttribute('width', sprite.width);
+    spriteClipRect.setAttribute('height', sprite.height);
+
+    spriteIcon.setAttributeNS('http://www.w3.org/1999/xlink',
+                              'xlink:href',
+                              skin[opts.value].sprite);
+    spriteIcon.setAttribute('width',
+                            sprite.width * spriteTotalFrames(opts.index));
+    spriteIcon.setAttribute('height', sprite.height);
     computeSpriteFrameNums(opts.index);
     // call display right away since the frame number may have changed:
     Studio.displaySprite(opts.index);
@@ -9319,14 +9350,14 @@ Studio.moveSingle = function (opts) {
       break;
     case Direction.EAST:
       sprite.x += sprite.speed;
-      if (sprite.x > (Studio.COLS - 2)) {
-        sprite.x = Studio.COLS - 2;
+      if (sprite.x > (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE))) {
+        sprite.x = Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.SOUTH:
       sprite.y += sprite.speed;
-      if (sprite.y > (Studio.ROWS - 2)) {
-        sprite.y = Studio.ROWS - 2;
+      if (sprite.y > (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE))) {
+        sprite.y = Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.WEST:
@@ -9353,16 +9384,34 @@ Studio.timedOut = function() {
 
 Studio.allFinishesComplete = function() {
   var i;
+  var finishCollisionDistance = function (yAxis) {
+    var dim1 = yAxis ?
+                  Studio.sprite[Studio.spriteFinishIndex].height :
+                  Studio.sprite[Studio.spriteFinishIndex].width;
+    var dim2 = yAxis ? Studio.MARKER_HEIGHT : Studio.MARKER_WIDTH;
+    return tiles.FINISH_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
   if (Studio.spriteFinish_) {
     var finished, playSound;
+    var xSpriteCenter =
+      Studio.sprite[Studio.spriteFinishIndex].x +
+      Studio.sprite[Studio.spriteFinishIndex].width / (2 * Studio.SQUARE_SIZE);
+    var ySpriteCenter =
+      Studio.sprite[Studio.spriteFinishIndex].y +
+      Studio.sprite[Studio.spriteFinishIndex].height / (2 * Studio.SQUARE_SIZE);
     for (i = 0, finished = 0; i < Studio.spriteFinishCount; i++) {
       if (!Studio.spriteFinish_[i].finished) {
-        if (essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].x,
-                             Studio.spriteFinish_[i].x,
-                             tiles.FINISH_COLLIDE_DISTANCE) &&
-            essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].y,
-                             Studio.spriteFinish_[i].y,
-                             tiles.FINISH_COLLIDE_DISTANCE)) {
+        var xFinCenter = Studio.spriteFinish_[i].x +
+                          Studio.MARKER_WIDTH / (2 * Studio.SQUARE_SIZE);
+        var yFinCenter = Studio.spriteFinish_[i].y +
+                          Studio.MARKER_HEIGHT / (2 * Studio.SQUARE_SIZE);
+        if (collisionTest(xSpriteCenter,
+                          xFinCenter,
+                          finishCollisionDistance(false),
+                          ySpriteCenter,
+                          yFinCenter,
+                          finishCollisionDistance(true))) {
           Studio.spriteFinish_[i].finished = true;
           finished++;
           playSound = true;
@@ -9564,9 +9613,9 @@ exports.Emotions = {
   SAD: 3,
 };
 
-exports.FINISH_COLLIDE_DISTANCE = 1.5;
-exports.SPRITE_COLLIDE_DISTANCE = 1.8;
-exports.PROJECTILE_COLLIDE_DISTANCE = 1.3;
+// scale the collision bounding box to make it so they need to overlap a touch:
+exports.FINISH_COLLIDE_DISTANCE_SCALING = 0.75;
+exports.SPRITE_COLLIDE_DISTANCE_SCALING = 0.9;
 exports.DEFAULT_SPRITE_SPEED = 0.1;
 
 /**
