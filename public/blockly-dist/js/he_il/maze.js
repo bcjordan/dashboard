@@ -9163,11 +9163,9 @@ Maze.scheduleDance = function(victoryDance) {
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 20);
   }, danceSpeed * 4);
-  if (!victoryDance) {
-    timeoutList.setTimeout(function() {
-      Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
-    }, danceSpeed * 5);
-  }
+  timeoutList.setTimeout(function() {
+    Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
+  }, danceSpeed * 5);
 };
 
 /**
