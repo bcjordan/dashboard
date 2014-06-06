@@ -339,7 +339,7 @@ BlocklyApps.init = function(config) {
     });
   }
 
-  var blockCount = document.getElementById('workspace-header');
+  var blockCount = document.getElementById('blockCounter');
   if (blockCount && !BlocklyApps.enableShowBlockCount) {
     blockCount.style.visibility = 'hidden';
   }
@@ -784,7 +784,6 @@ BlocklyApps.TestResults = {
   // Two stars.  The level was solved in an acceptable, but not ideal, manner.
   TOO_MANY_BLOCKS_FAIL: 20,   // More than the ideal number of blocks were used.
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
-  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy app failure. TODO: Fold into prior case.
 
   // Other.
   FREE_PLAY: 30,              // The user is in free-play mode.
@@ -1428,84 +1427,85 @@ var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
   var message;
-  switch (options.feedbackType) {
-    case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
-      message = msg.emptyBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
-      message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
-      break;
-    case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
-      message = options.level.levelIncompleteError ||
-          msg.levelIncompleteError();
-      break;
-    case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
-      message = msg.extraTopBlocks();
-      break;
-    // For completing level, user gets at least one star.
-    case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
-      message = options.level.other1StarError || options.message;
-      break;
-    // Two stars for using too many blocks.
-    case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
-      message = msg.numBlocksNeeded({
-        numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
-        puzzleNumber: options.level.puzzle_number || 0
-      });
-      break;
-    case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
-      message = msg.tooMuchWork();
-      break;
-    case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
-      message = msg.flappySpecificFail();
-      break;
-    case BlocklyApps.TestResults.EDIT_BLOCKS:
-      message = options.level.edit_blocks_success;
-      break;
-    case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
-      /* fallthrough */
-    case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
-      message = msg.missingBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.ALL_PASS:
-      var finalLevel = (options.response &&
-          (options.response.message == "no more levels"));
-      var stageCompleted = null;
-      if (options.response && options.response.stage_changing) {
-        stageCompleted = options.response.stage_changing.previous.name;
-      }
-      var msgParams = {
-        numTrophies: options.numTrophies,
-        stageNumber: 0, // TODO: remove once localized strings have been fixed
-        stageName: stageCompleted,
-        puzzleNumber: options.level.puzzle_number || 0
-      };
-      if (options.numTrophies > 0) {
-        message = finalLevel ? msg.finalStageTrophies(msgParams) :
-                               stageCompleted ?
-                                  msg.nextStageTrophies(msgParams) :
-                                  msg.nextLevelTrophies(msgParams);
-      } else {
-        message = finalLevel ? msg.finalStage(msgParams) :
-                               stageCompleted ?
-                                   msg.nextStage(msgParams) :
-                                   msg.nextLevel(msgParams);
-      }
-      break;
-    // Free plays
-    case BlocklyApps.TestResults.FREE_PLAY:
-      message = options.appStrings.reinfFeedbackMsg;
-      break;
-  }
-  // Database hint overwrites the default hint.
+
+  // If there's a database hint, use that.
   if (options.response && options.response.hint) {
     message = options.response.hint;
+  } else {
+    // Otherwise, the message will depend on the test result.
+    switch (options.feedbackType) {
+      case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
+        message = msg.emptyBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
+        message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
+        break;
+      case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
+        message = options.level.levelIncompleteError ||
+            msg.levelIncompleteError();
+        break;
+      case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
+        message = msg.extraTopBlocks();
+        break;
+      // For completing level, user gets at least one star.
+      case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
+        message = options.level.other1StarError || options.message;
+        break;
+      // Two stars for using too many blocks.
+      case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
+        message = msg.numBlocksNeeded({
+          numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
+          puzzleNumber: options.level.puzzle_number || 0
+        });
+        break;
+      case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
+        message = msg.tooMuchWork();
+        break;
+      case BlocklyApps.TestResults.EDIT_BLOCKS:
+        message = options.level.edit_blocks_success;
+        break;
+      case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
+        /* fallthrough */
+      case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
+        message = msg.missingBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.ALL_PASS:
+        var finalLevel = (options.response &&
+            (options.response.message == "no more levels"));
+        var stageCompleted = null;
+        if (options.response && options.response.stage_changing) {
+          stageCompleted = options.response.stage_changing.previous.name;
+        }
+        var msgParams = {
+          numTrophies: options.numTrophies,
+          stageNumber: 0, // TODO: remove once localized strings have been fixed
+          stageName: stageCompleted,
+          puzzleNumber: options.level.puzzle_number || 0
+        };
+        if (options.numTrophies > 0) {
+          message = finalLevel ? msg.finalStageTrophies(msgParams) :
+                                 stageCompleted ?
+                                    msg.nextStageTrophies(msgParams) :
+                                    msg.nextLevelTrophies(msgParams);
+        } else {
+          message = finalLevel ? msg.finalStage(msgParams) :
+                                 stageCompleted ?
+                                     msg.nextStage(msgParams) :
+                                     msg.nextLevel(msgParams);
+        }
+        break;
+      // Free plays
+      case BlocklyApps.TestResults.FREE_PLAY:
+        message = options.appStrings.reinfFeedbackMsg;
+        break;
+    }
   }
+
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-   if (options.response && options.response.design &&
-       isFeedbackMessageCustomized(options)) {
+  if (options.response && options.response.design &&
+      isFeedbackMessageCustomized(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1536,7 +1536,9 @@ var isFeedbackMessageCustomized = function(options) {
       (options.feedbackType == BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL &&
        options.level.levelIncompleteError) ||
       (options.feedbackType == BlocklyApps.TestResults.OTHER_1_STAR_FAIL &&
-       options.level.other1StarError);
+       options.level.other1StarError) ||
+      (options.feedbackType == BlocklyApps.TestResults.OTHER_2_STAR_FAIL &&
+       options.level.other2StarError);
 };
 
 exports.createSharingDiv = function(options) {
@@ -6173,7 +6175,7 @@ with (locals || {}) { (function(){
   var msg = require('../../locale/pt_br/common');
   var hideRunButton = locals.hideRunButton || false;
 ; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');17; };; buf.push('\n');18; // A spot for the server to inject some HTML for help content.
-var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((67,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((68,  data.blockCounterClass )), '>\n        ', escape((69,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((72,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((74,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');80; codeArea() ; buf.push('\n'); })();
+var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span>', escape((67,  msg.workspaceHeader())), ' </span>\n      <div id="blockCounter">\n        <div id="blockUsed" class=', escape((69,  data.blockCounterClass )), '>\n          ', escape((70,  data.blockUsed )), '\n        </div>\n        <span>&nbsp;/</span>\n        <span id="idealBlockNumber">', escape((73,  data.idealBlockNumber )), '</span>\n      </div>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((76,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');82; codeArea() ; buf.push('\n'); })();
 } 
 return buf.join('');
 };
@@ -6494,8 +6496,6 @@ exports.tooFewBlocksMsg = function(d){return "Você está usando todos os tipos 
 exports.tooManyBlocksMsg = function(d){return "Este quebra-cabeça pode ser resolvido com < x id='START_SPAN'/>< x id= 'END_SPAN'/> blocos."};
 
 exports.tooMuchWork = function(d){return "Você me fez trabalhar bastante! Podemos tentar repetindo menos vezes?"};
-
-exports.flappySpecificFail = function(d){return "Seu código parece bom - ele irá bater as asas com cada clique. Mas você precisa clicar muitas vezes para bater as asas para o alvo."};
 
 exports.toolboxHeader = function(d){return "Blocos"};
 

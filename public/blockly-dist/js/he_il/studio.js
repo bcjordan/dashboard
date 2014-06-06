@@ -339,7 +339,7 @@ BlocklyApps.init = function(config) {
     });
   }
 
-  var blockCount = document.getElementById('workspace-header');
+  var blockCount = document.getElementById('blockCounter');
   if (blockCount && !BlocklyApps.enableShowBlockCount) {
     blockCount.style.visibility = 'hidden';
   }
@@ -784,7 +784,6 @@ BlocklyApps.TestResults = {
   // Two stars.  The level was solved in an acceptable, but not ideal, manner.
   TOO_MANY_BLOCKS_FAIL: 20,   // More than the ideal number of blocks were used.
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
-  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy app failure. TODO: Fold into prior case.
 
   // Other.
   FREE_PLAY: 30,              // The user is in free-play mode.
@@ -1428,84 +1427,85 @@ var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
   var message;
-  switch (options.feedbackType) {
-    case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
-      message = msg.emptyBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
-      message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
-      break;
-    case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
-      message = options.level.levelIncompleteError ||
-          msg.levelIncompleteError();
-      break;
-    case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
-      message = msg.extraTopBlocks();
-      break;
-    // For completing level, user gets at least one star.
-    case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
-      message = options.level.other1StarError || options.message;
-      break;
-    // Two stars for using too many blocks.
-    case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
-      message = msg.numBlocksNeeded({
-        numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
-        puzzleNumber: options.level.puzzle_number || 0
-      });
-      break;
-    case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
-      message = msg.tooMuchWork();
-      break;
-    case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
-      message = msg.flappySpecificFail();
-      break;
-    case BlocklyApps.TestResults.EDIT_BLOCKS:
-      message = options.level.edit_blocks_success;
-      break;
-    case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
-      /* fallthrough */
-    case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
-      message = msg.missingBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.ALL_PASS:
-      var finalLevel = (options.response &&
-          (options.response.message == "no more levels"));
-      var stageCompleted = null;
-      if (options.response && options.response.stage_changing) {
-        stageCompleted = options.response.stage_changing.previous.name;
-      }
-      var msgParams = {
-        numTrophies: options.numTrophies,
-        stageNumber: 0, // TODO: remove once localized strings have been fixed
-        stageName: stageCompleted,
-        puzzleNumber: options.level.puzzle_number || 0
-      };
-      if (options.numTrophies > 0) {
-        message = finalLevel ? msg.finalStageTrophies(msgParams) :
-                               stageCompleted ?
-                                  msg.nextStageTrophies(msgParams) :
-                                  msg.nextLevelTrophies(msgParams);
-      } else {
-        message = finalLevel ? msg.finalStage(msgParams) :
-                               stageCompleted ?
-                                   msg.nextStage(msgParams) :
-                                   msg.nextLevel(msgParams);
-      }
-      break;
-    // Free plays
-    case BlocklyApps.TestResults.FREE_PLAY:
-      message = options.appStrings.reinfFeedbackMsg;
-      break;
-  }
-  // Database hint overwrites the default hint.
+
+  // If there's a database hint, use that.
   if (options.response && options.response.hint) {
     message = options.response.hint;
+  } else {
+    // Otherwise, the message will depend on the test result.
+    switch (options.feedbackType) {
+      case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
+        message = msg.emptyBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
+        message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
+        break;
+      case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
+        message = options.level.levelIncompleteError ||
+            msg.levelIncompleteError();
+        break;
+      case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
+        message = msg.extraTopBlocks();
+        break;
+      // For completing level, user gets at least one star.
+      case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
+        message = options.level.other1StarError || options.message;
+        break;
+      // Two stars for using too many blocks.
+      case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
+        message = msg.numBlocksNeeded({
+          numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
+          puzzleNumber: options.level.puzzle_number || 0
+        });
+        break;
+      case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
+        message = msg.tooMuchWork();
+        break;
+      case BlocklyApps.TestResults.EDIT_BLOCKS:
+        message = options.level.edit_blocks_success;
+        break;
+      case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
+        /* fallthrough */
+      case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
+        message = msg.missingBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.ALL_PASS:
+        var finalLevel = (options.response &&
+            (options.response.message == "no more levels"));
+        var stageCompleted = null;
+        if (options.response && options.response.stage_changing) {
+          stageCompleted = options.response.stage_changing.previous.name;
+        }
+        var msgParams = {
+          numTrophies: options.numTrophies,
+          stageNumber: 0, // TODO: remove once localized strings have been fixed
+          stageName: stageCompleted,
+          puzzleNumber: options.level.puzzle_number || 0
+        };
+        if (options.numTrophies > 0) {
+          message = finalLevel ? msg.finalStageTrophies(msgParams) :
+                                 stageCompleted ?
+                                    msg.nextStageTrophies(msgParams) :
+                                    msg.nextLevelTrophies(msgParams);
+        } else {
+          message = finalLevel ? msg.finalStage(msgParams) :
+                                 stageCompleted ?
+                                     msg.nextStage(msgParams) :
+                                     msg.nextLevel(msgParams);
+        }
+        break;
+      // Free plays
+      case BlocklyApps.TestResults.FREE_PLAY:
+        message = options.appStrings.reinfFeedbackMsg;
+        break;
+    }
   }
+
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-   if (options.response && options.response.design &&
-       isFeedbackMessageCustomized(options)) {
+  if (options.response && options.response.design &&
+      isFeedbackMessageCustomized(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1536,7 +1536,9 @@ var isFeedbackMessageCustomized = function(options) {
       (options.feedbackType == BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL &&
        options.level.levelIncompleteError) ||
       (options.feedbackType == BlocklyApps.TestResults.OTHER_1_STAR_FAIL &&
-       options.level.other1StarError);
+       options.level.other1StarError) ||
+      (options.feedbackType == BlocklyApps.TestResults.OTHER_2_STAR_FAIL &&
+       options.level.other2StarError);
 };
 
 exports.createSharingDiv = function(options) {
@@ -5105,8 +5107,8 @@ exports.moveDistance = function(id, spriteIndex, dir, distance) {
       {'spriteIndex': spriteIndex, 'dir': dir, 'distance': distance});
 };
 
-exports.incrementScore = function(id, player) {
-  Studio.queueCmd(id, 'incrementScore', {'player': player});
+exports.changeScore = function(id, value) {
+  Studio.queueCmd(id, 'changeScore', {'value': value});
 };
 
 exports.setScoreText = function(id, text) {
@@ -5784,27 +5786,34 @@ exports.install = function(blockly, blockInstallOptions) {
                this.getTitleValue('SOUND') + '\');\n';
   };
 
-  blockly.Blocks.studio_incrementScore = {
-    // Block for incrementing the score.
+  blockly.Blocks.studio_changeScore = {
+    // Block for changing the score.
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.PLAYERS), 'PLAYER');
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(msg.incrementPlayerScore());
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
-      this.setTooltip(msg.incrementScoreTooltip());
+      this.setTooltip(isK1 ?
+                        msg.changeScoreTooltipK1() :
+                        msg.changeScoreTooltip());
     }
   };
 
-  blockly.Blocks.studio_incrementScore.PLAYERS =
-      [[msg.incrementPlayerScore(), 'player'],
-       [msg.incrementOpponentScore(), 'opponent']];
+  blockly.Blocks.studio_changeScore.VALUES =
+      [[msg.incrementPlayerScore(), '1'],
+       [msg.decrementPlayerScore(), '-1']];
 
-  generator.studio_incrementScore = function() {
-    // Generate JavaScript for incrementing the score.
-    return 'Studio.incrementScore(\'block_id_' + this.id + '\', \'' +
-                this.getTitleValue('PLAYER') + '\');\n';
+  generator.studio_changeScore = function() {
+    // Generate JavaScript for changing the score.
+    return 'Studio.changeScore(\'block_id_' + this.id + '\', \'' +
+                (this.getTitleValue('VALUE') || '1') + '\');\n';
   };
 
   blockly.Blocks.studio_setScoreText = {
@@ -6614,7 +6623,7 @@ module.exports = {
     'spriteStartingImage': 2,
     'spriteFinishIndex': 1,
     'timeoutFailureTick': 150,
-    'minWorkspaceHeight': 500,
+    'minWorkspaceHeight': 750,
     'toolbox':
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
@@ -6626,19 +6635,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="100"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="180"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="260"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="340"></block>'
+      <block type="studio_repeatForever" deletable="false" x="20" y="500"></block>'
   },
   '10': {
     'requiredBlocks': [
@@ -6664,8 +6673,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'spriteFinishIndex': 1,
-    'minWorkspaceHeight': 600,
+    'minWorkspaceHeight': 950,
     'goal': {
       successCondition: function () {
         return (Studio.playSoundCount > 0) &&
@@ -6686,19 +6694,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="100"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="180"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="260"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="340"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -6708,7 +6716,163 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="450"></block>'
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"></block>'
+  },
+  '11': {
+    'requiredBlocks': [
+      [{'test': 'changeScore', 'type': 'studio_changeScore'}],
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'softButtons': [
+      'leftButton',
+      'rightButton',
+      'downButton',
+      'upButton'
+    ],
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [16,0, 0, 0,16, 0,16, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'spriteStartingImage': 2,
+    'minWorkspaceHeight': 1050,
+    'goal': {
+      successCondition: function () {
+        return Studio.sprite[0].collisionMask & Math.pow(2, 2);
+      }
+    },
+    'timeoutFailureTick': 600,
+    'toolbox':
+      tb('<block type="studio_moveDistance"> \
+           <title name="DISTANCE">400</title> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_saySprite"> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_playSound"> \
+           <title name="SOUND">crunch</title></block>' +
+         blockOfType('studio_changeScore')),
+    'startBlocks':
+     '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">8</title></block> \
+        </next></block> \
+      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">2</title></block> \
+        </next></block> \
+      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">1</title></block> \
+        </next></block> \
+      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">4</title></block> \
+        </next></block> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+        <statement name="DO"><block type="studio_moveDistance"> \
+                <title name="SPRITE">1</title> \
+                <title name="DISTANCE">400</title> \
+          <next><block type="studio_moveDistance"> \
+                  <title name="SPRITE">1</title> \
+                  <title name="DISTANCE">400</title> \
+                  <title name="DIR">4</title></block> \
+          </next></block> \
+      </statement></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"> \
+        <next><block type="studio_playSound"> \
+                <title name="SOUND">crunch</title></block> \
+        </next></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="820"> \
+       <title name="SPRITE2">2</title></block>'
+  },
+  '12': {
+    'requiredBlocks': [
+      [{'test': 'setBackground', 'type': 'studio_setBackground'}],
+      [{'test': 'setSpriteSpeed', 'type': 'studio_setSpriteSpeed'}],
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'softButtons': [
+      'leftButton',
+      'rightButton',
+      'downButton',
+      'upButton'
+    ],
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [16,0, 0, 0,16, 0,16, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'spriteStartingImage': 2,
+    'minWorkspaceHeight': 1200,
+    'goal': {
+      successCondition: function () {
+        return Studio.sprite[0].collisionMask & Math.pow(2, 2);
+      }
+    },
+    'timeoutFailureTick': 600,
+    'toolbox':
+      tb('<block type="studio_setBackground"> \
+           <title name="VALUE">"night"</title></block>' +
+         '<block type="studio_moveDistance"> \
+           <title name="DISTANCE">400</title> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_saySprite"> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_playSound"> \
+           <title name="SOUND">crunch</title></block>' +
+         blockOfType('studio_changeScore') +
+         '<block type="studio_setSpriteSpeed"> \
+          <title name="VALUE">Studio.SpriteSpeed.VERY_FAST</title></block>'),
+    'startBlocks':
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
+      <block type="studio_whenLeft" deletable="false" x="20" y="200"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">8</title></block> \
+        </next></block> \
+      <block type="studio_whenRight" deletable="false" x="20" y="320"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">2</title></block> \
+        </next></block> \
+      <block type="studio_whenUp" deletable="false" x="20" y="440"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">1</title></block> \
+        </next></block> \
+      <block type="studio_whenDown" deletable="false" x="20" y="560"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">4</title></block> \
+        </next></block> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="680"> \
+        <statement name="DO"><block type="studio_moveDistance"> \
+                <title name="SPRITE">1</title> \
+                <title name="DISTANCE">400</title> \
+          <next><block type="studio_moveDistance"> \
+                  <title name="SPRITE">1</title> \
+                  <title name="DISTANCE">400</title> \
+                  <title name="DIR">4</title></block> \
+          </next></block> \
+      </statement></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="880"> \
+        <next><block type="studio_playSound"> \
+                <title name="SOUND">crunch</title></block> \
+        </next></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1000"> \
+       <title name="SPRITE2">2</title> \
+        <next><block type="studio_changeScore"></block> \
+        </next></block>'
   },
   '13': {
     'requiredBlocks': [
@@ -6722,7 +6886,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1000,
+    'minWorkspaceHeight': 1300,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -6748,7 +6912,7 @@ module.exports = {
          blockOfType('studio_move') +
          blockOfType('studio_moveDistance') +
          blockOfType('studio_playSound') +
-         blockOfType('studio_incrementScore') +
+         blockOfType('studio_changeScore') +
          blockOfType('studio_saySprite') +
          blockOfType('studio_setSpriteSpeed') +
          blockOfType('studio_setSpriteEmotion')),
@@ -6798,7 +6962,7 @@ module.exports = {
          blockOfType('studio_stop') +
          blockOfType('studio_wait') +
          blockOfType('studio_playSound') +
-         blockOfType('studio_incrementScore') +
+         blockOfType('studio_changeScore') +
          blockOfType('studio_saySprite') +
          blockOfType('studio_setSpritePosition') +
          blockOfType('studio_throw') +
@@ -6953,6 +7117,8 @@ module.exports.k1_5 = utils.extend(module.exports['8'],  {'is_k1': true});
 module.exports.k1_6 = utils.extend(module.exports['4'],  {'is_k1': true});
 module.exports.k1_7 = utils.extend(module.exports['9'],  {'is_k1': true});
 module.exports.k1_8 = utils.extend(module.exports['10'], {'is_k1': true});
+module.exports.k1_9 = utils.extend(module.exports['11'], {'is_k1': true});
+module.exports.k1_10 = utils.extend(module.exports['12'], {'is_k1': true});
 module.exports.k1_11 = utils.extend(module.exports['13'], {'is_k1': true});
 
 },{"../../locale/he_il/studio":38,"../block_utils":3,"../utils":35,"./tiles":22}],18:[function(require,module,exports){
@@ -8136,7 +8302,6 @@ BlocklyApps.reset = function(first) {
 
   // Reset the score and title screen.
   Studio.playerScore = 0;
-  Studio.opponentScore = 0;
   Studio.scoreText = null;
   document.getElementById('score')
     .setAttribute('visibility', 'hidden');
@@ -8232,7 +8397,7 @@ BlocklyApps.runButtonClick = function() {
     shareCell.className = 'share-cell-enabled';
   }
 
-  if (level.showZeroZeroScore) {
+  if (level.showZeroScore) {
     Studio.displayScore();
   }
 };
@@ -8624,8 +8789,7 @@ Studio.displayScore = function() {
     score.textContent = Studio.scoreText;
   } else {
     score.textContent = studioMsg.scoreText({
-      playerScore: Studio.playerScore,
-      opponentScore: Studio.opponentScore
+      playerScore: Studio.playerScore
     });
   }
   score.setAttribute('visibility', 'visible');
@@ -8727,9 +8891,9 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       Studio.makeProjectile(cmd.opts);
       break;
-    case 'incrementScore':
+    case 'changeScore':
       BlocklyApps.highlight(cmd.id);
-      Studio.incrementScore(cmd.opts);
+      Studio.changeScore(cmd.opts);
       break;
     case 'setScoreText':
       BlocklyApps.highlight(cmd.id);
@@ -8752,12 +8916,8 @@ Studio.setSpriteSpeed = function (opts) {
   Studio.sprite[opts.spriteIndex].speed = opts.value;
 };
 
-Studio.incrementScore = function (opts) {
-  if (opts.player == "opponent") {
-    Studio.opponentScore++;
-  } else {
-    Studio.playerScore++;
-  }
+Studio.changeScore = function (opts) {
+  Studio.playerScore += Number(opts.value);
   Studio.displayScore();
 };
 
@@ -9586,7 +9746,7 @@ with (locals || {}) { (function(){
   var msg = require('../../locale/he_il/common');
   var hideRunButton = locals.hideRunButton || false;
 ; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');17; };; buf.push('\n');18; // A spot for the server to inject some HTML for help content.
-var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((67,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((68,  data.blockCounterClass )), '>\n        ', escape((69,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((72,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((74,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');80; codeArea() ; buf.push('\n'); })();
+var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span>', escape((67,  msg.workspaceHeader())), ' </span>\n      <div id="blockCounter">\n        <div id="blockUsed" class=', escape((69,  data.blockCounterClass )), '>\n          ', escape((70,  data.blockUsed )), '\n        </div>\n        <span>&nbsp;/</span>\n        <span id="idealBlockNumber">', escape((73,  data.idealBlockNumber )), '</span>\n      </div>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((76,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');82; codeArea() ; buf.push('\n'); })();
 } 
 return buf.join('');
 };
@@ -9908,8 +10068,6 @@ exports.tooManyBlocksMsg = function(d){return "ניתן לפתור את החיד
 
 exports.tooMuchWork = function(d){return "גרמת לי להרבה עבודה! האם אתה יכול לנסות לחזור פחות פעמים?"};
 
-exports.flappySpecificFail = function(d){return "הקוד שלך נראה טוב -. זה יעוף עם כל לחיצה. אבל אתה צריך ללחוץ הרבה פעמים כדי לנופף אל המטרה."};
-
 exports.toolboxHeader = function(d){return "בלוקים"};
 
 exports.openWorkspace = function(d){return "איך זה עובד"};
@@ -9969,15 +10127,17 @@ exports.catText = function(d){return "Text"};
 
 exports.catVariables = function(d){return "Variables"};
 
+exports.changeScoreTooltip = function(d){return "Add or remove a point to the score."};
+
+exports.changeScoreTooltipK1 = function(d){return "Add a point to the score."};
+
 exports.continue = function(d){return "המשך"};
+
+exports.decrementPlayerScore = function(d){return "remove point"};
 
 exports.defaultSayText = function(d){return "type here"};
 
 exports.finalLevel = function(d){return "מזל טוב! השלמת את הפאזל האחרון."};
-
-exports.incrementOpponentScore = function(d){return "הגדל ניקוד של היריב"};
-
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
 
 exports.incrementPlayerScore = function(d){return "הגדל ניקוד שחקן"};
 
