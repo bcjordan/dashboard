@@ -13,8 +13,8 @@ class ScriptLevelsControllerTest < ActionController::TestCase
     @script_level = @script.script_levels.fifth
 
     @custom_script = create(:script, :name => 'laurel')
-    @custom_stage_1 = create(:stage, script: @custom_script, position: 1)
-    @custom_stage_2 = create(:stage, script: @custom_script, position: 2)
+    @custom_stage_1 = create(:stage, script: @custom_script, name: 'Laurel Stage 1', position: 1)
+    @custom_stage_2 = create(:stage, script: @custom_script, name: 'Laurel Stage 2', position: 2)
     @custom_s1_l1 = create(:script_level, script: @custom_script,
                            stage: @custom_stage_1, :position => 1)
     @custom_s2_l1 = create(:script_level, script: @custom_script,
@@ -223,4 +223,39 @@ class ScriptLevelsControllerTest < ActionController::TestCase
     get :show, script_id: script_level.script.id, id: next_script_level.id
     assert_equal blocks, assigns["start_blocks"]
   end
+
+  test 'should render title for puzzle in default script' do
+    get :show, script_id: @script.id, id: @script_level.id
+    assert_equal 'Code.org - The Maze #4',
+      Nokogiri::HTML(@response.body).css('title').text.strip
+  end
+
+  test 'should render title for puzzle in custom script' do
+    get :show, script_id: @custom_script.name, stage_id: @custom_s2_l1.stage, id: @custom_s2_l1.position
+    assert_equal 'Code.org - custom-script-laurel: laurel-stage-2 #1',
+      Nokogiri::HTML(@response.body).css('title').text.strip
+  end
+
+  test 'show stage name in header for custom multi-stage script' do
+    get :show, script_id: @custom_script, stage_id: 2, id: 1
+    assert_template partial: '_header'
+    # js-encoded referenceArea causes assert_select to output warnings, so we need to use Nokogiri instead
+    assert_equal "Stage:\n#{I18n.t("data.script.name.#{@custom_script.name}.#{@custom_stage_2.name}")},\nPuzzle",
+      css('body div.header_level div.header_text').text.strip
+  end
+
+  test 'show stage position in header for default script' do
+    get :show, script_id: @script, id: @script_level.id
+    assert_template partial: '_header'
+    assert_equal "Stage 2:\n\nPuzzle",
+      css('body div.header_level div.header_text')[0].text.strip
+  end
+
+  test 'show Puzzle in header for HOC' do
+    get :show, script_id: Script.find(Script::HOC_ID).id, chapter: 1
+    assert_template partial: '_header'
+    assert_equal 'Puzzle',
+      css('body div.header_level div.header_text')[0].text.strip
+  end
+
 end

@@ -1,0 +1,13 @@
+= render partial: 'teacher/new_teacher_nav'
+
+%h1=  "Progress for #{@user.name}" 
+
+Teacher view of student progress goes here
+
+- if @user.scripts.empty?
+  No progress yet!
+
+- @user.scripts.each do |script|
+  %h2= script.name
+
+  = render partial: 'shared/user_stats', locals: { user: @user, script: script, hide_trophies: true }

@@ -26,8 +26,8 @@
                 - multiple_puzzles = game_levels.count > 1
 
                 .header_text
-                  - if script.twenty_hour?
-                    #{data_t_suffix('script.name', script.name, @game.name)}#{multiple_puzzles ? ':' : ''}
+                  = "#{@script_level.stage_position_str}#{multiple_puzzles || @stage ? ':' : ''}" if script.multiple_games?
+                  = "#{@script_level.name}#{multiple_puzzles ? ',' : ''}" if @stage
                   = t(:puzzle) if multiple_puzzles
                 - if multiple_puzzles
                   - game_levels.each do |sl|

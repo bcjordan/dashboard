@@ -15,8 +15,10 @@
       - data['answers'].each_with_index do |answer, i|
         - correct = answer["correct"]
         .item
-          .item-radio
+          .item-radio{id: "radio_#{i}"}
             %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
+          .item-cross{id: "cross_#{i}", style: "display: none"}
+            %b X
           .item-label{style: "height: #{height}"}
             %label{for: "choice_#{i}"}!= multi_t(answer['text'])
 
@@ -61,12 +63,14 @@
 :javascript
 
   var selection = "none";   // "none", "wrong", "right"
+  var selectionIndex = -1;
   var buttonEnabled = true;  // avoid multiple simultaneous submissions
 
   function radioChanged(index) 
   {
     enableButton(true);
     selection = $("#choice_" + index).attr("correct") == "true" ? "right" : "wrong";
+    selectionIndex = index;
   }
 
   $(function() 
@@ -124,6 +128,8 @@
       if (selection == "wrong") 
       {
         showDialog("error");
+        $("#radio_" + selectionIndex).hide();
+        $("#cross_" + selectionIndex).show();
       }
 
       if (selection != "none")

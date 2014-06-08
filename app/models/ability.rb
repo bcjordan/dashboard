@@ -9,13 +9,12 @@ class Ability
       can :manage, :all
     else
       can :read, :all
-      cannot :read, [PrizeProvider, Prize, TeacherPrize, TeacherBonusPrize, LevelSourceHint, FrequentUnsuccessfulLevelSource, :reports]
+      cannot :read, [PrizeProvider, Prize, TeacherPrize, TeacherBonusPrize, LevelSourceHint, FrequentUnsuccessfulLevelSource, :reports, User]
       can :claim_prize, PrizeProvider
     end
+
     if user.id
       can :manage, user
-      # don't want to run this for every request:
-      # can :manage, user.students.where("email = ''")
 
       # TODO a bunch of these should probably be limited by user_id
       can :manage, Section, user_id: user.id # TODO limit this to teachers
@@ -30,8 +29,9 @@ class Ability
       can :manage, [LevelSourceHint, FrequentUnsuccessfulLevelSource]
     end
 
-    if user.teacher?
+    if user.teacher? || !user.students.empty? # remove second when we fix users so all teachers are teachers
       can :manage, :teacher
+      can :manage, user.students
     end
     #
     # The first argument to `can` is the action you are giving the user 

@@ -55,7 +55,7 @@
           - stages << levels.length
     - students.each do |student|
       %tr.report_row
-        %td.fixed_width_cell= link_to student.name, user_stats_path(student)
+        %td.fixed_width_cell= link_to student.name, student
         - level_map = student.user_levels.index_by {|ul| ul.level_id }
         - final_index = rand(@all_script_levels.length)
         - stage_upto = 0

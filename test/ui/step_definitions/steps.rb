@@ -61,6 +61,10 @@ When /^I press "([^"]*)" using jQuery$/ do |button|
   @browser.execute_script("$('#" + button + "').click()");
 end
 
+When /^I press dropdown item "([^"]*)"$/ do |index|
+  @browser.execute_script("$('.goog-menuitem').eq(#{index}).simulate('drag', function(){})");
+end
+
 When /^I press a button with xpath "([^"]*)"$/ do |xpath|
   @button = @browser.find_element(:xpath, xpath)
   @button.click
@@ -104,6 +108,21 @@ end
 Then /^there's an image "([^"]*)"$/ do |path|
   exists = @browser.execute_script("return $('img[src*=\"#{path}\"]').length != 0;")
   exists.should eq true
+end
+
+Then /^there's a div with a background image "([^"]*)"$/ do |path|
+  exists = @browser.execute_script("return $('div').filter(function(){return $(this).css('background-image').indexOf('#{path}') != -1 }).length > 0");
+  exists.should eq true
+end
+
+Then /^there's an SVG image "([^"]*)"$/ do |path|
+  exists = @browser.execute_script("return $('image').filter('[xlink\\\\:href*=\"#{path}\"]').length != 0")
+  exists.should eq true
+end
+
+Then /^there's not an SVG image "([^"]*)"$/ do |path|
+  exists = @browser.execute_script("return $('image').filter('[xlink\\\\:href*=\"#{path}\"]').length != 0")
+  exists.should eq false
 end
 
 Then(/^"([^"]*)" should be in front of "([^"]*)"$/) do |selector_front, selector_behind|
