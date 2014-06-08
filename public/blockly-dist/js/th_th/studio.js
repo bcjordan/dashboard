@@ -5020,8 +5020,6 @@ module.exports = Slider;
 
 },{}],13:[function(require,module,exports){
 var tiles = require('./tiles');
-var xFromPosition = tiles.xFromPosition;
-var yFromPosition = tiles.yFromPosition;
 
 exports.SpriteSpeed = {
   VERY_SLOW: 0.04,
@@ -5069,9 +5067,7 @@ exports.setSpriteSpeed = function (id, spriteIndex, value) {
 exports.setSpritePosition = function (id, spriteIndex, value) {
   Studio.queueCmd(id,
                   'setSpritePosition',
-                  {'spriteIndex': spriteIndex,
-                   'x': xFromPosition[value],
-                   'y': yFromPosition[value]});
+                  {'spriteIndex': spriteIndex, 'value': value});
 };
 
 exports.playSound = function(id, soundName) {
@@ -9326,8 +9322,55 @@ Studio.makeProjectile = function (opts) {
   }
 };
 
+//
+// xFromPosition: return left-most point of sprite given position constant
+//
+
+var xFromPosition = function (sprite, position) {
+  switch (position) {
+    case tiles.Position.TOPLEFT:
+    case tiles.Position.MIDDLELEFT:
+    case tiles.Position.BOTTOMLEFT:
+      return 0;
+    case tiles.Position.TOPCENTER:
+    case tiles.Position.MIDDLECENTER:
+    case tiles.Position.BOTTOMCENTER:
+      return (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.TOPRIGHT:
+    case tiles.Position.MIDDLERIGHT:
+    case tiles.Position.BOTTOMRIGHT:
+      return Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
+  }
+};
+
+//
+// yFromPosition: return top-most point of sprite given position constant
+//
+
+var yFromPosition = function (sprite, position) {
+  switch (position) {
+    case tiles.Position.TOPLEFT:
+    case tiles.Position.TOPCENTER:
+    case tiles.Position.TOPRIGHT:
+      return 0;
+    case tiles.Position.MIDDLELEFT:
+    case tiles.Position.MIDDLECENTER:
+    case tiles.Position.MIDDLERIGHT:
+      return (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.BOTTOMLEFT:
+    case tiles.Position.BOTTOMCENTER:
+    case tiles.Position.BOTTOMRIGHT:
+      return Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
+  }
+};
+
 Studio.setSpritePosition = function (opts) {
   var sprite = Studio.sprite[opts.spriteIndex];
+  if (opts.value) {
+    // fill in .x and .y from the tiles.Position value in opts.value
+    opts.x = xFromPosition(sprite, opts.value);
+    opts.y = yFromPosition(sprite, opts.value);
+  }
   var samePosition = (sprite.x === opts.x && sprite.y === opts.y);
 
   // Don't reset collisions inside stop() if we're in the same position
@@ -9488,34 +9531,6 @@ exports.Position = {
   BOTTOMCENTER: 8,
   BOTTOMRIGHT: 9,
 };
-
-//
-// Coordinates for each Position (revisit when Sprite size is variable)
-//
-
-var Pos = exports.Position;
-
-exports.xFromPosition = {};
-exports.xFromPosition[Pos.TOPLEFT] = 0;
-exports.xFromPosition[Pos.TOPCENTER] = 3;
-exports.xFromPosition[Pos.TOPRIGHT] = 6;
-exports.xFromPosition[Pos.MIDDLELEFT] = 0;
-exports.xFromPosition[Pos.MIDDLECENTER] = 3;
-exports.xFromPosition[Pos.MIDDLERIGHT] = 6;
-exports.xFromPosition[Pos.BOTTOMLEFT] = 0;
-exports.xFromPosition[Pos.BOTTOMCENTER] = 3;
-exports.xFromPosition[Pos.BOTTOMRIGHT] = 6;
-
-exports.yFromPosition = {};
-exports.yFromPosition[Pos.TOPLEFT] = 0;
-exports.yFromPosition[Pos.TOPCENTER] = 0;
-exports.yFromPosition[Pos.TOPRIGHT] = 0;
-exports.yFromPosition[Pos.MIDDLELEFT] = 3;
-exports.yFromPosition[Pos.MIDDLECENTER] = 3;
-exports.yFromPosition[Pos.MIDDLERIGHT] = 3;
-exports.yFromPosition[Pos.BOTTOMLEFT] = 6;
-exports.yFromPosition[Pos.BOTTOMCENTER] = 6;
-exports.yFromPosition[Pos.BOTTOMRIGHT] = 6;
 
 //
 // Turn state machine, use as NextTurn[fromDir][toDir]
