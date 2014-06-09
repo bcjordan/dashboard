@@ -93,17 +93,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def get_best_next_hint(options)
-    best_next_hint = nil
+  def get_third_party_hint(options)
+    third_party_hint = nil
     if options[:level_source]
       options[:level_source].level_source_hints.each do |level_source_hint|
         if level_source_hint.hint_id && Hint.find(level_source_hint.hint_id)
-          best_next_hint = Hint.find(level_source_hint.hint_id).message
+          third_party_hint = Hint.find(level_source_hint.hint_id).message
           break
         end
       end
     end
-    best_next_hint
+    third_party_hint
   end
 
   def milestone_response(options)
@@ -141,11 +141,11 @@ class ApplicationController < ActionController::Base
         when ExperimentActivity::TYPE_FEEDBACK_CROWDSOURCED
           hint = get_crowdsourced_hint(options)
         when ExperimentActivity::TYPE_FEEDBACK_BEST_NEXT
-          hint = get_best_next_hint(options)
+          hint = get_third_party_hint(options)
       end
     else
       # Un-logged in users receive crowdsourced hints and best_next hints if available
-      hint = get_crowdsourced_hint(options) || get_best_next_hint(options)
+      hint = get_crowdsourced_hint(options) || get_third_party_hint(options)
     end
 
     response[:hint] = hint if hint
