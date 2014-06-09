@@ -1,4 +1,11 @@
 Dashboard::Application.routes.draw do
+  namespace :v2 do
+    resources :sections, shallow:true do
+      #resources :students
+      #resources :teachers
+    end
+  end
+
   resources :gallery_activities, path: '/gallery'
   resources :teacher_bonus_prizes
   resources :teacher_prizes
