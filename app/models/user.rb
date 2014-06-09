@@ -58,6 +58,12 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :teacher_prize_id, allow_nil: true
   validates_uniqueness_of :teacher_bonus_prize_id, allow_nil: true
 
+  after_create :codeorg_admin if Rails.env == "staging"
+  def codeorg_admin
+    require 'mail'
+    update(admin: true) if Mail::Address.new(email).domain.downcase == 'code.org'
+  end
+  
   def self.from_omniauth(auth)
     where(auth.slice(:provider, :uid)).first_or_create do |user|
       user.provider = auth.provider

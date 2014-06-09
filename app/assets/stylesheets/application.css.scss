@@ -270,7 +270,8 @@ th {
     display: table-cell;
     vertical-align: middle;
     .level {
-      display: inline-block;
+      display: table-cell;
+      padding-left: 4px;
       puzzle-number {
         position: relative;
         top: 1px;
