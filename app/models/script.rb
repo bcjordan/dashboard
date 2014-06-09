@@ -6,7 +6,7 @@ class Script < ActiveRecord::Base
   has_many :stages, -> { order("position ASC") }
   belongs_to :wrapup_video, foreign_key: 'wrapup_video_id', class_name: 'Video'
   belongs_to :user
-  validates_uniqueness_of :name, allow_nil: false, allow_blank: false, case_sensitive: false
+  validates :name, presence: true, uniqueness: { case_sensitive: false}
 
   # Hardcoded scriptID constants used throughout the code
   TWENTY_HOUR_ID = 1

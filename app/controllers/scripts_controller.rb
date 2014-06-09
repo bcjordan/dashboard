@@ -11,7 +11,20 @@ class ScriptsController < ApplicationController
     # Show all the scripts that a user has created.
     @scripts = Script.all
     @script_file_exists = {}
-    @scripts.each{|script| @script_file_exists[script] = File.exists?("config/scripts/#{script.name}.script")}
+  end
+  
+  def new
+  end
+  
+  def create
+    @script_text = params[:script_text]
+    @script = Script.new(script_params)
+    if @script.save
+      File.write("config/scripts/#{@script.name}.script", @script_text)
+      redirect_to @script
+    else
+      render 'new'
+    end
   end
 
   def show
@@ -19,6 +32,8 @@ class ScriptsController < ApplicationController
 
   def destroy
     @script.destroy
+    filename = "config/scripts/#{@script.name}.script"
+    File.delete(filename) if File.exists?(filename)
     respond_to do |format|
       format.html { redirect_to scripts_path, notice: I18n.t('crud.destroyed', model: Script.model_name.human) }
     end
