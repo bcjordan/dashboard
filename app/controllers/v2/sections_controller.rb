@@ -9,21 +9,7 @@ module V2; class SectionsController < ApplicationController
   ]
 
   def index
-    student = []
-    teacher = []
-
-    @@sections.each do |i|
-      puts i.to_json
-      if i[:role] == :teacher
-        teacher << filter_section_fields_by_role(i)
-      elsif i[:role] == :student
-        student << filter_section_fields_by_role(i)
-      else
-        raise 'Unknown Role'
-      end
-    end
-
-    render json:{student:student, teacher:teacher}
+    sections_content!(get_my_sections)
   end
 
   def create
@@ -95,6 +81,24 @@ module V2; class SectionsController < ApplicationController
     render text:'Forbidden', status: :forbidden, content_type:'text/plain'
   end
 
+  def get_my_sections()
+    student = []
+    teacher = []
+
+    @@sections.each do |i|
+      puts i.to_json
+      if i[:role] == :teacher
+        teacher << i
+      elsif i[:role] == :student
+        student << i
+      else
+        raise 'Unknown Role'
+      end
+    end
+
+    {student:student, teacher:teacher}
+  end
+
   def get_section(id)
     id = id.to_i
     @@sections.select{|i| i[:id] == id}.first
@@ -107,6 +111,13 @@ module V2; class SectionsController < ApplicationController
   def section_content!(section)
     return forbidden! unless section
     render json:filter_section_fields_by_role(section)
+  end
+
+  def sections_content!(sections)
+    render json:{
+      student:sections[:student].map{|i| filter_section_fields_by_role(i)},
+      teacher:sections[:teacher].map{|i| filter_section_fields_by_role(i)},
+    }
   end
 
   def update_section(section, params)
