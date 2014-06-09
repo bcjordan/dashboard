@@ -5163,6 +5163,14 @@ exports.enableProjectileCollisions = function(blockly) {
   blockly.Blocks.studio_projectileCollisions = true;
 };
 
+exports.enableEdgeCollisions = function(blockly) {
+  blockly.Blocks.studio_edgeCollisions = true;
+};
+
+exports.enableSpritesOutsidePlayspace = function(blockly) {
+  blockly.Blocks.studio_spritesOutsidePlayspace = true;
+};
+
 // Install extensions to Blockly's language and JavaScript generator.
 exports.install = function(blockly, blockInstallOptions) {
   var skin = blockInstallOptions.skin;
@@ -5174,8 +5182,11 @@ exports.install = function(blockly, blockInstallOptions) {
     return '\n';
   };
 
-  blockly.Blocks.studio_spriteCount = 6; // will be overridden
+  // These constants are set to the default values, but may be overridden
+  blockly.Blocks.studio_spriteCount = 6;
   blockly.Blocks.studio_projectileCollisions = false;
+  blockly.Blocks.studio_edgeCollisions = false;
+  blockly.Blocks.studio_spritesOutsidePlayspace = false;
 
   /**
    * Creates a dropdown with options for each sprite number
@@ -5338,7 +5349,7 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(140, 1.00, 0.74);
 
       if (isK1) {
-        // NOTE: K1 block does not yet support projectile collisions
+        // NOTE: K1 block does not yet support projectile or edge collisions
         dropdown1 = startingSpriteImageDropdown();
         dropdown2 = startingSpriteImageDropdown();
         this.appendDummyInput().appendTitle(commonMsg.when())
@@ -5350,17 +5361,18 @@ exports.install = function(blockly, blockInstallOptions) {
         var dropdownArray2 =
             this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
         if (blockly.Blocks.studio_projectileCollisions) {
-          dropdownArray2.push(
-              [msg.whenSpriteCollidedWithFireball(), 'fireball']);
-          dropdownArray2.push(
-              [msg.whenSpriteCollidedWithFlower(), 'flower']);
+          dropdownArray2 = dropdownArray2.concat(this.PROJECTILES);
+        }
+        if (blockly.Blocks.studio_edgeCollisions) {
+          dropdownArray2 = dropdownArray2.concat(this.EDGES);
         }
         dropdown2 = new blockly.FieldDropdown(dropdownArray2);
         this.appendDummyInput().appendTitle(dropdown1, 'SPRITE1');
         this.appendDummyInput().appendTitle(dropdown2, 'SPRITE2');
       }
       if (blockly.Blocks.studio_spriteCount > 1) {
-        dropdown2.setValue(dropdown2.getOptions()[1][1]); // default second dropdown to second item
+        // default second dropdown to second item
+        dropdown2.setValue(dropdown2.getOptions()[1][1]);
       }
 
       this.setPreviousStatement(false);
@@ -5385,6 +5397,16 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.whenSpriteCollidedWith4(), '3'],
        [msg.whenSpriteCollidedWith5(), '4'],
        [msg.whenSpriteCollidedWith6(), '5']];
+
+  blockly.Blocks.studio_whenSpriteCollided.PROJECTILES =
+      [[msg.whenSpriteCollidedWithFireball(), 'fireball'],
+       [msg.whenSpriteCollidedWithFlower(), 'flower']];
+
+  blockly.Blocks.studio_whenSpriteCollided.EDGES =
+      [[msg.whenSpriteCollidedWithTopEdge(), 'top'],
+       [msg.whenSpriteCollidedWithLeftEdge(), 'left'],
+       [msg.whenSpriteCollidedWithBottomEdge(), 'bottom'],
+       [msg.whenSpriteCollidedWithRightEdge(), 'right']];
 
   generator.studio_whenSpriteCollided = generator.studio_eventHandlerPrologue;
 
@@ -5533,8 +5555,14 @@ exports.install = function(blockly, blockInstallOptions) {
     init: function() {
       var dropdownArray =
           this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]); // default to top-left
+      var dropdown;
+      if (blockly.Blocks.studio_spritesOutsidePlayspace) {
+        dropdown = new blockly.FieldDropdown(this.VALUES_EXTENDED);
+        dropdown.setValue(this.VALUES_EXTENDED[4][1]); // default to top-left
+      } else {
+        dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[1][1]); // default to top-left
+      }
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
@@ -5560,6 +5588,7 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSprite5(), '4'],
        [msg.setSprite6(), '5']];
 
+  // 9 possible positions in playspace (+ random):
   blockly.Blocks.studio_setSpritePosition.VALUES =
       [[msg.positionRandom(), RANDOM_VALUE],
        [msg.positionTopLeft(), Position.TOPLEFT.toString()],
@@ -5571,6 +5600,27 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.positionBottomLeft(), Position.BOTTOMLEFT.toString()],
        [msg.positionBottomCenter(), Position.BOTTOMCENTER.toString()],
        [msg.positionBottomRight(), Position.BOTTOMRIGHT.toString()]];
+
+  // Still a slightly reduced set of 17 out of 25 possible positions (+ random):
+  blockly.Blocks.studio_setSpritePosition.VALUES_EXTENDED =
+      [[msg.positionRandom(), RANDOM_VALUE],
+       [msg.positionOutTopLeft(), Position.OUTTOPLEFT.toString()],
+       [msg.positionOutTopRight(), Position.OUTTOPRIGHT.toString()],
+       [msg.positionTopOutLeft(), Position.TOPOUTLEFT.toString()],
+       [msg.positionTopLeft(), Position.TOPLEFT.toString()],
+       [msg.positionTopCenter(), Position.TOPCENTER.toString()],
+       [msg.positionTopRight(), Position.TOPRIGHT.toString()],
+       [msg.positionTopOutRight(), Position.TOPOUTRIGHT.toString()],
+       [msg.positionMiddleLeft(), Position.MIDDLELEFT.toString()],
+       [msg.positionMiddleCenter(), Position.MIDDLECENTER.toString()],
+       [msg.positionMiddleRight(), Position.MIDDLERIGHT.toString()],
+       [msg.positionBottomOutLeft(), Position.BOTTOMOUTLEFT.toString()],
+       [msg.positionBottomLeft(), Position.BOTTOMLEFT.toString()],
+       [msg.positionBottomCenter(), Position.BOTTOMCENTER.toString()],
+       [msg.positionBottomRight(), Position.BOTTOMRIGHT.toString()],
+       [msg.positionBottomOutRight(), Position.BOTTOMOUTRIGHT.toString()],
+       [msg.positionOutBottomLeft(), Position.OUTBOTTOMLEFT.toString()],
+       [msg.positionOutBottomRight(), Position.OUTBOTTOMRIGHT.toString()]];
 
   generator.studio_setSpritePosition = function() {
     return generateSetterCode({
@@ -5755,7 +5805,8 @@ exports.install = function(blockly, blockInstallOptions) {
     init: function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected), 'SOUND');
+          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected),
+                       'SOUND');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
@@ -5894,8 +5945,13 @@ exports.install = function(blockly, blockInstallOptions) {
 
       var dropdown;
       if (isK1) {
-        dropdown = new blockly.FieldImageDropdown(this.IMAGE_CHOICES, skin.dropdownThumbnailWidth, skin.dropdownThumbnailHeight);
-        this.appendDummyInput().appendTitle(msg.setBackground()).appendTitle(dropdown, 'VALUE');
+        dropdown = new blockly.FieldImageDropdown(
+                                  this.IMAGE_CHOICES,
+                                  skin.dropdownThumbnailWidth,
+                                  skin.dropdownThumbnailHeight);
+        this.appendDummyInput()
+          .appendTitle(msg.setBackground())
+          .appendTitle(dropdown, 'VALUE');
       } else {
         dropdown = new blockly.FieldDropdown(this.VALUES);
         this.appendDummyInput().appendTitle(dropdown, 'VALUE');
@@ -6007,7 +6063,8 @@ exports.install = function(blockly, blockInstallOptions) {
         visibilityTextDropdown.setValue(VISIBLE_VALUE);  // default to visible
         this.appendDummyInput().appendTitle(visibilityTextDropdown, 'VALUE');
         if (blockly.Blocks.studio_spriteCount > 1) {
-            this.appendDummyInput().appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+            this.appendDummyInput()
+              .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         }
         this.setInputsInline(true);
         this.setPreviousStatement(true);
@@ -6928,7 +6985,9 @@ module.exports = {
       'upButton'
     ],
     'minWorkspaceHeight': 1300,
-    'enableProjectileCollisions': true,
+    'edgeCollisions': true,
+    'projectileCollisions': true,
+    'spritesOutsidePlayspace': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -6981,7 +7040,9 @@ module.exports = {
       'upButton'
     ],
     'minWorkspaceHeight': 1000,
-    'enableProjectileCollisions': true,
+    'edgeCollisions': true,
+    'projectileCollisions': true,
+    'spritesOutsidePlayspace': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -7470,9 +7531,26 @@ var Keycodes = {
   DOWN: 40
 };
 
+// NOTE: all class names should be unique. eventhandler naming won't work
+// if we name a projectile class 'left' for example.
+
 var ProjectileClassNames = [
   'fireball',
   'flower'
+];
+
+var EdgeClassNames = [
+  'top',
+  'left',
+  'bottom',
+  'right',
+];
+
+var EdgeCollisionBits = [
+  65536,    // 'top'
+  131072,   // 'left'
+  262144,   // 'bottom'
+  524288,   // 'right'
 ];
 
 var level;
@@ -7547,6 +7625,7 @@ var loadLevel = function() {
   Studio.minWorkspaceHeight = level.minWorkspaceHeight;
   Studio.spriteStartingImage = level.spriteStartingImage;
   Studio.spritesHiddenToStart = level.spritesHiddenToStart;
+  Studio.spritesOutsidePlayspace = level.spritesOutsidePlayspace;
   Studio.softButtons_ = level.softButtons || [];
   Studio.spriteFinishIndex = level.spriteFinishIndex || 0;
 
@@ -7802,27 +7881,30 @@ var getNextPosition = function (i, yAxis, modifyQueues) {
 // Perform Queued Moves in the X and Y axes (called from inside onTick)
 //
 var performQueuedMoves = function (i) {
-  // Make queued moves in the X axis (fixed to .01 values):
   var nextX = getNextPosition(i, false, true);
-  // Clamp nextX to boundaries as newX:
-  var newX = Math.min(
-                Studio.COLS - (Studio.sprite[i].width / Studio.SQUARE_SIZE),
-                Math.max(0, nextX));
-  if (nextX != newX) {
-    cancelQueuedMovements(i, false);
-  }
-  Studio.sprite[i].x = newX;
-
-  // Make queued moves in the Y axis (fixed to .01 values):
   var nextY = getNextPosition(i, true, true);
-  // Clamp nextY to boundaries as newY:
-  var newY = Math.min(
-                Studio.ROWS - (Studio.sprite[i].height / Studio.SQUARE_SIZE),
-                Math.max(0, nextY));
-  if (nextY != newY) {
-    cancelQueuedMovements(i, true);
+  if (Studio.spritesOutsidePlayspace) {
+    Studio.sprite[i].x = nextX;
+    Studio.sprite[i].y = nextY;
+  } else {
+    // Clamp nextX to boundaries as newX:
+    var newX = Math.min(
+                  Studio.COLS - (Studio.sprite[i].width / Studio.SQUARE_SIZE),
+                  Math.max(0, nextX));
+    if (nextX != newX) {
+      cancelQueuedMovements(i, false);
+    }
+    Studio.sprite[i].x = newX;
+
+    // Clamp nextY to boundaries as newY:
+    var newY = Math.min(
+                  Studio.ROWS - (Studio.sprite[i].height / Studio.SQUARE_SIZE),
+                  Math.max(0, nextY));
+    if (nextY != newY) {
+      cancelQueuedMovements(i, true);
+    }
+    Studio.sprite[i].y = newY;
   }
-  Studio.sprite[i].y = newY;
 };
 
 //
@@ -7992,12 +8074,22 @@ Studio.onTick = function() {
     return tiles.SPRITE_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
               (2 * Studio.SQUARE_SIZE);
   };
+  var edgeCollisionDistance = function (iS, edgeName, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[iS].height : Studio.sprite[iS].width;
+    var dim2;
+    if (edgeName === 'left' || edgeName === 'right') {
+      dim2 = yAxis ? Studio.MAZE_HEIGHT : 0;
+    } else {
+      dim2 = yAxis ? 0 : Studio.MAZE_WIDTH;
+    }
+    return (dim1 + dim2) / (2 * Studio.SQUARE_SIZE);
+  };
 
   for (i = 0; i < Studio.spriteCount; i++) {
-    var iXCenter = getNextPosition(i, false, false) +
-                    Studio.sprite[i].width / (Studio.SQUARE_SIZE * 2);
-    var iYCenter = getNextPosition(i, true, false) +
-                    Studio.sprite[i].height / (Studio.SQUARE_SIZE * 2);
+    var iHalfWidth = Studio.sprite[i].width / (Studio.SQUARE_SIZE * 2);
+    var iHalfHeight = Studio.sprite[i].height / (Studio.SQUARE_SIZE * 2);
+    var iXCenter = getNextPosition(i, false, false) + iHalfWidth;
+    var iYCenter = getNextPosition(i, true, false) + iHalfHeight;
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i == j) {
         continue;
@@ -8042,7 +8134,43 @@ Studio.onTick = function() {
         Studio.projectiles[j].markNotColliding(i);
       }
     }
+    for (j = 0; j < EdgeClassNames.length; j++) {
+      var edgeXCenter, edgeYCenter;
+      var edgeCollisionBit = EdgeCollisionBits[j];
+      switch (EdgeClassNames[j]) {
+        case 'top':
+          edgeXCenter = Studio.COLS / 2;
+          edgeYCenter = 0;
+          break;
+        case 'left':
+          edgeXCenter = 0;
+          edgeYCenter = Studio.ROWS / 2;
+          break;
+        case 'bottom':
+          edgeXCenter = Studio.COLS / 2;
+          edgeYCenter = Studio.ROWS;
+          break;
+        case 'right':
+          edgeXCenter = Studio.COLS;
+          edgeYCenter = Studio.ROWS / 2;
+          break;
+      }
+      if (collisionTest(iXCenter,
+                        edgeXCenter,
+                        edgeCollisionDistance(i, EdgeClassNames[j], false),
+                        iYCenter,
+                        edgeYCenter,
+                        edgeCollisionDistance(i, EdgeClassNames[j], true))) {
+        if (0 === (Studio.sprite[i].collisionMask & edgeCollisionBit)) {
+          Studio.sprite[i].collisionMask |= edgeCollisionBit;
+          callHandler('whenSpriteCollided-' + i + '-' + EdgeClassNames[j]);
+        }
+      } else {
+        Studio.sprite[i].collisionMask &= ~edgeCollisionBit;
+      }
+    }
     ProjectileClassNames.forEach(executeCollisionQueueForClass);
+    EdgeClassNames.forEach(executeCollisionQueueForClass);
   }
 
   for (i = 0; i < Studio.spriteCount; i++) {
@@ -8230,7 +8358,7 @@ Studio.init = function(config) {
   Studio.sprite = [];
   Studio.projectiles = [];
 
-  // Locate the start and finish squares.
+  // Locate the start and finish positions.
   for (var y = 0; y < Studio.ROWS; y++) {
     for (var x = 0; x < Studio.COLS; x++) {
       if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
@@ -8253,8 +8381,16 @@ Studio.init = function(config) {
   // Update the sprite count in the blocks:
   blocks.setSpriteCount(Blockly, Studio.spriteCount);
 
-  if (level.enableProjectileCollisions) {
+  if (level.projectileCollisions) {
     blocks.enableProjectileCollisions(Blockly);
+  }
+
+  if (level.edgeCollisions) {
+    blocks.enableEdgeCollisions(Blockly);
+  }
+
+  if (level.spritesOutsidePlayspace) {
+    blocks.enableSpritesOutsidePlayspace(Blockly);
   }
 
   BlocklyApps.init(config);
@@ -8530,6 +8666,7 @@ var registerHandlersWithSpriteParams =
                        String(j));
     }
     ProjectileClassNames.forEach(registerHandlersForClassName);
+    EdgeClassNames.forEach(registerHandlersForClassName);
   }
 };
 
@@ -9328,18 +9465,36 @@ Studio.makeProjectile = function (opts) {
 
 var xFromPosition = function (sprite, position) {
   switch (position) {
+    case tiles.Position.OUTTOPOUTLEFT:
+    case tiles.Position.TOPOUTLEFT:
+    case tiles.Position.MIDDLEOUTLEFT:
+    case tiles.Position.BOTTOMOUTLEFT:
+    case tiles.Position.OUTBOTTOMOUTLEFT:
+      return -sprite.width / Studio.SQUARE_SIZE;
+    case tiles.Position.OUTTOPLEFT:
     case tiles.Position.TOPLEFT:
     case tiles.Position.MIDDLELEFT:
     case tiles.Position.BOTTOMLEFT:
+    case tiles.Position.OUTBOTTOMLEFT:
       return 0;
+    case tiles.Position.OUTTOPCENTER:
     case tiles.Position.TOPCENTER:
     case tiles.Position.MIDDLECENTER:
     case tiles.Position.BOTTOMCENTER:
+    case tiles.Position.OUTBOTTOMCENTER:
       return (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.OUTTOPRIGHT:
     case tiles.Position.TOPRIGHT:
     case tiles.Position.MIDDLERIGHT:
     case tiles.Position.BOTTOMRIGHT:
+    case tiles.Position.OUTBOTTOMRIGHT:
       return Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
+    case tiles.Position.OUTTOPOUTRIGHT:
+    case tiles.Position.TOPOUTRIGHT:
+    case tiles.Position.MIDDLEOUTRIGHT:
+    case tiles.Position.BOTTOMOUTRIGHT:
+    case tiles.Position.OUTBOTTOMOUTRIGHT:
+      return Studio.COLS;
   }
 };
 
@@ -9349,18 +9504,36 @@ var xFromPosition = function (sprite, position) {
 
 var yFromPosition = function (sprite, position) {
   switch (position) {
+    case tiles.Position.OUTTOPOUTLEFT:
+    case tiles.Position.OUTTOPLEFT:
+    case tiles.Position.OUTTOPCENTER:
+    case tiles.Position.OUTTOPRIGHT:
+    case tiles.Position.OUTTOPOUTRIGHT:
+      return -sprite.height / Studio.SQUARE_SIZE;
+    case tiles.Position.TOPOUTLEFT:
     case tiles.Position.TOPLEFT:
     case tiles.Position.TOPCENTER:
     case tiles.Position.TOPRIGHT:
+    case tiles.Position.TOPOUTRIGHT:
       return 0;
+    case tiles.Position.MIDDLEOUTLEFT:
     case tiles.Position.MIDDLELEFT:
     case tiles.Position.MIDDLECENTER:
     case tiles.Position.MIDDLERIGHT:
+    case tiles.Position.MIDDLEOUTRIGHT:
       return (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.BOTTOMOUTLEFT:
     case tiles.Position.BOTTOMLEFT:
     case tiles.Position.BOTTOMCENTER:
     case tiles.Position.BOTTOMRIGHT:
+    case tiles.Position.BOTTOMOUTRIGHT:
       return Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
+    case tiles.Position.OUTBOTTOMOUTLEFT:
+    case tiles.Position.OUTBOTTOMLEFT:
+    case tiles.Position.OUTBOTTOMCENTER:
+    case tiles.Position.OUTBOTTOMRIGHT:
+    case tiles.Position.OUTBOTTOMOUTRIGHT:
+      return Studio.ROWS;
   }
 };
 
@@ -9387,25 +9560,27 @@ Studio.moveSingle = function (opts) {
   switch (opts.dir) {
     case Direction.NORTH:
       sprite.y -= sprite.speed;
-      if (sprite.y < 0) {
+      if (!Studio.spritesOutsidePlayspace && sprite.y < 0) {
         sprite.y = 0;
       }
       break;
     case Direction.EAST:
       sprite.x += sprite.speed;
-      if (sprite.x > (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE))) {
+      if (!Studio.spritesOutsidePlayspace &&
+          sprite.x > (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE))) {
         sprite.x = Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.SOUTH:
       sprite.y += sprite.speed;
-      if (sprite.y > (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE))) {
+      if (!Studio.spritesOutsidePlayspace &&
+          sprite.y > (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE))) {
         sprite.y = Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.WEST:
       sprite.x -= sprite.speed;
-      if (sprite.x < 0) {
+      if (!Studio.spritesOutsidePlayspace && sprite.x < 0) {
         sprite.x = 0;
       }
       break;
@@ -9521,15 +9696,31 @@ exports.Direction = {
 };
 
 exports.Position = {
-  TOPLEFT: 1,
-  TOPCENTER: 2,
-  TOPRIGHT: 3,
-  MIDDLELEFT: 4,
-  MIDDLECENTER: 5,
-  MIDDLERIGHT: 6,
-  BOTTOMLEFT: 7,
-  BOTTOMCENTER: 8,
-  BOTTOMRIGHT: 9,
+  OUTTOPOUTLEFT:    1,
+  OUTTOPLEFT:       2,
+  OUTTOPCENTER:     3,
+  OUTTOPRIGHT:      4,
+  OUTTOPOUTRIGHT:   5,
+  TOPOUTLEFT:       6,
+  TOPLEFT:          7,
+  TOPCENTER:        8,
+  TOPRIGHT:         9,
+  TOPOUTRIGHT:      10,
+  MIDDLEOUTLEFT:    11,
+  MIDDLELEFT:       12,
+  MIDDLECENTER:     13,
+  MIDDLERIGHT:      14,
+  MIDDLEOUTRIGHT:   15,
+  BOTTOMOUTLEFT:    16,
+  BOTTOMLEFT:       17,
+  BOTTOMCENTER:     18,
+  BOTTOMRIGHT:      19,
+  BOTTOMOUTRIGHT:   20,
+  OUTBOTTOMOUTLEFT: 21,
+  OUTBOTTOMLEFT:    22,
+  OUTBOTTOMCENTER:  23,
+  OUTBOTTOMRIGHT:   24,
+  OUTBOTTOMOUTRIGHT:25,
 };
 
 //
@@ -10309,11 +10500,19 @@ exports.playSoundWinPoint2 = function(d){return "Afspil vinde point 2 lyd"};
 
 exports.playSoundWood = function(d){return "afspil en træ lyd"};
 
+exports.positionOutTopLeft = function(d){return "to the above top left position"};
+
+exports.positionOutTopRight = function(d){return "to the above top right position"};
+
+exports.positionTopOutLeft = function(d){return "to the top outside left position"};
+
 exports.positionTopLeft = function(d){return "to the top left position"};
 
 exports.positionTopCenter = function(d){return "to the top center position"};
 
 exports.positionTopRight = function(d){return "to the top right position"};
+
+exports.positionTopOutRight = function(d){return "to the top outside right position"};
 
 exports.positionMiddleLeft = function(d){return "to the middle left position"};
 
@@ -10321,11 +10520,19 @@ exports.positionMiddleCenter = function(d){return "to the middle center position
 
 exports.positionMiddleRight = function(d){return "to the middle right position"};
 
+exports.positionBottomOutLeft = function(d){return "to the bottom outside left position"};
+
 exports.positionBottomLeft = function(d){return "to the bottom left position"};
 
 exports.positionBottomCenter = function(d){return "to the bottom center position"};
 
 exports.positionBottomRight = function(d){return "to the bottom right position"};
+
+exports.positionBottomOutRight = function(d){return "to the bottom outside right position"};
+
+exports.positionOutBottomLeft = function(d){return "to the below bottom left position"};
+
+exports.positionOutBottomRight = function(d){return "to the below bottom right position"};
 
 exports.positionRandom = function(d){return "to the random position"};
 
@@ -10596,6 +10803,14 @@ exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 exports.whenSpriteCollidedWithFireball = function(d){return "touches fireball"};
 
 exports.whenSpriteCollidedWithFlower = function(d){return "touches flower"};
+
+exports.whenSpriteCollidedWithBottomEdge = function(d){return "touches bottom edge"};
+
+exports.whenSpriteCollidedWithLeftEdge = function(d){return "touches left edge"};
+
+exports.whenSpriteCollidedWithRightEdge = function(d){return "touches right edge"};
+
+exports.whenSpriteCollidedWithTopEdge = function(d){return "touches top edge"};
 
 exports.whenUp = function(d){return "Når pil op"};
 
