@@ -2,65 +2,93 @@ module V2; class SectionsController < ApplicationController
 
   skip_before_action :verify_authenticity_token
 
-  @@next_id = 3
-
-  @@sections = {
-    student:{
-      3=>{id:3, name:'Student', role: :student},
-    },
-    teacher:{
-      1=>{id:1, name:'First', role: :teacher},
-      2=>{id:2, name:'Second', role: :teacher},
-    }
-  }
+  @@sections = [
+    {id:1, name:'First', role: :teacher},
+    {id:2, name:'Second', role: :teacher},
+    {id:3, name:'Student', role: :student},
+  ]
 
   def index
-    render json:get_my_sections()
+    student = []
+    teacher = []
+
+    @@sections.each do |i|
+      puts i.to_json
+      if i[:role] == :teacher
+        teacher << filter_section_fields_by_role(i)
+      elsif i[:role] == :student
+        student << filter_section_fields_by_role(i)
+      else
+        raise 'Unknown Role'
+      end
+    end
+
+    render json:{student:student, teacher:teacher}
   end
 
   def create
-    section = create_section(params[:name])
+    return forbidden! unless am_teacher?
+    section = create_section(params)
     redirect_to "/v2/sections/#{section[:id]}", status: :created
   end
 
   def show
     section = get_section(params[:id])
-    return forbidden! unless section
-    render json:section
+    section_content!(section)
   end
 
   def update
     section = get_section(params[:id])
-    return forbidden! unless section
-    return forbidden! unless section[:role] == :teacher
-    render json:update_section(section, params)
+    return forbidden! unless section and section[:role] == :teacher
+    section = update_section(section, params)
+    section_content!(section)
   end
 
   def destroy
     section = get_section(params[:id])
-    return forbidden! unless section
-    return forbidden! unless section[:role] == :teacher
+    return forbidden! unless section and section[:role] == :teacher
     destroy_section(section[:id])
     no_content!
   end
 
   private
 
-  def create_section(name)
-    id = @@next_id += 1
+  def am_teacher?()
+    true
+  end
+
+  def create_section(params)
+    id = @@prev_id += 1
 
     section = {
       id:id,
-      name:name,
+      name:params[:name],
       role: :teacher,
     }
+    section[:secret_word] = params[:secret_word] if params.has_key?(:secret_word)
+    section[:secret_picture] = params[:secret_picture] if params.has_key?(:secret_picture)
 
-    @@sections[:teacher][section[:id]] = section
+    @@sections << section
   end
 
   def destroy_section(id)
     id = id.to_i
-    @@sections[:teacher].delete(id)
+    @@sections.delete_if{|i| i[:id] == id}
+  end
+
+  def filter_section_fields_by_role(section)
+    response = {}
+
+    response[:id] = section[:id]
+    response[:name] = section[:name]
+    response[:role] = section[:role]
+
+    if section[:role] == :teacher
+      response[:secret_word] = section[:secret_word]
+      response[:secret_picture] = section[:secret_picture]
+    end
+
+    response
   end
 
   def forbidden!()
@@ -69,16 +97,16 @@ module V2; class SectionsController < ApplicationController
 
   def get_section(id)
     id = id.to_i
-    section = @@sections[:teacher][id]
-    section ||= @@sections[:student][id]
-  end
-
-  def get_my_sections()
-    @@sections
+    @@sections.select{|i| i[:id] == id}.first
   end
 
   def no_content!()
     render text:'No Content', status: :no_content, content_type:'text/plain'
+  end
+
+  def section_content!(section)
+    return forbidden! unless section
+    render json:filter_section_fields_by_role(section)
   end
 
   def update_section(section, params)
