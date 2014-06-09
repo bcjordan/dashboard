@@ -7,34 +7,30 @@ module V2; class SectionsController < ApplicationController
     {id:2, name:'Second', role: :teacher},
     {id:3, name:'Student', role: :student},
   ]
+  @@last_id = @@sections.count
 
   def index
-    sections_content!(get_my_sections)
+    render_sections get_my_sections
   end
 
   def create
-    return forbidden! unless am_teacher?
     section = create_section(params)
+    return forbidden! unless section
     redirect_to "/v2/sections/#{section[:id]}", status: :created
   end
 
   def show
-    section = get_section(params[:id])
-    section_content!(section)
+    render_section get_section(params[:id].to_i)
   end
 
   def update
-    section = get_section(params[:id])
-    return forbidden! unless section and section[:role] == :teacher
-    section = update_section(section, params)
-    section_content!(section)
+    render_section update_section(params[:id].to_i, params)
   end
 
   def destroy
-    section = get_section(params[:id])
-    return forbidden! unless section and section[:role] == :teacher
-    destroy_section(section[:id])
-    no_content!
+    section = destroy_section(params[:id].to_i)
+    return forbidden! unless section
+    render text:'', status: :no_content, content_type:'text/plain'
   end
 
   private
@@ -44,7 +40,9 @@ module V2; class SectionsController < ApplicationController
   end
 
   def create_section(params)
-    id = @@sections.count + 1
+    return nil unless am_teacher?
+
+    id = @@last_id += 1
 
     section = {
       id:id,
@@ -55,11 +53,15 @@ module V2; class SectionsController < ApplicationController
     section[:secret_picture] = params[:secret_picture] if params.has_key?(:secret_picture)
 
     @@sections << section
+
+    section
   end
 
   def destroy_section(id)
-    id = id.to_i
+    section = get_section(id)
+    return nil unless section and section[:role] == :teacher
     @@sections.delete_if{|i| i[:id] == id}
+    section
   end
 
   def filter_section_fields_by_role(section)
@@ -100,27 +102,24 @@ module V2; class SectionsController < ApplicationController
   end
 
   def get_section(id)
-    id = id.to_i
     @@sections.select{|i| i[:id] == id}.first
   end
 
-  def no_content!()
-    render text:'No Content', status: :no_content, content_type:'text/plain'
-  end
-
-  def section_content!(section)
+  def render_section(section)
     return forbidden! unless section
     render json:filter_section_fields_by_role(section)
   end
 
-  def sections_content!(sections)
+  def render_sections(sections)
     render json:{
       student:sections[:student].map{|i| filter_section_fields_by_role(i)},
       teacher:sections[:teacher].map{|i| filter_section_fields_by_role(i)},
     }
   end
 
-  def update_section(section, params)
+  def update_section(id, params)
+    section = get_section(id)
+    return nil unless section and section[:role] == :teacher
     section[:name] = params[:name] if params.has_key?(:name)
     section
   end
