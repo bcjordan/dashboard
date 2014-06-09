@@ -67,7 +67,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def get_crowdsourced_hint (options)
+  # For all crowdsourced hints. If a hint is selected, it will be returned directly; If there is no selected hint,
+  # the algorithm will collect all hints that are of type ‘experiment’, and randomly select one of the experiment hints.
+  def get_crowdsourced_hint(options)
     crowdsourced_hint = nil
     # Check if the current level_source has program specific hint, use it if use is set.
     if options[:level_source]
@@ -81,7 +83,7 @@ class ApplicationController < ActionController::Base
           experiment_hints.push(hint)
         end
       end
-      # Randomly select one of the experimental hints
+      # Randomly select one of the experimental hints if there was no selected hint.
       if crowdsourced_hint.nil? && experiment_hints.length > 0
         crowdsourced_hint = experiment_hints[rand(experiment_hints.count)]
       end
@@ -91,12 +93,13 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def get_best_next_hint (options)
+  def get_best_next_hint(options)
     best_next_hint = nil
     if options[:level_source]
       options[:level_source].level_source_hints.each do |level_source_hint|
         if level_source_hint.hint_id && Hint.find(level_source_hint.hint_id)
           best_next_hint = Hint.find(level_source_hint.hint_id).message
+          break
         end
       end
     end
@@ -141,7 +144,7 @@ class ApplicationController < ActionController::Base
           hint = get_best_next_hint(options)
       end
     else
-      # Un-logged in users receive crowdsoruced hints and best_next hints if available
+      # Un-logged in users receive crowdsourced hints and best_next hints if available
       hint = get_crowdsourced_hint(options) || get_best_next_hint(options)
     end
 
