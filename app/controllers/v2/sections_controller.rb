@@ -44,7 +44,7 @@ module V2; class SectionsController < ApplicationController
   end
 
   def create_section(params)
-    id = @@prev_id += 1
+    id = @@sections.count + 1
 
     section = {
       id:id,
