@@ -82,7 +82,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":32,"./utils":47}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":34,"./utils":49}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -909,7 +909,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/bg_bg/common":49,"./builder":5,"./dom":7,"./feedback.js":9,"./lodash":11,"./slider":34,"./templates/buttons.html":36,"./templates/instructions.html":38,"./templates/learn.html":39,"./templates/makeYourOwn.html":40,"./utils":47,"./xml":48}],3:[function(require,module,exports){
+},{"../locale/bg_bg/common":51,"./builder":5,"./dom":7,"./feedback.js":9,"./lodash":11,"./slider":36,"./templates/buttons.html":38,"./templates/instructions.html":40,"./templates/learn.html":41,"./templates/makeYourOwn.html":42,"./utils":49,"./xml":50}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -996,7 +996,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":48}],4:[function(require,module,exports){
+},{"./xml":50}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1059,7 +1059,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":35,"./utils.js":47,"url":61}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":37,"./utils.js":49,"url":63}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
@@ -2067,7 +2067,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/bg_bg/common":49,"./codegen":6,"./dom":7,"./templates/buttons.html":36,"./templates/code.html":37,"./templates/readonly.html":42,"./templates/sharing.html":43,"./templates/showCode.html":44,"./templates/trophy.html":45,"./utils":47}],10:[function(require,module,exports){
+},{"../locale/bg_bg/common":51,"./codegen":6,"./dom":7,"./templates/buttons.html":38,"./templates/code.html":39,"./templates/readonly.html":44,"./templates/sharing.html":45,"./templates/showCode.html":46,"./templates/trophy.html":47,"./utils":49}],10:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -2131,7 +2131,7 @@ exports.define = function(name) {
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash include="debounce,reject,map,value,range,without,sample" --output build/js/lodash.js`
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample,create" --output build/js/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3490,6 +3490,21 @@ exports.define = function(name) {
     'loop': 'if (callback(iterable[index], index, collection) === false) return result'
   };
 
+  /** Reusable iterator options for `assign` and `defaults` */
+  var defaultsIteratorOptions = {
+    'args': 'object, source, guard',
+    'top':
+      'var args = arguments,\n' +
+      '    argsIndex = 0,\n' +
+      "    argsLength = typeof guard == 'number' ? 2 : args.length;\n" +
+      'while (++argsIndex < argsLength) {\n' +
+      '  iterable = args[argsIndex];\n' +
+      '  if (iterable && objectTypes[typeof iterable]) {',
+    'keys': keys,
+    'loop': "if (typeof result[index] == 'undefined') result[index] = iterable[index]",
+    'bottom': '  }\n}'
+  };
+
   /** Reusable iterator options for `forIn` and `forOwn` */
   var forOwnIteratorOptions = {
     'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
@@ -3513,6 +3528,85 @@ exports.define = function(name) {
   var baseEach = createIterator(eachIteratorOptions);
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Assigns own enumerable properties of source object(s) to the destination
+   * object. Subsequent sources will overwrite property assignments of previous
+   * sources. If a callback is provided it will be executed to produce the
+   * assigned values. The callback is bound to `thisArg` and invoked with two
+   * arguments; (objectValue, sourceValue).
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @alias extend
+   * @category Objects
+   * @param {Object} object The destination object.
+   * @param {...Object} [source] The source objects.
+   * @param {Function} [callback] The function to customize assigning values.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns the destination object.
+   * @example
+   *
+   * _.assign({ 'name': 'fred' }, { 'employer': 'slate' });
+   * // => { 'name': 'fred', 'employer': 'slate' }
+   *
+   * var defaults = _.partialRight(_.assign, function(a, b) {
+   *   return typeof a == 'undefined' ? b : a;
+   * });
+   *
+   * var object = { 'name': 'barney' };
+   * defaults(object, { 'name': 'fred', 'employer': 'slate' });
+   * // => { 'name': 'barney', 'employer': 'slate' }
+   */
+  var assign = createIterator(defaultsIteratorOptions, {
+    'top':
+      defaultsIteratorOptions.top.replace(';',
+        ';\n' +
+        "if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {\n" +
+        '  var callback = baseCreateCallback(args[--argsLength - 1], args[argsLength--], 2);\n' +
+        "} else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {\n" +
+        '  callback = args[--argsLength];\n' +
+        '}'
+      ),
+    'loop': 'result[index] = callback ? callback(result[index], iterable[index]) : iterable[index]'
+  });
+
+  /**
+   * Creates an object that inherits from the given `prototype` object. If a
+   * `properties` object is provided its own enumerable properties are assigned
+   * to the created object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} prototype The object to inherit from.
+   * @param {Object} [properties] The properties to assign to the object.
+   * @returns {Object} Returns the new object.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * function Circle() {
+   *   Shape.call(this);
+   * }
+   *
+   * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
+   *
+   * var circle = new Circle;
+   * circle instanceof Circle;
+   * // => true
+   *
+   * circle instanceof Shape;
+   * // => true
+   */
+  function create(prototype, properties) {
+    var result = baseCreate(prototype);
+    return properties ? assign(result, properties) : result;
+  }
 
   /**
    * Iterates over own and inherited enumerable properties of an object,
@@ -4623,8 +4717,10 @@ exports.define = function(name) {
 
   /*--------------------------------------------------------------------------*/
 
+  lodash.assign = assign;
   lodash.bind = bind;
   lodash.chain = chain;
+  lodash.create = create;
   lodash.createCallback = createCallback;
   lodash.debounce = debounce;
   lodash.filter = filter;
@@ -4644,6 +4740,7 @@ exports.define = function(name) {
   // add aliases
   lodash.collect = map;
   lodash.each = forEach;
+  lodash.extend = assign;
   lodash.methods = functions;
   lodash.select = filter;
 
@@ -5044,6 +5141,10 @@ exports.loopHighlight = API_FUNCTION(function (id) {
   Maze.executionInfo.queueAction('null', id);
 });
 
+
+/**
+ * Bee related API functions
+ */
 exports.nectar = API_FUNCTION(function(id) {
   Maze.bee.getNectar(id);
 });
@@ -5052,8 +5153,25 @@ exports.honey = API_FUNCTION(function(id) {
   Maze.bee.makeHoney(id);
 });
 
-},{"../utils":47,"./tiles":24}],13:[function(require,module,exports){
+exports.atFlower = API_FUNCTION(function(id) {
+  var col = Maze.pegmanX;
+  var row = Maze.pegmanY;
+  Maze.executionInfo.queueAction("at_flower", id);
+  return Maze.bee.isFlower(row, col);
+});
+
+exports.atBeehive = API_FUNCTION(function(id) {
+  var col = Maze.pegmanX;
+  var row = Maze.pegmanY;
+  Maze.executionInfo.queueAction("at_beehive", id);
+  return Maze.bee.isHive(row, col);
+});
+
+},{"../utils":49,"./tiles":26}],13:[function(require,module,exports){
 var utils = require('../utils');
+
+var UNLIMITED_HONEY = -99;
+var UNLIMITED_NECTAR = 99;
 
 var Bee = function (maze, config) {
   this.maze_ = maze;
@@ -5094,7 +5212,7 @@ Bee.prototype.finished = function () {
       // If any of our hives still have non infinite capactiy, we haven't hit
       // the hiveGoal
       var capacity = this.hiveRemainingCapacity(row, col);
-      if (this.isHive(row, col) && capacity > 0 && capacity < Infinity) {
+      if (this.isHive(row, col) && capacity > 0 && capacity !== -UNLIMITED_HONEY) {
         return false;
       }
     }
@@ -5110,6 +5228,10 @@ Bee.prototype.finished = function () {
  */
 Bee.prototype.isHive = function (row, col) {
   return this.initialDirt_[row][col] < 0;
+};
+
+Bee.prototype.isFlower = function (row, col) {
+  return this.initialDirt_[row][col] > 0;
 };
 
 /**
@@ -5133,28 +5255,31 @@ Bee.prototype.hiveRemainingCapacity = function (row, col) {
     return 0;
   }
 
-  var currentVal = this.maze_.dirt_[row][col];
-  var initialVal = this.initialDirt_[row][col];
-  // If we started at -1, we have no hiveGoal and have infinite capacity
-  if (currentVal === -1 && initialVal === -1) {
-    return Infinity;
-  }
-
-  // Otherwise our capacity is how many more until we get to -1
-  return Math.abs(currentVal + 1);
+  return -this.maze_.dirt_[row][col];
 };
 
 /**
  * Update model to represent made honey.  Does no validation
  */
-Bee.prototype.makeHoneyAt = function (row, col) {
-  var capacity = this.hiveRemainingCapacity(row, col);
-  if (capacity > 0 && capacity !== Infinity) {
+Bee.prototype.madeHoneyAt = function (row, col) {
+  if (this.maze_.dirt_[row][col] !== UNLIMITED_HONEY) {
     this.maze_.dirt_[row][col] += 1; // update progress towards goal
   }
 
   this.nectar_ -= 1;
   this.honey_ += 1;
+};
+
+/**
+ * Update model to represet gathered nectar. Does no validation
+ */
+Bee.prototype.gotNectarAt = function (row, col) {
+  if (this.maze_.dirt_[row][col] !== UNLIMITED_NECTAR) {
+    this.maze_.dirt_[row][col] -= 1; // update progress towards goal
+  }
+
+  this.nectar_ += 1;
+  this.totalNectar_ += 1;
 };
 
 // API
@@ -5170,9 +5295,7 @@ Bee.prototype.getNectar = function (id) {
   }
 
   this.maze_.executionInfo.queueAction('nectar', id);
-  this.maze_.dirt_[row][col] -= 1;
-  this.nectar_ += 1;
-  this.totalNectar_ += 1;
+  this.gotNectarAt(row, col);
 };
 
 Bee.prototype.makeHoney = function (id) {
@@ -5185,7 +5308,7 @@ Bee.prototype.makeHoney = function (id) {
   }
 
   this.maze_.executionInfo.queueAction('honey', id);
-  this.makeHoneyAt(row, col);
+  this.madeHoneyAt(row, col);
 };
 
 // ANIMATIONS
@@ -5199,12 +5322,9 @@ Bee.prototype.animateGetNectar = function () {
       "there was no nectar to be had");
   }
 
-  this.maze_.dirt_[row][col] -= 1;
-  this.maze_.updateDirtImage(row, col);
+  this.gotNectarAt(row, col);
 
-  this.nectar_ += 1;
-  this.totalNectar_ += 1;
-
+  this.maze_.gridItemDrawer.updateItemImage(row, col);
   this.updateNectarImages_();
 
   // play a sound?
@@ -5256,9 +5376,9 @@ Bee.prototype.animateMakeHoney = function () {
       "we arent at a hive or dont have nectar");
   }
 
-  this.makeHoneyAt(row, col);
+  this.madeHoneyAt(row, col);
 
-  this.maze_.updateDirtImage(row, col);
+  this.maze_.gridItemDrawer.updateItemImage(row, col);
 
   this.updateNectarImages_();
   this.updateHoneyImages_();
@@ -5309,12 +5429,97 @@ Bee.prototype.setTilesTransparent = function () {
   for (var row = 0; row < this.initialDirt_.length; row++) {
     for (var col = 0; col < this.initialDirt_[row].length; col++) {
       this.maze_.dirt_[row][col] = 0;
-      this.maze_.updateDirtImage(row, col);
+      this.maze_.gridItemDrawer.updateItemImage(row, col);
     }
   }
 };
 
-},{"../utils":47}],14:[function(require,module,exports){
+},{"../utils":49}],14:[function(require,module,exports){
+/*jshint -W086 */
+
+var DirtDrawer = require('./dirtDrawer');
+require('../utils');
+
+/**
+ * Inherits DirtDrawer to draw flowers/honeycomb for bee.
+ * @param dirtMap The dirtMap from the maze, which shows the current state of
+ *   the dirt (or flowers/honey in this case).
+ * @param skin The app's skin, used to get URLs for our images
+ * @param initialDirtMap The state of the dirtMap at start time.
+ * @param flowerType How flowers behave for this level
+ */
+
+ // todo - send it a Bee instead of an initialDirtMap?
+function BeeItemDrawer(dirtMap, skin, initialDirtMap, flowerType) {
+  // todo - could i just use the dirtMap at creation time as initialDirtMap?
+  this.__base = this.constructor.prototype;
+
+  DirtDrawer.call(this, dirtMap, '');
+
+  this.initialDirt_ = initialDirtMap;
+  this.flowerType_ = flowerType;
+  switch (this.flowerType_) {
+
+     // Flowers are red.  We always show how much nectar a flower has, unless it's
+     // zero, in which case we show no image
+    case 'redWithNectar':
+      this.imageInfo_.href = skin.redFlowerWithNectar;
+      break;
+    // Flowers are red. We always show a question mark for nectar, unless it's
+    // zero, in which case we show a nectar count of 0.
+    case 'redNectarHidden':
+      this.imageInfo_.href = skin.redFlowerWithoutNectar;
+      this.imageInfo_.unclippedWidth = 650;
+      break;
+    // Flowers are purple. We always show a question mark for nectar, unless it's
+    // zero, in which case we show a nectar count of 0.
+    case 'purpleNectarHidden':
+      this.imageInfo_.href = skin.purpleFlowerWithoutNectar;
+      this.imageInfo_.unclippedWidth = 650;
+      break;
+    // Any flower or hive is displayed as a flowercomb, regardless of nectar count.
+    case 'hiddenFlower':
+      // single frame image
+      this.imageInfo_.href = skin.flowerComb;
+      this.imageInfo_.unclippedWidth = 50;
+      break;
+  }
+}
+
+BeeItemDrawer.inherits(DirtDrawer);
+module.exports = BeeItemDrawer;
+
+BeeItemDrawer.prototype.updateItemImage = function (row, col) {
+  var val = this.dirtMap_[row][col];
+
+  switch(this.flowerType_) {
+    case 'redNectarHidden':
+    case 'purpleNectarHidden':
+      var spriteIndex;
+      if (val < 0) {
+        // honeycomb handles the same as before
+        this.__base.updateItemImage.apply(this, arguments);
+      } else if (val === 0) {
+        var isFlower = (this.initialDirt_[row][col] > 0);
+        // spriteIndex 12 is flower with 0 counter
+        this.updateImageWithIndex(row, col, isFlower ? 12 : -1);
+      } else {
+        // flower with question mark
+        this.updateImageWithIndex(row, col, 11);
+      }
+      break;
+    case 'hiddenFlower':
+      if (val !== 0) {
+        this.updateImageWithIndex(row, col, 0);
+      }
+      break;
+    case 'redWithNectar':
+    default:
+      this.__base.updateItemImage.apply(this, arguments);
+  }
+};
+
+},{"../utils":49,"./dirtDrawer":17}],15:[function(require,module,exports){
 /**
  * Blockly Demo: Maze
  *
@@ -5574,6 +5779,38 @@ exports.install = function(blockly, blockInstallOptions) {
   //     [msg.noPathAhead(), 'noPathForward']
   ];
 
+  blockly.Blocks.bee_if = {
+    // Block for 'if' conditional if there is a path.
+    helpUrl: '',
+    init: function() {
+      this.setHSV(196, 1.0, 0.79);
+      this.appendDummyInput()
+          .appendTitle(msg.ifCode());
+      this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.DIRECTIONS), 'DIR');
+      this.setInputsInline(true);
+      this.appendStatementInput('DO')
+          .appendTitle(msg.doCode());
+      this.setTooltip(msg.ifTooltip());
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+    }
+  };
+
+  generator.bee_if = function() {
+    // Generate JavaScript for 'if' conditional if there is a path.
+    var argument = 'Maze.' + this.getTitleValue('DIR') +
+        '(\'block_id_' + this.id + '\')';
+    var branch = generator.statementToCode(this, 'DO');
+    var code = 'if (' + argument + ') {\n' + branch + '}\n';
+    return code;
+  };
+
+  blockly.Blocks.bee_if.DIRECTIONS = [
+       [msg.atFlower(), 'atFlower'],
+       [msg.atBeehive(), 'atBeehive']
+  ];
+
 
   blockly.Blocks.karel_ifElse = {
     // Block for 'if/else' conditional if there is a path.
@@ -5712,7 +5949,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/bg_bg/maze":50,"../block_utils":3,"../codegen":6}],15:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":52,"../block_utils":3,"../codegen":6}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5733,7 +5970,129 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/maze":50,"ejs":51}],16:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":52,"ejs":53}],17:[function(require,module,exports){
+// The number line is [-inf, min, min+1, ... no zero ..., max-1, max, +inf]
+var DIRT_MAX = 10;
+var DIRT_COUNT = DIRT_MAX * 2 + 2;
+
+// Duplicated from maze.js so that I don't need a dependency
+var SQUARE_SIZE = 50;
+
+// Duplicated from Blockly, so that I don't have to take a depency on it
+var SVG_NS = "http://www.w3.org/2000/svg";
+
+var DirtDrawer = module.exports = function (dirtMap, dirtAsset) {
+  this.dirtMap_ = dirtMap;
+
+  this.imageInfo_ = {
+    href: dirtAsset,
+    unclippedWidth: SQUARE_SIZE * DIRT_COUNT
+  };
+};
+
+/**
+ * Export cellId as static function on DirtDrawer
+ */
+DirtDrawer.cellId = cellId;
+
+/**
+ * Update the image at the given row,col by determining the spriteIndex for the
+ * current value
+ */
+DirtDrawer.prototype.updateItemImage = function (row, col) {
+  var val = this.dirtMap_[row][col];
+  this.updateImageWithIndex(row, col, spriteIndexForDirt(val));
+};
+
+/**
+ * Update the image at the given row,col with the provided spriteIndex.
+ */
+DirtDrawer.prototype.updateImageWithIndex = function (row, col, spriteIndex) {
+  var hiddenImage = spriteIndex < 0;
+
+  var img = document.getElementById(cellId('dirt', row, col));
+  if (!img) {
+    // we don't need any image
+    if (hiddenImage) {
+      return;
+    }
+    // we want an image, so let's create one
+    img = this.createDirtImage_(row, col);
+  }
+
+  img.setAttribute('visibility', hiddenImage ? 'hidden' : 'visible');
+  if (!hiddenImage) {
+    img.setAttribute('x', SQUARE_SIZE * (col - spriteIndex));
+    img.setAttribute('y', SQUARE_SIZE * row);
+  }
+};
+
+DirtDrawer.prototype.createDirtImage_ = function (row, col) {
+  var imageInfo = this.imageInfo_;
+
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+  var svg = document.getElementById('svgMaze');
+
+  var clipId = cellId('dirtClip', row, col);
+  var imgId = cellId('dirt', row, col);
+
+  // Create clip path.
+  var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+  clip.setAttribute('id', clipId);
+  var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+  rect.setAttribute('x', col * SQUARE_SIZE);
+  rect.setAttribute('y', row * SQUARE_SIZE);
+  rect.setAttribute('width', SQUARE_SIZE);
+  rect.setAttribute('height', SQUARE_SIZE);
+  clip.appendChild(rect);
+  svg.insertBefore(clip, pegmanElement);
+  // Create image.
+  var img = document.createElementNS(Blockly.SVG_NS, 'image');
+  img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', imageInfo.href);
+  img.setAttribute('height', SQUARE_SIZE);
+  img.setAttribute('width', imageInfo.unclippedWidth);
+  img.setAttribute('clip-path', 'url(#' + clipId + ')');
+  img.setAttribute('id', imgId);
+  svg.insertBefore(img, pegmanElement);
+
+  return img;
+};
+
+/**
+ * Given a dirt value, returns the index of the sprite to use in our spritesheet.
+ * Returns -1 if we want to display no sprite.
+ */
+ function spriteIndexForDirt (val) {
+  var spriteIndex;
+
+  if (val === 0) {
+    spriteIndex = -1;
+  } else if(val < -DIRT_MAX) {
+    spriteIndex = 0;
+  } else if (val < 0) {
+    spriteIndex = DIRT_MAX + val + 1;
+  } else if (val > DIRT_MAX) {
+    spriteIndex = DIRT_COUNT - 1;
+  } else if (val > 0) {
+    spriteIndex = DIRT_MAX + val;
+  }
+
+  return spriteIndex;
+}
+
+function cellId (prefix, row, col) {
+  return prefix + '_' + row + '_' + col;
+}
+
+
+/* start-test-block */
+// export private function(s) to expose to unit testing
+DirtDrawer.__testonly__ = {
+  spriteIndexForDirt: spriteIndexForDirt
+};
+/* end-test-block */
+
+},{}],18:[function(require,module,exports){
 /*jshint multistr: true */
 
 var levelBase = require('../level_base');
@@ -6942,7 +7301,8 @@ module.exports = {
       <block type="maze_turn"><title name="DIR">turnLeft</title></block>\
       <block type="maze_turn"><title name="DIR">turnRight</title></block>\
       <block type="maze_nectar"></block>\
-      <block type="maze_honey"></block>'
+      <block type="maze_honey"></block>\
+      <block type="bee_if"></block>'
     ),
     'startBlocks': startBlocks(1, 1),
     'requiredBlocks': [
@@ -6950,7 +7310,9 @@ module.exports = {
     'scale': {
       'snapRadius': 2.0
     },
-    honeyGoal: 2,
+    flowerType: 'purpleNectarHidden',
+    honeyGoal: 3,
+    // nectarGoal: 2,
     step: true,
     'map': [
       [ 0, 0, 0, 0, 0, 1, 1, 1 ],
@@ -6964,19 +7326,20 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'initialDirt': [
-      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-      [ 0, -1, 2, -1, -2, 0, 0, 0 ],
-      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-      [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-      [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+      [ 0, 0,  0,  0, 0, 0, 0, 0 ],
+      [ 0, 0,  0,  0, 0, 0, 0, 0 ],
+      [ 0, 0,  0,  0, 0, 0, 0, 0 ],
+      [ 0, 0,  0,  0, 0, 0, 0, 0 ],
+      [ 0, 3, -2, -1, -99, 0, 0, 0 ],
+      [ 0, 0,  0,  0, 0, 0, 0, 0 ],
+      [ 0, 0,  0,  0, 0, 0, 0, 0 ],
+      [ 0, 0,  0,  0, 0, 0, 0, 0 ]
+
     ]
   }
 };
 
-},{"../../locale/bg_bg/maze":50,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":17,"./tiles":24,"./toolboxes/karel1.xml":25,"./toolboxes/karel2.xml":26,"./toolboxes/karel3.xml":27}],17:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":52,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":19,"./tiles":26,"./toolboxes/karel1.xml":27,"./toolboxes/karel2.xml":28,"./toolboxes/karel3.xml":29}],19:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7008,7 +7371,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/maze":50,"ejs":51}],18:[function(require,module,exports){
+},{"../../locale/bg_bg/maze":52,"ejs":53}],20:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
 var wordsearchLevels = require('./wordsearchLevels');
@@ -7644,7 +8007,7 @@ cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
 cloneWithStep('karel_2_9', true, false);
 
-},{"../block_utils":3,"../utils":47,"./karelLevels":16,"./requiredBlocks":21,"./startBlocks.xml":23,"./tiles":24,"./toolboxes/maze.xml":28,"./wordsearchLevels":31}],19:[function(require,module,exports){
+},{"../block_utils":3,"../utils":49,"./karelLevels":18,"./requiredBlocks":23,"./startBlocks.xml":25,"./tiles":26,"./toolboxes/maze.xml":30,"./wordsearchLevels":33}],21:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -7663,7 +8026,7 @@ window.mazeMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":14,"./levels":18,"./maze":20,"./skins":22}],20:[function(require,module,exports){
+},{"../appMain":1,"./blocks":15,"./levels":20,"./maze":22,"./skins":24}],22:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -7703,6 +8066,8 @@ var utils = require('../utils');
 
 var Bee = require('./bee');
 var WordSearch = require('./wordsearch');
+var DirtDrawer = require('./dirtDrawer');
+var BeeItemDrawer = require('./beeItemDrawer');
 
 var ExecutionInfo = require('../executionInfo');
 
@@ -7769,16 +8134,14 @@ var loadLevel = function() {
   // Height and width of the goal and obstacles.
   Maze.MARKER_HEIGHT = 43;
   Maze.MARKER_WIDTH = 50;
-  // Height and width of the dirt piles/holes.
-  Maze.DIRT_HEIGHT = 50;
-  Maze.DIRT_WIDTH = 50;
-  // The number line is [-inf, min, min+1, ... no zero ..., max-1, max, +inf]
-  Maze.DIRT_MAX = 10;
-  Maze.DIRT_COUNT = Maze.DIRT_MAX * 2 + 2;
 
   Maze.MAZE_WIDTH = Maze.SQUARE_SIZE * Maze.COLS;
   Maze.MAZE_HEIGHT = Maze.SQUARE_SIZE * Maze.ROWS;
   Maze.PATH_WIDTH = Maze.SQUARE_SIZE / 3;
+
+  if (Maze.initialDirtMap) {
+    Maze.dirt_ = new Array(Maze.ROWS);
+  }
 };
 
 
@@ -7866,11 +8229,7 @@ function drawMap () {
     svg.appendChild(tile);
   }
 
-  if (Maze.wordSearch) {
-    Maze.wordSearch.drawMapTiles(svg);
-  } else {
-    drawMapTiles(svg);
-  }
+  drawMapTiles(svg);
 
   // Pegman's clipPath element, whose (x, y) is reset by Maze.displayPegman
   var pegmanClip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
@@ -7968,6 +8327,10 @@ function drawMap () {
 }
 
 function drawMapTiles(svg) {
+  if (Maze.wordSearch) {
+    return Maze.wordSearch.drawMapTiles(svg);
+  }
+
   // Draw the tiles making up the maze map.
 
   // Return a value of '0' if the specified square is wall or out of bounds '1'
@@ -8006,6 +8369,10 @@ function drawMapTiles(svg) {
         if (level.id == '2_1' || level.id == '2_2' || level.id == '2_3') {
           Maze.wallMap[y][x] = 0;
           tile = 'null0';
+        }
+
+        if (skin.id === 'bee') {
+          tile = 'null3';
         }
       }
 
@@ -8064,17 +8431,16 @@ Maze.drawTile = function (svg, tileSheetLocation, row, col, tileId) {
   tileElement.appendChild(tileAnimation);
 };
 
-var resetDirt = function() {
+function resetDirt() {
   if (!Maze.initialDirtMap) {
     return;
   }
-  // Init the dirt so that all places are empty
-  Maze.dirt_ = new Array(Maze.ROWS);
   // Locate the dirt in dirt_map
   for (var y = 0; y < Maze.ROWS; y++) {
     Maze.dirt_[y] = Maze.initialDirtMap[y].slice(0);
   }
-};
+
+}
 
 /**
  * Initialize Blockly and the maze.  Called on page load.
@@ -8154,8 +8520,7 @@ Maze.init = function(config) {
         var cell = Maze.map[y][x];
         if (cell == SquareType.START) {
           Maze.start_ = {x: x, y: y};
-        } else if (cell == SquareType.FINISH ||
-          (Maze.wordSearch && Maze.wordSearch.isFinishCell(cell))) {
+        } else if (isFinishCell(cell)) {
           Maze.finish_ = {x: x, y: y};
         } else if (cell == SquareType.STARTANDFINISH) {
           Maze.start_ = {x: x, y: y};
@@ -8165,6 +8530,12 @@ Maze.init = function(config) {
     }
 
     resetDirt();
+
+    if (config.skinId === 'bee') {
+      Maze.gridItemDrawer = new BeeItemDrawer(Maze.dirt_, skin, Maze.initialDirtMap, level.flowerType);
+    } else {
+      Maze.gridItemDrawer = new DirtDrawer(Maze.dirt_, skin.dirt);
+    }
 
     drawMap();
 
@@ -8184,6 +8555,13 @@ Maze.init = function(config) {
   BlocklyApps.init(config);
 };
 
+function isFinishCell(cell) {
+  if (Maze.wordSearch) {
+    return Maze.wordSearch.isFinishCell(cell);
+  }
+  return (cell === SquareType.FINISH);
+}
+
 /**
  * Handle a click on the step button.  If we're already animating, we should
  * perform a single step.  Otherwise, we call beginAttempt which will do
@@ -8195,85 +8573,6 @@ function stepButtonClick() {
   } else {
     Maze.beginAttempt(true);
   }
-}
-
-var cellId = function(prefix, row, col) {
-  return prefix + '_' + row + '_' + col;
-};
-
-
- // todo (brent) : The next set of dirt related methods probably belong in a single module
-
-
-function spriteIndexForDirt(val) {
-  var spriteIndex;
-
-  if (val < -Maze.DIRT_MAX) {
-    spriteIndex = 0;
-  } else if (val < 0) {
-    spriteIndex = Maze.DIRT_MAX + val + 1;
-  } else if (val > Maze.DIRT_MAX) {
-    spriteIndex = Maze.DIRT_COUNT - 1;
-  } else if (val > 0) {
-    spriteIndex = Maze.DIRT_MAX + val;
-  } else {
-    throw new Error('Expected non-zero dirt.');
-  }
-
-  return spriteIndex;
-}
-
-Maze.updateDirtImage = function (row, col) {
-  var val = Maze.dirt_[row][col];
-  var img = document.getElementById(cellId('dirt', row, col));
-  if (!img) {
-    // we don't need any image
-    if (val === 0) {
-      return;
-    }
-    // we want an image, so let's create one
-    img = createDirt(row, col);
-  }
-
-  img.setAttribute('visibility', val === 0 ? 'hidden' : 'visibile');
-  if (val !== 0) {
-    var spriteIndex = spriteIndexForDirt(val);
-
-    var x = Maze.SQUARE_SIZE * (col - spriteIndex + 0.5) - Maze.DIRT_HEIGHT / 2;
-    var y = Maze.SQUARE_SIZE * (row + 0.5) - Maze.DIRT_WIDTH / 2;
-    img.setAttribute('x', x);
-    img.setAttribute('y', y);
-  }
-};
-
-function createDirt (row, col) {
-  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
-  var svg = document.getElementById('svgMaze');
-
-  var clipId = cellId('dirtClip', row, col);
-  var imgId = cellId('dirt', row, col);
-
-  // Create clip path.
-  var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-  clip.setAttribute('id', clipId);
-  var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
-  rect.setAttribute('x', col * Maze.DIRT_WIDTH);
-  rect.setAttribute('y', row * Maze.DIRT_HEIGHT);
-  rect.setAttribute('width', Maze.DIRT_WIDTH);
-  rect.setAttribute('height', Maze.DIRT_HEIGHT);
-  clip.appendChild(rect);
-  svg.insertBefore(clip, pegmanElement);
-  // Create image.
-  var img = document.createElementNS(Blockly.SVG_NS, 'image');
-  img.setAttributeNS(
-      'http://www.w3.org/1999/xlink', 'xlink:href', skin.dirt);
-  img.setAttribute('height', Maze.DIRT_HEIGHT);
-  img.setAttribute('width', Maze.DIRT_WIDTH * Maze.DIRT_COUNT);
-  img.setAttribute('clip-path', 'url(#' + clipId + ')');
-  img.setAttribute('id', imgId);
-  svg.insertBefore(img, pegmanElement);
-
-  return img;
 }
 
 /**
@@ -8370,6 +8669,11 @@ var updatePegmanAnimation = function(options) {
  * @param {boolean} first True if an opening animation is to be played.
  */
 BlocklyApps.reset = function(first) {
+  if (Maze.bee) {
+    // Bee needs to reset itself and still run BlocklyApps.reset logic
+    Maze.bee.reset();
+  }
+
   var i;
   // Kill all tasks.
   timeoutList.clearTimeouts();
@@ -8436,16 +8740,12 @@ BlocklyApps.reset = function(first) {
     movePegmanIcon.setAttribute('visibility', 'hidden');
   }
 
-  if (Maze.bee) {
-    Maze.bee.reset();
-  }
-
   // Move the init dirt marker icons into position.
   resetDirt();
   for (var row = 0; row < Maze.ROWS; row++) {
     for (var col = 0; col < Maze.COLS; col++) {
       if (getTile(Maze.dirt_, col, row) !== undefined) {
-        Maze.updateDirtImage(row, col);
+        Maze.gridItemDrawer.updateItemImage(row, col);
       }
     }
   }
@@ -9102,6 +9402,10 @@ Maze.scheduleFail = function(forward) {
  * Set the tiles to be transparent gradually.
  */
 Maze.setTileTransparent = function() {
+  if (Maze.bee) {
+    Maze.bee.setTilesTransparent();
+  }
+
   var tileId = 0;
   for (var y = 0; y < Maze.ROWS; y++) {
     for (var x = 0; x < Maze.COLS; x++) {
@@ -9118,10 +9422,6 @@ Maze.setTileTransparent = function() {
       tileId++;
     }
   }
-
-  if (Maze.bee) {
-    Maze.bee.setTilesTransparent();
-  }
 };
 
 /**
@@ -9130,7 +9430,7 @@ Maze.setTileTransparent = function() {
  * puzzle (vs. dancing on load).
  */
 Maze.scheduleDance = function(victoryDance) {
-  var frame = tiles.directionToFrame(Maze.pegmanD);
+  var originalFrame = tiles.directionToFrame(Maze.pegmanD);
   Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 16);
 
   // Setting the tiles to be transparent
@@ -9164,7 +9464,7 @@ Maze.scheduleDance = function(victoryDance) {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 20);
   }, danceSpeed * 4);
   timeoutList.setTimeout(function() {
-    Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, frame);
+    Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, originalFrame);
   }, danceSpeed * 5);
 };
 
@@ -9189,7 +9489,7 @@ var scheduleDirtChange = function(options) {
   var col = Maze.pegmanX;
   var row = Maze.pegmanY;
   Maze.dirt_[row][col] += options.amount;
-  Maze.updateDirtImage(row, col);
+  Maze.gridItemDrawer.updateItemImage(row, col);
   BlocklyApps.playAudio(options.sound);
 };
 
@@ -9267,12 +9567,12 @@ Maze.scheduleLookStep = function(path, delay) {
   }, delay);
 };
 
-var atFinish = function() {
+function atFinish () {
   return !Maze.finish_ ||
       (Maze.pegmanX == Maze.finish_.x && Maze.pegmanY == Maze.finish_.y);
-};
+}
 
-var isDirtCorrect = function() {
+function isDirtCorrect () {
   if(!Maze.dirt_) {
     return true;
   }
@@ -9285,27 +9585,27 @@ var isDirtCorrect = function() {
     }
   }
   return true;
-};
+}
 
 Maze.checkSuccess = function() {
+  var finished;
   if (!atFinish()) {
-    return false;
-  }
-  if (Maze.bee) {
-    if (!Maze.bee.finished()) {
-      return false;
-    }
-  } else if (!isDirtCorrect()) {
-    return false;
+    finished = false;
+  } else if (Maze.bee) {
+    finished = Maze.bee.finished();
+  } else {
+    finished = isDirtCorrect();
   }
 
-  // Finished.  Terminate the user's program.
-  Maze.executionInfo.queueAction('finish', null);
-  Maze.executionInfo.terminateWithValue(true);
-  return true;
+  if (finished) {
+    // Finished.  Terminate the user's program.
+    Maze.executionInfo.queueAction('finish', null);
+    Maze.executionInfo.terminateWithValue(true);
+  }
+  return finished;
 };
 
-},{"../../locale/bg_bg/common":49,"../../locale/bg_bg/maze":50,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":33,"../templates/page.html":41,"../timeoutList":46,"../utils":47,"./api":12,"./bee":13,"./controls.html":15,"./tiles":24,"./visualization.html":29,"./wordsearch":30}],21:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"../../locale/bg_bg/maze":52,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":35,"../templates/page.html":43,"../timeoutList":48,"../utils":49,"./api":12,"./bee":13,"./beeItemDrawer":14,"./controls.html":16,"./dirtDrawer":17,"./tiles":26,"./visualization.html":31,"./wordsearch":32}],23:[function(require,module,exports){
 var requiredBlockUtils = require('../required_block_utils');
 
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
@@ -9333,7 +9633,7 @@ module.exports = {
   FOR_LOOP: FOR_LOOP
 };
 
-},{"../required_block_utils":32}],22:[function(require,module,exports){
+},{"../required_block_utils":34}],24:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -9365,10 +9665,10 @@ var CONFIGS = {
     movePegmanAnimation: 'move_avatar.png',
     movePegmanAnimationSpeedScale: 1.5,
     movePegmanAnimationFrameNumber: 9,
-    background: 4,
+    background: 1,
     dirtSound: true,
-    tileSheetWidth: 5,
     pegmanYOffset: 0,
+    tileSheetWidth: 5,
     pegmanHeight: 50,
     pegmanWidth: 50,
     danceOnLoad: false
@@ -9479,6 +9779,10 @@ exports.load = function(assetUrl, id) {
   skin.dirt = skin.assetUrl('dirt.png');
   skin.nectar = skin.assetUrl('nectar.png');
   skin.honey = skin.assetUrl('honey.png');
+  skin.flowerComb = skin.assetUrl('flowercomb.png');
+  skin.redFlowerWithNectar = skin.assetUrl('redFlowerWithNectar.png');
+  skin.redFlowerWithoutNectar = skin.assetUrl('redFlowerNectarHidden.png');
+  skin.purpleFlowerWithoutNectar = skin.assetUrl('purpleFlowerNectarHidden.png');
   if (config.background !== undefined) {
     var index = Math.floor(Math.random() * config.background);
     skin.background = skin.assetUrl('background' + index + '.png');
@@ -9492,7 +9796,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":33}],23:[function(require,module,exports){
+},{"../skins":35}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9513,7 +9817,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],24:[function(require,module,exports){
+},{"ejs":53}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -9576,7 +9880,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":47}],25:[function(require,module,exports){
+},{"../utils":49}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9597,7 +9901,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],26:[function(require,module,exports){
+},{"ejs":53}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9623,7 +9927,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/bg_bg/common":49,"../../../locale/bg_bg/maze":50,"ejs":51}],27:[function(require,module,exports){
+},{"../../../locale/bg_bg/common":51,"../../../locale/bg_bg/maze":52,"ejs":53}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9657,7 +9961,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/bg_bg/common":49,"ejs":51}],28:[function(require,module,exports){
+},{"../../../locale/bg_bg/common":51,"ejs":53}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9678,7 +9982,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],29:[function(require,module,exports){
+},{"ejs":53}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9699,7 +10003,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],30:[function(require,module,exports){
+},{"ejs":53}],32:[function(require,module,exports){
 var _ = require('../lodash');
 
 var SquareType = require('./tiles').SquareType;
@@ -9874,7 +10178,7 @@ WordSearch.__testonly__ = {
 };
 /* end-test-block */
 
-},{"../lodash":11,"./tiles":24}],31:[function(require,module,exports){
+},{"../lodash":11,"./tiles":26}],33:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var reqBlocks = require('./requiredBlocks');
 var blockUtils = require('../block_utils');
@@ -10224,7 +10528,7 @@ module.exports = {
   }
 };
 
-},{"../block_utils":3,"./requiredBlocks":21,"./tiles":24}],32:[function(require,module,exports){
+},{"../block_utils":3,"./requiredBlocks":23,"./tiles":26}],34:[function(require,module,exports){
 var xml = require('./xml');
 var blockUtils = require('./block_utils');
 var utils = require('./utils');
@@ -10344,7 +10648,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":47,"./xml":48}],33:[function(require,module,exports){
+},{"./block_utils":3,"./utils":49,"./xml":50}],35:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -10394,7 +10698,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -10599,7 +10903,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10620,7 +10924,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],36:[function(require,module,exports){
+},{"ejs":53}],38:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10641,7 +10945,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":49,"ejs":51}],37:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"ejs":53}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10662,7 +10966,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],38:[function(require,module,exports){
+},{"ejs":53}],40:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10683,7 +10987,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":49,"ejs":51}],39:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"ejs":53}],41:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10706,7 +11010,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":49,"ejs":51}],40:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"ejs":53}],42:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10727,7 +11031,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":49,"ejs":51}],41:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"ejs":53}],43:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10752,7 +11056,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":49,"ejs":51}],42:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"ejs":53}],44:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10774,7 +11078,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],43:[function(require,module,exports){
+},{"ejs":53}],45:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10795,7 +11099,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":49,"ejs":51}],44:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"ejs":53}],46:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10816,7 +11120,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/bg_bg/common":49,"ejs":51}],45:[function(require,module,exports){
+},{"../../locale/bg_bg/common":51,"ejs":53}],47:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10837,7 +11141,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":51}],46:[function(require,module,exports){
+},{"ejs":53}],48:[function(require,module,exports){
 var list = [];
 
 /**
@@ -10855,7 +11159,9 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
+var _ = require('./lodash');
+
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -10956,7 +11262,14 @@ exports.stripQuotes = function(inputString) {
   return inputString.replace(/["']/g, "");
 };
 
-},{}],48:[function(require,module,exports){
+/**
+ * Defines an inheritance relationship between parent class and this class.
+ */
+Function.prototype.inherits = function (parent) {
+  this.prototype = _.create(parent.prototype, { constructor: parent });
+};
+
+},{"./lodash":11}],50:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -10984,7 +11297,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],49:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bg=function(n){return n===1?"one":"other"}
 exports.blocklyMessage = function(d){return "Блокли"};
 
@@ -11125,8 +11438,12 @@ exports.signup = function(d){return "Регистрация във встъпи�
 exports.hintHeader = function(d){return "Ето един съвет:"};
 
 
-},{"messageformat":62}],50:[function(require,module,exports){
+},{"messageformat":64}],52:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bg=function(n){return n===1?"one":"other"}
+exports.atBeehive = function(d){return "at beehive"};
+
+exports.atFlower = function(d){return "at flower"};
+
 exports.avoidCowAndRemove = function(d){return "избeгни кравата и премахни 1"};
 
 exports.continue = function(d){return "продължи"};
@@ -11246,7 +11563,7 @@ exports.whileTooltip = function(d){return "Повтаря поставените
 exports.yes = function(d){return "Да"};
 
 
-},{"messageformat":62}],51:[function(require,module,exports){
+},{"messageformat":64}],53:[function(require,module,exports){
 
 /*!
  * EJS
@@ -11605,7 +11922,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":52,"./utils":53,"fs":54,"path":56}],52:[function(require,module,exports){
+},{"./filters":54,"./utils":55,"fs":56,"path":58}],54:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -11808,7 +12125,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 
 /*!
  * EJS
@@ -11834,9 +12151,9 @@ exports.escape = function(html){
 };
  
 
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -11891,7 +12208,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],56:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12119,7 +12436,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":55}],57:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":57}],59:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -12630,7 +12947,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],58:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12716,7 +13033,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],59:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12803,13 +13120,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],60:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":58,"./encode":59}],61:[function(require,module,exports){
+},{"./decode":60,"./encode":61}],63:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -13442,7 +13759,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":57,"querystring":60}],62:[function(require,module,exports){
+},{"punycode":59,"querystring":62}],64:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -15025,4 +15342,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[19])
+},{}]},{},[21])
