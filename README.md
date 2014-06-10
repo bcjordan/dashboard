@@ -53,7 +53,7 @@ If you won't be making modifications to blockly code, you can just skip the syml
       + Add this line to your ~/.profile to configure rbenv: `if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi`
       + `source ~/.profile`
     - Ubuntu: using apt-get
-      + install MySQL packages and other prerequisites (leave MySQL root password blank when prompted): `sudo apt-get install mysql-client mysql-server libmysqlclient-dev libmagickwand-dev imagemagick`
+      + install MySQL packages and other prerequisites (**note: leave MySQL root password blank when prompted**): `sudo apt-get install mysql-client mysql-server libmysqlclient-dev libmagickwand-dev imagemagick`
       + Start service (should auto-start on system boot): `sudo start mysql`
       + To connect:
         - `mysql`
