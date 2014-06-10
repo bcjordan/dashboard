@@ -14,6 +14,15 @@
   .field
     = f.label :instructions
     = f.text_area :instructions, placeholder: 'Instructions', rows: 4
+  -#Alternatively,
+  -#  1. loop through all @level['properties']
+  -#  2. (and/or) use a default prop list on the @type_class
+  -#  3. add a view helper and specify fields in this view
+  = f.fields_for :properties do |properties|
+    .field
+      = properties.label :instructions_image, "Instructions ani-gif"
+      = properties.text_field :instructions_image, value: @level.try(:[], 'properties').try(:[], 'instructions_image')
+      -# First try may no longer be necessary
   .field
     = f.label :skin
     = f.select :skin, options_for_select(@level.class.skins, @level.skin)

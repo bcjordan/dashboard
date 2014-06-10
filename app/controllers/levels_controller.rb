@@ -65,6 +65,8 @@ class LevelsController < ApplicationController
   def update
     start_direction = Integer(level_params["start_direction"]) rescue nil
     if @level.update(level_params.merge!(start_direction: start_direction))
+      level_params["properties"].each {|k,v| @level.properties[k] = v }
+      @level.save
       render json: { redirect: game_level_url(@level.game, @level) }.to_json
     else
       render json: @level.errors, status: :unprocessable_entity
@@ -154,6 +156,7 @@ class LevelsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def level_params
-      params[:level].permit([:maze, :name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, :is_k1, :nectar_goal, :honey_goal, {concept_ids: []}])
+      # TODO(bjordan): add a nested require().permit()? or require(:properties).permit! ?
+      params[:level].permit! #([:maze, :name, :type, :level_url, :level_num, :skin, :instructions, :properties, :x, :y, :start_direction, :user, :step_mode, :is_k1, :nectar_goal, :honey_goal, {concept_ids: []}])
     end
 end
