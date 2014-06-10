@@ -52,6 +52,9 @@ If you won't be making modifications to blockly code, you can just skip the syml
             + `mysql -uroot`
       + Add this line to your ~/.profile to configure rbenv: `if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi`
       + `source ~/.profile`
+    - EC2: using pre-built AMI
+      + Launch an instance using the AMI identifier `ami-f56a739c`, or by [clicking here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#LaunchInstanceWizard:ami=ami-f56a739c)
+      + This includes an install of `blockly` as well
     - Ubuntu: using apt-get
       + install MySQL packages and other prerequisites (**note: leave MySQL root password blank when prompted**): `sudo apt-get install mysql-client mysql-server libmysqlclient-dev libmagickwand-dev imagemagick`
       + Start service (should auto-start on system boot): `sudo start mysql`
