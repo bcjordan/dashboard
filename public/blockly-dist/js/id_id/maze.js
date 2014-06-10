@@ -9645,10 +9645,10 @@ module.exports = {
 // tileSheetWidth: How many tiles wide skin.tiles is
 
 var skinsBase = require('../skins');
+var _ = require('../lodash');
 
 var CONFIGS = {
   letters: {
-    look: '#FFF',
     nonDisappearingPegmanHittingObstacle: true,
     pegmanHeight: 68,
     pegmanWidth: 51,
@@ -9657,6 +9657,17 @@ var CONFIGS = {
   },
 
   bee: {
+    obstacleAnimation: '',
+    dirt: 'dirt.png',
+    nectar: 'nectar.png',
+    honey: 'honey.png',
+    flowerComb: 'flowercomb.png',
+    redFlowerWithNectar: 'redFlowerWithNectar.png',
+    redFlowerWithoutNectar: 'redFlowerNectarHidden.png',
+    purpleFlowerWithoutNectar:'purpleFlowerNectarHidden.png',
+    fillSound: 'fill.mp3',
+    digSound: 'dig.mp3',
+
     look: '#000',
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
@@ -9664,8 +9675,8 @@ var CONFIGS = {
     wallPegmanAnimation: 'wall_avatar.png',
     movePegmanAnimation: 'move_avatar.png',
     movePegmanAnimationSpeedScale: 1.5,
+    // This is required when move pegman animation is set
     movePegmanAnimationFrameNumber: 9,
-    background: 1,
     dirtSound: true,
     pegmanYOffset: 0,
     tileSheetWidth: 5,
@@ -9675,128 +9686,118 @@ var CONFIGS = {
   },
 
   farmer: {
+    dirt: 'dirt.png',
+    fillSound: 'fill.mp3',
+    digSound: 'dig.mp3',
+
     look: '#000',
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
-    background: 4,
+    background: 'background' + _.sample([0, 1, 2, 3]) + '.png',
     dirtSound: true,
-    pegmanYOffset: -8,
-    tileSheetWidth: 5
+    pegmanYOffset: -8
   },
 
   farmer_night: {
-    look: '#FFF',
+    dirt: 'dirt.png',
+    fillSound: 'fill.mp3',
+    digSound: 'dig.mp3',
+
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
-    background: 4,
+    background: 'background' + _.sample([0, 1, 2, 3]) + '.png',
     dirtSound: true,
-    pegmanYOffset: -8,
-    tileSheetWidth: 5
+    pegmanYOffset: -8
   },
 
   pvz: {
-    look: '#FFF',
+    goalAnimation: 'goal.gif',
+    maze_forever: 'maze_forever.png',
+
     obstacleScale: 1.4,
-    pegmanYOffset: -8,
-    tileSheetWidth: 5
+    pegmanYOffset: -8
   },
 
   birds: {
-    look: '#FFF',
+    goalAnimation: 'goal.gif',
+    maze_forever: 'maze_forever.png',
     largerObstacleAnimationTiles: 'tiles-broken.png',
+
     obstacleScale: 1.2,
     additionalSound: true,
     idlePegmanAnimation: 'idle_avatar.gif',
     wallPegmanAnimation: 'wall_avatar.png',
     movePegmanAnimation: 'move_avatar.png',
     movePegmanAnimationSpeedScale: 1.5,
+    // This is required when move pegman animation is set
     movePegmanAnimationFrameNumber: 9,
     hittingWallAnimation: 'wall.gif',
     approachingGoalAnimation: 'close_goal.png',
     pegmanHeight: 68,
     pegmanWidth: 51,
-    pegmanYOffset: -14,
-    tileSheetWidth: 5
+    pegmanYOffset: -14
   }
 
 };
 
+/**
+ * Given the mp3 sound, generates a list containing both the mp3 and ogg sounds
+ */
+function soundAssetUrls(skin, mp3Sound) {
+  var base = mp3Sound.match(/^(.*)\.mp3$/)[1];
+  return [skin.assetUrl(mp3Sound), skin.assetUrl(base + '.ogg')];
+}
+
 exports.load = function(assetUrl, id) {
+  // The skin has properties from three locations
+  // (1) skinBase - properties common across Blockly apps
+  // (2) here - properties common across all maze skins
+  // (3) config - properties particular to a maze skin
+  // If a property is defined in multiple locations, the more specific location
+  // takes precedence
+
+  // (1) Properties common across Blockly apps
   var skin = skinsBase.load(assetUrl, id);
   var config = CONFIGS[skin.id];
-  // Images
-  skin.tiles = skin.assetUrl('tiles.png');
-  skin.tileSheetWidth = config.tileSheetWidth;
-  skin.goal = skin.assetUrl('goal.png');
-  skin.goalAnimation = skin.assetUrl('goal.gif');
-  skin.obstacle = skin.assetUrl('obstacle.png');
+
+  // (2) Default values for properties common across maze skins.
+  skin.tileSheetWidth = 5;
+  skin.obstacleScale = 1.0;
   skin.obstacleAnimation = skin.assetUrl('obstacle.gif');
-  skin.maze_forever = skin.assetUrl('maze_forever.png');
-  if (config.transparentTileEnding) {
-    skin.transparentTileEnding = true;
-  } else {
-    skin.transparentTileEnding = false;
-  }
-  if (config.nonDisappearingPegmanHittingObstacle) {
-    skin.nonDisappearingPegmanHittingObstacle = true;
-  } else {
-    skin.nonDisappearingPegmanHittingObstacle = false;
-  }
-  skin.obstacleScale = config.obstacleScale || 1.0;
-  skin.largerObstacleAnimationTiles =
-      skin.assetUrl(config.largerObstacleAnimationTiles);
-  skin.idlePegmanAnimation =
-      skin.assetUrl(config.idlePegmanAnimation);
-  skin.wallPegmanAnimation =
-      skin.assetUrl(config.wallPegmanAnimation);
-  skin.movePegmanAnimation =
-      skin.assetUrl(config.movePegmanAnimation);
-  skin.movePegmanAnimationSpeedScale =
-      config.movePegmanAnimationSpeedScale || 1;
-  // This is required when move pegman animation is set
-  skin.movePegmanAnimationFrameNumber = config.movePegmanAnimationFrameNumber;
-  skin.hittingWallAnimation =
-      skin.assetUrl(config.hittingWallAnimation);
-  skin.approachingGoalAnimation =
-      skin.assetUrl(config.approachingGoalAnimation);
+  skin.movePegmanAnimationSpeedScale = 1;
+  skin.look = '#FFF';
+  skin.background = skin.assetUrl('background.png');
+  skin.pegmanHeight = 52;
+  skin.pegmanWidth = 49;
+  skin.pegmanYOffset = 0;
+
   // Sounds
-  skin.obstacleSound =
-      [skin.assetUrl('obstacle.mp3'), skin.assetUrl('obstacle.ogg')];
-  skin.wallSound = [skin.assetUrl('wall.mp3'), skin.assetUrl('wall.ogg')];
-  skin.winGoalSound = [skin.assetUrl('win_goal.mp3'),
-                       skin.assetUrl('win_goal.ogg')];
-  skin.wall0Sound = [skin.assetUrl('wall0.mp3'), skin.assetUrl('wall0.ogg')];
-  skin.wall1Sound = [skin.assetUrl('wall1.mp3'), skin.assetUrl('wall1.ogg')];
-  skin.wall2Sound = [skin.assetUrl('wall2.mp3'), skin.assetUrl('wall2.ogg')];
-  skin.wall3Sound = [skin.assetUrl('wall3.mp3'), skin.assetUrl('wall3.ogg')];
-  skin.wall4Sound = [skin.assetUrl('wall4.mp3'), skin.assetUrl('wall4.ogg')];
-  skin.fillSound = [skin.assetUrl('fill.mp3'), skin.assetUrl('fill.ogg')];
-  skin.digSound = [skin.assetUrl('dig.mp3'), skin.assetUrl('dig.ogg')];
-  skin.additionalSound = config.additionalSound;
-  skin.dirtSound = config.dirtSound;
-  // Settings
-  skin.look = config.look;
-  skin.dirt = skin.assetUrl('dirt.png');
-  skin.nectar = skin.assetUrl('nectar.png');
-  skin.honey = skin.assetUrl('honey.png');
-  skin.flowerComb = skin.assetUrl('flowercomb.png');
-  skin.redFlowerWithNectar = skin.assetUrl('redFlowerWithNectar.png');
-  skin.redFlowerWithoutNectar = skin.assetUrl('redFlowerNectarHidden.png');
-  skin.purpleFlowerWithoutNectar = skin.assetUrl('purpleFlowerNectarHidden.png');
-  if (config.background !== undefined) {
-    var index = Math.floor(Math.random() * config.background);
-    skin.background = skin.assetUrl('background' + index + '.png');
-  } else {
-    skin.background = skin.assetUrl('background.png');
+  skin.obstacleSound = soundAssetUrls(skin, 'obstacle.mp3');
+  skin.wallSound = soundAssetUrls(skin, 'wall.mp3');
+  skin.winGoalSound = soundAssetUrls(skin, 'win_goal.mp3');
+  skin.wall0Sound = soundAssetUrls(skin, 'wall0.mp3');
+  skin.wall1Sound = soundAssetUrls(skin, 'wall1.mp3');
+  skin.wall2Sound = soundAssetUrls(skin, 'wall2.mp3');
+  skin.wall3Sound = soundAssetUrls(skin, 'wall3.mp3');
+  skin.wall4Sound = soundAssetUrls(skin, 'wall4.mp3');
+
+  // (3) Get properties from config
+  var isAsset = /\.\S{3}$/; // ends in dot followed by three non-whitespace chars
+  var isSound = /^(.*)\.mp3$/; // something.mp3
+  for (var prop in config) {
+    var val = config[prop];
+    if (isSound.test(val)) {
+      val = soundAssetUrls(skin, val);
+    } else if (isAsset.test(val)) {
+      val = skin.assetUrl(val);
+    }
+    skin[prop] = val;
   }
-  skin.pegmanHeight = config.pegmanHeight || 52;
-  skin.pegmanWidth = config.pegmanWidth || 49;
-  skin.pegmanYOffset = config.pegmanYOffset || 0;
-  skin.danceOnLoad = (config.danceOnLoad === undefined) ? true : config.danceOnLoad;
+
   return skin;
 };
 
-},{"../skins":35}],25:[function(require,module,exports){
+},{"../lodash":11,"../skins":35}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){

@@ -3623,7 +3623,6 @@ var skinsBase = require('../skins');
 var CONFIGS = {
 
   bounce: {
-    transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
     ballYOffset: 10
   }
@@ -3649,14 +3648,7 @@ exports.load = function(assetUrl, id) {
   skin.goalSuccess = skin.assetUrl('goal_success.png');
   skin.ball = skin.assetUrl('ball.png');
   skin.paddle = skin.assetUrl('paddle.png');
-  skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.obstacle = skin.assetUrl('obstacle.png');
-  skin.obstacleAnimation = skin.assetUrl('obstacle.gif');
-  if (config.transparentTileEnding) {
-    skin.transparentTileEnding = true;
-  } else {
-    skin.transparentTileEnding = false;
-  }
   if (config.nonDisappearingPegmanHittingObstacle) {
     skin.nonDisappearingPegmanHittingObstacle = true;
   } else {
