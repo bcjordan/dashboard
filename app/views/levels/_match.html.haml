@@ -74,6 +74,16 @@
           %button#ok-button.secondary
             =t("dialog.ok")
 
+    #success-dialogcontent
+      .modal-content
+        %p.dialog-title
+          =t("match.correct_title")
+        %p
+          =t("match.correct_body")
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
 
 :javascript
 
@@ -88,9 +98,19 @@
     return this; 
   };
 
+  function dialogHidden()
+  {
+    if (dialogType == "success" && nextRedirect)
+    {
+      window.location.href = nextRedirect;
+    }
+  }
+
   function showDialog(type)
   {
-    var dialog = new Dialog({ body: "" });
+    dialogType = type;
+
+    var dialog = new Dialog({ body: "", onHidden: dialogHidden });
 
     // use our prefabricated dialog content
     $(".modal-body").append($("#" + type + "-dialogcontent").clone(true));
@@ -114,6 +134,7 @@
 
   var solution = "none";    // "none", "wrong", "right"
   var buttonEnabled = true;  // avoid multiple simultaneous submissions
+  var dialogType = null;
 
   function enableButton(enable)
   {
@@ -127,7 +148,7 @@
 
   $(function() 
   {
-    if ("#{data['pre_title']}")
+    if ("#{data['pre_title']}" != "")
     {
       setTimeout(function() {
         showDialog("pre");
@@ -270,7 +291,7 @@
             } 
             else if (nextRedirect) 
             {
-              window.location.href = nextRedirect;
+              showDialog("success");
             }
           }
        });

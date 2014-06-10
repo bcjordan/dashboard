@@ -46,7 +46,6 @@
           %button#ok-button.secondary
             =t("dialog.ok")
 
-
     #pre-dialogcontent
       - if data['pre_image']
         .modal-image{style: "margin-top: 0px"}
@@ -60,11 +59,22 @@
           %button#ok-button.secondary
             =t("dialog.ok")
 
+    #success-dialogcontent
+      .modal-content
+        %p.dialog-title
+          =t("multi.correct_title")
+        %p
+          =t("multi.correct_body")
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
 :javascript
 
   var selection = "none";   // "none", "wrong", "right"
   var selectionIndex = -1;
   var buttonEnabled = true;  // avoid multiple simultaneous submissions
+  var dialogType = null; 
 
   function radioChanged(index) 
   {
@@ -77,7 +87,7 @@
   {
     enableButton(false);
 
-    if ("#{data['pre_title']}")
+    if ("#{data['pre_title']}" != "")
     {
       setTimeout(function() {
         showDialog("pre");
@@ -95,9 +105,19 @@
       $('.submitButton').addClass("disabled");
   }
 
+  function dialogHidden()
+  {
+    if (dialogType == "success" && nextRedirect)
+    {
+      window.location.href = nextRedirect;
+    }
+  }
+
   function showDialog(type)
   {
-    var dialog = new Dialog({ body: "" });
+    dialogType = type;
+
+    var dialog = new Dialog({ body: "", onHidden: dialogHidden });
 
     // use our prefabricated dialog content
     $(".modal-body").append($("#" + type + "-dialogcontent").clone(true));
@@ -154,7 +174,7 @@
             } 
             else if (nextRedirect) 
             {
-              window.location.href = nextRedirect;
+              showDialog("success");
             }
           }
         });
