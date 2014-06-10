@@ -4485,9 +4485,7 @@ exports.load = function(assetUrl, id) {
   skin.tiles = skin.assetUrl('tiles.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
-  skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.obstacle = skin.assetUrl('obstacle.png');
-  skin.obstacleAnimation = skin.assetUrl('obstacle.gif');
   skin.obstacleScale = config.obstacleScale || 1.0;
   skin.largerObstacleAnimationTiles =
       skin.assetUrl(config.largerObstacleAnimationTiles);

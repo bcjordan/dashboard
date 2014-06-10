@@ -7369,7 +7369,6 @@ exports.load = function(assetUrl, id) {
   // Images
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
-  skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.approachingGoalAnimation =
       skin.assetUrl(config.approachingGoalAnimation);
   // Sounds
