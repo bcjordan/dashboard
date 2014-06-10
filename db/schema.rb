@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140530211735) do
+ActiveRecord::Schema.define(version: 20140604221441) do
 
   create_table "activities", force: true do |t|
     t.integer  "user_id"
@@ -117,6 +117,7 @@ ActiveRecord::Schema.define(version: 20140530211735) do
     t.text     "message",    null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "source"
   end
 
   create_table "level_source_hints", force: true do |t|
@@ -130,6 +131,9 @@ ActiveRecord::Schema.define(version: 20140530211735) do
     t.string   "status"
     t.integer  "hint_id"
   end
+
+  add_index "level_source_hints", ["level_source_id", "hint_id"], name: "index_level_source_hints_on_level_source_id_and_hint_id", unique: true, using: :btree
+  add_index "level_source_hints", ["level_source_id"], name: "index_level_source_hints_on_level_source_id", using: :btree
 
   create_table "level_source_images", force: true do |t|
     t.integer  "level_source_id"

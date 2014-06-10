@@ -82,7 +82,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":34}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":35}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -339,7 +339,7 @@ BlocklyApps.init = function(config) {
     });
   }
 
-  var blockCount = document.getElementById('workspace-header');
+  var blockCount = document.getElementById('blockCounter');
   if (blockCount && !BlocklyApps.enableShowBlockCount) {
     blockCount.style.visibility = 'hidden';
   }
@@ -462,7 +462,9 @@ BlocklyApps.init = function(config) {
 };
 
 exports.playAudio = function(name, options) {
-  Blockly.playAudio(name, options);
+  options = options || {};
+  var defaultOptions = {volume: 0.5};
+  Blockly.playAudio(name, utils.extend(defaultOptions, options));
 };
 
 exports.stopLoopingAudio = function(name) {
@@ -782,7 +784,6 @@ BlocklyApps.TestResults = {
   // Two stars.  The level was solved in an acceptable, but not ideal, manner.
   TOO_MANY_BLOCKS_FAIL: 20,   // More than the ideal number of blocks were used.
   OTHER_2_STAR_FAIL: 21,      // Application-specific 2-star failure.
-  FLAPPY_SPECIFIC_FAIL: 22,   // Flappy app failure. TODO: Fold into prior case.
 
   // Other.
   FREE_PLAY: 30,              // The user is in free-play mode.
@@ -908,7 +909,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/ru_ru/common":36,"./builder":5,"./dom":7,"./feedback.js":8,"./lodash":9,"./slider":12,"./templates/buttons.html":24,"./templates/instructions.html":26,"./templates/learn.html":27,"./templates/makeYourOwn.html":28,"./utils":34,"./xml":35}],3:[function(require,module,exports){
+},{"../locale/ru_ru/common":37,"./builder":5,"./dom":7,"./feedback.js":8,"./lodash":9,"./slider":12,"./templates/buttons.html":25,"./templates/instructions.html":27,"./templates/learn.html":28,"./templates/makeYourOwn.html":29,"./utils":35,"./xml":36}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -995,7 +996,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":35}],4:[function(require,module,exports){
+},{"./xml":36}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1058,7 +1059,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":23,"./utils.js":34,"url":48}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":24,"./utils.js":35,"url":49}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
@@ -1268,8 +1269,13 @@ exports.displayFeedback = function(options) {
     feedback.className += " k1";
   }
 
-  feedback.appendChild(getFeedbackButtons(
-    options.feedbackType, options.level.showPreviousLevelButton));
+  feedback.appendChild(
+    getFeedbackButtons({
+      feedbackType: options.feedbackType,
+      showPreviousButton: options.level.showPreviousLevelButton,
+      isK1: options.level.is_k1
+    })
+  );
 
   var againButton = feedback.querySelector('#again-button');
   var previousLevelButton = feedback.querySelector('#back-button');
@@ -1399,16 +1405,18 @@ exports.getNumEnabledBlocks = function() {
   return getEnabledBlocks().length;
 };
 
-var getFeedbackButtons = function(feedbackType, showPreviousLevelButton) {
+var getFeedbackButtons = function(options) {
   var buttons = document.createElement('div');
   buttons.id = 'feedbackButtons';
   buttons.innerHTML = require('./templates/buttons.html')({
     data: {
       previousLevel:
-        !exports.canContinueToNextLevel(feedbackType) &&
-        showPreviousLevelButton,
-      tryAgain: feedbackType !== BlocklyApps.TestResults.ALL_PASS,
-      nextLevel: exports.canContinueToNextLevel(feedbackType)
+        !exports.canContinueToNextLevel(options.feedbackType) &&
+        options.showPreviousButton,
+      tryAgain: options.feedbackType !== BlocklyApps.TestResults.ALL_PASS,
+      nextLevel: exports.canContinueToNextLevel(options.feedbackType),
+      isK1: options.isK1,
+      assetUrl: BlocklyApps.assetUrl
     }
   });
 
@@ -1419,84 +1427,85 @@ var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
   var message;
-  switch (options.feedbackType) {
-    case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
-      message = msg.emptyBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
-      message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
-      break;
-    case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
-      message = options.level.levelIncompleteError ||
-          msg.levelIncompleteError();
-      break;
-    case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
-      message = msg.extraTopBlocks();
-      break;
-    // For completing level, user gets at least one star.
-    case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
-      message = options.level.other1StarError || options.message;
-      break;
-    // Two stars for using too many blocks.
-    case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
-      message = msg.numBlocksNeeded({
-        numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
-        puzzleNumber: options.level.puzzle_number || 0
-      });
-      break;
-    case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
-      message = msg.tooMuchWork();
-      break;
-    case BlocklyApps.TestResults.FLAPPY_SPECIFIC_FAIL:
-      message = msg.flappySpecificFail();
-      break;
-    case BlocklyApps.TestResults.EDIT_BLOCKS:
-      message = options.level.edit_blocks_success;
-      break;
-    case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
-      /* fallthrough */
-    case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
-      message = msg.missingBlocksErrorMsg();
-      break;
-    case BlocklyApps.TestResults.ALL_PASS:
-      var finalLevel = (options.response &&
-          (options.response.message == "no more levels"));
-      var stageCompleted = null;
-      if (options.response && options.response.stage_changing) {
-        stageCompleted = options.response.stage_changing.previous.name;
-      }
-      var msgParams = {
-        numTrophies: options.numTrophies,
-        stageNumber: 0, // TODO: remove once localized strings have been fixed
-        stageName: stageCompleted,
-        puzzleNumber: options.level.puzzle_number || 0
-      };
-      if (options.numTrophies > 0) {
-        message = finalLevel ? msg.finalStageTrophies(msgParams) :
-                               stageCompleted ?
-                                  msg.nextStageTrophies(msgParams) :
-                                  msg.nextLevelTrophies(msgParams);
-      } else {
-        message = finalLevel ? msg.finalStage(msgParams) :
-                               stageCompleted ?
-                                   msg.nextStage(msgParams) :
-                                   msg.nextLevel(msgParams);
-      }
-      break;
-    // Free plays
-    case BlocklyApps.TestResults.FREE_PLAY:
-      message = options.appStrings.reinfFeedbackMsg;
-      break;
-  }
-  // Database hint overwrites the default hint.
+
+  // If there's a database hint, use that.
   if (options.response && options.response.hint) {
     message = options.response.hint;
+  } else {
+    // Otherwise, the message will depend on the test result.
+    switch (options.feedbackType) {
+      case BlocklyApps.TestResults.EMPTY_BLOCK_FAIL:
+        message = msg.emptyBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.TOO_FEW_BLOCKS_FAIL:
+        message = options.level.tooFewBlocksMsg || msg.tooFewBlocksMsg();
+        break;
+      case BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL:
+        message = options.level.levelIncompleteError ||
+            msg.levelIncompleteError();
+        break;
+      case BlocklyApps.TestResults.EXTRA_TOP_BLOCKS_FAIL:
+        message = msg.extraTopBlocks();
+        break;
+      // For completing level, user gets at least one star.
+      case BlocklyApps.TestResults.OTHER_1_STAR_FAIL:
+        message = options.level.other1StarError || options.message;
+        break;
+      // Two stars for using too many blocks.
+      case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
+        message = msg.numBlocksNeeded({
+          numBlocks: BlocklyApps.IDEAL_BLOCK_NUM,
+          puzzleNumber: options.level.puzzle_number || 0
+        });
+        break;
+      case BlocklyApps.TestResults.OTHER_2_STAR_FAIL:
+        message = msg.tooMuchWork();
+        break;
+      case BlocklyApps.TestResults.EDIT_BLOCKS:
+        message = options.level.edit_blocks_success;
+        break;
+      case BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED:
+        /* fallthrough */
+      case BlocklyApps.TestResults.MISSING_BLOCK_FINISHED:
+        message = msg.missingBlocksErrorMsg();
+        break;
+      case BlocklyApps.TestResults.ALL_PASS:
+        var finalLevel = (options.response &&
+            (options.response.message == "no more levels"));
+        var stageCompleted = null;
+        if (options.response && options.response.stage_changing) {
+          stageCompleted = options.response.stage_changing.previous.name;
+        }
+        var msgParams = {
+          numTrophies: options.numTrophies,
+          stageNumber: 0, // TODO: remove once localized strings have been fixed
+          stageName: stageCompleted,
+          puzzleNumber: options.level.puzzle_number || 0
+        };
+        if (options.numTrophies > 0) {
+          message = finalLevel ? msg.finalStageTrophies(msgParams) :
+                                 stageCompleted ?
+                                    msg.nextStageTrophies(msgParams) :
+                                    msg.nextLevelTrophies(msgParams);
+        } else {
+          message = finalLevel ? msg.finalStage(msgParams) :
+                                 stageCompleted ?
+                                     msg.nextStage(msgParams) :
+                                     msg.nextLevel(msgParams);
+        }
+        break;
+      // Free plays
+      case BlocklyApps.TestResults.FREE_PLAY:
+        message = options.appStrings.reinfFeedbackMsg;
+        break;
+    }
   }
+
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-   if (options.response && options.response.design &&
-       isFeedbackMessageCustomized(options)) {
+  if (options.response && options.response.design &&
+      isFeedbackMessageCustomized(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1527,7 +1536,9 @@ var isFeedbackMessageCustomized = function(options) {
       (options.feedbackType == BlocklyApps.TestResults.LEVEL_INCOMPLETE_FAIL &&
        options.level.levelIncompleteError) ||
       (options.feedbackType == BlocklyApps.TestResults.OTHER_1_STAR_FAIL &&
-       options.level.other1StarError);
+       options.level.other1StarError) ||
+      (options.feedbackType == BlocklyApps.TestResults.OTHER_2_STAR_FAIL &&
+       options.level.other2StarError);
 };
 
 exports.createSharingDiv = function(options) {
@@ -1964,12 +1975,12 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/ru_ru/common":36,"./codegen":6,"./dom":7,"./templates/buttons.html":24,"./templates/code.html":25,"./templates/readonly.html":30,"./templates/sharing.html":31,"./templates/showCode.html":32,"./templates/trophy.html":33,"./utils":34}],9:[function(require,module,exports){
+},{"../locale/ru_ru/common":37,"./codegen":6,"./dom":7,"./templates/buttons.html":25,"./templates/code.html":26,"./templates/readonly.html":31,"./templates/sharing.html":32,"./templates/showCode.html":33,"./templates/trophy.html":34,"./utils":35}],9:[function(require,module,exports){
 (function (global){
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash include="debounce,reject,map,value" --output build/js/lodash.js`
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample,create" --output build/js/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -1981,10 +1992,17 @@ var generateXMLForBlocks = function(blocks) {
   var undefined;
 
   /** Used to pool arrays and objects used internally */
-  var arrayPool = [];
+  var arrayPool = [],
+      objectPool = [];
 
   /** Used internally to indicate various things */
   var indicatorObject = {};
+
+  /** Used to prefix keys to avoid issues with `__proto__` and properties on `Object.prototype` */
+  var keyPrefix = +new Date + '';
+
+  /** Used as the size when optimizations are enabled for large arrays */
+  var largeArraySize = 75;
 
   /** Used as the max size of the `arrayPool` and `objectPool` */
   var maxPoolSize = 40;
@@ -2067,6 +2085,114 @@ var generateXMLForBlocks = function(blocks) {
   /*--------------------------------------------------------------------------*/
 
   /**
+   * The base implementation of `_.indexOf` without support for binary searches
+   * or `fromIndex` constraints.
+   *
+   * @private
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {number} [fromIndex=0] The index to search from.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   */
+  function baseIndexOf(array, value, fromIndex) {
+    var index = (fromIndex || 0) - 1,
+        length = array ? array.length : 0;
+
+    while (++index < length) {
+      if (array[index] === value) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * An implementation of `_.contains` for cache objects that mimics the return
+   * signature of `_.indexOf` by returning `0` if the value is found, else `-1`.
+   *
+   * @private
+   * @param {Object} cache The cache object to inspect.
+   * @param {*} value The value to search for.
+   * @returns {number} Returns `0` if `value` is found, else `-1`.
+   */
+  function cacheIndexOf(cache, value) {
+    var type = typeof value;
+    cache = cache.cache;
+
+    if (type == 'boolean' || value == null) {
+      return cache[value] ? 0 : -1;
+    }
+    if (type != 'number' && type != 'string') {
+      type = 'object';
+    }
+    var key = type == 'number' ? value : keyPrefix + value;
+    cache = (cache = cache[type]) && cache[key];
+
+    return type == 'object'
+      ? (cache && baseIndexOf(cache, value) > -1 ? 0 : -1)
+      : (cache ? 0 : -1);
+  }
+
+  /**
+   * Adds a given value to the corresponding cache object.
+   *
+   * @private
+   * @param {*} value The value to add to the cache.
+   */
+  function cachePush(value) {
+    var cache = this.cache,
+        type = typeof value;
+
+    if (type == 'boolean' || value == null) {
+      cache[value] = true;
+    } else {
+      if (type != 'number' && type != 'string') {
+        type = 'object';
+      }
+      var key = type == 'number' ? value : keyPrefix + value,
+          typeCache = cache[type] || (cache[type] = {});
+
+      if (type == 'object') {
+        (typeCache[key] || (typeCache[key] = [])).push(value);
+      } else {
+        typeCache[key] = true;
+      }
+    }
+  }
+
+  /**
+   * Creates a cache object to optimize linear searches of large arrays.
+   *
+   * @private
+   * @param {Array} [array=[]] The array to search.
+   * @returns {null|Object} Returns the cache object or `null` if caching should not be used.
+   */
+  function createCache(array) {
+    var index = -1,
+        length = array.length,
+        first = array[0],
+        mid = array[(length / 2) | 0],
+        last = array[length - 1];
+
+    if (first && typeof first == 'object' &&
+        mid && typeof mid == 'object' && last && typeof last == 'object') {
+      return false;
+    }
+    var cache = getObject();
+    cache['false'] = cache['null'] = cache['true'] = cache['undefined'] = false;
+
+    var result = getObject();
+    result.array = array;
+    result.cache = cache;
+    result.push = cachePush;
+
+    while (++index < length) {
+      result.push(array[index]);
+    }
+    return result;
+  }
+
+  /**
    * Gets an array from the array pool or creates a new one if the pool is empty.
    *
    * @private
@@ -2074,6 +2200,27 @@ var generateXMLForBlocks = function(blocks) {
    */
   function getArray() {
     return arrayPool.pop() || [];
+  }
+
+  /**
+   * Gets an object from the object pool or creates a new one if the pool is empty.
+   *
+   * @private
+   * @returns {Object} The object from the pool.
+   */
+  function getObject() {
+    return objectPool.pop() || {
+      'array': null,
+      'cache': null,
+      'false': false,
+      'null': false,
+      'number': null,
+      'object': null,
+      'push': null,
+      'string': null,
+      'true': false,
+      'undefined': false
+    };
   }
 
   /**
@@ -2099,6 +2246,23 @@ var generateXMLForBlocks = function(blocks) {
     array.length = 0;
     if (arrayPool.length < maxPoolSize) {
       arrayPool.push(array);
+    }
+  }
+
+  /**
+   * Releases the given object back to the object pool.
+   *
+   * @private
+   * @param {Object} [object] The object to release.
+   */
+  function releaseObject(object) {
+    var cache = object.cache;
+    if (cache) {
+      releaseObject(cache);
+    }
+    object.array = object.cache =object.object = object.number = object.string =null;
+    if (objectPool.length < maxPoolSize) {
+      objectPool.push(object);
     }
   }
 
@@ -2156,7 +2320,9 @@ var generateXMLForBlocks = function(blocks) {
   );
 
   /** Native method shortcuts */
-  var fnToString = Function.prototype.toString,
+  var ceil = Math.ceil,
+      floor = Math.floor,
+      fnToString = Function.prototype.toString,
       hasOwnProperty = objectProto.hasOwnProperty,
       push = arrayRef.push,
       propertyIsEnumerable = objectProto.propertyIsEnumerable,
@@ -2177,7 +2343,9 @@ var generateXMLForBlocks = function(blocks) {
   var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate,
       nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray,
       nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys,
-      nativeMax = Math.max;
+      nativeMax = Math.max,
+      nativeMin = Math.min,
+      nativeRandom = Math.random;
 
   /** Used to avoid iterating non-enumerable properties in IE < 9 */
   var nonEnumProps = {};
@@ -2682,6 +2850,43 @@ var generateXMLForBlocks = function(blocks) {
   }
 
   /**
+   * The base implementation of `_.difference` that accepts a single array
+   * of values to exclude.
+   *
+   * @private
+   * @param {Array} array The array to process.
+   * @param {Array} [values] The array of values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   */
+  function baseDifference(array, values) {
+    var index = -1,
+        indexOf = getIndexOf(),
+        length = array ? array.length : 0,
+        isLarge = length >= largeArraySize && indexOf === baseIndexOf,
+        result = [];
+
+    if (isLarge) {
+      var cache = createCache(values);
+      if (cache) {
+        indexOf = cacheIndexOf;
+        values = cache;
+      } else {
+        isLarge = false;
+      }
+    }
+    while (++index < length) {
+      var value = array[index];
+      if (indexOf(values, value) < 0) {
+        result.push(value);
+      }
+    }
+    if (isLarge) {
+      releaseObject(values);
+    }
+    return result;
+  }
+
+  /**
    * The base implementation of `_.isEqual`, without support for `thisArg` binding,
    * that allows partial "_.where" style comparisons.
    *
@@ -2857,6 +3062,19 @@ var generateXMLForBlocks = function(blocks) {
   }
 
   /**
+   * The base implementation of `_.random` without argument juggling or support
+   * for returning floating-point numbers.
+   *
+   * @private
+   * @param {number} min The minimum possible value.
+   * @param {number} max The maximum possible value.
+   * @returns {number} Returns a random number.
+   */
+  function baseRandom(min, max) {
+    return min + floor(nativeRandom() * (max - min + 1));
+  }
+
+  /**
    * Creates a function that, when called, either curries or invokes `func`
    * with an optional `this` binding and partially applied arguments.
    *
@@ -2985,6 +3203,19 @@ var generateXMLForBlocks = function(blocks) {
   }
 
   /**
+   * Gets the appropriate "indexOf" function. If the `_.indexOf` method is
+   * customized, this method returns the custom method, otherwise it returns
+   * the `baseIndexOf` function.
+   *
+   * @private
+   * @returns {Function} Returns the "indexOf" function.
+   */
+  function getIndexOf() {
+    var result = (result = lodash.indexOf) === indexOf ? baseIndexOf : result;
+    return result;
+  }
+
+  /**
    * Checks if `value` is a native function.
    *
    * @private
@@ -3108,6 +3339,21 @@ var generateXMLForBlocks = function(blocks) {
     'loop': 'if (callback(iterable[index], index, collection) === false) return result'
   };
 
+  /** Reusable iterator options for `assign` and `defaults` */
+  var defaultsIteratorOptions = {
+    'args': 'object, source, guard',
+    'top':
+      'var args = arguments,\n' +
+      '    argsIndex = 0,\n' +
+      "    argsLength = typeof guard == 'number' ? 2 : args.length;\n" +
+      'while (++argsIndex < argsLength) {\n' +
+      '  iterable = args[argsIndex];\n' +
+      '  if (iterable && objectTypes[typeof iterable]) {',
+    'keys': keys,
+    'loop': "if (typeof result[index] == 'undefined') result[index] = iterable[index]",
+    'bottom': '  }\n}'
+  };
+
   /** Reusable iterator options for `forIn` and `forOwn` */
   var forOwnIteratorOptions = {
     'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
@@ -3131,6 +3377,85 @@ var generateXMLForBlocks = function(blocks) {
   var baseEach = createIterator(eachIteratorOptions);
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Assigns own enumerable properties of source object(s) to the destination
+   * object. Subsequent sources will overwrite property assignments of previous
+   * sources. If a callback is provided it will be executed to produce the
+   * assigned values. The callback is bound to `thisArg` and invoked with two
+   * arguments; (objectValue, sourceValue).
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @alias extend
+   * @category Objects
+   * @param {Object} object The destination object.
+   * @param {...Object} [source] The source objects.
+   * @param {Function} [callback] The function to customize assigning values.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns the destination object.
+   * @example
+   *
+   * _.assign({ 'name': 'fred' }, { 'employer': 'slate' });
+   * // => { 'name': 'fred', 'employer': 'slate' }
+   *
+   * var defaults = _.partialRight(_.assign, function(a, b) {
+   *   return typeof a == 'undefined' ? b : a;
+   * });
+   *
+   * var object = { 'name': 'barney' };
+   * defaults(object, { 'name': 'fred', 'employer': 'slate' });
+   * // => { 'name': 'barney', 'employer': 'slate' }
+   */
+  var assign = createIterator(defaultsIteratorOptions, {
+    'top':
+      defaultsIteratorOptions.top.replace(';',
+        ';\n' +
+        "if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {\n" +
+        '  var callback = baseCreateCallback(args[--argsLength - 1], args[argsLength--], 2);\n' +
+        "} else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {\n" +
+        '  callback = args[--argsLength];\n' +
+        '}'
+      ),
+    'loop': 'result[index] = callback ? callback(result[index], iterable[index]) : iterable[index]'
+  });
+
+  /**
+   * Creates an object that inherits from the given `prototype` object. If a
+   * `properties` object is provided its own enumerable properties are assigned
+   * to the created object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} prototype The object to inherit from.
+   * @param {Object} [properties] The properties to assign to the object.
+   * @returns {Object} Returns the new object.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * function Circle() {
+   *   Shape.call(this);
+   * }
+   *
+   * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
+   *
+   * var circle = new Circle;
+   * circle instanceof Circle;
+   * // => true
+   *
+   * circle instanceof Shape;
+   * // => true
+   */
+  function create(prototype, properties) {
+    var result = baseCreate(prototype);
+    return properties ? assign(result, properties) : result;
+  }
 
   /**
    * Iterates over own and inherited enumerable properties of an object,
@@ -3282,6 +3607,31 @@ var generateXMLForBlocks = function(blocks) {
   function isString(value) {
     return typeof value == 'string' ||
       value && typeof value == 'object' && toString.call(value) == stringClass || false;
+  }
+
+  /**
+   * Creates an array composed of the own enumerable property values of `object`.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property values.
+   * @example
+   *
+   * _.values({ 'one': 1, 'two': 2, 'three': 3 });
+   * // => [1, 2, 3] (property order is not guaranteed across environments)
+   */
+  function values(object) {
+    var index = -1,
+        props = keys(object),
+        length = props.length,
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = object[props[index]];
+    }
+    return result;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -3492,6 +3842,240 @@ var generateXMLForBlocks = function(blocks) {
     return filter(collection, function(value, index, collection) {
       return !callback(value, index, collection);
     });
+  }
+
+  /**
+   * Retrieves a random element or `n` random elements from a collection.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to sample.
+   * @param {number} [n] The number of elements to sample.
+   * @param- {Object} [guard] Allows working with functions like `_.map`
+   *  without using their `index` arguments as `n`.
+   * @returns {Array} Returns the random sample(s) of `collection`.
+   * @example
+   *
+   * _.sample([1, 2, 3, 4]);
+   * // => 2
+   *
+   * _.sample([1, 2, 3, 4], 2);
+   * // => [3, 1]
+   */
+  function sample(collection, n, guard) {
+    if (collection && typeof collection.length != 'number') {
+      collection = values(collection);
+    } else if (support.unindexedChars && isString(collection)) {
+      collection = collection.split('');
+    }
+    if (n == null || guard) {
+      return collection ? collection[baseRandom(0, collection.length - 1)] : undefined;
+    }
+    var result = shuffle(collection);
+    result.length = nativeMin(nativeMax(0, n), result.length);
+    return result;
+  }
+
+  /**
+   * Creates an array of shuffled values, using a version of the Fisher-Yates
+   * shuffle. See http://en.wikipedia.org/wiki/Fisher-Yates_shuffle.
+   *
+   * @static
+   * @memberOf _
+   * @category Collections
+   * @param {Array|Object|string} collection The collection to shuffle.
+   * @returns {Array} Returns a new shuffled collection.
+   * @example
+   *
+   * _.shuffle([1, 2, 3, 4, 5, 6]);
+   * // => [4, 1, 6, 3, 5, 2]
+   */
+  function shuffle(collection) {
+    var index = -1,
+        length = collection ? collection.length : 0,
+        result = Array(typeof length == 'number' ? length : 0);
+
+    forEach(collection, function(value) {
+      var rand = baseRandom(0, ++index);
+      result[index] = result[rand];
+      result[rand] = value;
+    });
+    return result;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Gets the index at which the first occurrence of `value` is found using
+   * strict equality for comparisons, i.e. `===`. If the array is already sorted
+   * providing `true` for `fromIndex` will run a faster binary search.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to search.
+   * @param {*} value The value to search for.
+   * @param {boolean|number} [fromIndex=0] The index to search from or `true`
+   *  to perform a binary search on a sorted array.
+   * @returns {number} Returns the index of the matched value or `-1`.
+   * @example
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2);
+   * // => 1
+   *
+   * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
+   * // => 4
+   *
+   * _.indexOf([1, 1, 2, 2, 3, 3], 2, true);
+   * // => 2
+   */
+  function indexOf(array, value, fromIndex) {
+    if (typeof fromIndex == 'number') {
+      var length = array ? array.length : 0;
+      fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex || 0);
+    } else if (fromIndex) {
+      var index = sortedIndex(array, value);
+      return array[index] === value ? index : -1;
+    }
+    return baseIndexOf(array, value, fromIndex);
+  }
+
+  /**
+   * Creates an array of numbers (positive and/or negative) progressing from
+   * `start` up to but not including `end`. If `start` is less than `stop` a
+   * zero-length range is created unless a negative `step` is specified.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {number} [start=0] The start of the range.
+   * @param {number} end The end of the range.
+   * @param {number} [step=1] The value to increment or decrement by.
+   * @returns {Array} Returns a new range array.
+   * @example
+   *
+   * _.range(4);
+   * // => [0, 1, 2, 3]
+   *
+   * _.range(1, 5);
+   * // => [1, 2, 3, 4]
+   *
+   * _.range(0, 20, 5);
+   * // => [0, 5, 10, 15]
+   *
+   * _.range(0, -4, -1);
+   * // => [0, -1, -2, -3]
+   *
+   * _.range(1, 4, 0);
+   * // => [1, 1, 1]
+   *
+   * _.range(0);
+   * // => []
+   */
+  function range(start, end, step) {
+    start = +start || 0;
+    step = typeof step == 'number' ? step : (+step || 1);
+
+    if (end == null) {
+      end = start;
+      start = 0;
+    }
+    // use `Array(length)` so engines like Chakra and V8 avoid slower modes
+    // http://youtu.be/XAqIpGU8ZZk#t=17m25s
+    var index = -1,
+        length = nativeMax(0, ceil((end - start) / (step || 1))),
+        result = Array(length);
+
+    while (++index < length) {
+      result[index] = start;
+      start += step;
+    }
+    return result;
+  }
+
+  /**
+   * Uses a binary search to determine the smallest index at which a value
+   * should be inserted into a given sorted array in order to maintain the sort
+   * order of the array. If a callback is provided it will be executed for
+   * `value` and each element of `array` to compute their sort ranking. The
+   * callback is bound to `thisArg` and invoked with one argument; (value).
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to inspect.
+   * @param {*} value The value to evaluate.
+   * @param {Function|Object|string} [callback=identity] The function called
+   *  per iteration. If a property name or object is provided it will be used
+   *  to create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {number} Returns the index at which `value` should be inserted
+   *  into `array`.
+   * @example
+   *
+   * _.sortedIndex([20, 30, 50], 40);
+   * // => 2
+   *
+   * // using "_.pluck" callback shorthand
+   * _.sortedIndex([{ 'x': 20 }, { 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
+   * // => 2
+   *
+   * var dict = {
+   *   'wordToNumber': { 'twenty': 20, 'thirty': 30, 'fourty': 40, 'fifty': 50 }
+   * };
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return dict.wordToNumber[word];
+   * });
+   * // => 2
+   *
+   * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+   *   return this.wordToNumber[word];
+   * }, dict);
+   * // => 2
+   */
+  function sortedIndex(array, value, callback, thisArg) {
+    var low = 0,
+        high = array ? array.length : low;
+
+    // explicitly reference `identity` for better inlining in Firefox
+    callback = callback ? lodash.createCallback(callback, thisArg, 1) : identity;
+    value = callback(value);
+
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      (callback(array[mid]) < value)
+        ? low = mid + 1
+        : high = mid;
+    }
+    return low;
+  }
+
+  /**
+   * Creates an array excluding all provided values using strict equality for
+   * comparisons, i.e. `===`.
+   *
+   * @static
+   * @memberOf _
+   * @category Arrays
+   * @param {Array} array The array to filter.
+   * @param {...*} [value] The values to exclude.
+   * @returns {Array} Returns a new array of filtered values.
+   * @example
+   *
+   * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
+   * // => [2, 3, 4]
+   */
+  function without(array) {
+    return baseDifference(array, slice(arguments, 1));
   }
 
   /*--------------------------------------------------------------------------*/
@@ -3982,8 +4566,10 @@ var generateXMLForBlocks = function(blocks) {
 
   /*--------------------------------------------------------------------------*/
 
+  lodash.assign = assign;
   lodash.bind = bind;
   lodash.chain = chain;
+  lodash.create = create;
   lodash.createCallback = createCallback;
   lodash.debounce = debounce;
   lodash.filter = filter;
@@ -3994,11 +4580,16 @@ var generateXMLForBlocks = function(blocks) {
   lodash.keys = keys;
   lodash.map = map;
   lodash.property = property;
+  lodash.range = range;
   lodash.reject = reject;
+  lodash.shuffle = shuffle;
+  lodash.values = values;
+  lodash.without = without;
 
   // add aliases
   lodash.collect = map;
   lodash.each = forEach;
+  lodash.extend = assign;
   lodash.methods = functions;
   lodash.select = filter;
 
@@ -4008,6 +4599,7 @@ var generateXMLForBlocks = function(blocks) {
   /*--------------------------------------------------------------------------*/
 
   lodash.identity = identity;
+  lodash.indexOf = indexOf;
   lodash.isArguments = isArguments;
   lodash.isArray = isArray;
   lodash.isFunction = isFunction;
@@ -4016,6 +4608,7 @@ var generateXMLForBlocks = function(blocks) {
   lodash.mixin = mixin;
   lodash.noop = noop;
   lodash.now = now;
+  lodash.sortedIndex = sortedIndex;
 
   mixin(function() {
     var source = {}
@@ -4028,6 +4621,8 @@ var generateXMLForBlocks = function(blocks) {
   }(), false);
 
   /*--------------------------------------------------------------------------*/
+
+  lodash.sample = sample;
 
   forOwn(lodash, function(func, methodName) {
     var callbackable = methodName !== 'sample';
@@ -4265,7 +4860,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":34,"./xml":35}],11:[function(require,module,exports){
+},{"./block_utils":3,"./utils":35,"./xml":36}],11:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -4289,18 +4884,18 @@ exports.load = function(assetUrl, id) {
     winAvatar: skinUrl('win_avatar.png'),
     failureAvatar: skinUrl('failure_avatar.png'),
     repeatImage: assetUrl('media/common_images/repeat-arrows.png'),
-    leftArrow: assetUrl('media/common_images/move-west-arrow.png'),
-    downArrow: assetUrl('media/common_images/move-south-arrow.png'),
-    upArrow: assetUrl('media/common_images/move-north-arrow.png'),
-    rightArrow: assetUrl('media/common_images/move-east-arrow.png'),
+    leftArrow: assetUrl('media/common_images/moveleft.png'),
+    downArrow: assetUrl('media/common_images/movedown.png'),
+    upArrow: assetUrl('media/common_images/moveup.png'),
+    rightArrow: assetUrl('media/common_images/moveright.png'),
     leftArrowSmall: assetUrl('media/common_images/draw-west-arrow.png'),
     downArrowSmall: assetUrl('media/common_images/draw-south-arrow.png'),
     upArrowSmall: assetUrl('media/common_images/draw-north-arrow.png'),
     rightArrowSmall: assetUrl('media/common_images/draw-east-arrow.png'),
-    leftJumpArrow: assetUrl('media/common_images/jump-west-arrow.png'),
-    downJumpArrow: assetUrl('media/common_images/jump-south-arrow.png'),
-    upJumpArrow: assetUrl('media/common_images/jump-north-arrow.png'),
-    rightJumpArrow: assetUrl('media/common_images/jump-east-arrow.png'),
+    leftJumpArrow: assetUrl('media/common_images/jumpleft.png'),
+    downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
+    upJumpArrow: assetUrl('media/common_images/jumpup.png'),
+    rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
     longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
@@ -4522,8 +5117,6 @@ module.exports = Slider;
 
 },{}],13:[function(require,module,exports){
 var tiles = require('./tiles');
-var xFromPosition = tiles.xFromPosition;
-var yFromPosition = tiles.yFromPosition;
 
 exports.SpriteSpeed = {
   VERY_SLOW: 0.04,
@@ -4571,9 +5164,7 @@ exports.setSpriteSpeed = function (id, spriteIndex, value) {
 exports.setSpritePosition = function (id, spriteIndex, value) {
   Studio.queueCmd(id,
                   'setSpritePosition',
-                  {'spriteIndex': spriteIndex,
-                   'x': xFromPosition[value],
-                   'y': yFromPosition[value]});
+                  {'spriteIndex': spriteIndex, 'value': value});
 };
 
 exports.playSound = function(id, soundName) {
@@ -4582,6 +5173,20 @@ exports.playSound = function(id, soundName) {
 
 exports.stop = function(id, spriteIndex) {
   Studio.queueCmd(id, 'stop', {'spriteIndex': spriteIndex});
+};
+
+exports.throwProjectile = function(id, spriteIndex, dir, className) {
+  Studio.queueCmd(id,
+                  'throwProjectile',
+                  {'spriteIndex': spriteIndex,
+                   'dir': dir,
+                   'className': className});
+};
+
+exports.makeProjectile = function(id, className, action) {
+  Studio.queueCmd(id,
+                  'makeProjectile',
+                  {'className': className, 'action': action});
 };
 
 exports.move = function(id, spriteIndex, dir) {
@@ -4595,8 +5200,8 @@ exports.moveDistance = function(id, spriteIndex, dir, distance) {
       {'spriteIndex': spriteIndex, 'dir': dir, 'distance': distance});
 };
 
-exports.incrementScore = function(id, player) {
-  Studio.queueCmd(id, 'incrementScore', {'player': player});
+exports.changeScore = function(id, value) {
+  Studio.queueCmd(id, 'changeScore', {'value': value});
 };
 
 exports.setScoreText = function(id, text) {
@@ -4607,7 +5212,7 @@ exports.wait = function(id, value) {
   Studio.queueCmd(id, 'wait', {'value': value});
 };
 
-},{"./tiles":21}],14:[function(require,module,exports){
+},{"./tiles":22}],14:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -4617,23 +5222,30 @@ exports.wait = function(id, value) {
 'use strict';
 
 var msg = require('../../locale/ru_ru/studio');
+var commonMsg = require('../../locale/ru_ru/common');
 var codegen = require('../codegen');
 var tiles = require('./tiles');
+var studio = require('./studio');
+var utils = require('../utils');
+var _ = require('../lodash');
 
 var Direction = tiles.Direction;
 var Position = tiles.Position;
 var Emotions = tiles.Emotions;
 
+var RANDOM_VALUE = 'random';
+var HIDDEN_VALUE = '"hidden"';
+var VISIBLE_VALUE = '"visible"';
+var CAVE_VALUE = '"cave"';
+
 var generateSetterCode = function (opts) {
   var value = opts.ctx.getTitleValue('VALUE');
-  if (value === "random") {
-    var randomIndex = opts.random || 0;
-    // opts.random is the index of where the 'random' items is in beginning of
-    // the VALUES table (defaults to 0).
-    var allValues = opts.ctx.VALUES.slice(randomIndex + 1).map(function (item) {
-      return item[1];
-    });
-    value = 'Studio.random([' + allValues + '])';
+  if (value === RANDOM_VALUE) {
+    var possibleValues =
+      _(opts.ctx.VALUES)
+        .map(function (item) { return item[1]; })
+        .without(RANDOM_VALUE, HIDDEN_VALUE);
+    value = 'Studio.random([' + possibleValues + '])';
   }
 
   return 'Studio.' + opts.name + '(\'block_id_' + opts.ctx.id + '\', ' +
@@ -4642,6 +5254,18 @@ var generateSetterCode = function (opts) {
 
 exports.setSpriteCount = function(blockly, count) {
   blockly.Blocks.studio_spriteCount = count;
+};
+
+exports.enableProjectileCollisions = function(blockly) {
+  blockly.Blocks.studio_projectileCollisions = true;
+};
+
+exports.enableEdgeCollisions = function(blockly) {
+  blockly.Blocks.studio_edgeCollisions = true;
+};
+
+exports.enableSpritesOutsidePlayspace = function(blockly) {
+  blockly.Blocks.studio_spritesOutsidePlayspace = true;
 };
 
 // Install extensions to Blockly's language and JavaScript generator.
@@ -4655,7 +5279,37 @@ exports.install = function(blockly, blockInstallOptions) {
     return '\n';
   };
 
+  // These constants are set to the default values, but may be overridden
   blockly.Blocks.studio_spriteCount = 6;
+  blockly.Blocks.studio_projectileCollisions = false;
+  blockly.Blocks.studio_edgeCollisions = false;
+  blockly.Blocks.studio_spritesOutsidePlayspace = false;
+
+  /**
+   * Creates a dropdown with options for each sprite number
+   * @param choices
+   * @returns {Blockly.FieldDropdown}
+   */
+  function spriteNumberTextDropdown(choices) {
+    var dropdownArray = choices.slice(0, blockly.Blocks.studio_spriteCount);
+    return new blockly.FieldDropdown(dropdownArray);
+  }
+
+  /**
+   * Creates a dropdown with thumbnails for each starting sprite
+   * @returns {Blockly.FieldImageDropdown}
+   */
+  function startingSpriteImageDropdown() {
+    var spriteNumbers = _.range(0, blockly.Blocks.studio_spriteCount);
+    var choices = _.map(spriteNumbers, function (index) {
+        return [ skin[studio.nthStartingSkin(index)].dropdownThumbnail,
+                 index.toString() ];
+    });
+    return new blockly.FieldImageDropdown(
+                        choices,
+                        skin.dropdownThumbnailWidth,
+                        skin.dropdownThumbnailHeight);
+  }
 
   blockly.Blocks.studio_whenLeft = {
     // Block to handle event when the Left arrow button is pressed.
@@ -4787,20 +5441,37 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block to handle event when sprite collides with another sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray1 =
-          this.SPRITE1.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdownArray2 =
-          this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdown2 = new blockly.FieldDropdown(dropdownArray2);
+      var dropdown1;
+      var dropdown2;
+      this.setHSV(140, 1.00, 0.74);
+
+      if (isK1) {
+        // NOTE: K1 block does not yet support projectile or edge collisions
+        dropdown1 = startingSpriteImageDropdown();
+        dropdown2 = startingSpriteImageDropdown();
+        this.appendDummyInput().appendTitle(commonMsg.when())
+          .appendTitle(dropdown1, 'SPRITE1');
+        this.appendDummyInput().appendTitle(msg.whenSpriteCollidedWith())
+          .appendTitle(dropdown2, 'SPRITE2');
+      } else {
+        dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
+        var dropdownArray2 =
+            this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
+        if (blockly.Blocks.studio_projectileCollisions) {
+          dropdownArray2 = dropdownArray2.concat(this.PROJECTILES);
+        }
+        if (blockly.Blocks.studio_edgeCollisions) {
+          dropdownArray2 = dropdownArray2.concat(this.EDGES);
+        }
+        dropdown2 = new blockly.FieldDropdown(dropdownArray2);
+        this.appendDummyInput().appendTitle(dropdown1, 'SPRITE1');
+        this.appendDummyInput().appendTitle(dropdown2, 'SPRITE2');
+      }
       if (blockly.Blocks.studio_spriteCount > 1) {
-        dropdown2.setValue(dropdownArray2[1][1]); // default to 2
+        // default second dropdown to second item
+        dropdown2.setValue(dropdown2.getOptions()[1][1]);
       }
 
-      this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(dropdownArray1), 'SPRITE1');
-      this.appendDummyInput()
-        .appendTitle(dropdown2, 'SPRITE2');
       this.setPreviousStatement(false);
       this.setInputsInline(true);
       this.setNextStatement(true);
@@ -4823,6 +5494,16 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.whenSpriteCollidedWith4(), '3'],
        [msg.whenSpriteCollidedWith5(), '4'],
        [msg.whenSpriteCollidedWith6(), '5']];
+
+  blockly.Blocks.studio_whenSpriteCollided.PROJECTILES =
+      [[msg.whenSpriteCollidedWithFireball(), 'fireball'],
+       [msg.whenSpriteCollidedWithFlower(), 'flower']];
+
+  blockly.Blocks.studio_whenSpriteCollided.EDGES =
+      [[msg.whenSpriteCollidedWithTopEdge(), 'top'],
+       [msg.whenSpriteCollidedWithLeftEdge(), 'left'],
+       [msg.whenSpriteCollidedWithBottomEdge(), 'bottom'],
+       [msg.whenSpriteCollidedWithRightEdge(), 'right']];
 
   generator.studio_whenSpriteCollided = generator.studio_eventHandlerPrologue;
 
@@ -4861,14 +5542,124 @@ exports.install = function(blockly, blockInstallOptions) {
         (this.getTitleValue('SPRITE') || '0') + ');\n';
   };
 
+  blockly.Blocks.studio_throw = {
+    // Block for throwing a projectile from a sprite.
+    helpUrl: '',
+    init: function() {
+      var dropdownArray =
+          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
+      this.setHSV(184, 1.00, 0.74);
+      if (blockly.Blocks.studio_spriteCount > 1) {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.throwSprite());
+      }
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      this.appendDummyInput()
+        .appendTitle('\t');
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+      this.setPreviousStatement(true);
+      this.setInputsInline(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.throwTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_throw.SPRITE =
+      [[msg.throwSprite1(), '0'],
+       [msg.throwSprite2(), '1'],
+       [msg.throwSprite3(), '2'],
+       [msg.throwSprite4(), '3'],
+       [msg.throwSprite5(), '4'],
+       [msg.throwSprite6(), '5']];
+
+  blockly.Blocks.studio_throw.DIR =
+        [[msg.moveDirectionUp(), Direction.NORTH.toString()],
+         [msg.moveDirectionDown(), Direction.SOUTH.toString()],
+         [msg.moveDirectionLeft(), Direction.WEST.toString()],
+         [msg.moveDirectionRight(), Direction.EAST.toString()],
+         [msg.moveDirectionRandom(), 'random']];
+
+  blockly.Blocks.studio_throw.VALUES =
+        [[msg.projectileFireball(), '"fireball"'],
+         [msg.projectileFlower(), '"flower"'],
+         [msg.projectileRandom(), 'random']];
+
+  generator.studio_throw = function() {
+    // Generate JavaScript for throwing a projectile from a sprite.
+    var allDirections = this.DIR.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var dirParam = this.getTitleValue('DIR');
+    if (dirParam === 'random') {
+      dirParam = 'Studio.random([' + allDirections + '])';
+    }
+    var allValues = this.VALUES.slice(0, -1).map(function (item) {
+      return item[1];
+    });
+    var valParam = this.getTitleValue('VALUE');
+    if (valParam === 'random') {
+      valParam = 'Studio.random([' + allValues + '])';
+    }
+
+    return 'Studio.throwProjectile(\'block_id_' + this.id +
+        '\', ' +
+        (this.getTitleValue('SPRITE') || '0') + ', ' +
+        dirParam + ', ' +
+        valParam + ');\n';
+  };
+
+  blockly.Blocks.studio_makeProjectile = {
+    // Block for making a projectile bounce or disappear.
+    helpUrl: '',
+    init: function() {
+      this.setHSV(184, 1.00, 0.74);
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      this.appendDummyInput()
+        .appendTitle('\t');
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.ACTIONS), 'ACTION');
+      this.setPreviousStatement(true);
+      this.setInputsInline(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.makeProjectileTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_makeProjectile.VALUES =
+      [[msg.makeProjectileFireball(), '"fireball"'],
+       [msg.makeProjectileFlower(), '"flower"']];
+
+  blockly.Blocks.studio_makeProjectile.ACTIONS =
+        [[msg.makeProjectileBounce(), '"bounce"'],
+         [msg.makeProjectileDisappear(), '"disappear"']];
+
+  generator.studio_makeProjectile = function() {
+    // Generate JavaScript for making a projectile bounce or disappear.
+    return 'Studio.makeProjectile(\'block_id_' + this.id + '\', ' +
+        this.getTitleValue('VALUE') + ', ' +
+        this.getTitleValue('ACTION') + ');\n';
+  };
+
   blockly.Blocks.studio_setSpritePosition = {
     // Block for jumping a sprite to different position.
     helpUrl: '',
     init: function() {
       var dropdownArray =
           this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]); // default to top-left
+      var dropdown;
+      if (blockly.Blocks.studio_spritesOutsidePlayspace) {
+        dropdown = new blockly.FieldDropdown(this.VALUES_EXTENDED);
+        dropdown.setValue(this.VALUES_EXTENDED[4][1]); // default to top-left
+      } else {
+        dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[1][1]); // default to top-left
+      }
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
@@ -4894,8 +5685,9 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSprite5(), '4'],
        [msg.setSprite6(), '5']];
 
+  // 9 possible positions in playspace (+ random):
   blockly.Blocks.studio_setSpritePosition.VALUES =
-      [[msg.positionRandom(), 'random'],
+      [[msg.positionRandom(), RANDOM_VALUE],
        [msg.positionTopLeft(), Position.TOPLEFT.toString()],
        [msg.positionTopCenter(), Position.TOPCENTER.toString()],
        [msg.positionTopRight(), Position.TOPRIGHT.toString()],
@@ -4905,6 +5697,27 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.positionBottomLeft(), Position.BOTTOMLEFT.toString()],
        [msg.positionBottomCenter(), Position.BOTTOMCENTER.toString()],
        [msg.positionBottomRight(), Position.BOTTOMRIGHT.toString()]];
+
+  // Still a slightly reduced set of 17 out of 25 possible positions (+ random):
+  blockly.Blocks.studio_setSpritePosition.VALUES_EXTENDED =
+      [[msg.positionRandom(), RANDOM_VALUE],
+       [msg.positionOutTopLeft(), Position.OUTTOPLEFT.toString()],
+       [msg.positionOutTopRight(), Position.OUTTOPRIGHT.toString()],
+       [msg.positionTopOutLeft(), Position.TOPOUTLEFT.toString()],
+       [msg.positionTopLeft(), Position.TOPLEFT.toString()],
+       [msg.positionTopCenter(), Position.TOPCENTER.toString()],
+       [msg.positionTopRight(), Position.TOPRIGHT.toString()],
+       [msg.positionTopOutRight(), Position.TOPOUTRIGHT.toString()],
+       [msg.positionMiddleLeft(), Position.MIDDLELEFT.toString()],
+       [msg.positionMiddleCenter(), Position.MIDDLECENTER.toString()],
+       [msg.positionMiddleRight(), Position.MIDDLERIGHT.toString()],
+       [msg.positionBottomOutLeft(), Position.BOTTOMOUTLEFT.toString()],
+       [msg.positionBottomLeft(), Position.BOTTOMLEFT.toString()],
+       [msg.positionBottomCenter(), Position.BOTTOMCENTER.toString()],
+       [msg.positionBottomRight(), Position.BOTTOMRIGHT.toString()],
+       [msg.positionBottomOutRight(), Position.BOTTOMOUTRIGHT.toString()],
+       [msg.positionOutBottomLeft(), Position.OUTBOTTOMLEFT.toString()],
+       [msg.positionOutBottomRight(), Position.OUTBOTTOMRIGHT.toString()]];
 
   generator.studio_setSpritePosition = function() {
     return generateSetterCode({
@@ -4917,12 +5730,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for moving one frame a time.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.moveSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
         this.appendDummyInput()
           .appendTitle('\t');
       } else {
@@ -4963,12 +5779,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for moving/gliding a specific distance.
     block.helpUrl = '';
     block.init = function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.moveSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
         this.appendDummyInput()
           .appendTitle('\t');
       } else {
@@ -5070,13 +5889,21 @@ exports.install = function(blockly, blockInstallOptions) {
         distParam + ');\n';
   };
 
+  function onSoundSelected(soundValue) {
+    if (soundValue === RANDOM_VALUE) {
+      return;
+    }
+    BlocklyApps.playAudio(utils.stripQuotes(soundValue));
+  }
+
   blockly.Blocks.studio_playSound = {
     // Block for playing sound.
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
       this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.SOUNDS), 'SOUND');
+          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected),
+                       'SOUND');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
@@ -5103,27 +5930,34 @@ exports.install = function(blockly, blockInstallOptions) {
                this.getTitleValue('SOUND') + '\');\n';
   };
 
-  blockly.Blocks.studio_incrementScore = {
-    // Block for incrementing the score.
+  blockly.Blocks.studio_changeScore = {
+    // Block for changing the score.
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.PLAYERS), 'PLAYER');
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(msg.incrementPlayerScore());
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
-      this.setTooltip(msg.incrementScoreTooltip());
+      this.setTooltip(isK1 ?
+                        msg.changeScoreTooltipK1() :
+                        msg.changeScoreTooltip());
     }
   };
 
-  blockly.Blocks.studio_incrementScore.PLAYERS =
-      [[msg.incrementPlayerScore(), 'player'],
-       [msg.incrementOpponentScore(), 'opponent']];
+  blockly.Blocks.studio_changeScore.VALUES =
+      [[msg.incrementPlayerScore(), '1'],
+       [msg.decrementPlayerScore(), '-1']];
 
-  generator.studio_incrementScore = function() {
-    // Generate JavaScript for incrementing the score.
-    return 'Studio.incrementScore(\'block_id_' + this.id + '\', \'' +
-                this.getTitleValue('PLAYER') + '\');\n';
+  generator.studio_changeScore = function() {
+    // Generate JavaScript for changing the score.
+    return 'Studio.changeScore(\'block_id_' + this.id + '\', \'' +
+                (this.getTitleValue('VALUE') || '1') + '\');\n';
   };
 
   blockly.Blocks.studio_setScoreText = {
@@ -5176,7 +6010,7 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_setSpriteSpeed.VALUES =
-      [[msg.setSpriteSpeedRandom(), 'random'],
+      [[msg.setSpriteSpeedRandom(), RANDOM_VALUE],
        [msg.setSpriteSpeedVerySlow(), 'Studio.SpriteSpeed.VERY_SLOW'],
        [msg.setSpriteSpeedSlow(), 'Studio.SpriteSpeed.SLOW'],
        [msg.setSpriteSpeedNormal(), 'Studio.SpriteSpeed.NORMAL'],
@@ -5204,12 +6038,22 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_setBackground = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]);  // default to cave
-
       this.setHSV(312, 0.32, 0.62);
-      this.appendDummyInput()
+
+      var dropdown;
+      if (isK1) {
+        dropdown = new blockly.FieldImageDropdown(
+                                  this.IMAGE_CHOICES,
+                                  skin.dropdownThumbnailWidth,
+                                  skin.dropdownThumbnailHeight);
+        this.appendDummyInput()
+          .appendTitle(msg.setBackground())
           .appendTitle(dropdown, 'VALUE');
+      } else {
+        dropdown = new blockly.FieldDropdown(this.VALUES);
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
+      dropdown.setValue(CAVE_VALUE);  // default to cave
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
@@ -5218,13 +6062,22 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_setBackground.VALUES =
-      [[msg.setBackgroundRandom(), 'random'],
-       [msg.setBackgroundCave(), '"cave"'],
+      [[msg.setBackgroundRandom(), RANDOM_VALUE],
+       [msg.setBackgroundCave(), CAVE_VALUE],
        [msg.setBackgroundNight(), '"night"'],
        [msg.setBackgroundCloudy(), '"cloudy"'],
        [msg.setBackgroundUnderwater(), '"underwater"'],
        [msg.setBackgroundHardcourt(), '"hardcourt"'],
        [msg.setBackgroundBlack(), '"black"']];
+
+  blockly.Blocks.studio_setBackground.IMAGE_CHOICES =
+      [[skin.cave.background, CAVE_VALUE],
+       [skin.night.background, '"night"'],
+       [skin.cloudy.background, '"cloudy"'],
+       [skin.underwater.background, '"underwater"'],
+       [skin.hardcourt.background, '"hardcourt"'],
+       [skin.black.background, '"black"'],
+       [skin.randomPurpleIcon, RANDOM_VALUE]];
 
   generator.studio_setBackground = function() {
     return generateSetterCode({ctx: this, name: 'setBackground'});
@@ -5302,18 +6155,13 @@ exports.install = function(blockly, blockInstallOptions) {
     blockly.Blocks.studio_setSprite = {
       helpUrl: '',
       init: function() {
-        var dropdown = new blockly.FieldDropdown(this.VALUES);
-        dropdown.setValue(this.VALUES[1][1]);  // default to visible
-
-        var dropdownArray =
-            this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
-        this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
         this.setHSV(312, 0.32, 0.62);
+        var visibilityTextDropdown = new blockly.FieldDropdown(this.VALUES);
+        visibilityTextDropdown.setValue(VISIBLE_VALUE);  // default to visible
+        this.appendDummyInput().appendTitle(visibilityTextDropdown, 'VALUE');
         if (blockly.Blocks.studio_spriteCount > 1) {
-          this.appendDummyInput()
-            .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+            this.appendDummyInput()
+              .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         }
         this.setInputsInline(true);
         this.setPreviousStatement(true);
@@ -5331,8 +6179,8 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.sprite6(), '5']];
 
     blockly.Blocks.studio_setSprite.VALUES =
-        [[msg.setSpriteHideK1(), '"hidden"'],
-         [msg.setSpriteShowK1(), '"visible"']];
+        [[msg.setSpriteHideK1(), HIDDEN_VALUE],
+         [msg.setSpriteShowK1(), VISIBLE_VALUE]];
   } else {
     /**
      * setSprite
@@ -5372,8 +6220,8 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.setSprite6(), '5']];
 
     blockly.Blocks.studio_setSprite.VALUES =
-        [[msg.setSpriteHidden(), '"hidden"'],
-         [msg.setSpriteRandom(), 'random'],
+        [[msg.setSpriteHidden(), HIDDEN_VALUE],
+         [msg.setSpriteRandom(), RANDOM_VALUE],
          [msg.setSpriteWitch(), '"witch"'],
          [msg.setSpriteCat(), '"cat"'],
          [msg.setSpriteDinosaur(), '"dinosaur"'],
@@ -5386,8 +6234,8 @@ exports.install = function(blockly, blockInstallOptions) {
     var value = this.getTitleValue('VALUE');
     var indexString = this.getTitleValue('SPRITE') || '0';
     if (!blockly.Blocks.studio_firstSetSprite &&
-        'random' !== value &&
-        '"hidden"' !== value) {
+        RANDOM_VALUE !== value &&
+        HIDDEN_VALUE !== value) {
       // Store the params for the first non-random, non-hidden setSprite
       // call so we can auto-reference this sprite in showTitleScreen() later
       blockly.Blocks.studio_firstSetSprite = {
@@ -5397,7 +6245,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
     return generateSetterCode({
       ctx: this,
-      random: 1, // random may not be present for K1 block, but that's harmless
       extraParams: indexString,
       name: 'setSprite'});
   };
@@ -5408,13 +6255,15 @@ exports.install = function(blockly, blockInstallOptions) {
       var dropdown = new blockly.FieldDropdown(this.VALUES);
       dropdown.setValue(this.VALUES[1][1]);  // default to normal
 
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.setSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
@@ -5437,7 +6286,7 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSprite6(), '5']];
 
   blockly.Blocks.studio_setSpriteEmotion.VALUES =
-      [[msg.setSpriteEmotionRandom(), 'random'],
+      [[msg.setSpriteEmotionRandom(), RANDOM_VALUE],
        [msg.setSpriteEmotionNormal(), Emotions.NORMAL.toString()],
        [msg.setSpriteEmotionHappy(), Emotions.HAPPY.toString()],
        [msg.setSpriteEmotionAngry(), Emotions.ANGRY.toString()],
@@ -5454,12 +6303,15 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for waiting a specific amount of time.
     block.helpUrl = '';
     block.init = function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.saySprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.saySprite());
@@ -5512,7 +6364,7 @@ exports.install = function(blockly, blockInstallOptions) {
                (this.getTitleValue('SPRITE') || '0') + ', ' +
                textParam + ');\n';
   };
-  
+
   var initWaitBlock = function (block) {
     // Block for waiting a specific amount of time.
     block.helpUrl = '';
@@ -5560,7 +6412,6 @@ exports.install = function(blockly, blockInstallOptions) {
   generator.studio_wait = function() {
     return generateSetterCode({
       ctx: this,
-      random: 1,
       name: 'wait'});
   };
 
@@ -5574,7 +6425,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/ru_ru/studio":37,"../codegen":6,"./tiles":21}],15:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"../../locale/ru_ru/studio":38,"../codegen":6,"../lodash":9,"../utils":35,"./studio":21,"./tiles":22}],15:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5595,7 +6446,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/studio":37,"ejs":38}],16:[function(require,module,exports){
+},{"../../locale/ru_ru/studio":38,"ejs":39}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -5616,7 +6467,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/studio":37,"ejs":38}],17:[function(require,module,exports){
+},{"../../locale/ru_ru/studio":38,"ejs":39}],17:[function(require,module,exports){
 /*jshint multistr: true */
 
 var msg = require('../../locale/ru_ru/studio');
@@ -5922,7 +6773,7 @@ module.exports = {
     'spriteStartingImage': 2,
     'spriteFinishIndex': 1,
     'timeoutFailureTick': 150,
-    'minWorkspaceHeight': 500,
+    'minWorkspaceHeight': 750,
     'toolbox':
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
@@ -5934,19 +6785,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="100"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="180"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="260"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="340"></block>'
+      <block type="studio_repeatForever" deletable="false" x="20" y="500"></block>'
   },
   '10': {
     'requiredBlocks': [
@@ -5972,8 +6823,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'spriteFinishIndex': 1,
-    'minWorkspaceHeight': 600,
+    'minWorkspaceHeight': 950,
     'goal': {
       successCondition: function () {
         return (Studio.playSoundCount > 0) &&
@@ -5994,19 +6844,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="100"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="180"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="260"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="340"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -6016,10 +6866,11 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="450"></block>'
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"></block>'
   },
-  '13': {
+  '11': {
     'requiredBlocks': [
+      [{'test': 'changeScore', 'type': 'studio_changeScore'}],
     ],
     'scale': {
       'snapRadius': 2
@@ -6030,40 +6881,150 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1000,
-    'spritesHiddenToStart': true,
-    'freePlay': true,
     'map': [
-      [0,16, 0, 0, 0,16, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [16,0, 0, 0,16, 0,16, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
+    'spriteStartingImage': 2,
+    'minWorkspaceHeight': 1050,
+    'goal': {
+      successCondition: function () {
+        return Studio.sprite[0].collisionMask & Math.pow(2, 2);
+      }
+    },
+    'timeoutFailureTick': 600,
     'toolbox':
-      tb(blockOfType('studio_setSprite') +
-         blockOfType('studio_setBackground') +
-         blockOfType('studio_whenGameStarts') +
-         blockOfType('studio_whenLeft') +
-         blockOfType('studio_whenRight') +
-         blockOfType('studio_whenUp') +
-         blockOfType('studio_whenDown') +
-         blockOfType('studio_whenSpriteCollided') +
-         blockOfType('studio_repeatForever') +
-         blockOfType('studio_move') +
-         blockOfType('studio_moveDistance') +
-         blockOfType('studio_playSound') +
-         blockOfType('studio_incrementScore') +
-         blockOfType('studio_saySprite') +
-         blockOfType('studio_setSpriteSpeed') +
-         blockOfType('studio_setSpriteEmotion')),
+      tb('<block type="studio_moveDistance"> \
+           <title name="DISTANCE">400</title> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_saySprite"> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_playSound"> \
+           <title name="SOUND">crunch</title></block>' +
+         blockOfType('studio_changeScore')),
     'startBlocks':
-     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
+     '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">8</title></block> \
+        </next></block> \
+      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">2</title></block> \
+        </next></block> \
+      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">1</title></block> \
+        </next></block> \
+      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">4</title></block> \
+        </next></block> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+        <statement name="DO"><block type="studio_moveDistance"> \
+                <title name="SPRITE">1</title> \
+                <title name="DISTANCE">400</title> \
+          <next><block type="studio_moveDistance"> \
+                  <title name="SPRITE">1</title> \
+                  <title name="DISTANCE">400</title> \
+                  <title name="DIR">4</title></block> \
+          </next></block> \
+      </statement></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"> \
+        <next><block type="studio_playSound"> \
+                <title name="SOUND">crunch</title></block> \
+        </next></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="820"> \
+       <title name="SPRITE2">2</title></block>'
   },
-  '99': {
+  '12': {
+    'requiredBlocks': [
+      [{'test': 'setBackground', 'type': 'studio_setBackground'}],
+      [{'test': 'setSpriteSpeed', 'type': 'studio_setSpriteSpeed'}],
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'softButtons': [
+      'leftButton',
+      'rightButton',
+      'downButton',
+      'upButton'
+    ],
+    'map': [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [16,0, 0, 0,16, 0,16, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'spriteStartingImage': 2,
+    'minWorkspaceHeight': 1200,
+    'goal': {
+      successCondition: function () {
+        return Studio.sprite[0].collisionMask & Math.pow(2, 2);
+      }
+    },
+    'timeoutFailureTick': 600,
+    'toolbox':
+      tb('<block type="studio_setBackground"> \
+           <title name="VALUE">"night"</title></block>' +
+         '<block type="studio_moveDistance"> \
+           <title name="DISTANCE">400</title> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_saySprite"> \
+           <title name="SPRITE">1</title></block>' +
+         '<block type="studio_playSound"> \
+           <title name="SOUND">crunch</title></block>' +
+         blockOfType('studio_changeScore') +
+         '<block type="studio_setSpriteSpeed"> \
+          <title name="VALUE">Studio.SpriteSpeed.VERY_FAST</title></block>'),
+    'startBlocks':
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
+      <block type="studio_whenLeft" deletable="false" x="20" y="200"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">8</title></block> \
+        </next></block> \
+      <block type="studio_whenRight" deletable="false" x="20" y="320"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">2</title></block> \
+        </next></block> \
+      <block type="studio_whenUp" deletable="false" x="20" y="440"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">1</title></block> \
+        </next></block> \
+      <block type="studio_whenDown" deletable="false" x="20" y="560"> \
+        <next><block type="studio_move"> \
+                <title name="DIR">4</title></block> \
+        </next></block> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="680"> \
+        <statement name="DO"><block type="studio_moveDistance"> \
+                <title name="SPRITE">1</title> \
+                <title name="DISTANCE">400</title> \
+          <next><block type="studio_moveDistance"> \
+                  <title name="SPRITE">1</title> \
+                  <title name="DISTANCE">400</title> \
+                  <title name="DIR">4</title></block> \
+          </next></block> \
+      </statement></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="880"> \
+        <next><block type="studio_playSound"> \
+                <title name="SOUND">crunch</title></block> \
+        </next></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1000"> \
+       <title name="SPRITE2">2</title> \
+        <next><block type="studio_changeScore"></block> \
+        </next></block>'
+  },
+  '13': {
     'requiredBlocks': [
     ],
     'scale': {
@@ -6096,6 +7057,54 @@ module.exports = {
          blockOfType('studio_whenRight') +
          blockOfType('studio_whenUp') +
          blockOfType('studio_whenDown') +
+         blockOfType('studio_whenSpriteCollided') +
+         blockOfType('studio_repeatForever') +
+         blockOfType('studio_move') +
+         blockOfType('studio_moveDistance') +
+         blockOfType('studio_playSound') +
+         blockOfType('studio_changeScore') +
+         blockOfType('studio_saySprite') +
+         blockOfType('studio_setSpriteSpeed') +
+         blockOfType('studio_setSpriteEmotion')),
+    'startBlocks':
+     '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>'
+  },
+  '99': {
+    'requiredBlocks': [
+    ],
+    'scale': {
+      'snapRadius': 2
+    },
+    'softButtons': [
+      'leftButton',
+      'rightButton',
+      'downButton',
+      'upButton'
+    ],
+    'minWorkspaceHeight': 1300,
+    'edgeCollisions': true,
+    'projectileCollisions': true,
+    'spritesOutsidePlayspace': true,
+    'spritesHiddenToStart': true,
+    'freePlay': true,
+    'map': [
+      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0,16, 0, 0, 0,16, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    'toolbox':
+      tb(blockOfType('studio_setSprite') +
+         blockOfType('studio_setBackground') +
+         blockOfType('studio_whenGameStarts') +
+         blockOfType('studio_whenLeft') +
+         blockOfType('studio_whenRight') +
+         blockOfType('studio_whenUp') +
+         blockOfType('studio_whenDown') +
          blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
          blockOfType('studio_repeatForever') +
@@ -6105,9 +7114,11 @@ module.exports = {
          blockOfType('studio_stop') +
          blockOfType('studio_wait') +
          blockOfType('studio_playSound') +
-         blockOfType('studio_incrementScore') +
+         blockOfType('studio_changeScore') +
          blockOfType('studio_saySprite') +
          blockOfType('studio_setSpritePosition') +
+         blockOfType('studio_throw') +
+         blockOfType('studio_makeProjectile') +
          blockOfType('studio_setSpriteSpeed') +
          blockOfType('studio_setSpriteEmotion')),
     'startBlocks':
@@ -6126,6 +7137,9 @@ module.exports = {
       'upButton'
     ],
     'minWorkspaceHeight': 1000,
+    'edgeCollisions': true,
+    'projectileCollisions': true,
+    'spritesOutsidePlayspace': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -6165,6 +7179,8 @@ module.exports = {
                           <value name="TEXT"><block type="text"></block> \
                           </value></block>' +
                           blockOfType('studio_setSpritePosition') +
+                          blockOfType('studio_throw') +
+                          blockOfType('studio_makeProjectile') +
                           blockOfType('studio_setSpriteSpeed') +
                           blockOfType('studio_setSpriteEmotion')) +
          createCategory(msg.catEvents(),
@@ -6255,9 +7271,11 @@ module.exports.k1_5 = utils.extend(module.exports['8'],  {'is_k1': true});
 module.exports.k1_6 = utils.extend(module.exports['4'],  {'is_k1': true});
 module.exports.k1_7 = utils.extend(module.exports['9'],  {'is_k1': true});
 module.exports.k1_8 = utils.extend(module.exports['10'], {'is_k1': true});
+module.exports.k1_9 = utils.extend(module.exports['11'], {'is_k1': true});
+module.exports.k1_10 = utils.extend(module.exports['12'], {'is_k1': true});
 module.exports.k1_11 = utils.extend(module.exports['13'], {'is_k1': true});
 
-},{"../../locale/ru_ru/studio":37,"../block_utils":3,"../utils":34,"./tiles":21}],18:[function(require,module,exports){
+},{"../../locale/ru_ru/studio":38,"../block_utils":3,"../utils":35,"./tiles":22}],18:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Studio = require('./studio');
@@ -6275,7 +7293,7 @@ window.studioMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":14,"./levels":17,"./skins":19,"./studio":20}],19:[function(require,module,exports){
+},{"../appMain":1,"./blocks":14,"./levels":17,"./skins":19,"./studio":21}],19:[function(require,module,exports){
 /**
  * Load Skin for Studio.
  */
@@ -6312,32 +7330,45 @@ exports.load = function(assetUrl, id) {
   skin.underwater = {
     background: skin.assetUrl('background_underwater.png'),
   };
+  /**
+   * Sprite thumbs generated with:
+   * `brew install graphicsmagick`
+   * `gm convert +adjoin -crop 200x200 -resize 100x100 *spritesheet* output%02d.png`
+   */
   skin.cat = {
     sprite: skin.assetUrl('cat_spritesheet_200px.png'),
-    spriteFlags: 28,
+    dropdownThumbnail: skin.assetUrl('cat_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
   };
   skin.dinosaur = {
     sprite: skin.assetUrl('dinosaur_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dinosaur_thumb.png'),
     spriteFlags: 28,
   };
   skin.dog = {
     sprite: skin.assetUrl('dog_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dog_thumb.png'),
     spriteFlags: 28,
   };
   skin.octopus = {
     sprite: skin.assetUrl('octopus_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('octopus_thumb.png'),
     spriteFlags: 28,
   };
   skin.penguin = {
     sprite: skin.assetUrl('penguin_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('penguin_thumb.png'),
     spriteFlags: 28,
+  };
+  skin.witch = {
+    spriteFlags: 28,
+    dropdownThumbnail: skin.assetUrl('witch_thumb.png'),
+    sprite: skin.assetUrl('witch_sprite_200px.png'),
   };
 
   // Images
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
-  skin.sprite = skin.assetUrl('witch_sprite_200px.png');
-  skin.spriteFlags = 28; // flags: emotions, animation, turns
   skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.approachingGoalAnimation =
       skin.assetUrl(config.approachingGoalAnimation);
@@ -6364,7 +7395,7 @@ exports.load = function(assetUrl, id) {
                     skin.assetUrl('1_wall_bounce.ogg')];
   skin.hitSound = [skin.assetUrl('2_wall_bounce.mp3'),
                    skin.assetUrl('2_wall_bounce.ogg')];
-  
+
   // Settings
   if (config.background !== undefined) {
     var index = Math.floor(Math.random() * config.background);
@@ -6375,10 +7406,158 @@ exports.load = function(assetUrl, id) {
   skin.spriteHeight = config.spriteHeight || 100;
   skin.spriteWidth = config.spriteWidth || 100;
   skin.spriteYOffset = config.spriteYOffset || 0;
+  skin.dropdownThumbnailWidth = 50;
+  skin.dropdownThumbnailHeight = 50;
   return skin;
 };
 
 },{"../skins":11}],20:[function(require,module,exports){
+/**
+ * Blockly App: Studio
+ *
+ * Copyright 2014 Code.org
+ *
+ */
+
+'use strict';
+
+var Studio = require('./studio');
+var tiles = require('./tiles');
+var Direction = tiles.Direction;
+
+//
+// Sprite constructor (currently used for Studio projectiles only)
+//
+// opts.image (URL)
+// opts.width (pixels)
+// opts.height (pixels)
+// opts.x (x position)
+// opts.y (y position)
+// opts.dir (direction)
+// opts.speed (speed)
+//
+
+exports.Sprite = function (opts) {
+  for (var prop in opts) {
+    this[prop] = opts[prop];
+  }
+  this.flags = 0;
+  this.collisionMask = 0;
+  this.widthCoord = this.width / Studio.SQUARE_SIZE;
+  this.heightCoord = this.height / Studio.SQUARE_SIZE;
+};
+
+exports.Sprite.prototype.createElement = function (parentElement) {
+  this.element = document.createElementNS(Blockly.SVG_NS, 'image');
+  this.element.setAttributeNS('http://www.w3.org/1999/xlink',
+                              'xlink:href',
+                              this.image);
+  this.element.setAttribute('height', this.height);
+  this.element.setAttribute('width', this.width);
+  this.element.setAttribute('visibility', 'hidden');
+  parentElement.appendChild(this.element);
+};
+
+exports.Sprite.prototype.removeElement = function () {
+  if (this.element) {
+    this.element.parentElement.removeChild(this.element);
+    this.element = null;
+  }
+};
+
+exports.Sprite.prototype.setPosition = function (x, y) {
+  this.x = x;
+  this.y = y;
+};
+
+exports.Sprite.prototype.setDirection = function (dir) {
+  this.dir = dir;
+};
+
+exports.Sprite.prototype.setSpeed = function (speed) {
+  this.speed = speed;
+};
+
+exports.Sprite.prototype.startCollision = function (i) {
+  if (0 === (this.collisionMask & Math.pow(2, i))) {
+    this.collisionMask |= Math.pow(2, i);
+    return true;
+  }
+  return false;
+};
+
+exports.Sprite.prototype.markNotColliding = function (i) {
+  this.collisionMask &= ~(Math.pow(2, i));
+};
+
+var calcMoveDistance = function (sprite, yAxis) {
+  var scaleFactor;
+  switch (sprite.dir) {
+    case Direction.NORTH:
+      scaleFactor = yAxis ? -1 : 0;
+      break;
+    case Direction.WEST:
+      scaleFactor = yAxis ? 0: -1;
+      break;
+    case Direction.SOUTH:
+      scaleFactor = yAxis ? 1 : 0;
+      break;
+    case Direction.EAST:
+      scaleFactor = yAxis ? 0: 1;
+      break;
+  }
+  return sprite.speed * scaleFactor;
+};
+
+exports.Sprite.prototype.getNextPosition = function (yAxis) {
+  var curPos = yAxis ? this.y : this.x;
+  return curPos + calcMoveDistance(this, yAxis);
+};
+
+exports.Sprite.prototype.moveToNextPosition = function () {
+  this.x = this.getNextPosition(false);
+  this.y = this.getNextPosition(true);
+};
+
+exports.Sprite.prototype.bounce = function () {
+  switch (this.dir) {
+    case Direction.NORTH:
+      this.dir = Direction.SOUTH;
+      break;
+    case Direction.WEST:
+      this.dir = Direction.EAST;
+      break;
+    case Direction.SOUTH:
+      this.dir = Direction.NORTH;
+      break;
+    case Direction.EAST:
+      this.dir = Direction.WEST;
+      break;
+  }
+};
+
+exports.Sprite.prototype.outOfBounds = function () {
+  return (this.x < -(this.widthCoord / 2)) ||
+         (this.x > Studio.COLS + (this.widthCoord / 2)) ||
+         (this.y < -(this.heightCoord / 2)) ||
+         (this.y > Studio.ROWS + (this.heightCoord / 2));
+};
+
+exports.Sprite.prototype.display = function () {
+  var xCoord = (this.x - (this.widthCoord / 2)) * Studio.SQUARE_SIZE;
+  var yCoord = (this.y - (this.heightCoord / 2)) * Studio.SQUARE_SIZE;
+
+  this.element.setAttribute('x', xCoord);
+  this.element.setAttribute('y', yCoord);
+
+  if (!this.visible) {
+    this.element.setAttribute('visibility', 'visible');
+    this.visible = true;
+  }
+};
+
+
+},{"./studio":21,"./tiles":22}],21:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -6399,6 +7578,7 @@ var blocks = require('./blocks');
 var page = require('../templates/page.html');
 var feedback = require('../feedback.js');
 var dom = require('../dom');
+var Sprite = require('./sprite').Sprite;
 
 var Direction = tiles.Direction;
 var NextTurn = tiles.NextTurn;
@@ -6448,9 +7628,40 @@ var Keycodes = {
   DOWN: 40
 };
 
+// NOTE: all class names should be unique. eventhandler naming won't work
+// if we name a projectile class 'left' for example.
+
+var ProjectileClassNames = [
+  'fireball',
+  'flower'
+];
+
+var EdgeClassNames = [
+  'top',
+  'left',
+  'bottom',
+  'right',
+];
+
+var EdgeCollisionBits = [
+  65536,    // 'top'
+  131072,   // 'left'
+  262144,   // 'bottom'
+  524288,   // 'right'
+];
+
 var level;
 var skin;
 var onSharePage;
+
+var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
+  "witch" ];
+
+Studio.nthStartingSkin = function(n) {
+  var skinStartOffset = Studio.spriteStartingImage || 0;
+  var numStartingSkins = spriteStartingSkins.length;
+  return spriteStartingSkins[(n + skinStartOffset) % numStartingSkins];
+};
 
 /**
  * Milliseconds between each animation frame.
@@ -6511,6 +7722,7 @@ var loadLevel = function() {
   Studio.minWorkspaceHeight = level.minWorkspaceHeight;
   Studio.spriteStartingImage = level.spriteStartingImage;
   Studio.spritesHiddenToStart = level.spritesHiddenToStart;
+  Studio.spritesOutsidePlayspace = level.spritesOutsidePlayspace;
   Studio.softButtons_ = level.softButtons || [];
   Studio.spriteFinishIndex = level.spriteFinishIndex || 0;
 
@@ -6526,8 +7738,8 @@ var loadLevel = function() {
   Studio.COLS = Studio.map[0].length;
   // Pixel height and width of each maze square (i.e. tile).
   Studio.SQUARE_SIZE = 50;
-  Studio.SPRITE_HEIGHT = skin.spriteHeight;
-  Studio.SPRITE_WIDTH = skin.spriteWidth;
+  Studio.DEFAULT_SPRITE_HEIGHT = skin.spriteHeight;
+  Studio.DEFAULT_SPRITE_WIDTH = skin.spriteWidth;
   Studio.SPRITE_Y_OFFSET = skin.spriteYOffset;
   // Height and width of the goal and obstacles.
   Studio.MARKER_HEIGHT = 100;
@@ -6535,7 +7747,6 @@ var loadLevel = function() {
 
   Studio.MAZE_WIDTH = Studio.SQUARE_SIZE * Studio.COLS;
   Studio.MAZE_HEIGHT = Studio.SQUARE_SIZE * Studio.ROWS;
-  Studio.PATH_WIDTH = Studio.SQUARE_SIZE / 3;
 };
 
 var drawMap = function() {
@@ -6581,20 +7792,18 @@ var drawMap = function() {
 
   if (Studio.spriteStart_) {
     for (i = 0; i < Studio.spriteCount; i++) {
-      // Sprite clipPath element, whose (x, y) is reset by Studio.displaySprite
+      // Sprite clipPath element
+      // (not setting x, y, height, or width until displaySprite)
       var spriteClip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
       spriteClip.setAttribute('id', 'spriteClipPath' + i);
       var spriteClipRect = document.createElementNS(Blockly.SVG_NS, 'rect');
       spriteClipRect.setAttribute('id', 'spriteClipRect' + i);
-      spriteClipRect.setAttribute('width', Studio.SPRITE_WIDTH);
-      spriteClipRect.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteClip.appendChild(spriteClipRect);
       svg.appendChild(spriteClip);
 
-      // Add sprite (not setting href attribute or width until displaySprite).
+      // Add sprite (not setting href, height, or width until displaySprite).
       var spriteIcon = document.createElementNS(Blockly.SVG_NS, 'image');
       spriteIcon.setAttribute('id', 'sprite' + i);
-      spriteIcon.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteIcon.setAttribute('clip-path', 'url(#spriteClipPath' + i + ')');
       svg.appendChild(spriteIcon);
 
@@ -6685,9 +7894,8 @@ var drawMap = function() {
   svg.appendChild(titleScreenTextGroup);
 };
 
-var essentiallyEqual = function(float1, float2, opt_variance) {
-  var variance = opt_variance || 0.01;
-  return (Math.abs(float1 - float2) < variance);
+var collisionTest = function(x1, x2, xVariance, y1, y2, yVariance) {
+  return (Math.abs(x1 - x2) < xVariance) && (Math.abs(y1 - y2) < yVariance);
 };
 
 /**
@@ -6770,23 +7978,30 @@ var getNextPosition = function (i, yAxis, modifyQueues) {
 // Perform Queued Moves in the X and Y axes (called from inside onTick)
 //
 var performQueuedMoves = function (i) {
-  // Make queued moves in the X axis (fixed to .01 values):
   var nextX = getNextPosition(i, false, true);
-  // Clamp nextX to boundaries as newX:
-  var newX = Math.min(Studio.COLS - 2, Math.max(0, nextX));
-  if (nextX != newX) {
-    cancelQueuedMovements(i, false);
-  }
-  Studio.sprite[i].x = newX;
-
-  // Make queued moves in the Y axis (fixed to .01 values):
   var nextY = getNextPosition(i, true, true);
-  // Clamp nextY to boundaries as newY:
-  var newY = Math.min(Studio.ROWS - 2, Math.max(0, nextY));
-  if (nextY != newY) {
-    cancelQueuedMovements(i, true);
+  if (Studio.spritesOutsidePlayspace) {
+    Studio.sprite[i].x = nextX;
+    Studio.sprite[i].y = nextY;
+  } else {
+    // Clamp nextX to boundaries as newX:
+    var newX = Math.min(
+                  Studio.COLS - (Studio.sprite[i].width / Studio.SQUARE_SIZE),
+                  Math.max(0, nextX));
+    if (nextX != newX) {
+      cancelQueuedMovements(i, false);
+    }
+    Studio.sprite[i].x = newX;
+
+    // Clamp nextY to boundaries as newY:
+    var newY = Math.min(
+                  Studio.ROWS - (Studio.sprite[i].height / Studio.SQUARE_SIZE),
+                  Math.max(0, nextY));
+    if (nextY != newY) {
+      cancelQueuedMovements(i, true);
+    }
+    Studio.sprite[i].y = newY;
   }
-  Studio.sprite[i].y = newY;
 };
 
 //
@@ -6856,13 +8071,16 @@ var setSvgText = function(opts) {
 // Execute the code for all of the event handlers that match an event name
 //
 
-var callHandler = function (name) {
+var callHandler = function (name, allowQueueExtension) {
   Studio.eventHandlers.forEach(function (handler) {
     // Note: we skip executing the code if we have not completed executing
     // the cmdQueue on this handler (checking for non-zero length)
     if (handler.name === name &&
-        (!handler.cmdQueue || 0 === handler.cmdQueue.length)) {
-      handler.cmdQueue = [];
+        (allowQueueExtension ||
+         (!handler.cmdQueue || 0 === handler.cmdQueue.length))) {
+      if (!handler.cmdQueue) {
+        handler.cmdQueue = [];
+      }
       Studio.currentCmdQueue = handler.cmdQueue;
       try { handler.func(BlocklyApps, api, Studio.Globals); } catch (e) { }
       Studio.currentCmdQueue = null;
@@ -6934,17 +8152,55 @@ Studio.onTick = function() {
   // Check for collisions (note that we use the positions they are about
   // to attain with queued moves - this allows the moves to be canceled before
   // the actual movements take place):
+
+  var executeCollisionQueueForClass = function (className) {
+    Studio.executeQueue('whenSpriteCollided-' + i + '-' + className);
+  };
+
+  var spriteCollisionDistance = function (i1, i2, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[i1].height : Studio.sprite[i1].width;
+    var dim2 = yAxis ? Studio.sprite[i2].height : Studio.sprite[i2].width;
+    return tiles.SPRITE_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
+  var projectileCollisionDistance = function (iS, iP, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[iS].height : Studio.sprite[iS].width;
+    var dim2 = yAxis ?
+                  Studio.projectiles[iP].height :
+                  Studio.projectiles[iP].width;
+    return tiles.SPRITE_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
+  var edgeCollisionDistance = function (iS, edgeName, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[iS].height : Studio.sprite[iS].width;
+    var dim2;
+    if (edgeName === 'left' || edgeName === 'right') {
+      dim2 = yAxis ? Studio.MAZE_HEIGHT : 0;
+    } else {
+      dim2 = yAxis ? 0 : Studio.MAZE_WIDTH;
+    }
+    return (dim1 + dim2) / (2 * Studio.SQUARE_SIZE);
+  };
+
   for (i = 0; i < Studio.spriteCount; i++) {
+    var iHalfWidth = Studio.sprite[i].width / (Studio.SQUARE_SIZE * 2);
+    var iHalfHeight = Studio.sprite[i].height / (Studio.SQUARE_SIZE * 2);
+    var iXCenter = getNextPosition(i, false, false) + iHalfWidth;
+    var iYCenter = getNextPosition(i, true, false) + iHalfHeight;
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i == j) {
         continue;
       }
-      if (essentiallyEqual(getNextPosition(i, false, false),
-                           getNextPosition(j, false, false),
-                           tiles.SPRITE_COLLIDE_DISTANCE) &&
-          essentiallyEqual(getNextPosition(i, true, false),
-                           getNextPosition(j, true, false),
-                           tiles.SPRITE_COLLIDE_DISTANCE)) {
+      var jXCenter = getNextPosition(j, false, false) +
+                      Studio.sprite[j].width / (Studio.SQUARE_SIZE * 2);
+      var jYCenter = getNextPosition(j, true, false) +
+                      Studio.sprite[j].height / (Studio.SQUARE_SIZE * 2);
+      if (collisionTest(iXCenter,
+                        jXCenter,
+                        spriteCollisionDistance(i, j, false),
+                        iYCenter,
+                        jYCenter,
+                        spriteCollisionDistance(i, j, true))) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
           Studio.sprite[i].collisionMask |= Math.pow(2, j);
           callHandler('whenSpriteCollided-' + i + '-' + j);
@@ -6954,6 +8210,64 @@ Studio.onTick = function() {
       }
       Studio.executeQueue('whenSpriteCollided-' + i + '-' + j);
     }
+    for (j = 0; j < Studio.projectiles.length; j++) {
+      if (collisionTest(iXCenter,
+                        Studio.projectiles[j].getNextPosition(false),
+                        projectileCollisionDistance(i, j, false),
+                        iYCenter,
+                        Studio.projectiles[j].getNextPosition(true),
+                        projectileCollisionDistance(i, j, true))) {
+        if (Studio.projectiles[j].startCollision(i)) {
+          Studio.currentEventParams = { projectile: Studio.projectiles[j] };
+          // Allow cmdQueue extension (pass true) since this handler
+          // may be called for multiple projectiles before executing the queue
+          // below
+          callHandler('whenSpriteCollided-' + i + '-' +
+                        Studio.projectiles[j].className,
+                      true);
+          Studio.currentEventParams = null;
+        }
+      } else {
+        Studio.projectiles[j].markNotColliding(i);
+      }
+    }
+    for (j = 0; j < EdgeClassNames.length; j++) {
+      var edgeXCenter, edgeYCenter;
+      var edgeCollisionBit = EdgeCollisionBits[j];
+      switch (EdgeClassNames[j]) {
+        case 'top':
+          edgeXCenter = Studio.COLS / 2;
+          edgeYCenter = 0;
+          break;
+        case 'left':
+          edgeXCenter = 0;
+          edgeYCenter = Studio.ROWS / 2;
+          break;
+        case 'bottom':
+          edgeXCenter = Studio.COLS / 2;
+          edgeYCenter = Studio.ROWS;
+          break;
+        case 'right':
+          edgeXCenter = Studio.COLS;
+          edgeYCenter = Studio.ROWS / 2;
+          break;
+      }
+      if (collisionTest(iXCenter,
+                        edgeXCenter,
+                        edgeCollisionDistance(i, EdgeClassNames[j], false),
+                        iYCenter,
+                        edgeYCenter,
+                        edgeCollisionDistance(i, EdgeClassNames[j], true))) {
+        if (0 === (Studio.sprite[i].collisionMask & edgeCollisionBit)) {
+          Studio.sprite[i].collisionMask |= edgeCollisionBit;
+          callHandler('whenSpriteCollided-' + i + '-' + EdgeClassNames[j]);
+        }
+      } else {
+        Studio.sprite[i].collisionMask &= ~edgeCollisionBit;
+      }
+    }
+    ProjectileClassNames.forEach(executeCollisionQueueForClass);
+    EdgeClassNames.forEach(executeCollisionQueueForClass);
   }
 
   for (i = 0; i < Studio.spriteCount; i++) {
@@ -6961,6 +8275,19 @@ Studio.onTick = function() {
 
     // Display sprite:
     Studio.displaySprite(i);
+  }
+
+  for (i = 0; i < Studio.projectiles.length; i++) {
+    Studio.projectiles[i].moveToNextPosition();
+    if (Studio.projectiles[i].outOfBounds()) {
+      Studio.projectiles[i].removeElement();
+      Studio.projectiles.splice(i, 1);
+      // decrement i because we just removed an item from the array. We want to
+      // keep i as the same value for the next iteration through this loop
+      i--;
+    } else {
+      Studio.projectiles[i].display();
+    }
   }
 
   if (checkFinished()) {
@@ -7126,8 +8453,9 @@ Studio.init = function(config) {
   Studio.spriteFinishCount = 0;
   Studio.spriteCount = 0;
   Studio.sprite = [];
+  Studio.projectiles = [];
 
-  // Locate the start and finish squares.
+  // Locate the start and finish positions.
   for (var y = 0; y < Studio.ROWS; y++) {
     for (var x = 0; x < Studio.COLS; x++) {
       if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
@@ -7149,6 +8477,18 @@ Studio.init = function(config) {
 
   // Update the sprite count in the blocks:
   blocks.setSpriteCount(Blockly, Studio.spriteCount);
+
+  if (level.projectileCollisions) {
+    blocks.enableProjectileCollisions(Blockly);
+  }
+
+  if (level.edgeCollisions) {
+    blocks.enableEdgeCollisions(Blockly);
+  }
+
+  if (level.spritesOutsidePlayspace) {
+    blocks.enableSpritesOutsidePlayspace(Blockly);
+  }
 
   BlocklyApps.init(config);
 
@@ -7203,9 +8543,14 @@ BlocklyApps.reset = function(first) {
     softButtonsCell.className = 'soft-buttons-' + softButtonCount;
   }
 
+  // Reset the dynamic sprites list
+  while (Studio.projectiles.length) {
+    var projectile = Studio.projectiles.pop();
+    projectile.removeElement();
+  }
+
   // Reset the score and title screen.
   Studio.playerScore = 0;
-  Studio.opponentScore = 0;
   Studio.scoreText = null;
   document.getElementById('score')
     .setAttribute('visibility', 'hidden');
@@ -7225,11 +8570,6 @@ BlocklyApps.reset = function(first) {
   // Reset the Globals object used to contain program variables:
   Studio.Globals = [];
 
-  var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
-                              "witch" ];
-  var numStartingSkins = spriteStartingSkins.length;
-  var skinBias = Studio.spriteStartingImage || 0;
-
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
@@ -7243,7 +8583,7 @@ BlocklyApps.reset = function(first) {
 
     var opts = {
         'index': i,
-        'value': spriteStartingSkins[(i + skinBias) % numStartingSkins]
+        'value': Studio.nthStartingSkin(i)
     };
     if (Studio.spritesHiddenToStart) {
       opts.forceHidden = true;
@@ -7306,7 +8646,7 @@ BlocklyApps.runButtonClick = function() {
     shareCell.className = 'share-cell-enabled';
   }
 
-  if (level.showZeroZeroScore) {
+  if (level.showZeroScore) {
     Studio.displayScore();
   }
 };
@@ -7367,9 +8707,9 @@ var registerHandlers =
     var block = blocks[x];
     if (block.type === blockName &&
         (!nameParam1 ||
-         matchParam1Val === parseInt(block.getTitleValue(nameParam1), 10)) &&
+         matchParam1Val === block.getTitleValue(nameParam1)) &&
         (!nameParam2 ||
-         matchParam2Val === parseInt(block.getTitleValue(nameParam2), 10))) {
+         matchParam2Val === block.getTitleValue(nameParam2))) {
       var code = Blockly.Generator.blocksToCode('JavaScript', [ block ]);
       if (code) {
         var func = codegen.functionFromCode(code, {
@@ -7392,13 +8732,24 @@ var registerHandlers =
 var registerHandlersWithSpriteParam =
       function (handlers, blockName, eventNameBase, blockParam) {
   for (var i = 0; i < Studio.spriteCount; i++) {
-    registerHandlers(handlers, blockName, eventNameBase, blockParam, i);
+    registerHandlers(handlers, blockName, eventNameBase, blockParam, String(i));
   }
 };
 
+
 var registerHandlersWithSpriteParams =
       function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
-  for (var i = 0; i < Studio.spriteCount; i++) {
+  var i;
+  var registerHandlersForClassName = function (className) {
+    registerHandlers(handlers,
+                     blockName,
+                     eventNameBase,
+                     blockParam1,
+                     String(i),
+                     blockParam2,
+                     className);
+  };
+  for (i = 0; i < Studio.spriteCount; i++) {
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i === j) {
         continue;
@@ -7407,10 +8758,12 @@ var registerHandlersWithSpriteParams =
                        blockName,
                        eventNameBase,
                        blockParam1,
-                       i,
+                       String(i),
                        blockParam2,
-                       j);
+                       String(j));
     }
+    ProjectileClassNames.forEach(registerHandlersForClassName);
+    EdgeClassNames.forEach(registerHandlersForClassName);
   }
 };
 
@@ -7472,7 +8825,7 @@ Studio.execute = function() {
                                    'SPRITE1',
                                    'SPRITE2');
 
-  BlocklyApps.playAudio('start', {volume: 0.5});
+  BlocklyApps.playAudio('start');
 
   BlocklyApps.reset(false);
 
@@ -7508,9 +8861,9 @@ Studio.onPuzzleComplete = function() {
   }
 
   if (Studio.testResults >= BlocklyApps.TestResults.FREE_PLAY) {
-    BlocklyApps.playAudio('win', {volume : 0.5});
+    BlocklyApps.playAudio('win');
   } else {
-    BlocklyApps.playAudio('failure', {volume : 0.5});
+    BlocklyApps.playAudio('failure');
   }
 
   if (level.editCode) {
@@ -7606,10 +8959,11 @@ var updateSpeechBubblePath = function (element) {
 };
 
 Studio.displaySprite = function(i) {
-  var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
-  var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
+  var sprite = Studio.sprite[i];
+  var xCoord = sprite.x * Studio.SQUARE_SIZE;
+  var yCoord = sprite.y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
 
-  var xOffset = Studio.SPRITE_WIDTH * spriteFrameNumber(i);
+  var xOffset = sprite.width * spriteFrameNumber(i);
 
   var spriteIcon = document.getElementById('sprite' + i);
   var spriteClipRect = document.getElementById('spriteClipRect' + i);
@@ -7617,31 +8971,30 @@ Studio.displaySprite = function(i) {
   var xCoordPrev = spriteClipRect.getAttribute('x');
   var yCoordPrev = spriteClipRect.getAttribute('y');
 
-  var dirPrev = Studio.sprite[i].dir;
+  var dirPrev = sprite.dir;
   if (dirPrev === Direction.NONE) {
     // direction not yet set, start at SOUTH (forward facing)
-    Studio.sprite[i].dir = Direction.SOUTH;
+    sprite.dir = Direction.SOUTH;
   }
   else if ((xCoord != xCoordPrev) || (yCoord != yCoordPrev)) {
-    Studio.sprite[i].dir = Direction.NONE;
+    sprite.dir = Direction.NONE;
     if (xCoord < xCoordPrev) {
-      Studio.sprite[i].dir |= Direction.WEST;
+      sprite.dir |= Direction.WEST;
     } else if (xCoord > xCoordPrev) {
-      Studio.sprite[i].dir |= Direction.EAST;
+      sprite.dir |= Direction.EAST;
     }
     if (yCoord < yCoordPrev) {
-      Studio.sprite[i].dir |= Direction.NORTH;
+      sprite.dir |= Direction.NORTH;
     } else if (yCoord > yCoordPrev) {
-      Studio.sprite[i].dir |= Direction.SOUTH;
+      sprite.dir |= Direction.SOUTH;
     }
   }
 
-  if (Studio.sprite[i].dir !== Studio.sprite[i].displayDir) {
+  if (sprite.dir !== sprite.displayDir) {
     // Every other frame, assign a new displayDir from state table
     // (only one turn at a time):
     if (Studio.tickCount && (0 === Studio.tickCount % 2)) {
-      Studio.sprite[i].displayDir =
-          NextTurn[Studio.sprite[i].displayDir][Studio.sprite[i].dir];
+      sprite.displayDir = NextTurn[sprite.displayDir][sprite.dir];
     }
   }
 
@@ -7660,12 +9013,12 @@ Studio.displaySprite = function(i) {
   var nowOnRight = true;
   var ySpeech = yCoord - (bblHeight + SPEECH_BUBBLE_PADDING);
   if (ySpeech < 0) {
-    ySpeech = yCoord + Studio.SPRITE_HEIGHT + SPEECH_BUBBLE_PADDING;
+    ySpeech = yCoord + sprite.height + SPEECH_BUBBLE_PADDING;
     nowOnTop = false;
   }
   var xSpeech = xCoord + SPEECH_BUBBLE_H_OFFSET;
   if (xSpeech > Studio.MAZE_WIDTH - SPEECH_BUBBLE_WIDTH) {
-    xSpeech = xCoord + Studio.SPRITE_WIDTH -
+    xSpeech = xCoord + sprite.width -
                 (SPEECH_BUBBLE_WIDTH + SPEECH_BUBBLE_H_OFFSET);
     nowOnRight = false;
   }
@@ -7686,18 +9039,10 @@ Studio.displayScore = function() {
     score.textContent = Studio.scoreText;
   } else {
     score.textContent = studioMsg.scoreText({
-      playerScore: Studio.playerScore,
-      opponentScore: Studio.opponentScore
+      playerScore: Studio.playerScore
     });
   }
   score.setAttribute('visibility', 'visible');
-};
-
-var skinTheme = function (value) {
-  if (value === 'witch') {
-    return skin;
-  }
-  return skin[value];
 };
 
 Studio.queueCmd = function (id, name, opts) {
@@ -7706,6 +9051,11 @@ Studio.queueCmd = function (id, name, opts) {
       'name': name,
       'opts': opts,
   };
+  if (Studio.currentEventParams) {
+    for (var prop in Studio.currentEventParams) {
+      cmd.opts[prop] = Studio.currentEventParams[prop];
+    }
+  }
   Studio.currentCmdQueue.push(cmd);
 };
 
@@ -7762,7 +9112,7 @@ Studio.callCmd = function (cmd) {
       break;
     case 'playSound':
       BlocklyApps.highlight(cmd.id);
-      BlocklyApps.playAudio(cmd.opts.soundName, {volume: 0.5});
+      BlocklyApps.playAudio(cmd.opts.soundName);
       Studio.playSoundCount++;
       break;
     case 'showTitleScreen':
@@ -7783,9 +9133,17 @@ Studio.callCmd = function (cmd) {
       BlocklyApps.highlight(cmd.id);
       Studio.stop(cmd.opts);
       break;
-    case 'incrementScore':
+    case 'throwProjectile':
       BlocklyApps.highlight(cmd.id);
-      Studio.incrementScore(cmd.opts);
+      Studio.throwProjectile(cmd.opts);
+      break;
+    case 'makeProjectile':
+      BlocklyApps.highlight(cmd.id);
+      Studio.makeProjectile(cmd.opts);
+      break;
+    case 'changeScore':
+      BlocklyApps.highlight(cmd.id);
+      Studio.changeScore(cmd.opts);
       break;
     case 'setScoreText':
       BlocklyApps.highlight(cmd.id);
@@ -7808,12 +9166,8 @@ Studio.setSpriteSpeed = function (opts) {
   Studio.sprite[opts.spriteIndex].speed = opts.value;
 };
 
-Studio.incrementScore = function (opts) {
-  if (opts.player == "opponent") {
-    Studio.opponentScore++;
-  } else {
-    Studio.playerScore++;
-  }
+Studio.changeScore = function (opts) {
+  Studio.playerScore += Number(opts.value);
   Studio.displayScore();
 };
 
@@ -7825,7 +9179,7 @@ Studio.setScoreText = function (opts) {
 Studio.setBackground = function (opts) {
   var element = document.getElementById('background');
   element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-    skinTheme(opts.value).background);
+    skin[opts.value].background);
 };
 
 var computeSpriteFrameNums = function (index) {
@@ -7839,22 +9193,33 @@ var computeSpriteFrameNums = function (index) {
 };
 
 Studio.setSprite = function (opts) {
-  // Inherit some flags from the skin:
+  var sprite = Studio.sprite[opts.index];
   if (opts.value !== 'hidden' && opts.value !== 'visible') {
-    Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
-    Studio.sprite[opts.index].flags |= skinTheme(opts.value).spriteFlags;
+    // Inherit some flags from the skin:
+    sprite.flags &= ~SF_SKINS_MASK;
+    sprite.flags |= skin[opts.value].spriteFlags;
+    // Reset height and width:
+    sprite.height =
+        skin[opts.value].spriteHeight || Studio.DEFAULT_SPRITE_HEIGHT;
+    sprite.width = skin[opts.value].spriteWidth || Studio.DEFAULT_SPRITE_WIDTH;
   }
-  Studio.sprite[opts.index].value = opts.forceHidden ? 'hidden' : opts.value;
+  sprite.value = opts.forceHidden ? 'hidden' : opts.value;
 
-  var element = document.getElementById('sprite' + opts.index);
-  element.setAttribute(
+  var spriteIcon = document.getElementById('sprite' + opts.index);
+  spriteIcon.setAttribute(
       'visibility',
       (opts.value === 'hidden' || opts.forceHidden) ? 'hidden' : 'visible');
   if ((opts.value !== 'hidden') && (opts.value !== 'visible')) {
-    element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-                           skinTheme(opts.value).sprite);
-    element.setAttribute('width',
-                         Studio.SPRITE_WIDTH * spriteTotalFrames(opts.index));
+    var spriteClipRect = document.getElementById('spriteClipRect' + opts.index);
+    spriteClipRect.setAttribute('width', sprite.width);
+    spriteClipRect.setAttribute('height', sprite.height);
+
+    spriteIcon.setAttributeNS('http://www.w3.org/1999/xlink',
+                              'xlink:href',
+                              skin[opts.value].sprite);
+    spriteIcon.setAttribute('width',
+                            sprite.width * spriteTotalFrames(opts.index));
+    spriteIcon.setAttribute('height', sprite.height);
     computeSpriteFrameNums(opts.index);
     // call display right away since the frame number may have changed:
     Studio.displaySprite(opts.index);
@@ -8110,8 +9475,172 @@ Studio.stop = function (opts) {
   }
 };
 
+Studio.throwProjectile = function (opts) {
+  var optsInit = {
+    className: opts.className,
+    height: 50,
+    width: 50,
+    dir: opts.dir,
+    speed: tiles.DEFAULT_SPRITE_SPEED
+  };
+
+  var fromSprite = Studio.sprite[opts.spriteIndex];
+  optsInit.image = opts.className === "fireball" ? skin.goal : skin.goalSuccess;
+
+  // Choose point of origin based on direction
+  // assumes fromSprite is always 2x2 in size
+  // assumes projectile is always 1x1 in size
+  // fromSprite coords are left, top
+  // projectile coords are center, center
+  switch (opts.dir) {
+    case Direction.NORTH:
+      optsInit.x = fromSprite.x + 1;
+      optsInit.y = fromSprite.y - 0.5;
+      break;
+    case Direction.WEST:
+      optsInit.x = fromSprite.x - 0.5;
+      optsInit.y = fromSprite.y + 1;
+      break;
+    case Direction.SOUTH:
+      optsInit.x = fromSprite.x + 1;
+      optsInit.y = fromSprite.y + 2.5;
+      break;
+    case Direction.EAST:
+      optsInit.x = fromSprite.x + 2.5;
+      optsInit.y = fromSprite.y + 1;
+      break;
+  }
+
+  var projectile = new Sprite(optsInit);
+  projectile.createElement(document.getElementById('svgStudio'));
+  Studio.projectiles.push(projectile);
+};
+
+//
+// Internal helper to handle makeProjectile calls on a single projectile
+//
+// Return value: true if projectile was removed from the projectiles array
+//
+
+var doMakeProjectile = function (projectile, action) {
+  if (action === 'bounce') {
+    projectile.bounce();
+  } else if (action === 'disappear') {
+    projectile.removeElement();
+    var pos = Studio.projectiles.indexOf(projectile);
+    if (-1 !== pos) {
+      Studio.projectiles.splice(pos, 1);
+      return true;
+    }
+  } else {
+    throw "unknown action in doMakeProjectile";
+  }
+  return false;
+};
+
+Studio.makeProjectile = function (opts) {
+  if (opts.projectile) {
+    doMakeProjectile(opts.projectile, opts.action);
+  } else {
+    // No "current" projectile, so apply action to all of them of this class
+    for (var i = 0; i < Studio.projectiles.length; i++) {
+      if (Studio.projectiles[i].className === opts.className &&
+          doMakeProjectile(Studio.projectiles[i], opts.action)) {
+        // if this returned true, the projectile was deleted
+
+        // decrement i because we just removed an item from the array. We want
+        // to keep i as the same value for the next iteration through this loop
+        i--;
+      }
+    }
+  }
+};
+
+//
+// xFromPosition: return left-most point of sprite given position constant
+//
+
+var xFromPosition = function (sprite, position) {
+  switch (position) {
+    case tiles.Position.OUTTOPOUTLEFT:
+    case tiles.Position.TOPOUTLEFT:
+    case tiles.Position.MIDDLEOUTLEFT:
+    case tiles.Position.BOTTOMOUTLEFT:
+    case tiles.Position.OUTBOTTOMOUTLEFT:
+      return -sprite.width / Studio.SQUARE_SIZE;
+    case tiles.Position.OUTTOPLEFT:
+    case tiles.Position.TOPLEFT:
+    case tiles.Position.MIDDLELEFT:
+    case tiles.Position.BOTTOMLEFT:
+    case tiles.Position.OUTBOTTOMLEFT:
+      return 0;
+    case tiles.Position.OUTTOPCENTER:
+    case tiles.Position.TOPCENTER:
+    case tiles.Position.MIDDLECENTER:
+    case tiles.Position.BOTTOMCENTER:
+    case tiles.Position.OUTBOTTOMCENTER:
+      return (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.OUTTOPRIGHT:
+    case tiles.Position.TOPRIGHT:
+    case tiles.Position.MIDDLERIGHT:
+    case tiles.Position.BOTTOMRIGHT:
+    case tiles.Position.OUTBOTTOMRIGHT:
+      return Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
+    case tiles.Position.OUTTOPOUTRIGHT:
+    case tiles.Position.TOPOUTRIGHT:
+    case tiles.Position.MIDDLEOUTRIGHT:
+    case tiles.Position.BOTTOMOUTRIGHT:
+    case tiles.Position.OUTBOTTOMOUTRIGHT:
+      return Studio.COLS;
+  }
+};
+
+//
+// yFromPosition: return top-most point of sprite given position constant
+//
+
+var yFromPosition = function (sprite, position) {
+  switch (position) {
+    case tiles.Position.OUTTOPOUTLEFT:
+    case tiles.Position.OUTTOPLEFT:
+    case tiles.Position.OUTTOPCENTER:
+    case tiles.Position.OUTTOPRIGHT:
+    case tiles.Position.OUTTOPOUTRIGHT:
+      return -sprite.height / Studio.SQUARE_SIZE;
+    case tiles.Position.TOPOUTLEFT:
+    case tiles.Position.TOPLEFT:
+    case tiles.Position.TOPCENTER:
+    case tiles.Position.TOPRIGHT:
+    case tiles.Position.TOPOUTRIGHT:
+      return 0;
+    case tiles.Position.MIDDLEOUTLEFT:
+    case tiles.Position.MIDDLELEFT:
+    case tiles.Position.MIDDLECENTER:
+    case tiles.Position.MIDDLERIGHT:
+    case tiles.Position.MIDDLEOUTRIGHT:
+      return (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.BOTTOMOUTLEFT:
+    case tiles.Position.BOTTOMLEFT:
+    case tiles.Position.BOTTOMCENTER:
+    case tiles.Position.BOTTOMRIGHT:
+    case tiles.Position.BOTTOMOUTRIGHT:
+      return Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
+    case tiles.Position.OUTBOTTOMOUTLEFT:
+    case tiles.Position.OUTBOTTOMLEFT:
+    case tiles.Position.OUTBOTTOMCENTER:
+    case tiles.Position.OUTBOTTOMRIGHT:
+    case tiles.Position.OUTBOTTOMOUTRIGHT:
+      return Studio.ROWS;
+  }
+};
+
 Studio.setSpritePosition = function (opts) {
   var sprite = Studio.sprite[opts.spriteIndex];
+  if (opts.value) {
+    // fill in .x and .y from the tiles.Position value in opts.value
+    opts.x = xFromPosition(sprite, opts.value);
+    opts.y = yFromPosition(sprite, opts.value);
+  }
   var samePosition = (sprite.x === opts.x && sprite.y === opts.y);
 
   // Don't reset collisions inside stop() if we're in the same position
@@ -8128,25 +9657,27 @@ Studio.moveSingle = function (opts) {
   switch (opts.dir) {
     case Direction.NORTH:
       sprite.y -= sprite.speed;
-      if (sprite.y < 0) {
+      if (!Studio.spritesOutsidePlayspace && sprite.y < 0) {
         sprite.y = 0;
       }
       break;
     case Direction.EAST:
       sprite.x += sprite.speed;
-      if (sprite.x > (Studio.COLS - 2)) {
-        sprite.x = Studio.COLS - 2;
+      if (!Studio.spritesOutsidePlayspace &&
+          sprite.x > (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE))) {
+        sprite.x = Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.SOUTH:
       sprite.y += sprite.speed;
-      if (sprite.y > (Studio.ROWS - 2)) {
-        sprite.y = Studio.ROWS - 2;
+      if (!Studio.spritesOutsidePlayspace &&
+          sprite.y > (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE))) {
+        sprite.y = Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.WEST:
       sprite.x -= sprite.speed;
-      if (sprite.x < 0) {
+      if (!Studio.spritesOutsidePlayspace && sprite.x < 0) {
         sprite.x = 0;
       }
       break;
@@ -8168,16 +9699,34 @@ Studio.timedOut = function() {
 
 Studio.allFinishesComplete = function() {
   var i;
+  var finishCollisionDistance = function (yAxis) {
+    var dim1 = yAxis ?
+                  Studio.sprite[Studio.spriteFinishIndex].height :
+                  Studio.sprite[Studio.spriteFinishIndex].width;
+    var dim2 = yAxis ? Studio.MARKER_HEIGHT : Studio.MARKER_WIDTH;
+    return tiles.FINISH_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
   if (Studio.spriteFinish_) {
     var finished, playSound;
+    var xSpriteCenter =
+      Studio.sprite[Studio.spriteFinishIndex].x +
+      Studio.sprite[Studio.spriteFinishIndex].width / (2 * Studio.SQUARE_SIZE);
+    var ySpriteCenter =
+      Studio.sprite[Studio.spriteFinishIndex].y +
+      Studio.sprite[Studio.spriteFinishIndex].height / (2 * Studio.SQUARE_SIZE);
     for (i = 0, finished = 0; i < Studio.spriteFinishCount; i++) {
       if (!Studio.spriteFinish_[i].finished) {
-        if (essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].x,
-                             Studio.spriteFinish_[i].x,
-                             tiles.FINISH_COLLIDE_DISTANCE) &&
-            essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].y,
-                             Studio.spriteFinish_[i].y,
-                             tiles.FINISH_COLLIDE_DISTANCE)) {
+        var xFinCenter = Studio.spriteFinish_[i].x +
+                          Studio.MARKER_WIDTH / (2 * Studio.SQUARE_SIZE);
+        var yFinCenter = Studio.spriteFinish_[i].y +
+                          Studio.MARKER_HEIGHT / (2 * Studio.SQUARE_SIZE);
+        if (collisionTest(xSpriteCenter,
+                          xFinCenter,
+                          finishCollisionDistance(false),
+                          ySpriteCenter,
+                          yFinCenter,
+                          finishCollisionDistance(true))) {
           Studio.spriteFinish_[i].finished = true;
           finished++;
           playSound = true;
@@ -8195,7 +9744,7 @@ Studio.allFinishesComplete = function() {
     }
     if (playSound && finished != Studio.spriteFinishCount) {
       // Play a sound unless we've hit the last flag
-      BlocklyApps.playAudio('flag', {volume: 0.5});
+      BlocklyApps.playAudio('flag');
     }
     return (finished == Studio.spriteFinishCount);
   }
@@ -8228,7 +9777,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/ru_ru/common":36,"../../locale/ru_ru/studio":37,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":11,"../templates/page.html":29,"./api":13,"./blocks":14,"./controls.html":15,"./extraControlRows.html":16,"./tiles":21,"./visualization.html":22}],21:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"../../locale/ru_ru/studio":38,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":11,"../templates/page.html":30,"./api":13,"./blocks":14,"./controls.html":15,"./extraControlRows.html":16,"./sprite":20,"./tiles":22,"./visualization.html":23}],22:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
@@ -8244,44 +9793,32 @@ exports.Direction = {
 };
 
 exports.Position = {
-  TOPLEFT: 1,
-  TOPCENTER: 2,
-  TOPRIGHT: 3,
-  MIDDLELEFT: 4,
-  MIDDLECENTER: 5,
-  MIDDLERIGHT: 6,
-  BOTTOMLEFT: 7,
-  BOTTOMCENTER: 8,
-  BOTTOMRIGHT: 9,
+  OUTTOPOUTLEFT:    1,
+  OUTTOPLEFT:       2,
+  OUTTOPCENTER:     3,
+  OUTTOPRIGHT:      4,
+  OUTTOPOUTRIGHT:   5,
+  TOPOUTLEFT:       6,
+  TOPLEFT:          7,
+  TOPCENTER:        8,
+  TOPRIGHT:         9,
+  TOPOUTRIGHT:      10,
+  MIDDLEOUTLEFT:    11,
+  MIDDLELEFT:       12,
+  MIDDLECENTER:     13,
+  MIDDLERIGHT:      14,
+  MIDDLEOUTRIGHT:   15,
+  BOTTOMOUTLEFT:    16,
+  BOTTOMLEFT:       17,
+  BOTTOMCENTER:     18,
+  BOTTOMRIGHT:      19,
+  BOTTOMOUTRIGHT:   20,
+  OUTBOTTOMOUTLEFT: 21,
+  OUTBOTTOMLEFT:    22,
+  OUTBOTTOMCENTER:  23,
+  OUTBOTTOMRIGHT:   24,
+  OUTBOTTOMOUTRIGHT:25,
 };
-
-//
-// Coordinates for each Position (revisit when Sprite size is variable)
-//
-
-var Pos = exports.Position;
-
-exports.xFromPosition = {};
-exports.xFromPosition[Pos.TOPLEFT] = 0;
-exports.xFromPosition[Pos.TOPCENTER] = 3;
-exports.xFromPosition[Pos.TOPRIGHT] = 6;
-exports.xFromPosition[Pos.MIDDLELEFT] = 0;
-exports.xFromPosition[Pos.MIDDLECENTER] = 3;
-exports.xFromPosition[Pos.MIDDLERIGHT] = 6;
-exports.xFromPosition[Pos.BOTTOMLEFT] = 0;
-exports.xFromPosition[Pos.BOTTOMCENTER] = 3;
-exports.xFromPosition[Pos.BOTTOMRIGHT] = 6;
-
-exports.yFromPosition = {};
-exports.yFromPosition[Pos.TOPLEFT] = 0;
-exports.yFromPosition[Pos.TOPCENTER] = 0;
-exports.yFromPosition[Pos.TOPRIGHT] = 0;
-exports.yFromPosition[Pos.MIDDLELEFT] = 3;
-exports.yFromPosition[Pos.MIDDLECENTER] = 3;
-exports.yFromPosition[Pos.MIDDLERIGHT] = 3;
-exports.yFromPosition[Pos.BOTTOMLEFT] = 6;
-exports.yFromPosition[Pos.BOTTOMCENTER] = 6;
-exports.yFromPosition[Pos.BOTTOMRIGHT] = 6;
 
 //
 // Turn state machine, use as NextTurn[fromDir][toDir]
@@ -8379,8 +9916,9 @@ exports.Emotions = {
   SAD: 3,
 };
 
-exports.FINISH_COLLIDE_DISTANCE = 1.5;
-exports.SPRITE_COLLIDE_DISTANCE = 1.8;
+// scale the collision bounding box to make it so they need to overlap a touch:
+exports.FINISH_COLLIDE_DISTANCE_SCALING = 0.75;
+exports.SPRITE_COLLIDE_DISTANCE_SCALING = 0.9;
 exports.DEFAULT_SPRITE_SPEED = 0.1;
 
 /**
@@ -8394,7 +9932,7 @@ exports.SquareType = {
   SPRITESTART: 16,
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8415,7 +9953,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],23:[function(require,module,exports){
+},{"ejs":39}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8436,7 +9974,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],24:[function(require,module,exports){
+},{"ejs":39}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8449,7 +9987,7 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/ru_ru/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  <button id="again-button" class="launch">\n    ', escape((14,  msg.tryAgain() )), '\n  </button>\n');16; }; buf.push('\n');17; if (data.nextLevel) {; buf.push('  <button id="continue-button" class="launch">\n    ', escape((18,  msg.continue() )), '\n  </button>\n');20; }; buf.push(''); })();
+ buf.push('');1; var msg = require('../../locale/ru_ru/common'); ; buf.push('\n\n');3; if (data.ok) {; buf.push('  <div class="farSide" style="padding: 1ex 3ex 0">\n    <button id="ok-button" class="secondary">\n      ', escape((5,  msg.dialogOK() )), '\n    </button>\n  </div>\n');8; }; buf.push('\n');9; if (data.previousLevel) {; buf.push('  <button id="back-button" class="launch">\n    ', escape((10,  msg.backToPreviousLevel() )), '\n  </button>\n');12; }; buf.push('\n');13; if (data.tryAgain) {; buf.push('  ');13; if (data.isK1) {; buf.push('    <div id="again-button" class="launch arrow-container arrow-left">\n      <div class="arrow-head"><img src="', escape((14,  data.assetUrl('media/tryagain-arrow-head.png') )), '" alt="Arrowhead" width="67" height="130"/></div>\n      <div class="arrow-text">', escape((15,  msg.tryAgain() )), '</div>\n    </div>\n  ');17; } else {; buf.push('    <button id="again-button" class="launch">\n      ', escape((18,  msg.tryAgain() )), '\n    </button>\n  ');20; }; buf.push('');20; }; buf.push('\n');21; if (data.nextLevel) {; buf.push('  ');21; if (data.isK1) {; buf.push('    <div id="continue-button" class="launch arrow-container arrow-right">\n      <div class="arrow-head"><img src="', escape((22,  data.assetUrl('media/next-arrow-head.png') )), '" alt="Arrowhead" width="66" height="130"/></div>\n      <div class="arrow-text">', escape((23,  msg.continue() )), '</div>\n    </div>\n  ');25; } else {; buf.push('    <button id="continue-button" class="launch">\n      ', escape((26,  msg.continue() )), '\n    </button>\n  ');28; }; buf.push('');28; }; buf.push(''); })();
 } 
 return buf.join('');
 };
@@ -8457,7 +9995,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":36,"ejs":38}],25:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"ejs":39}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8478,7 +10016,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],26:[function(require,module,exports){
+},{"ejs":39}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8499,7 +10037,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":36,"ejs":38}],27:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"ejs":39}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8522,7 +10060,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":36,"ejs":38}],28:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"ejs":39}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8543,7 +10081,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":36,"ejs":38}],29:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"ejs":39}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8560,7 +10098,7 @@ with (locals || {}) { (function(){
   var msg = require('../../locale/ru_ru/common');
   var hideRunButton = locals.hideRunButton || false;
 ; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');17; };; buf.push('\n');18; // A spot for the server to inject some HTML for help content.
-var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span id="blockCounter">', escape((67,  msg.workspaceHeader() )), '</span>\n      <div id="blockUsed" class=', escape((68,  data.blockCounterClass )), '>\n        ', escape((69,  data.blockUsed )), '\n      </div>\n      <span>&nbsp;/</span>\n      <span id="idealBlockNumber">', escape((72,  data.idealBlockNumber )), '</span>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((74,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');80; codeArea() ; buf.push('\n'); })();
+var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span>', escape((67,  msg.workspaceHeader())), ' </span>\n      <div id="blockCounter">\n        <div id="blockUsed" class=', escape((69,  data.blockCounterClass )), '>\n          ', escape((70,  data.blockUsed )), '\n        </div>\n        <span>&nbsp;/</span>\n        <span id="idealBlockNumber">', escape((73,  data.idealBlockNumber )), '</span>\n      </div>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((76,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');82; codeArea() ; buf.push('\n'); })();
 } 
 return buf.join('');
 };
@@ -8568,7 +10106,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":36,"ejs":38}],30:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"ejs":39}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8590,7 +10128,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],31:[function(require,module,exports){
+},{"ejs":39}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8611,7 +10149,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":36,"ejs":38}],32:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"ejs":39}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8632,7 +10170,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/ru_ru/common":36,"ejs":38}],33:[function(require,module,exports){
+},{"../../locale/ru_ru/common":37,"ejs":39}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -8653,7 +10191,9 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":38}],34:[function(require,module,exports){
+},{"ejs":39}],35:[function(require,module,exports){
+var _ = require('./lodash');
+
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -8745,7 +10285,23 @@ exports.executeIfConditional = function (conditional, fn) {
   };
 };
 
-},{}],35:[function(require,module,exports){
+/**
+ * Removes all single and double quotes from a string
+ * @param inputString
+ * @returns {string} string without quotes
+ */
+exports.stripQuotes = function(inputString) {
+  return inputString.replace(/["']/g, "");
+};
+
+/**
+ * Defines an inheritance relationship between parent class and this class.
+ */
+Function.prototype.inherits = function (parent) {
+  this.prototype = _.create(parent.prototype, { constructor: parent });
+};
+
+},{"./lodash":9}],36:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -8773,7 +10329,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ru = function (n) {
   if ((n % 10) == 1 && (n % 100) != 11) {
     return 'one';
@@ -8886,8 +10442,6 @@ exports.tooManyBlocksMsg = function(d){return "Эта головоломка м�
 
 exports.tooMuchWork = function(d){return "Ты заставил меня попотеть! Может, будешь стараться делать меньше попыток?"};
 
-exports.flappySpecificFail = function(d){return "Твой код выглядит не плохо - она будет взлетать при клике мышкой. Но тебе прийдется кликать мышкой много раз, чтобы достичь цели."};
-
 exports.toolboxHeader = function(d){return "Блоки"};
 
 exports.openWorkspace = function(d){return "Как это работает"};
@@ -8929,7 +10483,7 @@ exports.signup = function(d){return "Зарегистрируйтесь на в�
 exports.hintHeader = function(d){return "Подсказка:"};
 
 
-},{"messageformat":49}],37:[function(require,module,exports){
+},{"messageformat":50}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.ru = function (n) {
   if ((n % 10) == 1 && (n % 100) != 11) {
     return 'one';
@@ -8960,17 +10514,29 @@ exports.catText = function(d){return "Text"};
 
 exports.catVariables = function(d){return "Variables"};
 
+exports.changeScoreTooltip = function(d){return "Add or remove a point to the score."};
+
+exports.changeScoreTooltipK1 = function(d){return "Add a point to the score."};
+
 exports.continue = function(d){return "Продолжить"};
+
+exports.decrementPlayerScore = function(d){return "remove point"};
 
 exports.defaultSayText = function(d){return "type here"};
 
 exports.finalLevel = function(d){return "Поздравляю! Последняя головоломка решена."};
 
-exports.incrementOpponentScore = function(d){return "increment opponent score"};
-
-exports.incrementScoreTooltip = function(d){return "Add one to the player or opponent score."};
-
 exports.incrementPlayerScore = function(d){return "increment player score"};
+
+exports.makeProjectileDisappear = function(d){return "disappear"};
+
+exports.makeProjectileBounce = function(d){return "bounce"};
+
+exports.makeProjectileFireball = function(d){return "make fireball"};
+
+exports.makeProjectileFlower = function(d){return "make flower"};
+
+exports.makeProjectileTooltip = function(d){return "Make the projectile that just collided disappear or bounce."};
 
 exports.makeYourOwn = function(d){return "Make Your Own Story"};
 
@@ -9066,11 +10632,19 @@ exports.playSoundWinPoint2 = function(d){return "проиграть звук п�
 
 exports.playSoundWood = function(d){return "проиграть звук дерева"};
 
+exports.positionOutTopLeft = function(d){return "to the above top left position"};
+
+exports.positionOutTopRight = function(d){return "to the above top right position"};
+
+exports.positionTopOutLeft = function(d){return "to the top outside left position"};
+
 exports.positionTopLeft = function(d){return "to the top left position"};
 
 exports.positionTopCenter = function(d){return "to the top center position"};
 
 exports.positionTopRight = function(d){return "to the top right position"};
+
+exports.positionTopOutRight = function(d){return "to the top outside right position"};
 
 exports.positionMiddleLeft = function(d){return "to the middle left position"};
 
@@ -9078,13 +10652,27 @@ exports.positionMiddleCenter = function(d){return "to the middle center position
 
 exports.positionMiddleRight = function(d){return "to the middle right position"};
 
+exports.positionBottomOutLeft = function(d){return "to the bottom outside left position"};
+
 exports.positionBottomLeft = function(d){return "to the bottom left position"};
 
 exports.positionBottomCenter = function(d){return "to the bottom center position"};
 
 exports.positionBottomRight = function(d){return "to the bottom right position"};
 
+exports.positionBottomOutRight = function(d){return "to the bottom outside right position"};
+
+exports.positionOutBottomLeft = function(d){return "to the below bottom left position"};
+
+exports.positionOutBottomRight = function(d){return "to the below bottom right position"};
+
 exports.positionRandom = function(d){return "to the random position"};
+
+exports.projectileFireball = function(d){return "fireball"};
+
+exports.projectileFlower = function(d){return "flower"};
+
+exports.projectileRandom = function(d){return "random"};
 
 exports.reinfFeedbackMsg = function(d){return "Вы можете нажать кнопку «Повторить», чтобы вернуться в игру."};
 
@@ -9111,6 +10699,8 @@ exports.saySprite6 = function(d){return "character 6 say"};
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
+
+exports.setBackground = function(d){return "set background"};
 
 exports.setBackgroundRandom = function(d){return "set random scene"};
 
@@ -9244,6 +10834,22 @@ exports.stopSprite6 = function(d){return "stop actor 6"};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
+exports.throwSprite = function(d){return "throw"};
+
+exports.throwSprite1 = function(d){return "actor 1 throw"};
+
+exports.throwSprite2 = function(d){return "actor 2 throw"};
+
+exports.throwSprite3 = function(d){return "actor 3 throw"};
+
+exports.throwSprite4 = function(d){return "actor 4 throw"};
+
+exports.throwSprite5 = function(d){return "actor 5 throw"};
+
+exports.throwSprite6 = function(d){return "actor 6 throw"};
+
+exports.throwTooltip = function(d){return "Throws a projectile from the specified actor."};
+
 exports.waitFor = function(d){return "wait for"};
 
 exports.waitSeconds = function(d){return "seconds"};
@@ -9312,6 +10918,8 @@ exports.whenSpriteCollided6 = function(d){return "when character 6"};
 
 exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
 
+exports.whenSpriteCollidedWith = function(d){return "touches"};
+
 exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
 
 exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
@@ -9324,6 +10932,18 @@ exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
 
 exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
 
+exports.whenSpriteCollidedWithFireball = function(d){return "touches fireball"};
+
+exports.whenSpriteCollidedWithFlower = function(d){return "touches flower"};
+
+exports.whenSpriteCollidedWithBottomEdge = function(d){return "touches bottom edge"};
+
+exports.whenSpriteCollidedWithLeftEdge = function(d){return "touches left edge"};
+
+exports.whenSpriteCollidedWithRightEdge = function(d){return "touches right edge"};
+
+exports.whenSpriteCollidedWithTopEdge = function(d){return "touches top edge"};
+
 exports.whenUp = function(d){return "when Up arrow"};
 
 exports.whenUpTooltip = function(d){return "Execute the actions below when the Up arrow button is pressed."};
@@ -9331,7 +10951,7 @@ exports.whenUpTooltip = function(d){return "Execute the actions below when the U
 exports.yes = function(d){return "Да"};
 
 
-},{"messageformat":49}],38:[function(require,module,exports){
+},{"messageformat":50}],39:[function(require,module,exports){
 
 /*!
  * EJS
@@ -9690,7 +11310,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":39,"./utils":40,"fs":41,"path":43}],39:[function(require,module,exports){
+},{"./filters":40,"./utils":41,"fs":42,"path":44}],40:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -9893,7 +11513,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 
 /*!
  * EJS
@@ -9919,9 +11539,9 @@ exports.escape = function(html){
 };
  
 
-},{}],41:[function(require,module,exports){
-
 },{}],42:[function(require,module,exports){
+
+},{}],43:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -9976,7 +11596,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10204,7 +11824,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":42}],44:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":43}],45:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -10715,7 +12335,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10801,7 +12421,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10888,13 +12508,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":45,"./encode":46}],48:[function(require,module,exports){
+},{"./decode":46,"./encode":47}],49:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -11527,7 +13147,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":44,"querystring":47}],49:[function(require,module,exports){
+},{"punycode":45,"querystring":48}],50:[function(require,module,exports){
 /**
  * messageformat.js
  *

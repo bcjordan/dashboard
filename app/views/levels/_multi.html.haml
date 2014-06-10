@@ -15,8 +15,10 @@
       - data['answers'].each_with_index do |answer, i|
         - correct = answer["correct"]
         .item
-          .item-radio
+          .item-radio{id: "radio_#{i}"}
             %input{id: "choice_#{i}", name: "vote", type: "radio", value: "#{i}", onchange: "radioChanged(#{i})", correct: "#{correct}"}
+          .item-cross{id: "cross_#{i}", style: "display: none"}
+            %b X
           .item-label{style: "height: #{height}"}
             %label{for: "choice_#{i}"}!= multi_t(answer['text'])
 
@@ -34,29 +36,63 @@
   .clear
 
   %div{:style=>'display:none'}
-    #dialogcontent.modal-content
-      %p.dialog-title
-        =t("multi.wrong_title")
-      %p
-        =t("multi.wrong_body")
-      .farSide
-        %button#ok-button.secondary
-          =t("dialog.ok")
+    #error-dialogcontent
+      .modal-content
+        %p.dialog-title
+          =t("multi.wrong_title")
+        %p
+          =t("multi.wrong_body")
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
+    #pre-dialogcontent
+      - if data['pre_image']
+        .modal-image{style: "margin-top: 0px"}
+          != multi_t(data['pre_image'])
+      .modal-content
+        %p.dialog-title
+          != multi_t(data['pre_title']) if data['pre_title']
+        %p
+          != multi_t(data['pre_body']) if data['pre_body']
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
+    #success-dialogcontent
+      .modal-content
+        %p.dialog-title
+          =t("multi.correct_title")
+        %p
+          =t("multi.correct_body")
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
 
 :javascript
 
   var selection = "none";   // "none", "wrong", "right"
+  var selectionIndex = -1;
   var buttonEnabled = true;  // avoid multiple simultaneous submissions
+  var dialogType = null; 
 
   function radioChanged(index) 
   {
     enableButton(true);
     selection = $("#choice_" + index).attr("correct") == "true" ? "right" : "wrong";
+    selectionIndex = index;
   }
 
   $(function() 
   {
     enableButton(false);
+
+    if ("#{data['pre_title']}" != "")
+    {
+      setTimeout(function() {
+        showDialog("pre");
+        }, 1000);
+    }
   });
 
   function enableButton(enable)
@@ -69,12 +105,22 @@
       $('.submitButton').addClass("disabled");
   }
 
-  function showDialog()
+  function dialogHidden()
   {
-    var dialog = new Dialog({ body: "" });
+    if (dialogType == "success" && nextRedirect)
+    {
+      window.location.href = nextRedirect;
+    }
+  }
+
+  function showDialog(type)
+  {
+    dialogType = type;
+
+    var dialog = new Dialog({ body: "", onHidden: dialogHidden });
 
     // use our prefabricated dialog content
-    $(".modal-body").append($("#dialogcontent").clone(true));
+    $(".modal-body").append($("#" + type + "-dialogcontent").clone(true));
 
     // Standard css hack to center a div within the viewport
     var full_dialog = $(".dash_modal");
@@ -101,7 +147,9 @@
 
       if (selection == "wrong") 
       {
-        showDialog();
+        showDialog("error");
+        $("#radio_" + selectionIndex).hide();
+        $("#cross_" + selectionIndex).show();
       }
 
       if (selection != "none")
@@ -126,7 +174,7 @@
             } 
             else if (nextRedirect) 
             {
-              window.location.href = nextRedirect;
+              showDialog("success");
             }
           }
         });

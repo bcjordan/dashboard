@@ -203,4 +203,12 @@ module LevelsHelper
     string_or_image('match', text)
   end
 
+  def level_title
+    if (script = @script_level.try(:script)) && !(script.default_script?)
+      "#{data_t_suffix('script.name', script.name, 'desc')}: #{@script_level.name} ##{@script_level.stage_or_game_position}"
+    else
+      "#{data_t('game.name', @game.name)} ##{@script_level.try(:game_chapter) || @level.level_num} "
+    end
+  end
+
 end

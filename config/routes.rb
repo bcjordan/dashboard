@@ -11,13 +11,15 @@ Dashboard::Application.routes.draw do
   end
   resources :concepts
   resources :activities
+
+  resources :teacher, only: [:index]
   resources :sections do # TODO: do this within a teacher scope
     member do
       get 'edit_students'
       patch 'update_students'
     end
   end
-  resources :teacher, only: [:index]
+  resources :users, only: [:show], path: '/students'
 
   resources :level_sources, path: '/sh/', only: [:show, :edit] do
     member do

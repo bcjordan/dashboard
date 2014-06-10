@@ -38,9 +38,9 @@ class SectionsController < ApplicationController
     # remove blank form rows
     filtered_section_params[:students_attributes].reject! {|student| student.values.all?(&:blank?)}
 
-    # add provider::manual so email is not required
+    # add provider::sponsored so email and username are not required
     filtered_section_params[:students_attributes].each do |student|
-      student[:provider] = User::PROVIDER_MANUAL
+      student[:provider] = User::PROVIDER_SPONSORED
     end
 
     respond_to do |format|
