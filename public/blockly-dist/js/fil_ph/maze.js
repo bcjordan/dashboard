@@ -5195,8 +5195,8 @@ Bee.prototype.reset = function () {
   this.nectar_ = 0;
   // represents the total nectar collected
   this.totalNectar_ = 0;
-  this.updateNectarImages_();
-  this.updateHoneyImages_();
+  this.maze_.gridItemDrawer.updateNectarCounter(this.nectar_);
+  this.maze_.gridItemDrawer.updateHoneyCounter(this.honey_);
 };
 
 /**
@@ -5325,47 +5325,10 @@ Bee.prototype.animateGetNectar = function () {
   this.gotNectarAt(row, col);
 
   this.maze_.gridItemDrawer.updateItemImage(row, col);
-  this.updateNectarImages_();
+  this.maze_.gridItemDrawer.updateNectarCounter(this.nectar_);
 
   // play a sound?
 };
-
-Bee.prototype.updateNectarImages_ = function () {
-  var self = this;
-
-  var svg = document.getElementById('svgMaze');
-  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
-
-  // create any needed images
-  for (var i = this.nectarImages_.length; i < this.nectar_; i++) {
-    // Create clip path.
-    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-    clip.setAttribute('id', 'nectarClip' + (i + 1));
-    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
-    rect.setAttribute('x', 0);
-    rect.setAttribute('y', 0);
-    rect.setAttribute('width', '100%');
-    rect.setAttribute('height', 50);
-    clip.appendChild(rect);
-    svg.insertBefore(clip, pegmanElement);
-
-    this.nectarImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
-    this.nectarImages_[i].setAttribute('id', 'nectar' + (i + 1));
-    this.nectarImages_[i].setAttribute('width', 50);
-    this.nectarImages_[i].setAttribute('height', 50);
-    this.nectarImages_[i].setAttribute('x', i * 50);
-    this.nectarImages_[i].setAttribute('y', 0);
-    this.nectarImages_[i].setAttribute('clip-path', 'url(#nectarClip' + (i + 1) + ')');
-    this.nectarImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      this.skin_.nectar);
-    svg.insertBefore(this.nectarImages_[i], pegmanElement);
-  }
-
-  this.nectarImages_.forEach(function (image, index) {
-    image.setAttribute('display', index < self.nectar_ ? 'block' : 'none');
-  });
-};
-
 
 Bee.prototype.animateMakeHoney = function () {
   var col = this.maze_.pegmanX;
@@ -5380,44 +5343,8 @@ Bee.prototype.animateMakeHoney = function () {
 
   this.maze_.gridItemDrawer.updateItemImage(row, col);
 
-  this.updateNectarImages_();
-  this.updateHoneyImages_();
-};
-
-Bee.prototype.updateHoneyImages_ = function () {
-  var self = this;
-
-  var svg = document.getElementById('svgMaze');
-  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
-
-  // create any needed images
-  for (var i = this.honeyImages_.length; i < this.honey_; i++) {
-    // Create clip path.
-    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-    clip.setAttribute('id', 'honeyClip' + (i + 1));
-    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
-    rect.setAttribute('x', 0);
-    rect.setAttribute('y', 50);
-    rect.setAttribute('width', '100%');
-    rect.setAttribute('height', 50);
-    clip.appendChild(rect);
-    svg.insertBefore(clip, pegmanElement);
-
-    this.honeyImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
-    this.honeyImages_[i].setAttribute('id', 'honey' + (i + 1));
-    this.honeyImages_[i].setAttribute('width', 50);
-    this.honeyImages_[i].setAttribute('height', 50);
-    this.honeyImages_[i].setAttribute('x', i * 50);
-    this.honeyImages_[i].setAttribute('y', 50);
-    this.honeyImages_[i].setAttribute('clip-path', 'url(#honeyClip' + (i + 1) + ')');
-    this.honeyImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      this.skin_.honey);
-    svg.insertBefore(this.honeyImages_[i], pegmanElement);
-  }
-
-  this.honeyImages_.forEach(function (image, index) {
-    image.setAttribute('display', index < self.honey_ ? 'block' : 'none');
-  });
+  this.maze_.gridItemDrawer.updateNectarCounter(this.nectar_);
+  this.maze_.gridItemDrawer.updateHoneyCounter(this.honey_);
 };
 
 /**
@@ -5448,13 +5375,17 @@ require('../utils');
  * @param initialDirtMap The state of the dirtMap at start time.
  * @param flowerType How flowers behave for this level
  */
-
- // todo - send it a Bee instead of an initialDirtMap?
 function BeeItemDrawer(dirtMap, skin, initialDirtMap, flowerType) {
-  // todo - could i just use the dirtMap at creation time as initialDirtMap?
   this.__base = this.constructor.prototype;
 
+  flowerType = flowerType || 'redWithNectar';
+
   DirtDrawer.call(this, dirtMap, '');
+
+  this.honeyPath_ = skin.honey;
+  this.nectarPath_ = skin.redFlower;
+  this.honeyImages_ = [];
+  this.nectarImages_ = [];
 
   this.initialDirt_ = initialDirtMap;
   this.flowerType_ = flowerType;
@@ -5476,6 +5407,7 @@ function BeeItemDrawer(dirtMap, skin, initialDirtMap, flowerType) {
     case 'purpleNectarHidden':
       this.imageInfo_.href = skin.purpleFlowerWithoutNectar;
       this.imageInfo_.unclippedWidth = 650;
+      this.nectarPath_ = skin.purpleFlower; // todo after skin updates
       break;
     // Any flower or hive is displayed as a flowercomb, regardless of nectar count.
     case 'hiddenFlower':
@@ -5516,6 +5448,76 @@ BeeItemDrawer.prototype.updateItemImage = function (row, col) {
     case 'redWithNectar':
     default:
       this.__base.updateItemImage.apply(this, arguments);
+  }
+};
+
+BeeItemDrawer.prototype.updateHoneyCounter = function (honeyCount) {
+  var self = this;
+
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.honeyImages_.length; i < honeyCount; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'honeyClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 50);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.honeyImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.honeyImages_[i].setAttribute('id', 'honey' + (i + 1));
+    this.honeyImages_[i].setAttribute('width', 50);
+    this.honeyImages_[i].setAttribute('height', 50);
+    this.honeyImages_[i].setAttribute('x', i * 50);
+    this.honeyImages_[i].setAttribute('y', 50);
+    this.honeyImages_[i].setAttribute('clip-path', 'url(#honeyClip' + (i + 1) + ')');
+    this.honeyImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.honeyPath_);
+    svg.insertBefore(this.honeyImages_[i], pegmanElement);
+  }
+
+  for (i = 0; i < this.honeyImages_.length; i++) {
+    this.honeyImages_[i].setAttribute('display', i < honeyCount ? 'block' : 'none');
+  }
+};
+
+BeeItemDrawer.prototype.updateNectarCounter = function (nectarCount) {
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.nectarImages_.length; i < nectarCount; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'nectarClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 0);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.nectarImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.nectarImages_[i].setAttribute('id', 'nectar' + (i + 1));
+    this.nectarImages_[i].setAttribute('width', 50);
+    this.nectarImages_[i].setAttribute('height', 50);
+    this.nectarImages_[i].setAttribute('x', i * 50);
+    this.nectarImages_[i].setAttribute('y', 0);
+    this.nectarImages_[i].setAttribute('clip-path', 'url(#nectarClip' + (i + 1) + ')');
+    this.nectarImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.nectarPath_);
+    svg.insertBefore(this.nectarImages_[i], pegmanElement);
+  }
+
+  for (i = 0; i < this.nectarImages_.length; i++) {
+    this.nectarImages_[i].setAttribute('display', i < nectarCount ? 'block' : 'none');
   }
 };
 
@@ -7310,7 +7312,7 @@ module.exports = {
     'scale': {
       'snapRadius': 2.0
     },
-    flowerType: 'purpleNectarHidden',
+    flowerType: 'redWithNectar',
     honeyGoal: 3,
     // nectarGoal: 2,
     step: true,
@@ -9659,7 +9661,8 @@ var CONFIGS = {
   bee: {
     obstacleAnimation: '',
     dirt: 'dirt.png',
-    nectar: 'nectar.png',
+    redFlower: 'redFlower.png',
+    purpleFlower: 'purpleFlower.png',
     honey: 'honey.png',
     flowerComb: 'flowercomb.png',
     redFlowerWithNectar: 'redFlowerWithNectar.png',
