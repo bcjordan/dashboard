@@ -48,6 +48,20 @@ class GalleryActivitiesControllerTest < ActionController::TestCase
     assert_response :created
   end
 
+  test "should return existing gallery_activity if exists" do
+    sign_in @user
+
+    gallery_activity = GalleryActivity.create!(activity_id: @new_activity.id, user_id: @user.id)
+
+    assert_no_difference('GalleryActivity.count') do
+      post :create, gallery_activity: { activity_id: @new_activity.id }, format: :json
+    end
+
+    assert_equal gallery_activity, assigns(:gallery_activity)
+
+    assert_response :created
+  end
+
   test "should destroy gallery_activity" do
     sign_in @user
 

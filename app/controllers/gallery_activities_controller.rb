@@ -15,16 +15,17 @@ class GalleryActivitiesController < ApplicationController
   # POST /gallery_activities
   # POST /gallery_activities.json
   def create
-    @gallery_activity = GalleryActivity.where(gallery_activity_params).first_or_initialize
+    retryable on: Mysql2::Error, matching: /Duplicate entry/ do # catch race conditions between first_or_intialize and save
+      @gallery_activity = GalleryActivity.where(gallery_activity_params).first_or_initialize
+      authorize! :save_to_gallery, @gallery_activity.activity
 
-    authorize! :save_to_gallery, @gallery_activity.activity
-
-    respond_to do |format|
-      if @gallery_activity.save
-        format.json { render action: 'show', status: :created, location: @gallery_activity }
-      else
-        # right now this never happens because we end up raising an exception in one of the authorization checks
-        format.json { render json: @gallery_activity.errors, status: :unprocessable_entity }
+      respond_to do |format|
+        if @gallery_activity.save
+          format.json { render action: 'show', status: :created, location: @gallery_activity }
+        else
+          # right now this never happens because we end up raising an exception in one of the authorization checks
+          format.json { render json: @gallery_activity.errors, status: :unprocessable_entity }
+        end
       end
     end
   end
