@@ -2039,7 +2039,7 @@ exports.define = function(name) {
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash include="debounce,reject,map,value,range,without,sample" --output build/js/lodash.js`
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample,create" --output build/js/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3398,6 +3398,21 @@ exports.define = function(name) {
     'loop': 'if (callback(iterable[index], index, collection) === false) return result'
   };
 
+  /** Reusable iterator options for `assign` and `defaults` */
+  var defaultsIteratorOptions = {
+    'args': 'object, source, guard',
+    'top':
+      'var args = arguments,\n' +
+      '    argsIndex = 0,\n' +
+      "    argsLength = typeof guard == 'number' ? 2 : args.length;\n" +
+      'while (++argsIndex < argsLength) {\n' +
+      '  iterable = args[argsIndex];\n' +
+      '  if (iterable && objectTypes[typeof iterable]) {',
+    'keys': keys,
+    'loop': "if (typeof result[index] == 'undefined') result[index] = iterable[index]",
+    'bottom': '  }\n}'
+  };
+
   /** Reusable iterator options for `forIn` and `forOwn` */
   var forOwnIteratorOptions = {
     'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
@@ -3421,6 +3436,85 @@ exports.define = function(name) {
   var baseEach = createIterator(eachIteratorOptions);
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Assigns own enumerable properties of source object(s) to the destination
+   * object. Subsequent sources will overwrite property assignments of previous
+   * sources. If a callback is provided it will be executed to produce the
+   * assigned values. The callback is bound to `thisArg` and invoked with two
+   * arguments; (objectValue, sourceValue).
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @alias extend
+   * @category Objects
+   * @param {Object} object The destination object.
+   * @param {...Object} [source] The source objects.
+   * @param {Function} [callback] The function to customize assigning values.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns the destination object.
+   * @example
+   *
+   * _.assign({ 'name': 'fred' }, { 'employer': 'slate' });
+   * // => { 'name': 'fred', 'employer': 'slate' }
+   *
+   * var defaults = _.partialRight(_.assign, function(a, b) {
+   *   return typeof a == 'undefined' ? b : a;
+   * });
+   *
+   * var object = { 'name': 'barney' };
+   * defaults(object, { 'name': 'fred', 'employer': 'slate' });
+   * // => { 'name': 'barney', 'employer': 'slate' }
+   */
+  var assign = createIterator(defaultsIteratorOptions, {
+    'top':
+      defaultsIteratorOptions.top.replace(';',
+        ';\n' +
+        "if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {\n" +
+        '  var callback = baseCreateCallback(args[--argsLength - 1], args[argsLength--], 2);\n' +
+        "} else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {\n" +
+        '  callback = args[--argsLength];\n' +
+        '}'
+      ),
+    'loop': 'result[index] = callback ? callback(result[index], iterable[index]) : iterable[index]'
+  });
+
+  /**
+   * Creates an object that inherits from the given `prototype` object. If a
+   * `properties` object is provided its own enumerable properties are assigned
+   * to the created object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} prototype The object to inherit from.
+   * @param {Object} [properties] The properties to assign to the object.
+   * @returns {Object} Returns the new object.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * function Circle() {
+   *   Shape.call(this);
+   * }
+   *
+   * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
+   *
+   * var circle = new Circle;
+   * circle instanceof Circle;
+   * // => true
+   *
+   * circle instanceof Shape;
+   * // => true
+   */
+  function create(prototype, properties) {
+    var result = baseCreate(prototype);
+    return properties ? assign(result, properties) : result;
+  }
 
   /**
    * Iterates over own and inherited enumerable properties of an object,
@@ -4531,8 +4625,10 @@ exports.define = function(name) {
 
   /*--------------------------------------------------------------------------*/
 
+  lodash.assign = assign;
   lodash.bind = bind;
   lodash.chain = chain;
+  lodash.create = create;
   lodash.createCallback = createCallback;
   lodash.debounce = debounce;
   lodash.filter = filter;
@@ -4552,6 +4648,7 @@ exports.define = function(name) {
   // add aliases
   lodash.collect = map;
   lodash.each = forEach;
+  lodash.extend = assign;
   lodash.methods = functions;
   lodash.select = filter;
 
@@ -8545,6 +8642,8 @@ var getFeedbackImage = function() {
 };
 
 },{"../../locale/zh_cn/turtle":39,"../base":2,"../codegen":6,"../skins":12,"../templates/page.html":20,"./api":26,"./controls.html":28,"./core":29,"./levels":30}],36:[function(require,module,exports){
+var _ = require('./lodash');
+
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -8645,7 +8744,14 @@ exports.stripQuotes = function(inputString) {
   return inputString.replace(/["']/g, "");
 };
 
-},{}],37:[function(require,module,exports){
+/**
+ * Defines an inheritance relationship between parent class and this class.
+ */
+Function.prototype.inherits = function (parent) {
+  this.prototype = _.create(parent.prototype, { constructor: parent });
+};
+
+},{"./lodash":10}],37:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
