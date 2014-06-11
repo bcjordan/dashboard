@@ -762,6 +762,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -2440,21 +2452,10 @@ function checkForSuccess() {
   if (success) {
     Blockly.removeChangeListener(Jigsaw.successListener);
 
-    Jigsaw.result = ResultType.SUCCESS;
+    Jigsaw.result = BlocklyApps.ResultType.SUCCESS;
     Jigsaw.onPuzzleComplete();
   }
 }
-
-/**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
 
 /**
  * App specific displayFeedback function that calls into
@@ -2493,7 +2494,7 @@ Jigsaw.onPuzzleComplete = function() {
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Jigsaw.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Jigsaw.result == BlocklyApps.ResultType.SUCCESS);
 
   Jigsaw.testResults = BlocklyApps.getTestResults();
 
@@ -2516,7 +2517,7 @@ Jigsaw.onPuzzleComplete = function() {
   BlocklyApps.report({
      app: 'Jigsaw',
      level: level.id,
-     result: Jigsaw.result === ResultType.SUCCESS,
+     result: Jigsaw.result === BlocklyApps.ResultType.SUCCESS,
      testResult: Jigsaw.testResults,
      program: encodeURIComponent(textBlocks),
      onComplete: Jigsaw.onReportComplete

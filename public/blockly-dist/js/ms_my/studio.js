@@ -762,6 +762,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -10847,17 +10859,6 @@ BlocklyApps.runButtonClick = function() {
 };
 
 /**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
-
-/**
  * App specific displayFeedback function that calls into
  * BlocklyApps.displayFeedback when appropriate
  */
@@ -10981,7 +10982,7 @@ var defineProcedures = function (blockType) {
  */
 Studio.execute = function() {
   var code;
-  Studio.result = ResultType.UNSET;
+  Studio.result = BlocklyApps.ResultType.UNSET;
   Studio.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Studio.waitingForReport = false;
   Studio.response = null;
@@ -11037,7 +11038,7 @@ Studio.execute = function() {
 
 Studio.onPuzzleComplete = function() {
   if (level.freePlay) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
   }
 
   // Stop everything on screen
@@ -11045,7 +11046,7 @@ Studio.onPuzzleComplete = function() {
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Studio.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Studio.result == BlocklyApps.ResultType.SUCCESS);
 
   // If the current level is a free play, always return the free play
   // result type
@@ -11080,7 +11081,7 @@ Studio.onPuzzleComplete = function() {
   BlocklyApps.report({
                      app: 'studio',
                      level: level.id,
-                     result: Studio.result === ResultType.SUCCESS,
+                     result: Studio.result === BlocklyApps.ResultType.SUCCESS,
                      testResult: Studio.testResults,
                      program: encodeURIComponent(textBlocks),
                      onComplete: Studio.onReportComplete
@@ -11949,23 +11950,23 @@ Studio.allFinishesComplete = function() {
 var checkFinished = function () {
   // if we have a succcess condition and have accomplished it, we're done and successful
   if (level.goal && level.goal.successCondition && level.goal.successCondition()) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
-    Studio.result = ResultType.FAILURE;
+    Studio.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
   if (Studio.allFinishesComplete()) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   if (Studio.timedOut()) {
-    Studio.result = ResultType.FAILURE;
+    Studio.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 

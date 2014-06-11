@@ -762,6 +762,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -8839,17 +8851,6 @@ Maze.resetButtonClick = function () {
 };
 
 /**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
-
-/**
  * App specific displayFeedback function that calls into
  * BlocklyApps.displayFeedback when appropriate
  */
@@ -8883,7 +8884,7 @@ Maze.execute = function(stepMode) {
 
   Maze.executionInfo = new ExecutionInfo({ticks: 100});
   var code = Blockly.Generator.workspaceToCode('JavaScript');
-  Maze.result = ResultType.UNSET;
+  Maze.result = BlocklyApps.ResultType.UNSET;
   Maze.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Maze.waitingForReport = false;
   Maze.animating_ = false;
@@ -8927,39 +8928,39 @@ Maze.execute = function(stepMode) {
     if (!Maze.executionInfo.isTerminated() && !Maze.checkSuccess()) {
       // If did not finish, shedule a failure.
       Maze.executionInfo.queueAction('finish', null);
-      Maze.result = ResultType.FAILURE;
+      Maze.result = BlocklyApps.ResultType.FAILURE;
       stepSpeed = 150;
     } else {
       switch (Maze.executionInfo.terminationValue()) {
         case Infinity:
           // Detected an infinite loop.  Animate what we have as quickly as
           // possible
-          Maze.result = ResultType.TIMEOUT;
+          Maze.result = BlocklyApps.ResultType.TIMEOUT;
           stepSpeed = 0;
           break;
         case true:
-          Maze.result = ResultType.SUCCESS;
+          Maze.result = BlocklyApps.ResultType.SUCCESS;
           stepSpeed = 100;
           break;
         case false:
-          Maze.result = ResultType.ERROR;
+          Maze.result = BlocklyApps.ResultType.ERROR;
           stepSpeed = 150;
           break;
         default:
-          Maze.result = ResultType.ERROR;
+          Maze.result = BlocklyApps.ResultType.ERROR;
           break;
       }
     }
   } catch (e) {
     // Syntax error, can't happen.
-    Maze.result = ResultType.ERROR;
+    Maze.result = BlocklyApps.ResultType.ERROR;
     console.error("Unexpected exception: " + e + "\n" + e.stack);
     return;
   }
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Maze.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Maze.result == BlocklyApps.ResultType.SUCCESS);
 
   Maze.testResults = BlocklyApps.getTestResults();
 
@@ -8982,7 +8983,7 @@ Maze.execute = function(stepMode) {
   BlocklyApps.report({
     app: 'maze',
     level: level.id,
-    result: Maze.result === ResultType.SUCCESS,
+    result: Maze.result === BlocklyApps.ResultType.SUCCESS,
     testResult: Maze.testResults,
     program: encodeURIComponent(textBlocks),
     onComplete: Maze.onReportComplete
@@ -9055,7 +9056,7 @@ Maze.performStep = function(stepMode) {
     Maze.animating_ = false;
     Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
-      Maze.result === ResultType.TIMEOUT ? 0 : 1000);
+      Maze.result === BlocklyApps.ResultType.TIMEOUT ? 0 : 1000);
     return;
   }
 
