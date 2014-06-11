@@ -5,6 +5,11 @@ class Karel < Maze
     ['farmer', 'farmer_night', 'bee']
   end
 
+  # List of possible flower types
+  def self.flower_types
+    ['redWithNectar', 'redNectarHidden', 'purpleNectarHidden', 'hiddenFlower']
+  end
+
   # If type is "Karel" return a 3 entry hash with keys 'maze', 'initial_dirt',
   # and 'final_dirt', the keys map to 2d arrays blockly can render.
   # final_dirt is always zeroed out until it is removed from Blockly.
@@ -49,6 +54,7 @@ class Karel < Maze
     <block type="maze_nectar"></block>
     <block type="maze_honey"></block>
     <block type="karel_if"></block>
+    <block type="bee_if"></block>
     <block type="maze_untilBlocked"></block>
     <block type="maze_untilBlockedOrNotClear"></block>
     <block type="math_number">
