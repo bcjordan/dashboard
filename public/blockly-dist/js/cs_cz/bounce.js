@@ -762,6 +762,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -2323,7 +2335,7 @@ Bounce.onTick = function() {
         if (Bounce.respawnBalls) {
           Bounce.launchBall(i);
         } else if (Bounce.failOnBallExit) {
-          Bounce.result = ResultType.FAILURE;
+          Bounce.result = BlocklyApps.ResultType.FAILURE;
           Bounce.onPuzzleComplete();
         }
       }
@@ -2750,17 +2762,6 @@ BlocklyApps.runButtonClick = function() {
 };
 
 /**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
-
-/**
  * App specific displayFeedback function that calls into
  * BlocklyApps.displayFeedback when appropriate
  */
@@ -2797,7 +2798,7 @@ Bounce.onReportComplete = function(response) {
  */
 Bounce.execute = function() {
   var code = Blockly.Generator.workspaceToCode('JavaScript', 'bounce_whenRun');
-  Bounce.result = ResultType.UNSET;
+  Bounce.result = BlocklyApps.ResultType.UNSET;
   Bounce.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Bounce.waitingForReport = false;
   Bounce.response = null;
@@ -2909,7 +2910,7 @@ Bounce.execute = function() {
 
 Bounce.onPuzzleComplete = function() {
   if (level.freePlay) {
-    Bounce.result = ResultType.SUCCESS;
+    Bounce.result = BlocklyApps.ResultType.SUCCESS;
   }
 
   // Stop everything on screen
@@ -2917,7 +2918,7 @@ Bounce.onPuzzleComplete = function() {
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Bounce.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Bounce.result == BlocklyApps.ResultType.SUCCESS);
 
   // If the current level is a free play, always return the free play
   // result type
@@ -2952,7 +2953,7 @@ Bounce.onPuzzleComplete = function() {
   BlocklyApps.report({
                      app: 'bounce',
                      level: level.id,
-                     result: Bounce.result === ResultType.SUCCESS,
+                     result: Bounce.result === BlocklyApps.ResultType.SUCCESS,
                      testResult: Bounce.testResults,
                      program: encodeURIComponent(textBlocks),
                      onComplete: Bounce.onReportComplete
@@ -3152,23 +3153,23 @@ Bounce.allFinishesComplete = function() {
 var checkFinished = function () {
   // if we have a succcess condition and have accomplished it, we're done and successful
   if (level.goal && level.goal.successCondition && level.goal.successCondition()) {
-    Bounce.result = ResultType.SUCCESS;
+    Bounce.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
-    Bounce.result = ResultType.FAILURE;
+    Bounce.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
   if (Bounce.allFinishesComplete()) {
-    Bounce.result = ResultType.SUCCESS;
+    Bounce.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   if (Bounce.timedOut()) {
-    Bounce.result = ResultType.FAILURE;
+    Bounce.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
