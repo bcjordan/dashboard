@@ -9623,7 +9623,7 @@ exports.Sprite.prototype.createElement = function (parentElement) {
 
 exports.Sprite.prototype.removeElement = function () {
   if (this.element) {
-    this.element.parentElement.removeChild(this.element);
+    this.element.parentNode.removeChild(this.element);
     this.element = null;
   }
 };
