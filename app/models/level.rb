@@ -51,6 +51,10 @@ class Level < ActiveRecord::Base
   def self.step_modes
   end
 
+  # Overriden by different level types.
+  def self.flower_types
+  end
+
   def self.custom_levels
     Naturally.sort_by(Level.where.not(user_id: nil), :name)
   end
