@@ -67,11 +67,6 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors.messages.length == 1
   end
 
-  test "cannot create user with no type" do
-    user = User.create(@good_data.merge({username: 'superreallydoublelongusername'}))
-    assert user.errors.messages.length == 1
-  end
-
   test "cannot create user with username with whitespace" do
     user = User.create(@good_data.merge({username: 'bo gus'}))
     assert user.errors.messages.length == 1
