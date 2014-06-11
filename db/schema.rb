@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140611195616) do
+ActiveRecord::Schema.define(version: 20140616231428) do
 
   create_table "activities", force: true do |t|
     t.integer  "user_id"
@@ -156,29 +156,15 @@ ActiveRecord::Schema.define(version: 20140611195616) do
 
   create_table "levels", force: true do |t|
     t.integer  "game_id"
-    t.string   "name",                                   null: false
-    t.string   "level_url"
+    t.string   "name",                     null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "level_num"
-    t.string   "skin"
     t.integer  "ideal_level_source_id"
     t.integer  "solution_level_source_id"
     t.integer  "user_id"
-    t.string   "instructions"
-    t.string   "maze",                     limit: 20000
-    t.integer  "x"
-    t.integer  "y"
-    t.string   "start_direction"
-    t.text     "start_blocks"
-    t.text     "toolbox_blocks"
     t.text     "properties"
     t.string   "type"
-    t.integer  "step_mode"
-    t.boolean  "is_k1"
-    t.integer  "nectar_goal"
-    t.integer  "honey_goal"
-    t.string   "flower_type",              limit: 20
   end
 
   add_index "levels", ["game_id"], name: "index_levels_on_game_id", using: :btree

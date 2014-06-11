@@ -1,0 +1,14 @@
+.field
+  = f.label :start_direction, 'Start Direction (in degrees)'
+  = f.number_field :start_direction, :in => 0...360, :value => @level.start_direction
+.field
+  = f.label :x
+  = f.number_field :x, :value => @level.x
+.field
+  = f.label :y
+  = f.number_field :y, :value => @level.y
+.field
+  = f.label :solution_blocks
+  = link_to "Edit Solution Blocks", game_level_edit_blocks_path(@game, @level, :solution_blocks)
+.field
+  = link_to "Edit Predraw Blocks", game_level_edit_blocks_path(@game, @level, :predraw_blocks)

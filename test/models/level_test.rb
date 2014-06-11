@@ -7,9 +7,8 @@ class LevelTest < ActiveSupport::TestCase
     @custom_turtle_data = {:solution_level_source_id=>4, :user_id=>1}
     @maze_data = {:game_id=>25, :name=>"__bob4", :level_num=>"custom", :skin=>"birds", :instructions=>"sdfdfs"}
     @custom_maze_data = @maze_data.merge(:user_id=>1)
-
-    @custom_level = Level.create(@custom_maze_data)
-    @level = Level.create(@maze_data)
+    @custom_level = Blockly.create(@custom_maze_data)
+    @level = Blockly.create(@maze_data)
   end
 
   test "throws argument error on bad data" do
@@ -28,13 +27,13 @@ class LevelTest < ActiveSupport::TestCase
   test "parses maze data" do
     csv = stub(:read => [['0', '1'], ['1', '2']])
     maze = Maze.parse_maze(Maze.load_maze(csv, 2).to_json, 2)
-    assert_equal({'maze' => [[0, 1], [1, 2]]}, maze)
+    assert_equal({'maze' => [[0, 1], [1, 2]].to_json}, maze)
   end
 
   test "parses karel data" do
     json = [[0,1,0],[2,'+5','-5'],[0,0,0]].to_json
     maze = Karel.parse_maze(json, 3)
-    assert_equal({'maze' => [[0, 1, 0], [2, 1, 1], [0, 0, 0]], 'initial_dirt' => [[0, 0, 0], [0, 5, -5], [0, 0, 0]], 'final_dirt' => [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}, maze)
+    assert_equal({'maze' => [[0, 1, 0], [2, 1, 1], [0, 0, 0]].to_json, 'initial_dirt' => [[0, 0, 0], [0, 5, -5], [0, 0, 0]].to_json, 'final_dirt' => [[0, 0, 0], [0, 0, 0], [0, 0, 0]].to_json}, maze)
   end
 
   test "cannot create two custom levels with same name" do
@@ -98,24 +97,40 @@ class LevelTest < ActiveSupport::TestCase
     assert_equal "controls_repeat_simplified", first_block.attributes["type"].value
   end
 
-  test "farmer improper mod migration" do
-    farmer = Karel.create(@maze_data.update(name: "heyho"))
-    farmer.properties["maze"] = [[2, 0], [0, 0]]
-    farmer.properties["initial_dirt"] = [[0, 95], [4, 0]]
-    farmer.save!
-    expected_maze = [[2, 1], [1, 0]]
-    expected_dirt = [[0, -5], [4, 0]]
-
-    require File.join(Rails.root, 'db', 'migrate', '20140515223058_fix_farmer_levels')
-    FixFarmerLevels.up
-    farmer.reload
-    assert_equal expected_maze, farmer.properties["maze"]
-    assert_equal expected_dirt, farmer.properties["initial_dirt"]
-  end
-
   test "include type in json" do
     maze = Maze.create(@maze_data)
     maze_from_json = Level.create(JSON.parse(maze.to_json))
     assert maze_from_json.is_a? Maze
   end
+
+  test 'serialize properties' do
+    level = Blockly.new
+    level.instructions = 'test!'
+    assert_equal 'test!', level.properties['instructions']
+    assert_equal level.instructions, level.properties['instructions']
+  end
+
+  test 'create with serialized properties' do
+    level = Blockly.create(instructions: 'test')
+    assert_equal 'test', level.instructions
+    level.instructions = 'test2'
+    assert_equal 'test2', level.instructions
+  end
+
+=begin
+  test "level column migration" do
+    level = Blockly.create(name: 'test-level-column-migration')
+    level.send(:write_attribute, :instructions, 'test12333')
+    puts "level1=#{level.as_json}"
+    level.save!
+    require File.join(Rails.root, 'db', 'migrate', '20140616231428_remove_level_data_columns')
+    RemoveLevelDataColumns.migrate(:up)
+    level.reload
+    puts "level2=#{level.as_json}"
+    RemoveLevelDataColumns.migrate(:down)
+    level.reload
+    puts "level3=#{level.as_json}"
+  end
+=end
+
 end

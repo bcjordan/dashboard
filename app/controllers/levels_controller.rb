@@ -36,7 +36,7 @@ class LevelsController < ApplicationController
   def edit
     @type_class = @level.type.try(:constantize)
     if @type_class == Maze || @type_class == Karel
-      @level[:maze] = @level.class.unparse_maze(@level.properties)
+      @level.maze = @level.class.unparse_maze(@level.properties)
     end
   end
 
@@ -154,6 +154,25 @@ class LevelsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def level_params
-      params[:level].permit([:maze, :name, :type, :level_url, :level_num, :skin, :instructions, :x, :y, :start_direction, :user, :step_mode, :is_k1, :nectar_goal, :honey_goal, :flower_type, {concept_ids: []}])
+      permitted_params = [
+        :maze,
+        :name,
+        :type,
+        :level_url,
+        :level_num,
+        :skin,
+        :instructions,
+        :x, :y,
+        :start_direction,
+        :user,
+        :step_mode,
+        :is_k1,
+        :nectar_goal,
+        :honey_goal,
+        :flower_type,
+        {concept_ids: []}
+      ]
+      permitted_params.concat(Level.serialized_properties)
+      params[:level].permit(permitted_params)
     end
 end

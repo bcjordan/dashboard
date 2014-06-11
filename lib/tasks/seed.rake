@@ -100,6 +100,12 @@ namespace :seed do
     end
   end
 
+  task import_custom_levels: [:set_force_custom_levels, :custom_levels]
+
+  task set_force_custom_levels: :environment do
+    ENV["FORCE_CUSTOM_LEVELS"] = '1'
+  end
+
   # Generate the database entry from the custom levels json file
   task custom_levels: :environment do
     if Rails.env != "staging" || ENV["FORCE_CUSTOM_LEVELS"]

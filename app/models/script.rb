@@ -134,16 +134,20 @@ class Script < ActiveRecord::Base
         (Concept.find_by_name(concept_name) || raise("missing concept '#{concept_name}'")).id
       end
 
+      # if :level_num is present, find/create the reference to the Blockly level.
       if row[:name].try(:start_with?, 'blockly:')
         row[:name], row[:game], row[:level_num] = row.delete(:name).split(':')
       end
 
-      # if :level_num is present, find/create the reference to the Blockly level.
-      level = row[:level_num] ?
-        Level.create_with(name: row.delete(:name)).find_or_create_by!(game: Game.find_by(name: row.delete(:game)), level_num: row[:level_num]) :
-        Level.find_by!(name: row.delete(:name))
+      row_data = row.dup
+      begin
+        level = row[:level_num] ?
+          Level.create_with(name: row.delete(:name), type:'Blockly').find_or_create_by!(game: Game.find_by(name: row.delete(:game)), level_num: row[:level_num]) :
+          Level.find_by!(name: row.delete(:name))
+      rescue ActiveRecord::RecordNotFound => e
+        raise e, "#{$!}, Level: #{row_data.to_json}, Script: #{script.name}", e.backtrace
+      end
 
-      raise "Level #{level.to_json}, does not have a game." if level.game.nil?
       stage = row.delete(:stage)
       level.update(row)
 

@@ -1,7 +1,6 @@
 # Maps to an individual Blockly level definition
 # "name" is unique in custom-built levels
 class Level < ActiveRecord::Base
-  serialize :properties, JSON
   belongs_to :game
   has_and_belongs_to_many :concepts
   has_many :script_levels, dependent: :destroy
@@ -10,11 +9,9 @@ class Level < ActiveRecord::Base
   validates_length_of :name, within: 1..70
   validates_uniqueness_of :name, case_sensitive: false, conditions: -> { where.not(user_id: nil) }
   after_save :write_custom_levels_to_file if Rails.env == "staging"
-  after_initialize :init
 
-  def init
-    self.properties  ||= {}
-  end
+  include SerializedProperties
+  serialize :properties, JSON
 
   # https://github.com/rails/rails/issues/3508#issuecomment-29858772
   # Include type in serialization.
@@ -59,19 +56,23 @@ class Level < ActiveRecord::Base
     Naturally.sort_by(Level.where.not(user_id: nil), :name)
   end
 
-  def write_custom_levels_to_file
+  def self.write_custom_levels
     File.open(Rails.root.join("config", "scripts", "custom_levels.json"), 'w+') do |file|
       levels = Level.custom_levels
       levels_json = levels.as_json
       levels_json.each do |level|
         %w(maze initial_dirt final_dirt).map do |maze_type|
-          level['properties'][maze_type] &&= level['properties'][maze_type].to_json
+          level['properties'][maze_type] = level['properties'][maze_type].to_json if level['properties'][maze_type] && level['properties'][maze_type].is_a?(Array)
         end
         level.delete 'id'
         level.reject! { |k, v| v.nil? }
       end
       file << JSON.pretty_generate(levels_json)
     end
+  end
+
+  def write_custom_levels_to_file
+    self.write_custom_levels
   end
 
   def self.update_unplugged

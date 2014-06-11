@@ -10,9 +10,10 @@ class ActivitiesControllerTest < ActionController::TestCase
 
     @admin = create(:admin)
 
-    @script_level_prev = ScriptLevel.find(1)
-    @script_level = ScriptLevel.find(2)
-    @script_level_next = ScriptLevel.find(3)
+    script_levels = Script.find(Script::TWENTY_HOUR_ID).script_levels
+    @script_level_prev = script_levels[0]
+    @script_level = @script_level_prev.next_level
+    @script_level_next = @script_level.next_level
     @script = @script_level.script
 
     @blank_image = File.read('test/fixtures/artist_image_blank.png', binmode: true)
@@ -122,7 +123,7 @@ class ActivitiesControllerTest < ActionController::TestCase
 
     assert_response :success
 
-    expected_response = {"previous_level"=>"/s/1/level/1",
+    expected_response = {"previous_level"=>"/s/1/level/#{@script_level_prev.id}",
                          "message"=>"try again",
                          "level_source"=>"http://test.host/sh/#{assigns(:level_source).id}",
                          "design"=>"white_background"}
@@ -148,7 +149,7 @@ class ActivitiesControllerTest < ActionController::TestCase
 
     assert_response :success
 
-    expected_response = {"previous_level"=>"/s/1/level/1",
+    expected_response = {"previous_level"=>"/s/1/level/#{@script_level_prev.id}",
                          "message"=>"try again",
                          "level_source"=>"http://test.host/sh/#{assigns(:level_source).id}",
                          "design"=>"white_background"}
@@ -476,7 +477,7 @@ class ActivitiesControllerTest < ActionController::TestCase
     assert_equal 10, session['lines']
     
     assert_response :success
-    expected_response = {"previous_level"=>"/s/1/level/1",
+    expected_response = {"previous_level"=>"/s/1/level/#{@script_level_prev.id}",
                          "message"=>"try again",
                          "level_source"=>"http://test.host/sh/#{assigns(:level_source).id}",
                          "design"=>"white_background"}

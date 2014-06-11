@@ -300,4 +300,47 @@ class LevelsControllerTest < ActionController::TestCase
     get :show, id: @level, game_id: @level.game
     assert_match /#{Regexp.quote(@level.level_num)}/, Nokogiri::HTML(@response.body).css('title').text.strip
   end
+
+  test "should update maze data properly" do
+    game = Game.find_by_name("CustomMaze")
+    post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :type => 'Maze'},
+      :game_id => game.id, :maze_source => fixture_file_upload("maze_level.csv", "r"), :size => 8
+
+    my_level = Level.where(name: 'NewCustomLevel').first
+    maze_json = JSON.parse(my_level.maze)
+    maze_json[0][0] = '2'; maze_json[2][0] = 3
+
+    patch :update, :level => {:maze => maze_json.to_json}, id: my_level, game_id: game.id
+
+    new_maze = JSON.parse(Level.where(name: 'NewCustomLevel').first.maze)
+    maze_json[0][0] = 2
+    assert_equal maze_json, new_maze
+  end
+
+  test "should update karel data properly" do
+    game = Game.find_by_name("CustomMaze")
+    maze_array = [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, '+5', 1, '-5', 0, 0],
+      [0, 0, 0, '+5', 0, '-5', 0, 0],
+      [0, 0, 0, '+5', 0, '-5', 0, 0],
+      [0, 0, 2, 1, 0, '-5', 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]]
+    post :create, :level => {:name => "NewCustomLevel", :instructions => "Some Instructions", :maze =>maze_array.to_json, :type => 'Karel'},
+      :game_id => game.id, :size => 8
+
+    my_level = Level.where(name: 'NewCustomLevel').first
+    maze_json = JSON.parse(my_level.maze)
+    maze_array[0][0] = '+2'; maze_array[2][0] = 1
+
+    patch :update, :level => {:maze => maze_array.to_json}, id: my_level, game_id: game.id
+
+    new_maze = JSON.parse(Level.where(name: 'NewCustomLevel').first.maze)
+    new_initial_dirt = JSON.parse(Level.where(name: 'NewCustomLevel').first.properties['initial_dirt'])
+    maze_json[0][0] = 1; maze_json[2][0] = 1
+    assert_equal maze_json, new_maze
+  end
+
 end

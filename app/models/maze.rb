@@ -1,7 +1,9 @@
 require "csv"
 
-class Maze < Level
+class Maze < Blockly
   before_save :update_maze
+
+  serialized_attrs :maze, :start_direction
 
   # Fix STI routing http://stackoverflow.com/a/9463495
   def self.model_name
@@ -44,9 +46,11 @@ class Maze < Level
   end
 
   def update_maze
-    if self.maze.present?
-      properties.update(self.class.parse_maze(self.maze, 8))
-      self.maze.clear
+    if read_attribute(:maze).present?
+      properties.update(self.class.parse_maze(read_attribute(:maze), 8))
+      write_attribute(:maze, nil)
+    elsif self.maze.present?
+      self.properties.update(self.class.parse_maze(maze, 8))
     end
   end
 
@@ -63,12 +67,14 @@ class Maze < Level
   #   array that Blockly can render.
   # Throws ArgumentError if there is a non integer value in the array.
   def self.parse_maze(maze_json, size)
-    { 'maze' => JSON.parse(maze_json).map { |row| row.map { |cell| Integer(cell) } }}
+    maze_json = maze_json.to_json if maze_json.is_a? Array
+    { 'maze' => JSON.parse(maze_json).map { |row| row.map { |cell| Integer(cell) } }.to_json}
   end
 
   # Returns an 'unparsed' array object from the parsed properties
   def self.unparse_maze(contents)
-    contents['maze'].to_json
+    maze = contents['maze']
+    maze.is_a?(Array) ? maze.to_json : maze
   end
 
   def common_blocks(type)

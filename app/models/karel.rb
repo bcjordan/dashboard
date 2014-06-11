@@ -1,4 +1,5 @@
 class Karel < Maze
+  serialized_attrs :nectar_goal, :honey_goal
 
   # List of possible skins, the first is used as a default.
   def self.skins
@@ -14,8 +15,9 @@ class Karel < Maze
   # and 'final_dirt', the keys map to 2d arrays blockly can render.
   # final_dirt is always zeroed out until it is removed from Blockly.
   def self.parse_maze(maze_json, size)
+    maze_json = maze_json.to_json if maze_json.is_a? Array
     maze = JSON.parse(maze_json)
-    map, initial_dirt, final_dirt = (0...3).map { Array.new(size) { Array.new(size, 0) }}
+    map, initial_dirt, final_dirt = (0...3).map { Array.new(maze.length) { Array.new(maze[0].length, 0) }}
     maze.each_with_index do |row, x|
       row.each_with_index do |cell, y|
         # "+X" or "-X" cells define dirt
@@ -28,11 +30,15 @@ class Karel < Maze
       end
     end
 
-    { 'maze' => map, 'initial_dirt' => initial_dirt, 'final_dirt' => final_dirt }
+    { 'maze' => map.to_json, 'initial_dirt' => initial_dirt.to_json, 'final_dirt' => final_dirt.to_json }
   end
 
   def self.unparse_maze(contents)
-    maze, initial_dirt, final_dirt = [contents['maze'], contents['initial_dirt'], contents['final_dirt']]
+    maze, initial_dirt, final_dirt = %w(maze initial_dirt final_dirt).map do |x|
+      data = contents[x]
+      data = JSON.parse(data) if data.is_a?(String)
+      data
+    end
     output = Array.new(maze.size) { Array.new(maze[0].size, 0) }
     maze.each_with_index do |row, x|
       row.each_with_index do |map, y|

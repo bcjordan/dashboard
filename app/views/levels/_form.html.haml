@@ -1,177 +1,25 @@
 = form_for [@game, @level], method: @level.new_record? ? :post : :patch, remote: true do |f|
-  - if @level.errors.any?
-    #error_explanation
-      %h2
-        = pluralize(@level.errors.count, "error")
-        prohibited this level from being saved:
-      %ul
-        - @level.errors.full_messages.each do |msg|
-          %li= msg
   = f.hidden_field :type, value: @type_class.to_s.presence || @level.type
   .field
     = f.label :name
     = f.text_field :name, placeholder: 'Level Name'
   .field
-    = f.label :instructions
-    = f.text_area :instructions, placeholder: 'Instructions', rows: 4
-  .field
-    = f.label :skin
-    = f.select :skin, options_for_select(@level.class.skins, @level.skin)
-  .field
-    - if @level.class.start_directions.present?
-      = f.label :start_direction
-      = f.select :start_direction, options_for_select(@level.class.start_directions, @level.start_direction)
-    - else
-      = f.label :start_direction, 'Start Direction (in degrees)'
-      = f.number_field :start_direction, :in => 0...360, :value => @level.start_direction
-  - if @level.type.try(:constantize) == Artist
-    .field
-      = f.label :x
-      = f.number_field :x, :value => @level.x
-    .field
-      = f.label :y
-      = f.number_field :y, :value => @level.y
-  - if @level.class.step_modes.present?
-    .field
-      = f.label :step_mode
-      = f.select :step_mode, options_for_select(@level.class.step_modes, @level.step_mode)
-  - if @level.is_a? Karel
-    .field
-      = f.label :flower_type, 'Flower Type (bee only)'
-      = f.select :flower_type, options_for_select(@level.class.flower_types, @level.flower_type)
-    .field
-      = f.label :nectar_goal, 'Nectar Goal (bee only)'
-      = f.number_field :nectar_goal, :value => @level.nectar_goal
-    .field
-      = f.label :honey_goal, 'Honey Goal (bee only)'
-      = f.number_field :honey_goal, :value => @level.honey_goal
-  .field
-    = f.label :is_k1, "Is K1 level?"
-    = f.check_box :is_k1
-  .field
     = f.label 'concepts'
-    = f.collection_select :concept_ids, Concept.cached, :id, :name, { :selected => @level.concept_ids }, { :multiple => true, :name => 'level[concept_ids][]', :style => 'height: 160px' }
-    %br/
-    (shift-click to select multiple)
-  - unless @level.new_record?
-    - if @level.is_a? Artist
-      .field
-        = link_to "Edit Solution Blocks", game_level_edit_blocks_path(@game, @level, :solution_blocks)
-    .field
-      = link_to "Edit Toolbox Blocks", game_level_edit_blocks_path(@game, @level, :toolbox_blocks)
-    .field
-      = link_to "Edit Start Blocks", game_level_edit_blocks_path(@game, @level, :start_blocks)
-    .field
-      = link_to "Edit Required Blocks", game_level_edit_blocks_path(@game, @level, :required_blocks)
-    .field
-      = link_to "Edit Predraw Blocks", game_level_edit_blocks_path(@game, @level, :predraw_blocks)
-  - if @level.is_a? Maze
-    = hidden_field_tag :size, 8
-    = f.hidden_field :maze
-    .field
-      = f.label 'level'
-      :css
-        .border { background-color: dimgray !important}
-        .path { background-color: darkgreen !important}
-        .start { background-color: firebrick !important}
-        .end {background-color: lime !important}
-        .obstacle {background-color: gold !important}
-        .dirt {background-color: #d1d567 !important}
-        tr { height: 40px; }
-        td.start {
-          background-image: url('/blockly/media/skins/birds/small_static_avatar.png');
-          background-size: 100% 100%;
-        }
-        td.end {
-          background-image: url('/blockly/media/skins/birds/goal.png');
-          background-size: 100% 100%;
-          background-repeat: no-repeat;
-        }
-        td.obstacle {
-          background-image: url('/blockly/media/skins/birds/obstacle.png');
-          background-size: 100% 100%;
-        }
-        td.dirt {
-          background-image: url('/blockly/media/skins/farmer/dirt.png');
-          background-size: 1100px 100%;
-          text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;
-        }
-        .htInvalid { background-color: orangered !important}
-        .htNumeric { text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF }
-      #mazeTable
-      .label
-        WHAT THE NUMBERS MEAN:
-        %ul(style="list-style-type:none;margin:0;")
-          %li(class='border') 0 = border/wall
-          %li(class='path') 1 = path
-          %li(class='start') 2 = start
-          %li(class='end') 3 = end (for Maze levels only)
-          %li(class='obstacle') 4 = obstacle
-        FARMER:
-        %ul(style="list-style-type:none;margin:0;")
-          %li -x .. +x = piles
-        BEE:
-        %ul(style="list-style-type:none;margin:0;")
-          %li +x = nectar. +99 = unlimited
-          %li -x = honey. -99 = unlimited
-
-      %script{:type => 'text/javascript',
-              :src  => '/assets/jquery.handsontable.full.js'}
-      %link{:rel => :stylesheet, :type => :'text/css', :href => '/assets/jquery.handsontable.full.css'}
-    :javascript
-      var data = eval(#{@level.maze.try(:to_json) || Array.new(8){Array.new(8){0}}.to_json})
-      function negativeValueRenderer(instance, td, row, col, prop, value, cellProperties) {
-        var dataValues = ['border','path','start','end','obstacle'];
-        if(value[0] == '+' || value[0] == '-') {
-            Handsontable.renderers.TextRenderer.apply(this, arguments);
-            td.className += ' dirt';
-            // index into the dirt png spritesheet
-            var dirtValue = parseInt(value);
-            var dirtIndex = 10 + dirtValue + (dirtValue < 0 ? 1 : 0);
-            $(td).css('background-position',(-dirtIndex * 50));
-        }
-        else if (parseInt(value) < 5 && parseInt(value) >= 0) {
-            Handsontable.renderers.NumericRenderer.apply(this, arguments);
-            td.className += ' ' + dataValues[parseInt(value)];
-        }
-      }
-      $("#mazeTable").handsontable(
-      { data: data, startRows: 8, startCols: 8, maxRows: 8, maxCols: 8, stretchH: 'none', validator: function(value, callback) {
-        if(value[0] == '+' || value[0] == '-' && parseInt(value.substring(1)) % 1 == 0) callback(true);
-        callback(parseInt(value) % 1 == 0);
-      }, afterChange: function(changes, source) {
-        $('#level_maze').attr('value', JSON.stringify(data))
-      }, cells: function(row, col, prop) {
-        return {renderer: negativeValueRenderer};
-      }});
+    = f.collection_select :concept_ids, Concept.cached, :id, :name, { :selected => @level.concept_ids }, { :multiple => true, :name => 'level[concept_ids][]', :size => Concept.cached.length, :style => 'width:auto' }
+    %p (shift-click to select multiple)
+  =render partial: 'levels/editors/blockly', locals: {f: f} if @level.is_a? Level
+  =render partial: 'levels/editors/maze', locals: {f: f} if @level.is_a? Maze
+  =render partial: 'levels/editors/karel', locals: {f: f} if @level.is_a? Karel
+  =render partial: 'levels/editors/artist', locals: {f: f} if @level.is_a? Artist
   .actions
     = f.submit
 #validation-error
-- level_selector = @level.new_record? ? '#new_level' : '.edit_level'
+  - if @level.errors.any?
+    %h2
+      = pluralize(@level.errors.count, "error")
+      prohibited this level from being saved:
+    %ul
+      - @level.errors.full_messages.each do |msg|
+        %li= msg
 :javascript
-  $(document).ready(function() {
-    $('#{level_selector}').on('ajax:beforeSend', function(e, xhr) {
-      $('#validation-error').empty();
-      var token = $('meta[name="csrf-token"]').attr('content');
-      xhr.setRequestHeader('X-CSRF-TOKEN', token);
-    });
-    $('#{level_selector}').on('ajax:complete', function(e, data) {
-      if (data.status == "200") {
-        window.location.href = JSON.parse(data.responseText).redirect
-      }
-    });
-    $('#{level_selector}').on("ajax:error", function(evt, xhr, status, error){
-      var errors, errorText;
-      try {
-        errors = $.parseJSON(xhr.responseText);
-      } catch(err) {
-        errors = {message: "Generic error ("+error+"). Please reload the page and try again"};
-      }
-      $('#validation-error')
-        .html("<p>Couldn't create level:</p>")
-        .append($("<ul/>")
-          .append(Object.keys(errors).map(function (v) {
-              return $("<li/>").text(v+": "+errors[v]);
-          })));
-    });
-  });
+  #{render partial: 'shared/ajax_submit', formats: [:js],  locals: {form_selector: @level.new_record? ? '#new_level' : '.edit_level'}}

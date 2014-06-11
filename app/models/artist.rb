@@ -1,4 +1,5 @@
-class Artist < Level
+class Artist < Blockly
+  serialized_attrs :start_direction, :x, :y
   # Fix STI routing http://stackoverflow.com/a/9463495
   def self.model_name
     Level.model_name
@@ -12,12 +13,14 @@ class Artist < Level
   def self.create_from_level_builder(params, level_params)
     create(level_params.merge(
         user: params[:user],
-        x: params[:x],
-        y: params[:y],
-        start_direction: params[:start_direction],
         game: Game.find(params[:game_id]),
-        level_num: 'custom',
-        properties: { solution_blocks: params[:program] }
+        properties: {
+          level_num: 'custom',
+          x: params[:x],
+          y: params[:y],
+          start_direction: params[:start_direction],
+          solution_blocks: params[:program]
+        }
     ))
   end
 

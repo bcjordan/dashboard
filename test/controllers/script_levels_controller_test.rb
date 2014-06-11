@@ -41,10 +41,10 @@ class ScriptLevelsControllerTest < ActionController::TestCase
 
   test "script level id based routing for 20 hour script" do
     # 'normal' script level routing
-    sl = ScriptLevel.find 3
-    assert_routing({method: "get", path: '/s/1/level/3'},
-                   {controller: "script_levels", action: "show", script_id: Script::TWENTY_HOUR_ID.to_s, id: "3"})
-    assert_equal '/s/1/level/3', build_script_level_path(sl)
+    sl = ScriptLevel.find_by(script_id: Script::TWENTY_HOUR_ID, chapter: 3)
+    assert_routing({method: "get", path: "/s/1/level/#{sl.id}"},
+                   {controller: "script_levels", action: "show", script_id: Script::TWENTY_HOUR_ID.to_s, id: sl.id.to_s})
+    assert_equal "/s/1/level/#{sl.id}", build_script_level_path(sl)
   end
 
   test "chapter based routing" do
