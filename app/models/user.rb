@@ -234,7 +234,6 @@ SQL
   end
 
   def teacher?
-    # TODO !
     self.user_type == TYPE_TEACHER
   end
 
