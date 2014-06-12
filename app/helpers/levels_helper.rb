@@ -177,7 +177,7 @@ module LevelsHelper
     %w(instructions levelIncompleteError other1StarError tooFewBlocksMsg).each do |label|
       val = [@level.game.app, @level.game.name].map { |name|
         data_t("level.#{label}", "#{name}_#{@level.level_num}")
-      }.compact!.first
+      }.compact.first
       level[label] ||= val unless val.nil?
     end
 
