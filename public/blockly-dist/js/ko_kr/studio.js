@@ -7117,8 +7117,12 @@ exports.load = function(assetUrl, id) {
     longLineDraw: assetUrl('media/common_images/draw-long.png'),
     soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -7621,8 +7625,14 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenGameStarts());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.startIcon));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.whenGameStarts());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenGameStartsTooltip());
@@ -8145,7 +8155,7 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (isK1) {
         this.appendDummyInput()
-          .appendTitle(msg.score())
+          .appendTitle(commonMsg.score())
           .appendTitle(new blockly.FieldImage(skin.scoreCard));
       } else {
         this.appendDummyInput()
@@ -9607,15 +9617,11 @@ exports.load = function(assetUrl, id) {
   skin.whenDown = skin.assetUrl('when-down.png');
   skin.whenLeft = skin.assetUrl('when-left.png');
   skin.whenRight = skin.assetUrl('when-right.png');
-  skin.speedFast = skin.assetUrl('speed-fast.png');
-  skin.speedMedium = skin.assetUrl('speed-medium.png');
-  skin.speedSlow = skin.assetUrl('speed-slow.png');
   skin.collide = skin.assetUrl('when-sprite-collide.png');
   skin.emotionAngry = skin.assetUrl('emotion-angry.png');
   skin.emotionNormal = skin.assetUrl('emotion-nothing.png');
   skin.emotionSad = skin.assetUrl('emotion-sad.png');
   skin.emotionHappy = skin.assetUrl('emotion-happy.png');
-  skin.scoreCard = skin.assetUrl('increment-score.png');
   skin.speechBubble = skin.assetUrl('say-sprite.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
@@ -12758,6 +12764,8 @@ exports.runProgram = function(d){return "프로그램 실행"};
 
 exports.runTooltip = function(d){return "블럭들로 작성되어있는 프로그램을 실행합니다."};
 
+exports.score = function(d){return "score"};
+
 exports.showCodeHeader = function(d){return "코드 보기"};
 
 exports.showGeneratedCode = function(d){return "코드 보기"};
@@ -12998,8 +13006,6 @@ exports.saySprite = function(d){return "say"};
 exports.saySpriteN = function(d){return "actor "+v(d,"spriteIndex")+" say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
-
-exports.score = function(d){return "score"};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 

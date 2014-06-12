@@ -5954,8 +5954,12 @@ exports.load = function(assetUrl, id) {
     longLineDraw: assetUrl('media/common_images/draw-long.png'),
     soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -6646,6 +6650,8 @@ exports.resetProgram = function(d){return "Resetează"};
 exports.runProgram = function(d){return "Rulează Programul"};
 
 exports.runTooltip = function(d){return "Rulează programul definit de blocuri în spațiul de lucru."};
+
+exports.score = function(d){return "score"};
 
 exports.showCodeHeader = function(d){return "Arată Codul"};
 
