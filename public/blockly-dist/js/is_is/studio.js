@@ -10661,7 +10661,7 @@ Studio.initSprites = function () {
         if (0 === Studio.spriteCount) {
           Studio.spriteStart_ = [];
         }
-        Studio.sprite[Studio.spriteCount] = [];
+        Studio.sprite[Studio.spriteCount] = {};
         Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
         Studio.spriteCount++;
       }
@@ -10871,6 +10871,7 @@ Studio.clearEventHandlersKillTickLoop = function() {
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
+  Studio.tickCount = 0;
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
@@ -10926,6 +10927,7 @@ BlocklyApps.reset = function(first) {
 
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
+    Studio.sprite[i] = {};
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
     Studio.sprite[i].y = Studio.spriteStart_[i].y;
     Studio.sprite[i].speed = tiles.DEFAULT_SPRITE_SPEED;
@@ -11179,7 +11181,6 @@ Studio.execute = function() {
 
   // Set event handlers and start the onTick timer
   Studio.eventHandlers = handlers;
-  Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
 
@@ -11758,12 +11759,21 @@ Studio.hideSpeechBubble = function (opts) {
   speechBubble.removeAttribute('onRight');
   speechBubble.removeAttribute('height');
   opts.complete = true;
+  delete Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc;
   Studio.sayComplete++;
 };
 
 Studio.saySprite = function (opts) {
   if (!opts.started) {
     opts.started = true;
+
+    // Remove any existing speech bubble on this sprite:
+    if (Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc) {
+      Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc();
+    }
+    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+
+    // Start creating the new speech bubble:
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
 
@@ -11790,9 +11800,10 @@ Studio.saySprite = function (opts) {
     Studio.displaySprite(opts.spriteIndex);
     speechBubble.setAttribute('visibility', 'visible');
 
-    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+    Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc =
+        delegate(this, Studio.hideSpeechBubble, opts);
     Studio.sprite[opts.spriteIndex].bubbleTimeout = window.setTimeout(
-        delegate(this, Studio.hideSpeechBubble, opts),
+        Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc,
         Studio.SPEECH_BUBBLE_TIMEOUT);
   }
 
