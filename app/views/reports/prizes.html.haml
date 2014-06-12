@@ -12,54 +12,33 @@
     %br/
     %br/
 
-  - if current_user.teacher_prize.nil? || current_user.teacher_bonus_prize.nil?
+  - if current_user.teacher_prize.nil? && current_user.teacher_bonus_prize.nil?
+    %h4
+      %b DonorsChoose.org rewards are no longer available as of June 15, 2014. Please refer to this
+      %b= link_to 'FAQ', 'http://code.org/faq'
+      %b for more information.
+
+      %br/
+      %br/
+  - else
     %h4
       %b
-        DonorsChoose.org rewards are still available, but running out. We will offer rewards through June 15, 2014, or sooner, until supplies last.
+        While DonorsChoose.org rewards are no longer available as of June 15, 2014, you can still use the codes that you have previously claimed (listed below). Be sure to use your codes right away, as they will expire soon! Please refer to this
+      %b= link_to 'FAQ', 'http://code.org/faq'
+      %b for more information.
+
       %br/
       %br/
 
-  - if current_user.teacher_prize_earned
+  - if current_user.teacher_prize
     %h4= t('redeem_prizes.msg.teacher.earned', num_trophies: Trophy::TROPHY_MAX)
-    - if current_user.teacher_prize
-      = render partial: 'shared/redeemed_prize', locals: { prize: current_user.teacher_prize }
-    - elsif !current_user.confirmed?
-      %h5
-        #{t('redeem_prizes.teacher_email_required')} #{link_to t('nav.user.settings'), edit_user_registration_url}
-    - elsif current_user.school.blank? || current_user.full_address.blank?
-      %h5
-        #{t('redeem_prizes.teacher_info_required')} #{link_to t('nav.user.settings'), edit_user_registration_url}
-    - else
-      = t('redeem_prizes.msg.choose_teacher')
-      %br/
-      %br/
-      = render partial: 'shared/choose_prize', locals: { prize_collection: TeacherPrize, prize_type: 'teacher' }
-  - else
-    %h4= sanitize(t('redeem_prizes.msg.teacher.not_earned_title').html_safe, tags: %w(a), attributes: %w(href target))
-    = sanitize(t('redeem_prizes.msg.teacher.not_earned', num_trophies: Trophy::TROPHY_MAX).html_safe, tags: %w(a), attributes: %w(href target))
-  %div{style:"clear:left;"}
+    = render partial: 'shared/redeemed_prize', locals: { prize: current_user.teacher_prize }
     %br/
 
-  - if current_user.teacher_prize_earned
-    - if current_user.teacher_bonus_prize_earned
-      %h4= t('redeem_prizes.msg.teacher.bonus.earned', num_trophies: Trophy::TROPHY_MAX)
-      - if current_user.teacher_bonus_prize
-        = render partial: 'shared/redeemed_prize', locals: { prize: current_user.teacher_bonus_prize }
-      - elsif !current_user.confirmed?
-        %h5
-          #{t('redeem_prizes.teacher_email_required')} #{link_to t('nav.user.settings'), edit_user_registration_url}
-      - elsif current_user.school.blank? || current_user.full_address.blank?
-        %h5
-          #{t('redeem_prizes.teacher_info_required')} #{link_to t('nav.user.settings'), edit_user_registration_url}
-      - else
-        = t('redeem_prizes.msg.choose_teacher')
-        %br/
-        %br/
-        = render partial: 'shared/choose_prize', locals: { prize_collection: TeacherBonusPrize, prize_type: 'teacher_bonus' }
-    - else
-      %h4= sanitize(t('redeem_prizes.msg.teacher.bonus.not_earned_title').html_safe, tags: %w(a), attributes: %w(href target))
-      = sanitize(t('redeem_prizes.msg.teacher.bonus.not_earned', num_trophies: Trophy::TROPHY_MAX).html_safe, tags: %w(a), attributes: %w(href target))
-    %div{style:"clear:left;"}
+  - if current_user.teacher_bonus_prize
+    %h4= t('redeem_prizes.msg.teacher.bonus.earned', num_trophies: Trophy::TROPHY_MAX)
+    = render partial: 'shared/redeemed_prize', locals: { prize: current_user.teacher_bonus_prize }
+    %br/
 - else
   %h4= t('redeem_prizes.no_prizes_available')
 
