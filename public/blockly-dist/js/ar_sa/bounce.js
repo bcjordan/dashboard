@@ -1964,7 +1964,7 @@ var drawMap = function() {
   svg.setAttribute('height', Bounce.MAZE_HEIGHT);
 
   // Attach drag handler.
-  var hammerSvg = new Hammer(svg, {preventDefault: true});
+  var hammerSvg = new Hammer(svg);
   hammerSvg.on("drag", Bounce.onSvgDrag);
 
   // Adjust visualization and belowVisualization width.
@@ -2356,8 +2356,11 @@ Bounce.onTick = function() {
 };
 
 Bounce.onSvgDrag = function(e) {
-  Bounce.gesturesObserved[e.gesture.direction] =
-    Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+  if (Bounce.intervalId) {
+    Bounce.gesturesObserved[e.gesture.direction] =
+      Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+    e.gesture.preventDefault();
+  }
 };
 
 Bounce.onKey = function(e) {

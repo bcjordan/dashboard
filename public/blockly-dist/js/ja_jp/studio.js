@@ -10083,7 +10083,7 @@ var drawMap = function() {
   svg.setAttribute('height', Studio.MAZE_HEIGHT);
 
   // Attach click handler.
-  var hammerSvg = new Hammer(svg, {preventDefault: true});
+  var hammerSvg = new Hammer(svg);
   hammerSvg.on("tap", Studio.onSvgClicked);
   hammerSvg.on("drag", Studio.onSvgDrag);
 
@@ -10643,8 +10643,11 @@ Studio.onTick = function() {
 };
 
 Studio.onSvgDrag = function(e) {
-  Studio.gesturesObserved[e.gesture.direction] =
-    Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+  if (Studio.intervalId) {
+    Studio.gesturesObserved[e.gesture.direction] =
+      Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+    e.gesture.preventDefault();
+  }
 };
 
 Studio.onKey = function(e) {
