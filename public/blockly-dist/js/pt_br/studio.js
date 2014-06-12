@@ -70,7 +70,11 @@ module.exports = function(app, levels, options) {
 
   addReadyListener(function() {
     if (options.readonly) {
-      BlocklyApps.initReadonly(options);
+      if (app.initReadonly) {
+        app.initReadonly(options);
+      } else {
+        BlocklyApps.initReadonly(options);
+      }
     } else {
       app.init(options);
       if (options.onInitialize) {
@@ -8814,7 +8818,7 @@ module.exports = {
   },
   '2': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}]
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}]
     ],
     'scale': {
       'snapRadius': 2
@@ -8838,7 +8842,7 @@ module.exports = {
   },
   '3': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}],
       [{'test': 'saySprite', 'type': 'studio_saySprite'}]
     ],
     'scale': {
@@ -9047,7 +9051,9 @@ module.exports = {
   },
   '9': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance',
+        'type': 'studio_moveDistance',
+        'titles': {'SPRITE': '1', 'DISTANCE': '400'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -9071,7 +9077,7 @@ module.exports = {
     'spriteStartingImage': 2,
     'spriteFinishIndex': 1,
     'timeoutFailureTick': 150,
-    'minWorkspaceHeight': 750,
+    'minWorkspaceHeight': 800,
     'toolbox':
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
@@ -9083,23 +9089,23 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"></block>'
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"></block>'
   },
   '10': {
     'requiredBlocks': [
-      [{'test': 'playSound', 'type': 'studio_playSound'}],
+      [{'test': 'playSound', 'type': 'studio_playSound', 'titles': {'SOUND': 'crunch'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -9121,7 +9127,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 950,
+    'minWorkspaceHeight': 900,
     'goal': {
       successCondition: function () {
         return (Studio.playSoundCount > 0) &&
@@ -9142,19 +9148,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9164,7 +9170,7 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"></block>'
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"></block>'
   },
   '11': {
     'requiredBlocks': [
@@ -9211,19 +9217,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9233,17 +9239,21 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="820"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="860"> \
        <title name="SPRITE2">2</title></block>'
   },
   '12': {
     'requiredBlocks': [
-      [{'test': 'setBackground', 'type': 'studio_setBackground'}],
-      [{'test': 'setSpriteSpeed', 'type': 'studio_setSpriteSpeed'}],
+      [{'test': 'setBackground',
+        'type': 'studio_setBackground',
+        'titles': {'VALUE': '"night"'}}],
+      [{'test': 'setSpriteSpeed',
+        'type': 'studio_setSpriteSpeed',
+        'titles': {'VALUE': 'Studio.SpriteSpeed.FAST'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -9265,7 +9275,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 1200,
+    'minWorkspaceHeight': 1250,
     'goal': {
       successCondition: function () {
         return Studio.sprite[0].collisionMask & Math.pow(2, 2);
@@ -9291,19 +9301,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="320"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="330"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="440"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="460"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="560"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="590"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="680"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="720"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9313,11 +9323,11 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="880"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="910"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1000"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1040"> \
        <title name="SPRITE2">2</title> \
         <next><block type="studio_changeScore"></block> \
         </next></block>'
@@ -10691,6 +10701,64 @@ Studio.onMouseUp = function(e) {
   Studio.btnState = {};
 };
 
+Studio.initSprites = function () {
+  Studio.spriteFinishCount = 0;
+  Studio.spriteCount = 0;
+  Studio.sprite = [];
+  Studio.projectiles = [];
+
+  // Locate the start and finish positions.
+  for (var y = 0; y < Studio.ROWS; y++) {
+    for (var x = 0; x < Studio.COLS; x++) {
+      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
+        if (0 === Studio.spriteFinishCount) {
+          Studio.spriteFinish_ = [];
+        }
+        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
+        Studio.spriteFinishCount++;
+      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
+        if (0 === Studio.spriteCount) {
+          Studio.spriteStart_ = [];
+        }
+        Studio.sprite[Studio.spriteCount] = [];
+        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
+        Studio.spriteCount++;
+      }
+    }
+  }
+
+  // Update the sprite count in the blocks:
+  blocks.setSpriteCount(Blockly, Studio.spriteCount);
+
+  if (level.projectileCollisions) {
+    blocks.enableProjectileCollisions(Blockly);
+  }
+
+  if (level.edgeCollisions) {
+    blocks.enableEdgeCollisions(Blockly);
+  }
+
+  if (level.spritesOutsidePlayspace) {
+    blocks.enableSpritesOutsidePlayspace(Blockly);
+  }
+};
+
+/**
+ * Initialize Blockly and Studio for read-only (blocks feedback).
+ * Called on iframe load for read-only.
+ */
+Studio.initReadonly = function(config) {
+  // Do some minimal level loading and sprite initialization so that
+  // we can ensure that the blocks are appropriately modified for this level
+  skin = config.skin;
+  level = config.level;
+  loadLevel();
+
+  Studio.initSprites();
+
+  BlocklyApps.initReadonly(config);
+};
+
 /**
  * Initialize Blockly and the Studio app.  Called on page load.
  */
@@ -10792,45 +10860,7 @@ Studio.init = function(config) {
 
   config.preventExtraTopLevelBlocks = true;
 
-  Studio.spriteFinishCount = 0;
-  Studio.spriteCount = 0;
-  Studio.sprite = [];
-  Studio.projectiles = [];
-
-  // Locate the start and finish positions.
-  for (var y = 0; y < Studio.ROWS; y++) {
-    for (var x = 0; x < Studio.COLS; x++) {
-      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
-        if (0 === Studio.spriteFinishCount) {
-          Studio.spriteFinish_ = [];
-        }
-        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
-        Studio.spriteFinishCount++;
-      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
-        if (0 === Studio.spriteCount) {
-          Studio.spriteStart_ = [];
-        }
-        Studio.sprite[Studio.spriteCount] = [];
-        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
-        Studio.spriteCount++;
-      }
-    }
-  }
-
-  // Update the sprite count in the blocks:
-  blocks.setSpriteCount(Blockly, Studio.spriteCount);
-
-  if (level.projectileCollisions) {
-    blocks.enableProjectileCollisions(Blockly);
-  }
-
-  if (level.edgeCollisions) {
-    blocks.enableEdgeCollisions(Blockly);
-  }
-
-  if (level.spritesOutsidePlayspace) {
-    blocks.enableSpritesOutsidePlayspace(Blockly);
-  }
+  Studio.initSprites();
 
   BlocklyApps.init(config);
 
