@@ -2242,8 +2242,14 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenEnterObstacle());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.enterObstacleIcon));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.whenEnterObstacle());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenEnterObstacleTooltip());
@@ -2343,34 +2349,62 @@ exports.install = function(blockly, blockInstallOptions) {
 
   blockly.Blocks.flappy_playSound = {
     // Block for playing sound.
+    WING_FLAP_SOUND: '"sfx_wing"',
     helpUrl: '',
-    init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES, onSoundSelected);
-      dropdown.setValue(this.VALUES[7][1]);
+    init: function () {
+      this.VALUES = isK1 ? this.k1SoundChoices : this.soundChoices;
+      var soundDropdown = new blockly.FieldDropdown(this.VALUES, onSoundSelected);
+      soundDropdown.setValue(this.WING_FLAP_SOUND);
+
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.play())
+          .appendTitle(new blockly.FieldImage(skin.soundIcon))
+          .appendTitle(soundDropdown, 'VALUE');
+      } else {
+        this.appendDummyInput().appendTitle(soundDropdown, 'VALUE');
+      }
+
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
+    },
+    get k1SoundChoices() {
+      return [
+        [msg.soundRandom(), RANDOM_VALUE],
+        [msg.soundBounce(), '"wall"'],
+        [msg.soundCrunch(), '"wall0"'],
+        [msg.soundDie(), '"sfx_die"'],
+        [msg.soundHit(), '"sfx_hit"'],
+        [msg.soundPoint(), '"sfx_point"'],
+        [msg.soundSwoosh(), '"sfx_swooshing"'],
+        [msg.soundWing(), this.WING_FLAP_SOUND],
+        [msg.soundJet(), '"jet"'],
+        [msg.soundCrash(), '"crash"'],
+        [msg.soundJingle(), '"jingle"'],
+        [msg.soundSplash(), '"splash"'],
+        [msg.soundLaser(), '"laser"']
+      ];
+    },
+    get soundChoices() {
+      return [
+        [msg.playSoundRandom(), RANDOM_VALUE],
+        [msg.playSoundBounce(), '"wall"'],
+        [msg.playSoundCrunch(), '"wall0"'],
+        [msg.playSoundDie(), '"sfx_die"'],
+        [msg.playSoundHit(), '"sfx_hit"'],
+        [msg.playSoundPoint(), '"sfx_point"'],
+        [msg.playSoundSwoosh(), '"sfx_swooshing"'],
+        [msg.playSoundWing(), this.WING_FLAP_SOUND],
+        [msg.playSoundJet(), '"jet"'],
+        [msg.playSoundCrash(), '"crash"'],
+        [msg.playSoundJingle(), '"jingle"'],
+        [msg.playSoundSplash(), '"splash"'],
+        [msg.playSoundLaser(), '"laser"']
+      ];
     }
   };
-
-  blockly.Blocks.flappy_playSound.VALUES =
-      [[msg.playSoundRandom(), RANDOM_VALUE],
-       [msg.playSoundBounce(), '"wall"'],
-       [msg.playSoundCrunch(), '"wall0"'],
-       [msg.playSoundDie(), '"sfx_die"'],
-       [msg.playSoundHit(), '"sfx_hit"'],
-       [msg.playSoundPoint(), '"sfx_point"'],
-       [msg.playSoundSwoosh(), '"sfx_swooshing"'],
-       [msg.playSoundWing(), '"sfx_wing"'],
-       [msg.playSoundJet(), '"jet"'],
-       [msg.playSoundCrash(), '"crash"'],
-       [msg.playSoundJingle(), '"jingle"'],
-       [msg.playSoundSplash(), '"splash"'],
-       [msg.playSoundLaser(), '"laser"']
-     ];
 
   generator.flappy_playSound = function() {
     return generateSetterCode(this, 'playSound');
@@ -2381,8 +2415,15 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.incrementPlayerScore());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.score())
+          .appendTitle(new blockly.FieldImage(skin.scoreCard));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.incrementPlayerScore());
+      }
+
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.incrementPlayerScoreTooltip());
@@ -2422,18 +2463,29 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.flappy_setSpeed = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[3][1]);  // default to normal
-
       this.setHSV(312, 0.32, 0.62);
-      this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES, 63, 33);
+        fieldImageDropdown.setValue(this.K1_VALUES[1][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.setSpeed())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[3][1]); // default to normal
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.setSpeedTooltip());
     }
   };
+
+  blockly.Blocks.flappy_setSpeed.K1_VALUES =
+    [[skin.speedSlow, 'Flappy.LevelSpeed.SLOW'],
+      [skin.speedMedium, 'Flappy.LevelSpeed.NORMAL'],
+      [skin.speedFast, 'Flappy.LevelSpeed.FAST']];
 
   blockly.Blocks.flappy_setSpeed.VALUES =
       [[msg.speedRandom(), RANDOM_VALUE],
@@ -4524,6 +4576,7 @@ exports.load = function(assetUrl, id) {
   skin.crashIcon = skin.assetUrl('when-crash.png');
   skin.collideObstacleIcon = skin.assetUrl('when-obstacle.png');
   skin.collideGroundIcon = skin.assetUrl('when-crash.png');
+  skin.enterObstacleIcon = skin.assetUrl('when-pass.png');
   skin.tiles = skin.assetUrl('tiles.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
@@ -7508,8 +7561,12 @@ exports.load = function(assetUrl, id) {
     longLineDraw: assetUrl('media/common_images/draw-long.png'),
     soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -8192,6 +8249,8 @@ exports.runProgram = function(d){return "Programma uitvoeren"};
 
 exports.runTooltip = function(d){return "Voer het programma gedefinieerd door de blokken uit in de werkruimte."};
 
+exports.score = function(d){return "score"};
+
 exports.showCodeHeader = function(d){return "Code weergeven"};
 
 exports.showGeneratedCode = function(d){return "Code weergeven"};
@@ -8454,6 +8513,32 @@ exports.share = function(d){return "Delen"};
 exports.shareFlappyTwitter = function(d){return "Speel hier het Flappy spel dat ik zelf heb gemaakt. Ik maakte het met @codeorg"};
 
 exports.shareGame = function(d){return "Deel je spel met anderen:"};
+
+exports.soundRandom = function(d){return "random"};
+
+exports.soundBounce = function(d){return "bounce"};
+
+exports.soundCrunch = function(d){return "crunch"};
+
+exports.soundDie = function(d){return "sad"};
+
+exports.soundHit = function(d){return "smash"};
+
+exports.soundPoint = function(d){return "point"};
+
+exports.soundSwoosh = function(d){return "swoosh"};
+
+exports.soundWing = function(d){return "wing"};
+
+exports.soundJet = function(d){return "jet"};
+
+exports.soundCrash = function(d){return "crash"};
+
+exports.soundJingle = function(d){return "jingle"};
+
+exports.soundSplash = function(d){return "splash"};
+
+exports.soundLaser = function(d){return "laser"};
 
 exports.speedRandom = function(d){return "stel snelheid willekeurig in"};
 

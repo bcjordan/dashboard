@@ -7117,8 +7117,12 @@ exports.load = function(assetUrl, id) {
     longLineDraw: assetUrl('media/common_images/draw-long.png'),
     soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -7621,8 +7625,14 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenGameStarts());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.startIcon));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.whenGameStarts());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenGameStartsTooltip());
@@ -8145,7 +8155,7 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (isK1) {
         this.appendDummyInput()
-          .appendTitle(msg.score())
+          .appendTitle(commonMsg.score())
           .appendTitle(new blockly.FieldImage(skin.scoreCard));
       } else {
         this.appendDummyInput()
@@ -9607,15 +9617,11 @@ exports.load = function(assetUrl, id) {
   skin.whenDown = skin.assetUrl('when-down.png');
   skin.whenLeft = skin.assetUrl('when-left.png');
   skin.whenRight = skin.assetUrl('when-right.png');
-  skin.speedFast = skin.assetUrl('speed-fast.png');
-  skin.speedMedium = skin.assetUrl('speed-medium.png');
-  skin.speedSlow = skin.assetUrl('speed-slow.png');
   skin.collide = skin.assetUrl('when-sprite-collide.png');
   skin.emotionAngry = skin.assetUrl('emotion-angry.png');
   skin.emotionNormal = skin.assetUrl('emotion-nothing.png');
   skin.emotionSad = skin.assetUrl('emotion-sad.png');
   skin.emotionHappy = skin.assetUrl('emotion-happy.png');
-  skin.scoreCard = skin.assetUrl('increment-score.png');
   skin.speechBubble = skin.assetUrl('say-sprite.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
@@ -10655,7 +10661,7 @@ Studio.initSprites = function () {
         if (0 === Studio.spriteCount) {
           Studio.spriteStart_ = [];
         }
-        Studio.sprite[Studio.spriteCount] = [];
+        Studio.sprite[Studio.spriteCount] = {};
         Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
         Studio.spriteCount++;
       }
@@ -10865,6 +10871,7 @@ Studio.clearEventHandlersKillTickLoop = function() {
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
+  Studio.tickCount = 0;
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
@@ -10920,6 +10927,7 @@ BlocklyApps.reset = function(first) {
 
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
+    Studio.sprite[i] = {};
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
     Studio.sprite[i].y = Studio.spriteStart_[i].y;
     Studio.sprite[i].speed = tiles.DEFAULT_SPRITE_SPEED;
@@ -11173,7 +11181,6 @@ Studio.execute = function() {
 
   // Set event handlers and start the onTick timer
   Studio.eventHandlers = handlers;
-  Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
 
@@ -11752,12 +11759,21 @@ Studio.hideSpeechBubble = function (opts) {
   speechBubble.removeAttribute('onRight');
   speechBubble.removeAttribute('height');
   opts.complete = true;
+  delete Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc;
   Studio.sayComplete++;
 };
 
 Studio.saySprite = function (opts) {
   if (!opts.started) {
     opts.started = true;
+
+    // Remove any existing speech bubble on this sprite:
+    if (Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc) {
+      Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc();
+    }
+    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+
+    // Start creating the new speech bubble:
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
 
@@ -11784,9 +11800,10 @@ Studio.saySprite = function (opts) {
     Studio.displaySprite(opts.spriteIndex);
     speechBubble.setAttribute('visibility', 'visible');
 
-    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+    Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc =
+        delegate(this, Studio.hideSpeechBubble, opts);
     Studio.sprite[opts.spriteIndex].bubbleTimeout = window.setTimeout(
-        delegate(this, Studio.hideSpeechBubble, opts),
+        Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc,
         Studio.SPEECH_BUBBLE_TIMEOUT);
   }
 
@@ -12758,6 +12775,8 @@ exports.runProgram = function(d){return "Programma uitvoeren"};
 
 exports.runTooltip = function(d){return "Voer het programma gedefinieerd door de blokken uit in de werkruimte."};
 
+exports.score = function(d){return "score"};
+
 exports.showCodeHeader = function(d){return "Code weergeven"};
 
 exports.showGeneratedCode = function(d){return "Code weergeven"};
@@ -12998,8 +13017,6 @@ exports.saySprite = function(d){return "say"};
 exports.saySpriteN = function(d){return "actor "+v(d,"spriteIndex")+" say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
-
-exports.score = function(d){return "score"};
 
 exports.scoreText = function(d){return "Score: "+v(d,"playerScore")+" : "+v(d,"opponentScore")};
 
