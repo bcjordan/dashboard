@@ -9395,7 +9395,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1300,
+    'minWorkspaceHeight': 1400,
     'edgeCollisions': true,
     'projectileCollisions': true,
     'spritesOutsidePlayspace': true,
@@ -9450,7 +9450,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1000,
+    'minWorkspaceHeight': 1400,
     'edgeCollisions': true,
     'projectileCollisions': true,
     'spritesOutsidePlayspace': true,
@@ -9907,6 +9907,7 @@ var feedback = require('../feedback.js');
 var dom = require('../dom');
 var Sprite = require('./sprite').Sprite;
 var Hammer = require('../hammer');
+var parseXmlElement = require('../xml').parseElement;
 
 var Direction = tiles.Direction;
 var NextTurn = tiles.NextTurn;
@@ -10004,6 +10005,9 @@ BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
 
 //The number of blocks to show as feedback.
 BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = 1;
+
+Studio.BLOCK_X_COORDINATE = 20;
+Studio.BLOCK_Y_COORDINATE = 20;
 
 // Default Scalings
 Studio.scale = {
@@ -10769,6 +10773,52 @@ Studio.initReadonly = function(config) {
 };
 
 /**
+ * Arrange the start blocks to spread them out in the workspace.
+ * This uses unique logic for studio - spread event blocks vertically even
+ * over the total height of the workspace.
+ */
+var arrangeStartBlocks = function (config) {
+  var xml = parseXmlElement(config.level.startBlocks);
+  var numUnplacedElementNodes = 0;
+  //
+  // two passes through, one to count the nodes:
+  //
+  for (var x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+    xmlChild = xml.childNodes[x];
+
+    // Only look at element nodes without a y coordinate:
+    if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+      numUnplacedElementNodes++;
+    }
+  }
+  //
+  // and one to place the nodes:
+  //
+  if (numUnplacedElementNodes) {
+    var numberOfPlacedBlocks = 0;
+    var totalHeightAvail =
+        (config.level.minWorkspaceHeight || 1000) - Studio.BLOCK_Y_COORDINATE;
+    var yCoordInterval = totalHeightAvail / numUnplacedElementNodes;
+    for (x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+      xmlChild = xml.childNodes[x];
+
+      // Only look at element nodes without a y coordinate:
+      if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+        xmlChild.setAttribute(
+            'x',
+            xmlChild.getAttribute('x') || Studio.BLOCK_X_COORDINATE);
+        xmlChild.setAttribute(
+            'y',
+            Studio.BLOCK_Y_COORDINATE + yCoordInterval * numberOfPlacedBlocks);
+        numberOfPlacedBlocks += 1;
+      }
+    }
+    // replace the startBlocks since we changed the attributes in the xml dom:
+    config.level.startBlocks = Blockly.Xml.domToText(xml);
+  }
+};
+
+/**
  * Initialize Blockly and the Studio app.  Called on page load.
  */
 Studio.init = function(config) {
@@ -10846,13 +10896,7 @@ Studio.init = function(config) {
     return visualization.getBoundingClientRect().width;
   };
 
-  // TODO: update this for Studio
-  // Block placement default (used as fallback in the share levels)
-  config.blockArrangement = {
-    'studio_whenGameStarts': { x: 20, y: 20},
-    'studio_whenLeft': { x: 20, y: 110},
-    'studio_whenRight': { x: 180, y: 110},
-  };
+  arrangeStartBlocks(config);
 
   config.twitter = twitterOptions;
 
@@ -12148,7 +12192,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/sq_al/common":38,"../../locale/sq_al/studio":39,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../hammer":9,"../skins":12,"../templates/page.html":31,"./api":14,"./blocks":15,"./controls.html":16,"./extraControlRows.html":17,"./sprite":21,"./tiles":23,"./visualization.html":24}],23:[function(require,module,exports){
+},{"../../locale/sq_al/common":38,"../../locale/sq_al/studio":39,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../hammer":9,"../skins":12,"../templates/page.html":31,"../xml":37,"./api":14,"./blocks":15,"./controls.html":16,"./extraControlRows.html":17,"./sprite":21,"./tiles":23,"./visualization.html":24}],23:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
