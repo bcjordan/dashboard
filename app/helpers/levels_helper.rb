@@ -175,9 +175,10 @@ module LevelsHelper
 
     # Fetch localized strings
     %w(instructions levelIncompleteError other1StarError tooFewBlocksMsg).each do |label|
-      level[label] ||= [@level.game.app, @level.game.name].map { |name|
+      val = [@level.game.app, @level.game.name].map { |name|
         data_t("level.#{label}", "#{name}_#{@level.level_num}")
       }.compact!.first
+      level[label] ||= val unless val.nil?
     end
 
     # Set some values that Blockly expects on the root of its options string
