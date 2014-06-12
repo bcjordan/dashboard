@@ -1,10 +1,6 @@
 require 'test_helper'
 
 class OmniauthCallbacksControllerTest < ActionController::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
-
   test "authorizing with known facebook account signs in" do
     user = create(:user, provider: 'facebook', uid: '1111')
 
