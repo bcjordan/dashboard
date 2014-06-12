@@ -58,14 +58,14 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :teacher_prize_id, allow_nil: true
   validates_uniqueness_of :teacher_bonus_prize_id, allow_nil: true
 
-  def self.from_omniauth(auth)
+  def self.from_omniauth(auth, params)
     where(auth.slice(:provider, :uid)).first_or_create do |user|
       user.provider = auth.provider
       user.uid = auth.uid
       user.username = auth.info.nickname
       user.name = auth.info.name
       user.email = auth.info.email
-      user.user_type = request.env['omniauth.params']['user_type'] || User::TYPE_STUDENT
+      user.user_type = params['user_type'] || User::TYPE_STUDENT
     end
   end
 
