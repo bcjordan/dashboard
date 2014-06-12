@@ -20,7 +20,7 @@
           - if @script_level
             .header_level
               %div{class: "header_level_container"}
-                - game_script_levels = (@stage && @stage.script_levels) || script.script_levels_from_game(@game.id)
+                - game_script_levels = (@stage && @stage.script_levels.includes(:script).joins(:level)) || script.script_levels_from_game(@game.id)
                 - count = game_script_levels.count
                 - game_levels = current_user ? current_user.levels_from_script(script, @game.id, @stage) : game_script_levels
                 - multiple_puzzles = game_levels.count > 1

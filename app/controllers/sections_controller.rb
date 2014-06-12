@@ -41,6 +41,7 @@ class SectionsController < ApplicationController
     # add provider::sponsored so email and username are not required
     filtered_section_params[:students_attributes].each do |student|
       student[:provider] = User::PROVIDER_SPONSORED
+      student[:user_type] = User::TYPE_STUDENT
     end
 
     respond_to do |format|

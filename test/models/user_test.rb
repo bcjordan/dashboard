@@ -4,13 +4,13 @@ require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
   setup do
-    @good_data = { email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester'}
+    @good_data = { email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester', user_type: User::TYPE_STUDENT}
   end
 
   test "log in with password with pepper" do
     assert Devise.pepper
 
-    user = User.create! email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester'
+    user = User.create! @good_data
 
     # if password is already peppered we don't need to change the hashed pw
     assert_no_change('user.reload.encrypted_password') do
@@ -25,7 +25,7 @@ class UserTest < ActiveSupport::TestCase
     Devise.stubs(:pepper).returns(nil)
 
     # create the user without the pepper
-    user = User.create! email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester'
+    user = User.create! @good_data
     
     Devise.stubs(:pepper).returns(a_pepper)
 
@@ -54,6 +54,16 @@ class UserTest < ActiveSupport::TestCase
 
   test "cannot create user with long username" do
     user = User.create(@good_data.merge({username: 'superreallydoublelongusername'}))
+    assert user.errors.messages.length == 1
+  end
+
+  test "cannot create user with no type" do
+    user = User.create(@good_data.merge(user_type: nil))
+    assert user.errors.messages.length == 1
+  end
+
+  test "cannot create user with invalid type" do
+    user = User.create(@good_data.merge(user_type: 'xxxxx'))
     assert user.errors.messages.length == 1
   end
 

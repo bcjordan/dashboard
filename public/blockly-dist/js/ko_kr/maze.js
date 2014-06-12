@@ -762,6 +762,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -5195,8 +5207,8 @@ Bee.prototype.reset = function () {
   this.nectar_ = 0;
   // represents the total nectar collected
   this.totalNectar_ = 0;
-  this.updateNectarImages_();
-  this.updateHoneyImages_();
+  this.maze_.gridItemDrawer.updateNectarCounter(this.nectar_);
+  this.maze_.gridItemDrawer.updateHoneyCounter(this.honey_);
 };
 
 /**
@@ -5325,47 +5337,10 @@ Bee.prototype.animateGetNectar = function () {
   this.gotNectarAt(row, col);
 
   this.maze_.gridItemDrawer.updateItemImage(row, col);
-  this.updateNectarImages_();
+  this.maze_.gridItemDrawer.updateNectarCounter(this.nectar_);
 
   // play a sound?
 };
-
-Bee.prototype.updateNectarImages_ = function () {
-  var self = this;
-
-  var svg = document.getElementById('svgMaze');
-  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
-
-  // create any needed images
-  for (var i = this.nectarImages_.length; i < this.nectar_; i++) {
-    // Create clip path.
-    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-    clip.setAttribute('id', 'nectarClip' + (i + 1));
-    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
-    rect.setAttribute('x', 0);
-    rect.setAttribute('y', 0);
-    rect.setAttribute('width', '100%');
-    rect.setAttribute('height', 50);
-    clip.appendChild(rect);
-    svg.insertBefore(clip, pegmanElement);
-
-    this.nectarImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
-    this.nectarImages_[i].setAttribute('id', 'nectar' + (i + 1));
-    this.nectarImages_[i].setAttribute('width', 50);
-    this.nectarImages_[i].setAttribute('height', 50);
-    this.nectarImages_[i].setAttribute('x', i * 50);
-    this.nectarImages_[i].setAttribute('y', 0);
-    this.nectarImages_[i].setAttribute('clip-path', 'url(#nectarClip' + (i + 1) + ')');
-    this.nectarImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      this.skin_.nectar);
-    svg.insertBefore(this.nectarImages_[i], pegmanElement);
-  }
-
-  this.nectarImages_.forEach(function (image, index) {
-    image.setAttribute('display', index < self.nectar_ ? 'block' : 'none');
-  });
-};
-
 
 Bee.prototype.animateMakeHoney = function () {
   var col = this.maze_.pegmanX;
@@ -5380,44 +5355,8 @@ Bee.prototype.animateMakeHoney = function () {
 
   this.maze_.gridItemDrawer.updateItemImage(row, col);
 
-  this.updateNectarImages_();
-  this.updateHoneyImages_();
-};
-
-Bee.prototype.updateHoneyImages_ = function () {
-  var self = this;
-
-  var svg = document.getElementById('svgMaze');
-  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
-
-  // create any needed images
-  for (var i = this.honeyImages_.length; i < this.honey_; i++) {
-    // Create clip path.
-    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
-    clip.setAttribute('id', 'honeyClip' + (i + 1));
-    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
-    rect.setAttribute('x', 0);
-    rect.setAttribute('y', 50);
-    rect.setAttribute('width', '100%');
-    rect.setAttribute('height', 50);
-    clip.appendChild(rect);
-    svg.insertBefore(clip, pegmanElement);
-
-    this.honeyImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
-    this.honeyImages_[i].setAttribute('id', 'honey' + (i + 1));
-    this.honeyImages_[i].setAttribute('width', 50);
-    this.honeyImages_[i].setAttribute('height', 50);
-    this.honeyImages_[i].setAttribute('x', i * 50);
-    this.honeyImages_[i].setAttribute('y', 50);
-    this.honeyImages_[i].setAttribute('clip-path', 'url(#honeyClip' + (i + 1) + ')');
-    this.honeyImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      this.skin_.honey);
-    svg.insertBefore(this.honeyImages_[i], pegmanElement);
-  }
-
-  this.honeyImages_.forEach(function (image, index) {
-    image.setAttribute('display', index < self.honey_ ? 'block' : 'none');
-  });
+  this.maze_.gridItemDrawer.updateNectarCounter(this.nectar_);
+  this.maze_.gridItemDrawer.updateHoneyCounter(this.honey_);
 };
 
 /**
@@ -5448,13 +5387,17 @@ require('../utils');
  * @param initialDirtMap The state of the dirtMap at start time.
  * @param flowerType How flowers behave for this level
  */
-
- // todo - send it a Bee instead of an initialDirtMap?
 function BeeItemDrawer(dirtMap, skin, initialDirtMap, flowerType) {
-  // todo - could i just use the dirtMap at creation time as initialDirtMap?
   this.__base = this.constructor.prototype;
 
+  flowerType = flowerType || 'redWithNectar';
+
   DirtDrawer.call(this, dirtMap, '');
+
+  this.honeyPath_ = skin.honey;
+  this.nectarPath_ = skin.redFlower;
+  this.honeyImages_ = [];
+  this.nectarImages_ = [];
 
   this.initialDirt_ = initialDirtMap;
   this.flowerType_ = flowerType;
@@ -5476,6 +5419,7 @@ function BeeItemDrawer(dirtMap, skin, initialDirtMap, flowerType) {
     case 'purpleNectarHidden':
       this.imageInfo_.href = skin.purpleFlowerWithoutNectar;
       this.imageInfo_.unclippedWidth = 650;
+      this.nectarPath_ = skin.purpleFlower; // todo after skin updates
       break;
     // Any flower or hive is displayed as a flowercomb, regardless of nectar count.
     case 'hiddenFlower':
@@ -5516,6 +5460,76 @@ BeeItemDrawer.prototype.updateItemImage = function (row, col) {
     case 'redWithNectar':
     default:
       this.__base.updateItemImage.apply(this, arguments);
+  }
+};
+
+BeeItemDrawer.prototype.updateHoneyCounter = function (honeyCount) {
+  var self = this;
+
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.honeyImages_.length; i < honeyCount; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'honeyClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 50);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.honeyImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.honeyImages_[i].setAttribute('id', 'honey' + (i + 1));
+    this.honeyImages_[i].setAttribute('width', 50);
+    this.honeyImages_[i].setAttribute('height', 50);
+    this.honeyImages_[i].setAttribute('x', i * 50);
+    this.honeyImages_[i].setAttribute('y', 50);
+    this.honeyImages_[i].setAttribute('clip-path', 'url(#honeyClip' + (i + 1) + ')');
+    this.honeyImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.honeyPath_);
+    svg.insertBefore(this.honeyImages_[i], pegmanElement);
+  }
+
+  for (i = 0; i < this.honeyImages_.length; i++) {
+    this.honeyImages_[i].setAttribute('display', i < honeyCount ? 'block' : 'none');
+  }
+};
+
+BeeItemDrawer.prototype.updateNectarCounter = function (nectarCount) {
+  var svg = document.getElementById('svgMaze');
+  var pegmanElement = document.getElementsByClassName('pegman-location')[0];
+
+  // create any needed images
+  for (var i = this.nectarImages_.length; i < nectarCount; i++) {
+    // Create clip path.
+    var clip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
+    clip.setAttribute('id', 'nectarClip' + (i + 1));
+    var rect = document.createElementNS(Blockly.SVG_NS, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 0);
+    rect.setAttribute('width', '100%');
+    rect.setAttribute('height', 50);
+    clip.appendChild(rect);
+    svg.insertBefore(clip, pegmanElement);
+
+    this.nectarImages_[i] = document.createElementNS(Blockly.SVG_NS, 'image');
+    this.nectarImages_[i].setAttribute('id', 'nectar' + (i + 1));
+    this.nectarImages_[i].setAttribute('width', 50);
+    this.nectarImages_[i].setAttribute('height', 50);
+    this.nectarImages_[i].setAttribute('x', i * 50);
+    this.nectarImages_[i].setAttribute('y', 0);
+    this.nectarImages_[i].setAttribute('clip-path', 'url(#nectarClip' + (i + 1) + ')');
+    this.nectarImages_[i].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
+      this.nectarPath_);
+    svg.insertBefore(this.nectarImages_[i], pegmanElement);
+  }
+
+  for (i = 0; i < this.nectarImages_.length; i++) {
+    this.nectarImages_[i].setAttribute('display', i < nectarCount ? 'block' : 'none');
   }
 };
 
@@ -7310,7 +7324,7 @@ module.exports = {
     'scale': {
       'snapRadius': 2.0
     },
-    flowerType: 'purpleNectarHidden',
+    flowerType: 'redWithNectar',
     honeyGoal: 3,
     // nectarGoal: 2,
     step: true,
@@ -8837,17 +8851,6 @@ Maze.resetButtonClick = function () {
 };
 
 /**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
-
-/**
  * App specific displayFeedback function that calls into
  * BlocklyApps.displayFeedback when appropriate
  */
@@ -8881,7 +8884,7 @@ Maze.execute = function(stepMode) {
 
   Maze.executionInfo = new ExecutionInfo({ticks: 100});
   var code = Blockly.Generator.workspaceToCode('JavaScript');
-  Maze.result = ResultType.UNSET;
+  Maze.result = BlocklyApps.ResultType.UNSET;
   Maze.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Maze.waitingForReport = false;
   Maze.animating_ = false;
@@ -8925,39 +8928,39 @@ Maze.execute = function(stepMode) {
     if (!Maze.executionInfo.isTerminated() && !Maze.checkSuccess()) {
       // If did not finish, shedule a failure.
       Maze.executionInfo.queueAction('finish', null);
-      Maze.result = ResultType.FAILURE;
+      Maze.result = BlocklyApps.ResultType.FAILURE;
       stepSpeed = 150;
     } else {
       switch (Maze.executionInfo.terminationValue()) {
         case Infinity:
           // Detected an infinite loop.  Animate what we have as quickly as
           // possible
-          Maze.result = ResultType.TIMEOUT;
+          Maze.result = BlocklyApps.ResultType.TIMEOUT;
           stepSpeed = 0;
           break;
         case true:
-          Maze.result = ResultType.SUCCESS;
+          Maze.result = BlocklyApps.ResultType.SUCCESS;
           stepSpeed = 100;
           break;
         case false:
-          Maze.result = ResultType.ERROR;
+          Maze.result = BlocklyApps.ResultType.ERROR;
           stepSpeed = 150;
           break;
         default:
-          Maze.result = ResultType.ERROR;
+          Maze.result = BlocklyApps.ResultType.ERROR;
           break;
       }
     }
   } catch (e) {
     // Syntax error, can't happen.
-    Maze.result = ResultType.ERROR;
+    Maze.result = BlocklyApps.ResultType.ERROR;
     console.error("Unexpected exception: " + e + "\n" + e.stack);
     return;
   }
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Maze.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Maze.result == BlocklyApps.ResultType.SUCCESS);
 
   Maze.testResults = BlocklyApps.getTestResults();
 
@@ -8980,7 +8983,7 @@ Maze.execute = function(stepMode) {
   BlocklyApps.report({
     app: 'maze',
     level: level.id,
-    result: Maze.result === ResultType.SUCCESS,
+    result: Maze.result === BlocklyApps.ResultType.SUCCESS,
     testResult: Maze.testResults,
     program: encodeURIComponent(textBlocks),
     onComplete: Maze.onReportComplete
@@ -9053,7 +9056,7 @@ Maze.performStep = function(stepMode) {
     Maze.animating_ = false;
     Blockly.mainWorkspace.setEnableToolbox(true); // reenable toolbox
     window.setTimeout(displayFeedback,
-      Maze.result === ResultType.TIMEOUT ? 0 : 1000);
+      Maze.result === BlocklyApps.ResultType.TIMEOUT ? 0 : 1000);
     return;
   }
 
@@ -9645,10 +9648,10 @@ module.exports = {
 // tileSheetWidth: How many tiles wide skin.tiles is
 
 var skinsBase = require('../skins');
+var _ = require('../lodash');
 
 var CONFIGS = {
   letters: {
-    look: '#FFF',
     nonDisappearingPegmanHittingObstacle: true,
     pegmanHeight: 68,
     pegmanWidth: 51,
@@ -9657,6 +9660,18 @@ var CONFIGS = {
   },
 
   bee: {
+    obstacleAnimation: '',
+    dirt: 'dirt.png',
+    redFlower: 'redFlower.png',
+    purpleFlower: 'purpleFlower.png',
+    honey: 'honey.png',
+    flowerComb: 'flowercomb.png',
+    redFlowerWithNectar: 'redFlowerWithNectar.png',
+    redFlowerWithoutNectar: 'redFlowerNectarHidden.png',
+    purpleFlowerWithoutNectar:'purpleFlowerNectarHidden.png',
+    fillSound: 'fill.mp3',
+    digSound: 'dig.mp3',
+
     look: '#000',
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
@@ -9664,8 +9679,8 @@ var CONFIGS = {
     wallPegmanAnimation: 'wall_avatar.png',
     movePegmanAnimation: 'move_avatar.png',
     movePegmanAnimationSpeedScale: 1.5,
+    // This is required when move pegman animation is set
     movePegmanAnimationFrameNumber: 9,
-    background: 1,
     dirtSound: true,
     pegmanYOffset: 0,
     tileSheetWidth: 5,
@@ -9675,128 +9690,118 @@ var CONFIGS = {
   },
 
   farmer: {
+    dirt: 'dirt.png',
+    fillSound: 'fill.mp3',
+    digSound: 'dig.mp3',
+
     look: '#000',
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
-    background: 4,
+    background: 'background' + _.sample([0, 1, 2, 3]) + '.png',
     dirtSound: true,
-    pegmanYOffset: -8,
-    tileSheetWidth: 5
+    pegmanYOffset: -8
   },
 
   farmer_night: {
-    look: '#FFF',
+    dirt: 'dirt.png',
+    fillSound: 'fill.mp3',
+    digSound: 'dig.mp3',
+
     transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
-    background: 4,
+    background: 'background' + _.sample([0, 1, 2, 3]) + '.png',
     dirtSound: true,
-    pegmanYOffset: -8,
-    tileSheetWidth: 5
+    pegmanYOffset: -8
   },
 
   pvz: {
-    look: '#FFF',
+    goalAnimation: 'goal.gif',
+    maze_forever: 'maze_forever.png',
+
     obstacleScale: 1.4,
-    pegmanYOffset: -8,
-    tileSheetWidth: 5
+    pegmanYOffset: -8
   },
 
   birds: {
-    look: '#FFF',
+    goalAnimation: 'goal.gif',
+    maze_forever: 'maze_forever.png',
     largerObstacleAnimationTiles: 'tiles-broken.png',
+
     obstacleScale: 1.2,
     additionalSound: true,
     idlePegmanAnimation: 'idle_avatar.gif',
     wallPegmanAnimation: 'wall_avatar.png',
     movePegmanAnimation: 'move_avatar.png',
     movePegmanAnimationSpeedScale: 1.5,
+    // This is required when move pegman animation is set
     movePegmanAnimationFrameNumber: 9,
     hittingWallAnimation: 'wall.gif',
     approachingGoalAnimation: 'close_goal.png',
     pegmanHeight: 68,
     pegmanWidth: 51,
-    pegmanYOffset: -14,
-    tileSheetWidth: 5
+    pegmanYOffset: -14
   }
 
 };
 
+/**
+ * Given the mp3 sound, generates a list containing both the mp3 and ogg sounds
+ */
+function soundAssetUrls(skin, mp3Sound) {
+  var base = mp3Sound.match(/^(.*)\.mp3$/)[1];
+  return [skin.assetUrl(mp3Sound), skin.assetUrl(base + '.ogg')];
+}
+
 exports.load = function(assetUrl, id) {
+  // The skin has properties from three locations
+  // (1) skinBase - properties common across Blockly apps
+  // (2) here - properties common across all maze skins
+  // (3) config - properties particular to a maze skin
+  // If a property is defined in multiple locations, the more specific location
+  // takes precedence
+
+  // (1) Properties common across Blockly apps
   var skin = skinsBase.load(assetUrl, id);
   var config = CONFIGS[skin.id];
-  // Images
-  skin.tiles = skin.assetUrl('tiles.png');
-  skin.tileSheetWidth = config.tileSheetWidth;
-  skin.goal = skin.assetUrl('goal.png');
-  skin.goalAnimation = skin.assetUrl('goal.gif');
-  skin.obstacle = skin.assetUrl('obstacle.png');
+
+  // (2) Default values for properties common across maze skins.
+  skin.tileSheetWidth = 5;
+  skin.obstacleScale = 1.0;
   skin.obstacleAnimation = skin.assetUrl('obstacle.gif');
-  skin.maze_forever = skin.assetUrl('maze_forever.png');
-  if (config.transparentTileEnding) {
-    skin.transparentTileEnding = true;
-  } else {
-    skin.transparentTileEnding = false;
-  }
-  if (config.nonDisappearingPegmanHittingObstacle) {
-    skin.nonDisappearingPegmanHittingObstacle = true;
-  } else {
-    skin.nonDisappearingPegmanHittingObstacle = false;
-  }
-  skin.obstacleScale = config.obstacleScale || 1.0;
-  skin.largerObstacleAnimationTiles =
-      skin.assetUrl(config.largerObstacleAnimationTiles);
-  skin.idlePegmanAnimation =
-      skin.assetUrl(config.idlePegmanAnimation);
-  skin.wallPegmanAnimation =
-      skin.assetUrl(config.wallPegmanAnimation);
-  skin.movePegmanAnimation =
-      skin.assetUrl(config.movePegmanAnimation);
-  skin.movePegmanAnimationSpeedScale =
-      config.movePegmanAnimationSpeedScale || 1;
-  // This is required when move pegman animation is set
-  skin.movePegmanAnimationFrameNumber = config.movePegmanAnimationFrameNumber;
-  skin.hittingWallAnimation =
-      skin.assetUrl(config.hittingWallAnimation);
-  skin.approachingGoalAnimation =
-      skin.assetUrl(config.approachingGoalAnimation);
+  skin.movePegmanAnimationSpeedScale = 1;
+  skin.look = '#FFF';
+  skin.background = skin.assetUrl('background.png');
+  skin.pegmanHeight = 52;
+  skin.pegmanWidth = 49;
+  skin.pegmanYOffset = 0;
+
   // Sounds
-  skin.obstacleSound =
-      [skin.assetUrl('obstacle.mp3'), skin.assetUrl('obstacle.ogg')];
-  skin.wallSound = [skin.assetUrl('wall.mp3'), skin.assetUrl('wall.ogg')];
-  skin.winGoalSound = [skin.assetUrl('win_goal.mp3'),
-                       skin.assetUrl('win_goal.ogg')];
-  skin.wall0Sound = [skin.assetUrl('wall0.mp3'), skin.assetUrl('wall0.ogg')];
-  skin.wall1Sound = [skin.assetUrl('wall1.mp3'), skin.assetUrl('wall1.ogg')];
-  skin.wall2Sound = [skin.assetUrl('wall2.mp3'), skin.assetUrl('wall2.ogg')];
-  skin.wall3Sound = [skin.assetUrl('wall3.mp3'), skin.assetUrl('wall3.ogg')];
-  skin.wall4Sound = [skin.assetUrl('wall4.mp3'), skin.assetUrl('wall4.ogg')];
-  skin.fillSound = [skin.assetUrl('fill.mp3'), skin.assetUrl('fill.ogg')];
-  skin.digSound = [skin.assetUrl('dig.mp3'), skin.assetUrl('dig.ogg')];
-  skin.additionalSound = config.additionalSound;
-  skin.dirtSound = config.dirtSound;
-  // Settings
-  skin.look = config.look;
-  skin.dirt = skin.assetUrl('dirt.png');
-  skin.nectar = skin.assetUrl('nectar.png');
-  skin.honey = skin.assetUrl('honey.png');
-  skin.flowerComb = skin.assetUrl('flowercomb.png');
-  skin.redFlowerWithNectar = skin.assetUrl('redFlowerWithNectar.png');
-  skin.redFlowerWithoutNectar = skin.assetUrl('redFlowerNectarHidden.png');
-  skin.purpleFlowerWithoutNectar = skin.assetUrl('purpleFlowerNectarHidden.png');
-  if (config.background !== undefined) {
-    var index = Math.floor(Math.random() * config.background);
-    skin.background = skin.assetUrl('background' + index + '.png');
-  } else {
-    skin.background = skin.assetUrl('background.png');
+  skin.obstacleSound = soundAssetUrls(skin, 'obstacle.mp3');
+  skin.wallSound = soundAssetUrls(skin, 'wall.mp3');
+  skin.winGoalSound = soundAssetUrls(skin, 'win_goal.mp3');
+  skin.wall0Sound = soundAssetUrls(skin, 'wall0.mp3');
+  skin.wall1Sound = soundAssetUrls(skin, 'wall1.mp3');
+  skin.wall2Sound = soundAssetUrls(skin, 'wall2.mp3');
+  skin.wall3Sound = soundAssetUrls(skin, 'wall3.mp3');
+  skin.wall4Sound = soundAssetUrls(skin, 'wall4.mp3');
+
+  // (3) Get properties from config
+  var isAsset = /\.\S{3}$/; // ends in dot followed by three non-whitespace chars
+  var isSound = /^(.*)\.mp3$/; // something.mp3
+  for (var prop in config) {
+    var val = config[prop];
+    if (isSound.test(val)) {
+      val = soundAssetUrls(skin, val);
+    } else if (isAsset.test(val)) {
+      val = skin.assetUrl(val);
+    }
+    skin[prop] = val;
   }
-  skin.pegmanHeight = config.pegmanHeight || 52;
-  skin.pegmanWidth = config.pegmanWidth || 49;
-  skin.pegmanYOffset = config.pegmanYOffset || 0;
-  skin.danceOnLoad = (config.danceOnLoad === undefined) ? true : config.danceOnLoad;
+
   return skin;
 };
 
-},{"../skins":35}],25:[function(require,module,exports){
+},{"../lodash":11,"../skins":35}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10207,14 +10212,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 'R', 'U', 'Nx', 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2, 'R', 'U', 'Nx',   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ],
     'startBlocks': blockUtils.blockOfType('maze_moveEast')
   },
@@ -10226,14 +10231,14 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 2, 0, 0, 0, 0],
-      [0, 0, 0, 'S', 0, 0, 0, 0],
-      [0, 0, 0, 'E', 0, 0, 0, 0],
-      [0, 0, 0, 'Tx', 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   2,   0,   0,   0,   0],
+      [0,   0,   0, 'S',   0,   0,   0,   0],
+      [0,   0,   0, 'E',   0,   0,   0,   0],
+      [0,   0,   0, 'Tx',   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ],
     'startBlocks': blockUtils.blockOfType('maze_moveSouth')
   },
@@ -10245,14 +10250,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 'M', 'O', 'V', 'Ex', 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2, 'M', 'O', 'V', 'Ex',   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ],
     'startBlocks': blockUtils.blockOfType('maze_moveEast')
   },
@@ -10264,14 +10269,14 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 0, 0, 0, 0, 0],
-      [0, 0, 12, 0, 0, 0, 0, 0],
-      [0, 0, 24, 0, 0, 0, 0, 0],
-      [0, 0, 13, 0, 0, 0, 0, 0],
-      [0, 0, 44, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2,   0,   0,   0,   0,   0],
+      [0,   0, 'C',   0,   0,   0,   0,   0],
+      [0,   0, 'O',   0,   0,   0,   0,   0],
+      [0,   0, 'D',   0,   0,   0,   0,   0],
+      [0,   0, 'Ex',   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_5': {
@@ -10282,14 +10287,14 @@ module.exports = {
     ],
     'startDirection': Direction.NORTH,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 62, 0, 0, 0, 0, 0, 0],
-      [0, 10, 0, 0, 0, 0, 0, 0],
-      [0, 27, 0, 0, 0, 0, 0, 0],
-      [0, 13, 0, 0, 0, 0, 0, 0],
-      [0, 2, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0, 'Wx',   0,   0,   0,   0,   0,   0],
+      [0, 'A',   0,   0,   0,   0,   0,   0],
+      [0, 'R',   0,   0,   0,   0,   0,   0],
+      [0, 'D',   0,   0,   0,   0,   0,   0],
+      [0,   2,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_6': {
@@ -10300,14 +10305,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 19, 30, 22, 0, 0],
-      [0, 0, 0, 0, 0, 55, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2, 'J', 'U', 'M',   0,   0],
+      [0,   0,   0,   0,   0, 'P',   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_7': {
@@ -10318,14 +10323,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 59, 0, 0, 0],
-      [0, 0, 0, 0, 33, 0, 0, 0],
-      [0, 0, 2, 23, 14, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0, 'Tx',  0,   0,   0],
+      [0,   0,   0,   0, 'X',   0,   0,   0],
+      [0,   0,   2, 'N', 'E',   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_8': {
@@ -10336,14 +10341,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 32, 0, 0, 0, 0],
-      [0, 0, 0, 14, 28, 59, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2, 'W',   0,   0,   0,   0],
+      [0,   0,   0, 'E', 'S', 'Tx',  0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_9': {
@@ -10354,14 +10359,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 28, 59, 0, 0, 0],
-      [0, 2, 14, 10, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0, 'S', 'Tx',  0,   0,   0],
+      [0,   2, 'E', 'A',   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_10': {
@@ -10372,14 +10377,14 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 0, 0, 0, 0, 0],
-      [0, 0, 23, 0, 0, 0, 0, 0],
-      [0, 0, 24, 0, 0, 0, 0, 0],
-      [0, 0, 27, 0, 0, 0, 0, 0],
-      [0, 0, 29, 0, 0, 0, 0],
-      [0, 0, 47, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2,   0,   0,   0,   0,   0],
+      [0,   0, 'N',   0,   0,   0,   0,   0],
+      [0,   0, 'O',   0,   0,   0,   0,   0],
+      [0,   0, 'R',   0,   0,   0,   0,   0],
+      [0,   0, 'T',   0,   0,   0,   0,   0],
+      [0,   0, 'Hx',  0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_11': {
@@ -10390,14 +10395,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 28, 24, 0, 0, 0],
-      [0, 0, 0, 0, 30, 0, 0, 0],
-      [0, 0, 0, 0, 29, 0, 0, 0],
-      [0, 0, 0, 0, 47, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2, 'S', 'O',   0,   0,   0],
+      [0,   0,   0,   0, 'U',   0,   0,   0],
+      [0,   0,   0,   0, 'T',   0,   0,   0],
+      [0,   0,   0,   0, 'Hx',  0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_12': {
@@ -10408,14 +10413,14 @@ module.exports = {
     ],
     'startDirection': Direction.NORTH,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 24, 21, 24, 57, 0, 0, 0],
-      [0, 12, 0, 0, 0, 0, 0, 0],
-      [0, 2, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0, 'I', 'G', 'H', 'Tx',  0,   0,   0],
+      [0, 'R',   0,   0,   0,   0,   0,   0],
+      [0,   2,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_13': {
@@ -10426,14 +10431,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 2, 13, 14, 0, 0, 0, 0],
-      [0, 0, 0, 11, 0, 0, 0, 0],
-      [0, 0, 0, 30, 46, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   2, 'D', 'E',   0,   0,   0,   0],
+      [0,   0,   0, 'B',   0,   0,   0,   0],
+      [0,   0,   0, 'U', 'Gx',  0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_14': {
@@ -10444,14 +10449,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 28, 14, 59, 0, 0],
-      [0, 0, 0, 14, 0, 0, 0, 0],
-      [0, 0, 2, 27, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0, 'S', 'E', 'Tx',  0,   0],
+      [0,   0,   0, 'E',   0,   0,   0,   0],
+      [0,   0,   2, 'R',   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_15': {
@@ -10462,14 +10467,14 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 0, 0, 0, 0, 0],
-      [0, 0, 10, 0, 0, 0, 0, 0],
-      [0, 0, 11, 24, 0, 0, 0, 0],
-      [0, 0, 0, 31, 44, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2,   0,   0,   0,   0,   0],
+      [0,   0, 'A',   0,   0,   0,   0,   0],
+      [0,   0, 'B', 'O',   0,   0,   0,   0],
+      [0,   0,   0, 'V', 'Ex',  0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_16': {
@@ -10480,14 +10485,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 62, 0, 0, 0],
-      [0, 0, 0, 0, 24, 0, 0, 0],
-      [0, 0, 0, 14, 21, 0, 0, 0],
-      [0, 0, 2, 11, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0, 'Wx',  0,   0,   0],
+      [0,   0,   0,   0, 'O',   0,   0,   0],
+      [0,   0,   0, 'E', 'L',   0,   0,   0],
+      [0,   0,   2, 'B',   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_17': {
@@ -10498,14 +10503,14 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 2, 0, 0, 0, 0, 0],
-      [0, 0, 28, 26, 0, 0, 0, 0],
-      [0, 0, 0, 30, 10, 0, 0, 0],
-      [0, 0, 0, 0, 27, 0, 0, 0],
-      [0, 0, 0, 0, 44, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   2,   0,   0,   0,   0,   0],
+      [0,   0, 'S', 'Q',   0,   0,   0,   0],
+      [0,   0,   0, 'U', 'A',   0,   0,   0],
+      [0,   0,   0,   0, 'R',   0,   0,   0],
+      [0,   0,   0,   0, 'Ex',  0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   },
   'k_18': {
@@ -10516,14 +10521,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 10, 52, 0],
-      [0, 0, 0, 0, 0, 27, 0, 0],
-      [0, 0, 0, 27, 24, 16, 0, 0],
-      [0, 0, 2, 25, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0, 'A', 'Mx',  0],
+      [0,   0,   0,   0,   0, 'R',   0,   0],
+      [0,   0,   0, 'R', 'O', 'G',   0,   0],
+      [0,   0,   2, 'P',   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0],
+      [0,   0,   0,   0,   0,   0,   0,   0]
     ]
   }
 };
