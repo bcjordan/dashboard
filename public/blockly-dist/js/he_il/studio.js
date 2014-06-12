@@ -70,7 +70,11 @@ module.exports = function(app, levels, options) {
 
   addReadyListener(function() {
     if (options.readonly) {
-      BlocklyApps.initReadonly(options);
+      if (app.initReadonly) {
+        app.initReadonly(options);
+      } else {
+        BlocklyApps.initReadonly(options);
+      }
     } else {
       app.init(options);
       if (options.onInitialize) {
@@ -1251,10 +1255,12 @@ exports.displayFeedback = function(options) {
   var canContinue = exports.canContinueToNextLevel(options.feedbackType);
   var displayShowCode = BlocklyApps.enableShowCode && canContinue;
   var feedback = document.createElement('div');
-  var feedbackMessage = getFeedbackMessage(options);
   var sharingDiv = (canContinue && options.showingSharing) ? exports.createSharingDiv(options) : null;
   var showCode = displayShowCode ? getShowCodeElement(options) : null;
   var feedbackBlocks = new FeedbackBlocks(options);
+  // feedbackMessage must be initialized after feedbackBlocks
+  // because FeedbackBlocks can mutate options.response.hint.
+  var feedbackMessage = getFeedbackMessage(options);
 
   if (feedbackMessage) {
     feedback.appendChild(feedbackMessage);
@@ -1264,7 +1270,12 @@ exports.displayFeedback = function(options) {
     feedback.appendChild(trophies);
   }
   if (feedbackBlocks.div) {
-    feedback.appendChild(feedbackBlocks.div);
+    if (feedbackMessage && useSpecialFeedbackDesign(options)) {
+      // put the blocks iframe inside the feedbackMessage for this special case:
+      feedbackMessage.appendChild(feedbackBlocks.div);
+    } else {
+      feedback.appendChild(feedbackBlocks.div);
+    }
   }
   if (sharingDiv) {
     feedback.appendChild(sharingDiv);
@@ -1435,6 +1446,12 @@ var getFeedbackButtons = function(options) {
   return buttons;
 };
 
+var useSpecialFeedbackDesign = function (options) {
+ return options.response &&
+        options.response.design &&
+        isFeedbackMessageCustomized(options);
+};
+
 var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
@@ -1516,8 +1533,7 @@ var getFeedbackMessage = function(options) {
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-  if (options.response && options.response.design &&
-      isFeedbackMessageCustomized(options)) {
+  if (useSpecialFeedbackDesign(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1672,15 +1688,39 @@ var getGeneratedCodeString = function() {
 };
 
 var FeedbackBlocks = function(options) {
-  var missingBlocks = getMissingRequiredBlocks();
-  if (missingBlocks.length === 0) {
-    return;
+  // Check whether blocks are embedded in the hint returned from dashboard.
+  // See below comment for format.
+  var embeddedBlocks = options.response && options.response.hint &&
+      options.response.hint.indexOf("[{") !== 0;
+  if (!embeddedBlocks &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_FINISHED) {
+      return;
   }
-  if ((options.response && options.response.hint) ||
-      (options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
-       options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_FINISHED)) {
+
+  var blocksToDisplay = [];
+  if (embeddedBlocks) {
+    // Hint should be of the form: SOME TEXT {[..], [..], ...} IGNORED.
+    // Example: 'Try the following block: [{"type": "maze_moveForward"}]'
+    // Note that double quotes are required by the JSON parser.
+    var parts = options.response.hint.match(/(.*)(\[.*\])/);
+    if (!parts) {
+      return;
+    }
+    options.response.hint = parts[1].trim();  // Remove blocks from hint.
+    try {
+      blocksToDisplay = JSON.parse(parts[2]);
+    } catch(err) {
+      // The blocks could not be parsed.  Ignore them.
+      return;
+    }
+  } else {
+    blocksToDisplay = getMissingRequiredBlocks();
+  }
+
+  if (blocksToDisplay.length === 0) {
     return;
   }
 
@@ -1696,11 +1736,12 @@ var FeedbackBlocks = function(options) {
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
       level: options.level,
-      blocks: generateXMLForBlocks(missingBlocks)
+      blocks: generateXMLForBlocks(blocksToDisplay)
     }
   });
   this.iframe = document.createElement('iframe');
   this.iframe.setAttribute('id', 'feedbackBlocks');
+  this.iframe.setAttribute('allowtransparency', 'true');
   this.div.appendChild(this.iframe);
 };
 
@@ -7072,8 +7113,9 @@ exports.load = function(assetUrl, id) {
     downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
     upJumpArrow: assetUrl('media/common_images/jumpup.png'),
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
-    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
-    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
     startIcon: assetUrl('media/common_images/start-icon.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
@@ -7492,8 +7534,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenLeft());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenLeft));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenLeft());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenLeftTooltip());
@@ -7507,8 +7554,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenRight());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenRight));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenRight());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenRightTooltip());
@@ -7522,8 +7574,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenUp());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenUp));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenUp());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenUpTooltip());
@@ -7537,8 +7594,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenDown());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenDown));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenDown());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenDownTooltip());
@@ -7567,10 +7629,17 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(322, 0.90, 0.95);
-      this.appendDummyInput()
-        .appendTitle(msg.repeatForever());
-      this.appendStatementInput('DO')
-        .appendTitle(msg.repeatDo());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.repeat());
+        this.appendStatementInput('DO')
+          .appendTitle(new blockly.FieldImage(skin.repeatImage));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.repeatForever());
+        this.appendStatementInput('DO')
+          .appendTitle(msg.repeatDo());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(false);
       this.setTooltip(msg.repeatForeverTooltip());
@@ -7626,8 +7695,10 @@ exports.install = function(blockly, blockInstallOptions) {
         dropdown1 = startingSpriteImageDropdown();
         dropdown2 = startingSpriteImageDropdown();
         this.appendDummyInput().appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.collide))
           .appendTitle(dropdown1, 'SPRITE1');
-        this.appendDummyInput().appendTitle(msg.whenSpriteCollidedWith())
+        this.appendDummyInput()
+          .appendTitle(commonMsg.and())
           .appendTitle(dropdown2, 'SPRITE2');
       } else {
         dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
@@ -7938,6 +8009,12 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.moveSprite5(), '4'],
        [msg.moveSprite6(), '5']];
 
+  blockly.Blocks.studio_move.K1_DIR =
+      [[skin.upArrowSmall, Direction.NORTH.toString()],
+       [skin.rightArrowSmall, Direction.EAST.toString()],
+       [skin.downArrowSmall, Direction.SOUTH.toString()],
+       [skin.leftArrowSmall, Direction.WEST.toString()]];
+
   blockly.Blocks.studio_move.DIR =
       [[msg.moveDirectionUp(), Direction.NORTH.toString()],
        [msg.moveDirectionDown(), Direction.SOUTH.toString()],
@@ -8077,14 +8154,34 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected),
-                       'SOUND');
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.play())
+          .appendTitle(new blockly.FieldImage(skin.soundIcon))
+          .appendTitle(new blockly.FieldDropdown(this.K1_SOUNDS, onSoundSelected), 'SOUND');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected), 'SOUND');
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
     }
   };
+
+  blockly.Blocks.studio_playSound.K1_SOUNDS =
+      [[msg.soundHit(), 'hit'],
+       [msg.soundWood(), 'wood'],
+       [msg.soundRetro(), 'retro'],
+       [msg.soundSlap(), 'slap'],
+       [msg.soundRubber(), 'rubber'],
+       [msg.soundCrunch(), 'crunch'],
+       [msg.soundWinPoint(), 'winpoint'],
+       [msg.soundWinPoint2(), 'winpoint2'],
+       [msg.soundLosePoint(), 'losepoint'],
+       [msg.soundLosePoint2(), 'losepoint2'],
+       [msg.soundGoal1(), 'goal1'],
+       [msg.soundGoal2(), 'goal2']];
 
   blockly.Blocks.studio_playSound.SOUNDS =
       [[msg.playSoundHit(), 'hit'],
@@ -8113,7 +8210,8 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (isK1) {
         this.appendDummyInput()
-          .appendTitle(msg.incrementPlayerScore());
+          .appendTitle(msg.score())
+          .appendTitle(new blockly.FieldImage(skin.scoreCard));
       } else {
         this.appendDummyInput()
           .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
@@ -8162,28 +8260,44 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for setting sprite speed
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[3][1]); // default to normal
-
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
       this.setHSV(184, 1.00, 0.74);
+
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.setSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(dropdown, 'VALUE');
+
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES);
+        fieldImageDropdown.setValue(this.K1_VALUES[1][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.speed())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[3][1]); // default to normal
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
+
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.setSpriteSpeedTooltip());
     }
   };
+
+  blockly.Blocks.studio_setSpriteSpeed.K1_VALUES =
+      [[skin.speedSlow, 'Studio.SpriteSpeed.SLOW'],
+       [skin.speedMedium, 'Studio.SpriteSpeed.NORMAL'],
+       [skin.speedFast, 'Studio.SpriteSpeed.FAST']];
 
   blockly.Blocks.studio_setSpriteSpeed.VALUES =
       [[msg.setSpriteSpeedRandom(), RANDOM_VALUE],
@@ -8428,9 +8542,6 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_setSpriteEmotion = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]);  // default to normal
-
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         if (isK1) {
@@ -8444,8 +8555,19 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(dropdown, 'VALUE');
+
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES, 34, 34);
+        fieldImageDropdown.setValue(this.K1_VALUES[0][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.emotion())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[1][1]);  // default to normal
+        this.appendDummyInput()
+          .appendTitle(dropdown, 'VALUE');
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
@@ -8467,6 +8589,13 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSpriteEmotionHappy(), Emotions.HAPPY.toString()],
        [msg.setSpriteEmotionAngry(), Emotions.ANGRY.toString()],
        [msg.setSpriteEmotionSad(), Emotions.SAD.toString()]];
+
+  blockly.Blocks.studio_setSpriteEmotion.K1_VALUES =
+      [[skin.emotionNormal, Emotions.NORMAL.toString()],
+       [skin.emotionHappy, Emotions.HAPPY.toString()],
+       [skin.emotionAngry, Emotions.ANGRY.toString()],
+       [skin.emotionSad, Emotions.SAD.toString()],
+       [skin.randomPurpleIcon, RANDOM_VALUE]];
 
   generator.studio_setSpriteEmotion = function() {
     return generateSetterCode({
@@ -8496,8 +8625,11 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendValueInput('TEXT')
           .setCheck('String');
       } else {
-        this.appendDummyInput()
-          .appendTitle(new Blockly.FieldImage(
+        var quotedTextInput = this.appendDummyInput();
+        if (isK1) {
+          quotedTextInput.appendTitle(new Blockly.FieldImage(skin.speechBubble));
+        }
+        quotedTextInput.appendTitle(new Blockly.FieldImage(
                   Blockly.assetUrl('media/quote0.png'), 12, 12))
           .appendTitle(new Blockly.FieldTextInput(msg.defaultSayText()), 'TEXT')
           .appendTitle(new Blockly.FieldImage(
@@ -8692,7 +8824,7 @@ module.exports = {
   },
   '2': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}]
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}]
     ],
     'scale': {
       'snapRadius': 2
@@ -8716,7 +8848,7 @@ module.exports = {
   },
   '3': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}],
       [{'test': 'saySprite', 'type': 'studio_saySprite'}]
     ],
     'scale': {
@@ -8925,7 +9057,9 @@ module.exports = {
   },
   '9': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance',
+        'type': 'studio_moveDistance',
+        'titles': {'SPRITE': '1', 'DISTANCE': '400'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -8949,7 +9083,7 @@ module.exports = {
     'spriteStartingImage': 2,
     'spriteFinishIndex': 1,
     'timeoutFailureTick': 150,
-    'minWorkspaceHeight': 750,
+    'minWorkspaceHeight': 800,
     'toolbox':
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
@@ -8961,23 +9095,23 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"></block>'
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"></block>'
   },
   '10': {
     'requiredBlocks': [
-      [{'test': 'playSound', 'type': 'studio_playSound'}],
+      [{'test': 'playSound', 'type': 'studio_playSound', 'titles': {'SOUND': 'crunch'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -8999,7 +9133,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 950,
+    'minWorkspaceHeight': 900,
     'goal': {
       successCondition: function () {
         return (Studio.playSoundCount > 0) &&
@@ -9020,19 +9154,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9042,7 +9176,7 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"></block>'
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"></block>'
   },
   '11': {
     'requiredBlocks': [
@@ -9089,19 +9223,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9111,17 +9245,21 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="820"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="860"> \
        <title name="SPRITE2">2</title></block>'
   },
   '12': {
     'requiredBlocks': [
-      [{'test': 'setBackground', 'type': 'studio_setBackground'}],
-      [{'test': 'setSpriteSpeed', 'type': 'studio_setSpriteSpeed'}],
+      [{'test': 'setBackground',
+        'type': 'studio_setBackground',
+        'titles': {'VALUE': '"night"'}}],
+      [{'test': 'setSpriteSpeed',
+        'type': 'studio_setSpriteSpeed',
+        'titles': {'VALUE': 'Studio.SpriteSpeed.FAST'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -9143,7 +9281,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 1200,
+    'minWorkspaceHeight': 1250,
     'goal': {
       successCondition: function () {
         return Studio.sprite[0].collisionMask & Math.pow(2, 2);
@@ -9162,26 +9300,26 @@ module.exports = {
            <title name="SOUND">crunch</title></block>' +
          blockOfType('studio_changeScore') +
          '<block type="studio_setSpriteSpeed"> \
-          <title name="VALUE">Studio.SpriteSpeed.VERY_FAST</title></block>'),
+          <title name="VALUE">Studio.SpriteSpeed.FAST</title></block>'),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
       <block type="studio_whenLeft" deletable="false" x="20" y="200"> \
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="320"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="330"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="440"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="460"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="560"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="590"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="680"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="720"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9191,11 +9329,11 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="880"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="910"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1000"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1040"> \
        <title name="SPRITE2">2</title> \
         <next><block type="studio_changeScore"></block> \
         </next></block>'
@@ -9543,6 +9681,20 @@ exports.load = function(assetUrl, id) {
   };
 
   // Images
+  skin.whenUp = skin.assetUrl('when-up.png');
+  skin.whenDown = skin.assetUrl('when-down.png');
+  skin.whenLeft = skin.assetUrl('when-left.png');
+  skin.whenRight = skin.assetUrl('when-right.png');
+  skin.speedFast = skin.assetUrl('speed-fast.png');
+  skin.speedMedium = skin.assetUrl('speed-medium.png');
+  skin.speedSlow = skin.assetUrl('speed-slow.png');
+  skin.collide = skin.assetUrl('when-sprite-collide.png');
+  skin.emotionAngry = skin.assetUrl('emotion-angry.png');
+  skin.emotionNormal = skin.assetUrl('emotion-nothing.png');
+  skin.emotionSad = skin.assetUrl('emotion-sad.png');
+  skin.emotionHappy = skin.assetUrl('emotion-happy.png');
+  skin.scoreCard = skin.assetUrl('increment-score.png');
+  skin.speechBubble = skin.assetUrl('say-sprite.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
   skin.approachingGoalAnimation =
@@ -9937,7 +10089,7 @@ var drawMap = function() {
   svg.setAttribute('height', Studio.MAZE_HEIGHT);
 
   // Attach click handler.
-  var hammerSvg = new Hammer(svg, {preventDefault: true});
+  var hammerSvg = new Hammer(svg);
   hammerSvg.on("tap", Studio.onSvgClicked);
   hammerSvg.on("drag", Studio.onSvgDrag);
 
@@ -10497,8 +10649,11 @@ Studio.onTick = function() {
 };
 
 Studio.onSvgDrag = function(e) {
-  Studio.gesturesObserved[e.gesture.direction] =
-    Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+  if (Studio.intervalId) {
+    Studio.gesturesObserved[e.gesture.direction] =
+      Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+    e.gesture.preventDefault();
+  }
 };
 
 Studio.onKey = function(e) {
@@ -10553,6 +10708,64 @@ Studio.onArrowButtonUp = function(e, idBtn) {
 Studio.onMouseUp = function(e) {
   // Reset btnState on mouse up
   Studio.btnState = {};
+};
+
+Studio.initSprites = function () {
+  Studio.spriteFinishCount = 0;
+  Studio.spriteCount = 0;
+  Studio.sprite = [];
+  Studio.projectiles = [];
+
+  // Locate the start and finish positions.
+  for (var y = 0; y < Studio.ROWS; y++) {
+    for (var x = 0; x < Studio.COLS; x++) {
+      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
+        if (0 === Studio.spriteFinishCount) {
+          Studio.spriteFinish_ = [];
+        }
+        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
+        Studio.spriteFinishCount++;
+      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
+        if (0 === Studio.spriteCount) {
+          Studio.spriteStart_ = [];
+        }
+        Studio.sprite[Studio.spriteCount] = [];
+        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
+        Studio.spriteCount++;
+      }
+    }
+  }
+
+  // Update the sprite count in the blocks:
+  blocks.setSpriteCount(Blockly, Studio.spriteCount);
+
+  if (level.projectileCollisions) {
+    blocks.enableProjectileCollisions(Blockly);
+  }
+
+  if (level.edgeCollisions) {
+    blocks.enableEdgeCollisions(Blockly);
+  }
+
+  if (level.spritesOutsidePlayspace) {
+    blocks.enableSpritesOutsidePlayspace(Blockly);
+  }
+};
+
+/**
+ * Initialize Blockly and Studio for read-only (blocks feedback).
+ * Called on iframe load for read-only.
+ */
+Studio.initReadonly = function(config) {
+  // Do some minimal level loading and sprite initialization so that
+  // we can ensure that the blocks are appropriately modified for this level
+  skin = config.skin;
+  level = config.level;
+  loadLevel();
+
+  Studio.initSprites();
+
+  BlocklyApps.initReadonly(config);
 };
 
 /**
@@ -10656,45 +10869,7 @@ Studio.init = function(config) {
 
   config.preventExtraTopLevelBlocks = true;
 
-  Studio.spriteFinishCount = 0;
-  Studio.spriteCount = 0;
-  Studio.sprite = [];
-  Studio.projectiles = [];
-
-  // Locate the start and finish positions.
-  for (var y = 0; y < Studio.ROWS; y++) {
-    for (var x = 0; x < Studio.COLS; x++) {
-      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
-        if (0 === Studio.spriteFinishCount) {
-          Studio.spriteFinish_ = [];
-        }
-        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
-        Studio.spriteFinishCount++;
-      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
-        if (0 === Studio.spriteCount) {
-          Studio.spriteStart_ = [];
-        }
-        Studio.sprite[Studio.spriteCount] = [];
-        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
-        Studio.spriteCount++;
-      }
-    }
-  }
-
-  // Update the sprite count in the blocks:
-  blocks.setSpriteCount(Blockly, Studio.spriteCount);
-
-  if (level.projectileCollisions) {
-    blocks.enableProjectileCollisions(Blockly);
-  }
-
-  if (level.edgeCollisions) {
-    blocks.enableEdgeCollisions(Blockly);
-  }
-
-  if (level.spritesOutsidePlayspace) {
-    blocks.enableSpritesOutsidePlayspace(Blockly);
-  }
+  Studio.initSprites();
 
   BlocklyApps.init(config);
 
@@ -12316,7 +12491,7 @@ escape = escape || function (html){
 var buf = [];
 with (locals || {}) { (function(){ 
  buf.push('<!DOCTYPE html>\n<html dir="', escape((2,  options.localeDirection )), '">\n<head>\n  <meta charset="utf-8">\n  <title>Blockly</title>\n  <script type="text/javascript" src="', escape((6,  assetUrl('js/' + options.locale + '/vendor.js') )), '"></script>\n  <script type="text/javascript" src="', escape((7,  assetUrl('js/' + options.locale + '/' + app + '.js') )), '"></script>\n  <script type="text/javascript">\n    ');9; // delay to onload to fix IE9. 
-; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: #fff;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
+; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: transparent;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      background-color: transparent;\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
 } 
 return buf.join('');
 };
@@ -12527,6 +12702,8 @@ exports.parseElement = function(text) {
 
 },{}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.he=function(n){return n===1?"one":"other"}
+exports.and = function(d){return "and"};
+
 exports.blocklyMessage = function(d){return "Blockly"};
 
 exports.catActions = function(d){return "פעולות"};
@@ -12603,7 +12780,11 @@ exports.numBlocksNeeded = function(d){return "כל הכבוד! השלמת את �
 
 exports.numLinesOfCodeWritten = function(d){return "כתבת "+p(d,"numLines",0,"he",{"one":"שורת","other":n(d,"numLines")+" שורות"})+" קוד!"};
 
+exports.play = function(d){return "play"};
+
 exports.puzzleTitle = function(d){return "חידה "+v(d,"puzzle_number")+" מ- "+v(d,"stage_total")};
+
+exports.repeat = function(d){return "repeat"};
 
 exports.resetProgram = function(d){return "אפס"};
 
@@ -12668,6 +12849,8 @@ exports.hintHeader = function(d){return "הנה עצה:"};
 
 },{"messageformat":51}],39:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.he=function(n){return n===1?"one":"other"}
+exports.actor = function(d){return "actor"};
+
 exports.catActions = function(d){return "Actions"};
 
 exports.catControl = function(d){return "Loops"};
@@ -12693,6 +12876,8 @@ exports.continue = function(d){return "המשך"};
 exports.decrementPlayerScore = function(d){return "remove point"};
 
 exports.defaultSayText = function(d){return "type here"};
+
+exports.emotion = function(d){return "emotion"};
 
 exports.finalLevel = function(d){return "מזל טוב! השלמת את הפאזל האחרון."};
 
@@ -12868,6 +13053,8 @@ exports.saySprite6 = function(d){return "character 6 say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
+exports.score = function(d){return "score"};
+
 exports.scoreText = function(d){return "ניקוד: "+v(d,"playerScore")+":"+v(d,"opponentScore")};
 
 exports.setBackground = function(d){return "set background"};
@@ -12975,6 +13162,32 @@ exports.setSprite4 = function(d){return "set character 4"};
 exports.setSprite5 = function(d){return "set character 5"};
 
 exports.setSprite6 = function(d){return "set character 6"};
+
+exports.soundCrunch = function(d){return "crunch"};
+
+exports.soundGoal1 = function(d){return "goal 1"};
+
+exports.soundGoal2 = function(d){return "goal 2"};
+
+exports.soundHit = function(d){return "hit"};
+
+exports.soundLosePoint = function(d){return "lose point"};
+
+exports.soundLosePoint2 = function(d){return "lose point 2"};
+
+exports.soundRetro = function(d){return "retro"};
+
+exports.soundRubber = function(d){return "rubber"};
+
+exports.soundSlap = function(d){return "slap"};
+
+exports.soundWinPoint = function(d){return "win point"};
+
+exports.soundWinPoint2 = function(d){return "win point 2"};
+
+exports.soundWood = function(d){return "wood"};
+
+exports.speed = function(d){return "speed"};
 
 exports.sprite1 = function(d){return "actor 1"};
 
