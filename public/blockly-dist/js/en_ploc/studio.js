@@ -7117,8 +7117,12 @@ exports.load = function(assetUrl, id) {
     longLineDraw: assetUrl('media/common_images/draw-long.png'),
     soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -7453,6 +7457,7 @@ var Emotions = tiles.Emotions;
 
 var RANDOM_VALUE = 'random';
 var HIDDEN_VALUE = '"hidden"';
+var CLICK_VALUE = '"click"';
 var VISIBLE_VALUE = '"visible"';
 var CAVE_VALUE = '"cave"';
 
@@ -7462,7 +7467,7 @@ var generateSetterCode = function (opts) {
     var possibleValues =
       _(opts.ctx.VALUES)
         .map(function (item) { return item[1]; })
-        .without(RANDOM_VALUE, HIDDEN_VALUE);
+        .without(RANDOM_VALUE, HIDDEN_VALUE, CLICK_VALUE);
     value = 'Studio.random([' + possibleValues + '])';
   }
 
@@ -7503,14 +7508,20 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_edgeCollisions = false;
   blockly.Blocks.studio_spritesOutsidePlayspace = false;
 
+  function spriteNumberTextArray(string) {
+    var spriteNumbers = _.range(0, blockly.Blocks.studio_spriteCount);
+    return _.map(spriteNumbers, function (index) {
+        return [ string({spriteIndex: index + 1}),
+                 index.toString() ];
+    });
+  }
   /**
    * Creates a dropdown with options for each sprite number
    * @param choices
    * @returns {Blockly.FieldDropdown}
    */
-  function spriteNumberTextDropdown(choices) {
-    var dropdownArray = choices.slice(0, blockly.Blocks.studio_spriteCount);
-    return new blockly.FieldDropdown(dropdownArray);
+  function spriteNumberTextDropdown(string) {
+    return new blockly.FieldDropdown(spriteNumberTextArray(string));
   }
 
   /**
@@ -7614,8 +7625,14 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenGameStarts());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.startIcon));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.whenGameStarts());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenGameStartsTooltip());
@@ -7656,11 +7673,10 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.whenSpriteClickedN),
+                       'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.whenSpriteClicked());
@@ -7671,14 +7687,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.whenSpriteClickedTooltip());
     },
   };
-
-  blockly.Blocks.studio_whenSpriteClicked.SPRITE =
-    [[msg.whenSpriteClicked1(), '0'],
-     [msg.whenSpriteClicked2(), '1'],
-     [msg.whenSpriteClicked3(), '2'],
-     [msg.whenSpriteClicked4(), '3'],
-     [msg.whenSpriteClicked5(), '4'],
-     [msg.whenSpriteClicked6(), '5']];
 
   generator.studio_whenSpriteClicked = generator.studio_eventHandlerPrologue;
 
@@ -7701,9 +7709,8 @@ exports.install = function(blockly, blockInstallOptions) {
           .appendTitle(commonMsg.and())
           .appendTitle(dropdown2, 'SPRITE2');
       } else {
-        dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
-        var dropdownArray2 =
-            this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
+        dropdown1 = spriteNumberTextDropdown(msg.whenSpriteCollidedN);
+        var dropdownArray2 = spriteNumberTextArray(msg.whenSpriteCollidedWithN);
         if (blockly.Blocks.studio_projectileCollisions) {
           dropdownArray2 = dropdownArray2.concat(this.PROJECTILES);
         }
@@ -7726,22 +7733,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_whenSpriteCollided.SPRITE1 =
-      [[msg.whenSpriteCollided1(), '0'],
-       [msg.whenSpriteCollided2(), '1'],
-       [msg.whenSpriteCollided3(), '2'],
-       [msg.whenSpriteCollided4(), '3'],
-       [msg.whenSpriteCollided5(), '4'],
-       [msg.whenSpriteCollided6(), '5']];
-
-  blockly.Blocks.studio_whenSpriteCollided.SPRITE2 =
-      [[msg.whenSpriteCollidedWith1(), '0'],
-       [msg.whenSpriteCollidedWith2(), '1'],
-       [msg.whenSpriteCollidedWith3(), '2'],
-       [msg.whenSpriteCollidedWith4(), '3'],
-       [msg.whenSpriteCollidedWith5(), '4'],
-       [msg.whenSpriteCollidedWith6(), '5']];
-
   blockly.Blocks.studio_whenSpriteCollided.PROJECTILES =
       [[msg.whenSpriteCollidedWithFireball(), 'fireball'],
        [msg.whenSpriteCollidedWithFlower(), 'flower']];
@@ -7758,12 +7749,10 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for stopping the movement of a sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.stopSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.stopSprite());
@@ -7775,14 +7764,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_stop.SPRITE =
-      [[msg.stopSprite1(), '0'],
-       [msg.stopSprite2(), '1'],
-       [msg.stopSprite3(), '2'],
-       [msg.stopSprite4(), '3'],
-       [msg.stopSprite5(), '4'],
-       [msg.stopSprite6(), '5']];
-
   generator.studio_stop = function() {
     // Generate JavaScript for stopping the movement of a sprite.
     return 'Studio.stop(\'block_id_' + this.id + '\', ' +
@@ -7793,12 +7774,10 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for throwing a projectile from a sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.throwSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.throwSprite());
@@ -7815,14 +7794,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.throwTooltip());
     }
   };
-
-  blockly.Blocks.studio_throw.SPRITE =
-      [[msg.throwSprite1(), '0'],
-       [msg.throwSprite2(), '1'],
-       [msg.throwSprite3(), '2'],
-       [msg.throwSprite4(), '3'],
-       [msg.throwSprite5(), '4'],
-       [msg.throwSprite6(), '5']];
 
   blockly.Blocks.studio_throw.DIR =
         [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -7897,8 +7868,6 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for jumping a sprite to different position.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       var dropdown;
       if (blockly.Blocks.studio_spritesOutsidePlayspace) {
         dropdown = new blockly.FieldDropdown(this.VALUES_EXTENDED);
@@ -7910,7 +7879,7 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
@@ -7923,14 +7892,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.setSpritePositionTooltip());
     }
   };
-
-  blockly.Blocks.studio_setSpritePosition.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
 
   // 9 possible positions in playspace (+ random):
   blockly.Blocks.studio_setSpritePosition.VALUES =
@@ -7984,7 +7945,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.moveSpriteN), 'SPRITE');
         }
         this.appendDummyInput()
           .appendTitle('\t');
@@ -8000,14 +7961,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.moveTooltip());
     }
   };
-
-  blockly.Blocks.studio_move.SPRITE =
-      [[msg.moveSprite1(), '0'],
-       [msg.moveSprite2(), '1'],
-       [msg.moveSprite3(), '2'],
-       [msg.moveSprite4(), '3'],
-       [msg.moveSprite5(), '4'],
-       [msg.moveSprite6(), '5']];
 
   blockly.Blocks.studio_move.K1_DIR =
       [[skin.upArrowSmall, Direction.NORTH.toString()],
@@ -8039,7 +7992,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.moveSpriteN), 'SPRITE');
         }
         this.appendDummyInput()
           .appendTitle('\t');
@@ -8065,14 +8018,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setNextStatement(true);
       this.setTooltip(msg.moveDistanceTooltip());
     };
-
-    block.SPRITE =
-      [[msg.moveSprite1(), '0'],
-       [msg.moveSprite2(), '1'],
-       [msg.moveSprite3(), '2'],
-       [msg.moveSprite4(), '3'],
-       [msg.moveSprite5(), '4'],
-       [msg.moveSprite6(), '5']];
 
     block.DIR =
         [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -8210,7 +8155,7 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (isK1) {
         this.appendDummyInput()
-          .appendTitle(msg.score())
+          .appendTitle(commonMsg.score())
           .appendTitle(new blockly.FieldImage(skin.scoreCard));
       } else {
         this.appendDummyInput()
@@ -8268,7 +8213,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
         }
       } else {
         this.appendDummyInput()
@@ -8306,14 +8251,6 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSpriteSpeedNormal(), 'Studio.SpriteSpeed.NORMAL'],
        [msg.setSpriteSpeedFast(), 'Studio.SpriteSpeed.FAST'],
        [msg.setSpriteSpeedVeryFast(), 'Studio.SpriteSpeed.VERY_FAST']];
-
-  blockly.Blocks.studio_setSpriteSpeed.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
 
   generator.studio_setSpriteSpeed = function () {
     return generateSetterCode({
@@ -8460,14 +8397,6 @@ exports.install = function(blockly, blockInstallOptions) {
       }
     };
 
-    blockly.Blocks.studio_setSprite.SPRITE =
-        [[msg.sprite1(), '0'],
-         [msg.sprite2(), '1'],
-         [msg.sprite3(), '2'],
-         [msg.sprite4(), '3'],
-         [msg.sprite5(), '4'],
-         [msg.sprite6(), '5']];
-
     blockly.Blocks.studio_setSprite.VALUES =
         [[msg.setSpriteHideK1(), HIDDEN_VALUE],
          [msg.setSpriteShowK1(), VISIBLE_VALUE]];
@@ -8481,13 +8410,10 @@ exports.install = function(blockly, blockInstallOptions) {
         var dropdown = new blockly.FieldDropdown(this.VALUES);
         dropdown.setValue(this.VALUES[2][1]);  // default to witch
 
-        var dropdownArray =
-            this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
         this.setHSV(312, 0.32, 0.62);
         if (blockly.Blocks.studio_spriteCount > 1) {
           this.appendDummyInput()
-            .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
         } else {
           this.appendDummyInput()
             .appendTitle(msg.setSprite());
@@ -8501,14 +8427,6 @@ exports.install = function(blockly, blockInstallOptions) {
       }
     };
 
-    blockly.Blocks.studio_setSprite.SPRITE =
-        [[msg.setSprite1(), '0'],
-         [msg.setSprite2(), '1'],
-         [msg.setSprite3(), '2'],
-         [msg.setSprite4(), '3'],
-         [msg.setSprite5(), '4'],
-         [msg.setSprite6(), '5']];
-
     blockly.Blocks.studio_setSprite.VALUES =
         [[msg.setSpriteHidden(), HIDDEN_VALUE],
          [msg.setSpriteRandom(), RANDOM_VALUE],
@@ -8517,7 +8435,12 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.setSpriteDinosaur(), '"dinosaur"'],
          [msg.setSpriteDog(), '"dog"'],
          [msg.setSpriteOctopus(), '"octopus"'],
-         [msg.setSpritePenguin(), '"penguin"']];
+         [msg.setSpritePenguin(), '"penguin"'],
+         [msg.setSpriteBat(), '"bat"'],
+         [msg.setSpriteBird(), '"bird"'],
+         [msg.setSpriteDragon(), '"dragon"'],
+         [msg.setSpriteSquirrel(), '"squirrel"'],
+         [msg.setSpriteWizard(), '"wizard"']];
   }
 
   generator.studio_setSprite = function() {
@@ -8549,7 +8472,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
         }
       } else {
         this.appendDummyInput()
@@ -8574,14 +8497,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.setSpriteEmotionTooltip());
     }
   };
-
-  blockly.Blocks.studio_setSpriteEmotion.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
 
   blockly.Blocks.studio_setSpriteEmotion.VALUES =
       [[msg.setSpriteEmotionRandom(), RANDOM_VALUE],
@@ -8615,7 +8530,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.saySpriteN), 'SPRITE');
         }
       } else {
         this.appendDummyInput()
@@ -8640,14 +8555,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setNextStatement(true);
       this.setTooltip(msg.saySpriteTooltip());
     };
-
-    block.SPRITE =
-        [[msg.saySprite1(), '0'],
-         [msg.saySprite2(), '1'],
-         [msg.saySprite3(), '2'],
-         [msg.saySprite4(), '3'],
-         [msg.saySprite5(), '4'],
-         [msg.saySprite6(), '5']];
   };
 
   blockly.Blocks.studio_saySprite = {};
@@ -8702,7 +8609,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
     if (!block.params) {
       block.VALUES =
-        [[msg.waitForClick(), '0'],
+        [[msg.waitForClick(), '"click"'],
          [msg.waitForRandom(), 'random'],
          [msg.waitForHalfSecond(), '500'],
          [msg.waitFor1Second(), '1000'],
@@ -9350,17 +9257,17 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1300,
+    'minWorkspaceHeight': 1500,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0,16, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0,16, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'toolbox':
@@ -9395,7 +9302,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1300,
+    'minWorkspaceHeight': 1400,
     'edgeCollisions': true,
     'projectileCollisions': true,
     'spritesOutsidePlayspace': true,
@@ -9450,7 +9357,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1000,
+    'minWorkspaceHeight': 1400,
     'edgeCollisions': true,
     'projectileCollisions': true,
     'spritesOutsidePlayspace': true,
@@ -9679,21 +9586,42 @@ exports.load = function(assetUrl, id) {
     dropdownThumbnail: skin.assetUrl('witch_thumb.png'),
     sprite: skin.assetUrl('witch_sprite_200px.png'),
   };
+  skin.bat = {
+    sprite: skin.assetUrl('bat_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('bat_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.bird = {
+    sprite: skin.assetUrl('bird_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('bird_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.dragon = {
+    sprite: skin.assetUrl('dragon_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dragon_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.squirrel = {
+    sprite: skin.assetUrl('squirrel_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('squirrel_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.wizard = {
+    sprite: skin.assetUrl('wizard_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('wizard_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
 
   // Images
   skin.whenUp = skin.assetUrl('when-up.png');
   skin.whenDown = skin.assetUrl('when-down.png');
   skin.whenLeft = skin.assetUrl('when-left.png');
   skin.whenRight = skin.assetUrl('when-right.png');
-  skin.speedFast = skin.assetUrl('speed-fast.png');
-  skin.speedMedium = skin.assetUrl('speed-medium.png');
-  skin.speedSlow = skin.assetUrl('speed-slow.png');
   skin.collide = skin.assetUrl('when-sprite-collide.png');
   skin.emotionAngry = skin.assetUrl('emotion-angry.png');
   skin.emotionNormal = skin.assetUrl('emotion-nothing.png');
   skin.emotionSad = skin.assetUrl('emotion-sad.png');
   skin.emotionHappy = skin.assetUrl('emotion-happy.png');
-  skin.scoreCard = skin.assetUrl('increment-score.png');
   skin.speechBubble = skin.assetUrl('say-sprite.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
@@ -9907,6 +9835,7 @@ var feedback = require('../feedback.js');
 var dom = require('../dom');
 var Sprite = require('./sprite').Sprite;
 var Hammer = require('../hammer');
+var parseXmlElement = require('../xml').parseElement;
 
 var Direction = tiles.Direction;
 var NextTurn = tiles.NextTurn;
@@ -9986,7 +9915,7 @@ var skin;
 var onSharePage;
 
 var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
-  "witch" ];
+  "witch", "bat", "bird", "dragon", "squirrel", "wizard" ];
 
 Studio.nthStartingSkin = function(n) {
   var skinStartOffset = Studio.spriteStartingImage || 0;
@@ -10004,6 +9933,9 @@ BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
 
 //The number of blocks to show as feedback.
 BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = 1;
+
+Studio.BLOCK_X_COORDINATE = 20;
+Studio.BLOCK_Y_COORDINATE = 20;
 
 // Default Scalings
 Studio.scale = {
@@ -10729,7 +10661,7 @@ Studio.initSprites = function () {
         if (0 === Studio.spriteCount) {
           Studio.spriteStart_ = [];
         }
-        Studio.sprite[Studio.spriteCount] = [];
+        Studio.sprite[Studio.spriteCount] = {};
         Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
         Studio.spriteCount++;
       }
@@ -10766,6 +10698,52 @@ Studio.initReadonly = function(config) {
   Studio.initSprites();
 
   BlocklyApps.initReadonly(config);
+};
+
+/**
+ * Arrange the start blocks to spread them out in the workspace.
+ * This uses unique logic for studio - spread event blocks vertically even
+ * over the total height of the workspace.
+ */
+var arrangeStartBlocks = function (config) {
+  var xml = parseXmlElement(config.level.startBlocks);
+  var numUnplacedElementNodes = 0;
+  //
+  // two passes through, one to count the nodes:
+  //
+  for (var x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+    xmlChild = xml.childNodes[x];
+
+    // Only look at element nodes without a y coordinate:
+    if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+      numUnplacedElementNodes++;
+    }
+  }
+  //
+  // and one to place the nodes:
+  //
+  if (numUnplacedElementNodes) {
+    var numberOfPlacedBlocks = 0;
+    var totalHeightAvail =
+        (config.level.minWorkspaceHeight || 1000) - Studio.BLOCK_Y_COORDINATE;
+    var yCoordInterval = totalHeightAvail / numUnplacedElementNodes;
+    for (x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+      xmlChild = xml.childNodes[x];
+
+      // Only look at element nodes without a y coordinate:
+      if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+        xmlChild.setAttribute(
+            'x',
+            xmlChild.getAttribute('x') || Studio.BLOCK_X_COORDINATE);
+        xmlChild.setAttribute(
+            'y',
+            Studio.BLOCK_Y_COORDINATE + yCoordInterval * numberOfPlacedBlocks);
+        numberOfPlacedBlocks += 1;
+      }
+    }
+    // replace the startBlocks since we changed the attributes in the xml dom:
+    config.level.startBlocks = Blockly.Xml.domToText(xml);
+  }
 };
 
 /**
@@ -10846,13 +10824,7 @@ Studio.init = function(config) {
     return visualization.getBoundingClientRect().width;
   };
 
-  // TODO: update this for Studio
-  // Block placement default (used as fallback in the share levels)
-  config.blockArrangement = {
-    'studio_whenGameStarts': { x: 20, y: 20},
-    'studio_whenLeft': { x: 20, y: 110},
-    'studio_whenRight': { x: 180, y: 110},
-  };
+  arrangeStartBlocks(config);
 
   config.twitter = twitterOptions;
 
@@ -10899,6 +10871,7 @@ Studio.clearEventHandlersKillTickLoop = function() {
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
+  Studio.tickCount = 0;
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
@@ -10954,6 +10927,7 @@ BlocklyApps.reset = function(first) {
 
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
+    Studio.sprite[i] = {};
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
     Studio.sprite[i].y = Studio.spriteStart_[i].y;
     Studio.sprite[i].speed = tiles.DEFAULT_SPRITE_SPEED;
@@ -11207,7 +11181,6 @@ Studio.execute = function() {
 
   // Set event handlers and start the onTick timer
   Studio.eventHandlers = handlers;
-  Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
 
@@ -11657,9 +11630,9 @@ Studio.wait = function (opts) {
   if (!opts.started) {
     opts.started = true;
 
-    // opts.value is the number of milliseconds to wait - or zero which means
+    // opts.value is the number of milliseconds to wait - or 'click' which means
     // "wait for click"
-    if (0 === opts.value) {
+    if ('click' === opts.value) {
       opts.waitForClick = true;
     } else {
       opts.waitTimeout = window.setTimeout(
@@ -11786,12 +11759,21 @@ Studio.hideSpeechBubble = function (opts) {
   speechBubble.removeAttribute('onRight');
   speechBubble.removeAttribute('height');
   opts.complete = true;
+  delete Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc;
   Studio.sayComplete++;
 };
 
 Studio.saySprite = function (opts) {
   if (!opts.started) {
     opts.started = true;
+
+    // Remove any existing speech bubble on this sprite:
+    if (Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc) {
+      Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc();
+    }
+    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+
+    // Start creating the new speech bubble:
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
 
@@ -11818,9 +11800,10 @@ Studio.saySprite = function (opts) {
     Studio.displaySprite(opts.spriteIndex);
     speechBubble.setAttribute('visibility', 'visible');
 
-    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+    Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc =
+        delegate(this, Studio.hideSpeechBubble, opts);
     Studio.sprite[opts.spriteIndex].bubbleTimeout = window.setTimeout(
-        delegate(this, Studio.hideSpeechBubble, opts),
+        Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc,
         Studio.SPEECH_BUBBLE_TIMEOUT);
   }
 
@@ -12148,7 +12131,7 @@ var checkFinished = function () {
   return false;
 };
 
-},{"../../locale/en_ploc/common":38,"../../locale/en_ploc/studio":39,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../hammer":9,"../skins":12,"../templates/page.html":31,"./api":14,"./blocks":15,"./controls.html":16,"./extraControlRows.html":17,"./sprite":21,"./tiles":23,"./visualization.html":24}],23:[function(require,module,exports){
+},{"../../locale/en_ploc/common":38,"../../locale/en_ploc/studio":39,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../hammer":9,"../skins":12,"../templates/page.html":31,"../xml":37,"./api":14,"./blocks":15,"./controls.html":16,"./extraControlRows.html":17,"./sprite":21,"./tiles":23,"./visualization.html":24}],23:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
@@ -12792,6 +12775,8 @@ exports.runProgram = function(d){return "!!-Run-!!"};
 
 exports.runTooltip = function(d){return "!!-Run the program defined by the blocks in the workspace.-!!"};
 
+exports.score = function(d){return "!!-score-!!"};
+
 exports.showCodeHeader = function(d){return "!!-Show Code-!!"};
 
 exports.showGeneratedCode = function(d){return "!!-Show code-!!"};
@@ -12923,17 +12908,7 @@ exports.moveDistanceTooltip = function(d){return "!!-Move an actor a specific di
 
 exports.moveSprite = function(d){return "!!-move-!!"};
 
-exports.moveSprite1 = function(d){return "!!-move actor 1-!!"};
-
-exports.moveSprite2 = function(d){return "!!-move actor 2-!!"};
-
-exports.moveSprite3 = function(d){return "!!-move actor 3-!!"};
-
-exports.moveSprite4 = function(d){return "!!-move actor 4-!!"};
-
-exports.moveSprite5 = function(d){return "!!-move actor 5-!!"};
-
-exports.moveSprite6 = function(d){return "!!-move actor 6-!!"};
+exports.moveSpriteN = function(d){return "!!-move actor "+v(d,"spriteIndex")+"-!!"};
 
 exports.moveDown = function(d){return "!!-move down-!!"};
 
@@ -13039,21 +13014,9 @@ exports.repeatForeverTooltip = function(d){return "!!-Execute the actions in thi
 
 exports.saySprite = function(d){return "!!-say-!!"};
 
-exports.saySprite1 = function(d){return "!!-actor 1 say-!!"};
-
-exports.saySprite2 = function(d){return "!!-actor 2 say-!!"};
-
-exports.saySprite3 = function(d){return "!!-actor 3 say-!!"};
-
-exports.saySprite4 = function(d){return "!!-actor 4 say-!!"};
-
-exports.saySprite5 = function(d){return "!!-actor 5 say-!!"};
-
-exports.saySprite6 = function(d){return "!!-actor 6 say-!!"};
+exports.saySpriteN = function(d){return "!!-actor "+v(d,"spriteIndex")+" say-!!"};
 
 exports.saySpriteTooltip = function(d){return "!!-Pop up a speech bubble with the associated text from the specified actor.-!!"};
-
-exports.score = function(d){return "!!-score-!!"};
 
 exports.scoreText = function(d){return "!!-Score: "+v(d,"playerScore")+"-!!"};
 
@@ -13091,11 +13054,17 @@ exports.setSpriteEmotionSad = function(d){return "!!-to a sad emotion-!!"};
 
 exports.setSpriteEmotionTooltip = function(d){return "!!-Sets the actor emotion-!!"};
 
+exports.setSpriteBat = function(d){return "!!-to a bat image-!!"};
+
+exports.setSpriteBird = function(d){return "!!-to a bird image-!!"};
+
 exports.setSpriteCat = function(d){return "!!-to a cat image-!!"};
 
 exports.setSpriteDinosaur = function(d){return "!!-to a dinosaur image-!!"};
 
 exports.setSpriteDog = function(d){return "!!-to a dog image-!!"};
+
+exports.setSpriteDragon = function(d){return "!!-to a dragon image-!!"};
 
 exports.setSpriteHidden = function(d){return "!!-to a hidden image-!!"};
 
@@ -13109,7 +13078,11 @@ exports.setSpriteRandom = function(d){return "!!-to a random image-!!"};
 
 exports.setSpriteShowK1 = function(d){return "!!-show-!!"};
 
+exports.setSpriteSquirrel = function(d){return "!!-to a squirrel image-!!"};
+
 exports.setSpriteWitch = function(d){return "!!-to a witch image-!!"};
+
+exports.setSpriteWizard = function(d){return "!!-to a wizard image-!!"};
 
 exports.setSpritePositionTooltip = function(d){return "!!-Instantly moves an actor to the specified location.-!!"};
 
@@ -13151,17 +13124,7 @@ exports.showTitleScreenTooltip = function(d){return "!!-Show a title screen with
 
 exports.setSprite = function(d){return "!!-set-!!"};
 
-exports.setSprite1 = function(d){return "!!-set actor 1-!!"};
-
-exports.setSprite2 = function(d){return "!!-set actor 2-!!"};
-
-exports.setSprite3 = function(d){return "!!-set actor 3-!!"};
-
-exports.setSprite4 = function(d){return "!!-set actor 4-!!"};
-
-exports.setSprite5 = function(d){return "!!-set actor 5-!!"};
-
-exports.setSprite6 = function(d){return "!!-set actor 6-!!"};
+exports.setSpriteN = function(d){return "!!-set actor "+v(d,"spriteIndex")+"-!!"};
 
 exports.soundCrunch = function(d){return "!!-crunch-!!"};
 
@@ -13189,47 +13152,15 @@ exports.soundWood = function(d){return "!!-wood-!!"};
 
 exports.speed = function(d){return "!!-speed-!!"};
 
-exports.sprite1 = function(d){return "!!-actor 1-!!"};
-
-exports.sprite2 = function(d){return "!!-actor 2-!!"};
-
-exports.sprite3 = function(d){return "!!-actor 3-!!"};
-
-exports.sprite4 = function(d){return "!!-actor 4-!!"};
-
-exports.sprite5 = function(d){return "!!-actor 5-!!"};
-
-exports.sprite6 = function(d){return "!!-actor 6-!!"};
-
 exports.stopSprite = function(d){return "!!-stop-!!"};
 
-exports.stopSprite1 = function(d){return "!!-stop actor 1-!!"};
-
-exports.stopSprite2 = function(d){return "!!-stop actor 2-!!"};
-
-exports.stopSprite3 = function(d){return "!!-stop actor 3-!!"};
-
-exports.stopSprite4 = function(d){return "!!-stop actor 4-!!"};
-
-exports.stopSprite5 = function(d){return "!!-stop actor 5-!!"};
-
-exports.stopSprite6 = function(d){return "!!-stop actor 6-!!"};
+exports.stopSpriteN = function(d){return "!!-stop actor "+v(d,"spriteIndex")+"-!!"};
 
 exports.stopTooltip = function(d){return "!!-Stops an actor's movement.-!!"};
 
 exports.throwSprite = function(d){return "!!-throw-!!"};
 
-exports.throwSprite1 = function(d){return "!!-actor 1 throw-!!"};
-
-exports.throwSprite2 = function(d){return "!!-actor 2 throw-!!"};
-
-exports.throwSprite3 = function(d){return "!!-actor 3 throw-!!"};
-
-exports.throwSprite4 = function(d){return "!!-actor 4 throw-!!"};
-
-exports.throwSprite5 = function(d){return "!!-actor 5 throw-!!"};
-
-exports.throwSprite6 = function(d){return "!!-actor 6 throw-!!"};
+exports.throwSpriteN = function(d){return "!!-actor "+v(d,"spriteIndex")+" throw-!!"};
 
 exports.throwTooltip = function(d){return "!!-Throws a projectile from the specified actor.-!!"};
 
@@ -13273,47 +13204,17 @@ exports.whenRightTooltip = function(d){return "!!-Execute the actions below when
 
 exports.whenSpriteClicked = function(d){return "!!-when actor clicked-!!"};
 
-exports.whenSpriteClicked1 = function(d){return "!!-when actor 1 clicked-!!"};
-
-exports.whenSpriteClicked2 = function(d){return "!!-when actor 2 clicked-!!"};
-
-exports.whenSpriteClicked3 = function(d){return "!!-when actor 3 clicked-!!"};
-
-exports.whenSpriteClicked4 = function(d){return "!!-when actor 4 clicked-!!"};
-
-exports.whenSpriteClicked5 = function(d){return "!!-when actor 5 clicked-!!"};
-
-exports.whenSpriteClicked6 = function(d){return "!!-when actor 6 clicked-!!"};
+exports.whenSpriteClickedN = function(d){return "!!-when actor "+v(d,"spriteIndex")+" clicked-!!"};
 
 exports.whenSpriteClickedTooltip = function(d){return "!!-Execute the actions below when an actor is clicked.-!!"};
 
-exports.whenSpriteCollided1 = function(d){return "!!-when actor 1-!!"};
-
-exports.whenSpriteCollided2 = function(d){return "!!-when actor 2-!!"};
-
-exports.whenSpriteCollided3 = function(d){return "!!-when actor 3-!!"};
-
-exports.whenSpriteCollided4 = function(d){return "!!-when actor 4-!!"};
-
-exports.whenSpriteCollided5 = function(d){return "!!-when actor 5-!!"};
-
-exports.whenSpriteCollided6 = function(d){return "!!-when actor 6-!!"};
+exports.whenSpriteCollidedN = function(d){return "!!-when actor "+v(d,"spriteIndex")+"-!!"};
 
 exports.whenSpriteCollidedTooltip = function(d){return "!!-Execute the actions below when an actor touches another actor.-!!"};
 
 exports.whenSpriteCollidedWith = function(d){return "!!-touches-!!"};
 
-exports.whenSpriteCollidedWith1 = function(d){return "!!-touches actor 1-!!"};
-
-exports.whenSpriteCollidedWith2 = function(d){return "!!-touches actor 2-!!"};
-
-exports.whenSpriteCollidedWith3 = function(d){return "!!-touches actor 3-!!"};
-
-exports.whenSpriteCollidedWith4 = function(d){return "!!-touches actor 4-!!"};
-
-exports.whenSpriteCollidedWith5 = function(d){return "!!-touches actor 5-!!"};
-
-exports.whenSpriteCollidedWith6 = function(d){return "!!-touches actor 6-!!"};
+exports.whenSpriteCollidedWithN = function(d){return "!!-touches actor "+v(d,"spriteIndex")+"-!!"};
 
 exports.whenSpriteCollidedWithFireball = function(d){return "!!-touches fireball-!!"};
 

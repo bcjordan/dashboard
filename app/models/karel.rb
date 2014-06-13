@@ -54,11 +54,14 @@ class Karel < Maze
     <block type="maze_nectar"></block>
     <block type="maze_honey"></block>
     <block type="karel_if"></block>
-    <block type="bee_if"></block>
     <block type="maze_untilBlocked"></block>
     <block type="maze_untilBlockedOrNotClear"></block>
     <block type="math_number">
       <title name="NUM">1</title>
-    </block>'
+    </block>
+    <block type="bee_ifNectarAmount"></block>
+    <block type="bee_ifTotalNectar"></block>
+    <block type="bee_ifFlower"></block>
+    <block type="bee_whileNectarAmount"></block>'
   end
 end
