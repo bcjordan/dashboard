@@ -8907,13 +8907,15 @@ BlocklyApps.reset = function(first) {
 
   Maze.pegmanD = Maze.startDirection;
   if (first) {
+    // Dance consists of 5 animations, each of which get 150ms
+    var danceTime = 150 * 5;
     if (skin.danceOnLoad) {
-      Maze.scheduleDance(false);
+      Maze.scheduleDance(false, danceTime);
     }
     timeoutList.setTimeout(function() {
       stepSpeed = 100;
       Maze.scheduleTurn(Maze.startDirection);
-    }, stepSpeed * 5);
+    }, danceTime + 150);
   } else {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, tiles.directionToFrame(Maze.pegmanD));
   }
@@ -9244,7 +9246,7 @@ Maze.execute = function(stepMode) {
  */
 Maze.performStep = function(stepMode) {
   // Speeding up specific levels
-  var scaledStepSpeed = stepSpeed * Maze.scale.stepSpeed *
+  var timePerStep = stepSpeed * Maze.scale.stepSpeed *
     skin.movePegmanAnimationSpeedScale;
 
   // All tasks should be complete now.  Clean up the PID list.
@@ -9268,7 +9270,7 @@ Maze.performStep = function(stepMode) {
   }
 
   for (var i = 0; i < step.length; i++) {
-    animateAction(step[i], stepMode);
+    animateAction(step[i], stepMode, timePerStep);
   }
 
   var finishSteps = !stepMode;
@@ -9284,14 +9286,17 @@ Maze.performStep = function(stepMode) {
   if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
-    }, scaledStepSpeed);
+    }, timePerStep);
   }
 };
 
 /**
  * Animates a single action
+ * @param {string} action The action to animate
+ * @param {boolean} stepMode Whether or not we're in stepMode
+ * @param {integer} timePerStep How much time we have allocated before the next step
  */
-function animateAction (action, stepMode) {
+function animateAction (action, stepMode, timePerStep) {
   if (action.blockId) {
     BlocklyApps.highlight(action.blockId, stepMode);
   }
@@ -9343,7 +9348,7 @@ function animateAction (action, stepMode) {
         case BlocklyApps.TestResults.FREE_PLAY:
         case BlocklyApps.TestResults.TOO_MANY_BLOCKS_FAIL:
         case BlocklyApps.TestResults.ALL_PASS:
-          Maze.scheduleDance(true);
+          Maze.scheduleDance(true, timePerStep);
           break;
         default:
           timeoutList.setTimeout(function() {
@@ -9637,9 +9642,10 @@ Maze.setTileTransparent = function() {
 /**
  * Schedule the animations and sound for a dance.
  * @param {boolean} victoryDance This is a victory dance after completing the
- * puzzle (vs. dancing on load).
+ *   puzzle (vs. dancing on load).
+ * @param {integer} timeAlloted How much time we have for our animations
  */
-Maze.scheduleDance = function(victoryDance) {
+Maze.scheduleDance = function(victoryDance, timeAlloted) {
   var originalFrame = tiles.directionToFrame(Maze.pegmanD);
   Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 16);
 
@@ -9660,7 +9666,7 @@ Maze.scheduleDance = function(victoryDance) {
     BlocklyApps.playAudio('win');
   }
 
-  var danceSpeed = 150;  // Slow down victory animation a bit.
+  var danceSpeed = timeAlloted / 5;
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 18);
   }, danceSpeed);
@@ -9673,9 +9679,11 @@ Maze.scheduleDance = function(victoryDance) {
   timeoutList.setTimeout(function() {
     Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, 20);
   }, danceSpeed * 4);
-  timeoutList.setTimeout(function() {
-    Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, originalFrame);
-  }, danceSpeed * 5);
+  if (!victoryDance || skin.turnAfterVictory) {
+    timeoutList.setTimeout(function() {
+      Maze.displayPegman(Maze.pegmanX, Maze.pegmanY, originalFrame);
+    }, danceSpeed * 5);
+  }
 };
 
 /**
@@ -9892,8 +9900,7 @@ var CONFIGS = {
     pegmanYOffset: 0,
     tileSheetWidth: 5,
     pegmanHeight: 50,
-    pegmanWidth: 50,
-    danceOnLoad: false
+    pegmanWidth: 50
   },
 
   farmer: {
@@ -9906,7 +9913,8 @@ var CONFIGS = {
     nonDisappearingPegmanHittingObstacle: true,
     background: 'background' + _.sample([0, 1, 2, 3]) + '.png',
     dirtSound: true,
-    pegmanYOffset: -8
+    pegmanYOffset: -8,
+    danceOnLoad: true
   },
 
   farmer_night: {
@@ -9918,7 +9926,8 @@ var CONFIGS = {
     nonDisappearingPegmanHittingObstacle: true,
     background: 'background' + _.sample([0, 1, 2, 3]) + '.png',
     dirtSound: true,
-    pegmanYOffset: -8
+    pegmanYOffset: -8,
+    danceOnLoad: true
   },
 
   pvz: {
@@ -9926,7 +9935,8 @@ var CONFIGS = {
     maze_forever: 'maze_forever.png',
 
     obstacleScale: 1.4,
-    pegmanYOffset: -8
+    pegmanYOffset: -8,
+    danceOnLoad: true
   },
 
   birds: {
@@ -9946,7 +9956,8 @@ var CONFIGS = {
     approachingGoalAnimation: 'close_goal.png',
     pegmanHeight: 68,
     pegmanWidth: 51,
-    pegmanYOffset: -14
+    pegmanYOffset: -14,
+    turnAfterVictory: true
   }
 
 };
@@ -9981,6 +9992,10 @@ exports.load = function(assetUrl, id) {
   skin.pegmanHeight = 52;
   skin.pegmanWidth = 49;
   skin.pegmanYOffset = 0;
+  // do we turn to the direction we're facing after performing our victory
+  // animation?
+  skin.turnAfterVictory = false;
+  skin.danceOnLoad = false;
 
   // Sounds
   skin.obstacleSound = soundAssetUrls(skin, 'obstacle.mp3');
