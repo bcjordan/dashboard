@@ -5401,20 +5401,6 @@ Bee.prototype.animateMakeHoney = function () {
 };
 
 /**
- * When successfully completing a level, maze gradually fades out paths.  It
- * assumes all dirt is at 0. For now we'll just set all dirt to 0 so that hives
- * get hidden.  There may be a better long term approach.
- */
-Bee.prototype.setTilesTransparent = function () {
-  for (var row = 0; row < this.initialDirt_.length; row++) {
-    for (var col = 0; col < this.initialDirt_[row].length; col++) {
-      this.maze_.dirt_[row][col] = 0;
-      this.maze_.gridItemDrawer.updateItemImage(row, col);
-    }
-  }
-};
-
-/**
  * Bee related API functions
  */
 Bee.api = {};
@@ -9617,10 +9603,6 @@ Maze.scheduleFail = function(forward) {
  * Set the tiles to be transparent gradually.
  */
 Maze.setTileTransparent = function() {
-  if (Maze.bee) {
-    Maze.bee.setTilesTransparent();
-  }
-
   var tileId = 0;
   for (var y = 0; y < Maze.ROWS; y++) {
     for (var x = 0; x < Maze.COLS; x++) {
@@ -9888,7 +9870,6 @@ var CONFIGS = {
     digSound: 'dig.mp3',
 
     look: '#000',
-    transparentTileEnding: true,
     nonDisappearingPegmanHittingObstacle: true,
     idlePegmanAnimation: 'idle_avatar.gif',
     wallPegmanAnimation: 'wall_avatar.png',
