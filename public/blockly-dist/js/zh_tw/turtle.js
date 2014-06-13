@@ -2042,7 +2042,7 @@ exports.call = function(name) {
   return {
     test: function(block) {
       return block.type == 'procedures_callnoreturn' &&
-          block.getTitleValue('NAME') == name;
+          block.getTitleValue('NAME').toLowerCase() == name.toLowerCase();
     },
     type: 'procedures_callnoreturn',
     titles: {'NAME': name}
@@ -2060,7 +2060,7 @@ exports.callWithArg = function(func_name, arg_name) {
   return {
     test: function(block) {
       return block.type == 'procedures_callnoreturn' &&
-          block.getTitleValue('NAME') == func_name;
+          block.getTitleValue('NAME').toLowerCase() == func_name.toLowerCase();
     },
     type: 'procedures_callnoreturn',
     extra: '<mutation name="' + func_name + '"><arg name="' + arg_name +
@@ -2080,7 +2080,7 @@ exports.define = function(name) {
   return {
     test: function(block) {
       return block.type == 'procedures_defnoreturn' &&
-          block.getTitleValue('NAME') == name;
+          block.getTitleValue('NAME').toLowerCase() == name.toLowerCase();
     },
     type: 'procedures_defnoreturn',
     titles: {'NAME': name}
