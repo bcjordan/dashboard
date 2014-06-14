@@ -40,6 +40,7 @@ class LevelSourcesController < ApplicationController
     @full_width = true
     @hide_source = hide_source
     @share = true
+    @callback = milestone_level_url(user_id: current_user.try(:id) || 0, level_id: @level.id)
     @no_padding = @share && phone? && @game.share_mobile_fullscreen?
     @callouts = []
   end

@@ -23,7 +23,7 @@ class ActivitiesController < ApplicationController
     lines = params[:lines].to_i
     
     @activity = Activity.create!(user: current_user,
-                                 level: @script_level.level,
+                                 level: @level,
                                  action: solved, # TODO I think we don't actually use this. (maybe in a report?)
                                  test_result: test_result,
                                  attempt: params[:attempt].to_i,
@@ -32,7 +32,7 @@ class ActivitiesController < ApplicationController
                                  level_source: @level_source )
 
     retryable on: ActiveRecord::RecordNotUnique do
-      user_level = UserLevel.where(user: current_user, level: @script_level.level).first_or_create
+      user_level = UserLevel.where(user: current_user, level: @level).first_or_create
 
       user_level.attempts += 1 unless user_level.best?
       user_level.best_result = user_level.best_result ?
@@ -68,8 +68,8 @@ class ActivitiesController < ApplicationController
     # hash of level_id => test_result
     test_result = params[:testResult].to_i
     session[:progress] ||= {}
-    if test_result > session[:progress].fetch(@script_level.level_id, -1)
-      session[:progress][@script_level.level_id] = test_result
+    if test_result > session[:progress].fetch(@level.id, -1)
+      session[:progress][@level.id] = test_result
     end
 
     # counter of total lines written
@@ -83,10 +83,16 @@ class ActivitiesController < ApplicationController
   def milestone
     # TODO: do we use the :result and :testResult params for the same thing?
     solved = ('true' == params[:result])
-    @script_level = ScriptLevel.cache_find(params[:script_level_id].to_i)
+    if params[:script_level_id]
+      @script_level = ScriptLevel.cache_find(params[:script_level_id].to_i)
+      @level = @script_level.level
+    elsif params[:level_id]
+      # TODO: do we need a cache_find for Level like we have for ScriptLevel?
+      @level = Level.find(params[:level_id].to_i)
+    end
 
     if params[:program]
-      @level_source = LevelSource.lookup(@script_level.level, params[:program])
+      @level_source = LevelSource.lookup(@level, params[:program])
     end
 
     log_milestone(@level_source, params)
@@ -119,7 +125,8 @@ class ActivitiesController < ApplicationController
                                     activity: @activity)
 
     slog(:tag => 'activity_finish',
-         :script_level_id => @script_level.id,
+         :script_level_id => @script_level.try(:id),
+         :level_id => @level.id,
          :user_agent => request.user_agent,
          :locale => locale)
   end

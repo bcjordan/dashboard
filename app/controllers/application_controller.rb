@@ -71,18 +71,22 @@ class ApplicationController < ActionController::Base
     response = {}
     script_level = options[:script_level]
 
-    previous_level = script_level.previous_level
-    if previous_level
-      response[:previous_level] = build_script_level_path(previous_level)
-    end
+    if script_level
+      previous_level = script_level.previous_level
+      if previous_level
+        response[:previous_level] = build_script_level_path(previous_level)
+      end
 
-    # if they solved it, figure out next level
-    if options[:solved?]
-      response[:total_lines] = options[:total_lines]
-      response[:trophy_updates] = options[:trophy_updates] unless options[:trophy_updates].blank?
-      script_level.solved(response, self, current_user)
-    else # not solved
-      response[:message] = 'try again'
+      # if they solved it, figure out next level
+      if options[:solved?]
+        response[:total_lines] = options[:total_lines]
+        response[:trophy_updates] = options[:trophy_updates] unless options[:trophy_updates].blank?
+        script_level.solved(response, self, current_user)
+      else # not solved
+        response[:message] = 'try again'
+      end
+    else
+      response[:message] = 'no script provided'
     end
 
     if options[:level_source]

@@ -128,6 +128,7 @@ Dashboard::Application.routes.draw do
   get '/join(/:section_code)', to: 'followers#student_user_new', as: 'student_user_new'
   post '/join/:section_code', to: 'followers#student_register', as: 'student_register'
 
+  post '/milestone/:user_id/level/:level_id', :to => 'activities#milestone', :as => 'milestone_level'
   post '/milestone/:user_id/:script_level_id', :to => 'activities#milestone', :as => 'milestone'
 
   get '/admin/usage', to: 'reports#all_usage', as: 'all_usage'
