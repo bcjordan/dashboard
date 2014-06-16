@@ -853,24 +853,21 @@ BlocklyApps.report = function(options) {
   report.attempt = BlocklyApps.attempts;
   report.lines = feedback.getNumBlocksUsed();
 
-  // Disable the run button until onReportComplete is called.
-  if (!BlocklyApps.share) {
-    var onAttemptCallback = (function() {
-      return function(builderDetails) {
-        for (var option in builderDetails) {
-          report[option] = builderDetails[option];
-        }
-        onAttempt(report);
-      };
-    })();
+  var onAttemptCallback = (function() {
+    return function(builderDetails) {
+      for (var option in builderDetails) {
+        report[option] = builderDetails[option];
+      }
+      onAttempt(report);
+    };
+  })();
 
-    // If this is the level builder, go to builderForm to get more info from
-    // the level builder.
-    if (options.builder) {
-      builder.builderForm(onAttemptCallback);
-    } else {
-      onAttemptCallback();
-    }
+  // If this is the level builder, go to builderForm to get more info from
+  // the level builder.
+  if (options.builder) {
+    builder.builderForm(onAttemptCallback);
+  } else {
+    onAttemptCallback();
   }
 };
 
@@ -2869,7 +2866,6 @@ Flappy.avatarVelocity = 0;
 
 var level;
 var skin;
-var onSharePage;
 
 Flappy.obstacles = [];
 
@@ -3311,7 +3307,6 @@ Flappy.init = function(config) {
 
   config.grayOutUndeletableBlocks = level.grayOutUndeletableBlocks;
 
-  onSharePage = config.share;
   loadLevel();
 
   config.html = page({
@@ -3410,10 +3405,8 @@ Flappy.init = function(config) {
 
   BlocklyApps.init(config);
 
-  if (!onSharePage) {
-    var rightButton = document.getElementById('rightButton');
-    dom.addClickTouchEvent(rightButton, Flappy.onPuzzleComplete);
-  }
+  var rightButton = document.getElementById('rightButton');
+  dom.addClickTouchEvent(rightButton, Flappy.onPuzzleComplete);
 };
 
 /**
@@ -3513,7 +3506,7 @@ BlocklyApps.runButtonClick = function() {
   BlocklyApps.attempts++;
   Flappy.execute();
 
-  if (level.freePlay && !onSharePage) {
+  if (level.freePlay) {
     var rightButtonCell = document.getElementById('right-button-cell');
     rightButtonCell.className = 'right-button-cell-enabled';
   }

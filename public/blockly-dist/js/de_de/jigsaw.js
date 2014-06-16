@@ -853,24 +853,21 @@ BlocklyApps.report = function(options) {
   report.attempt = BlocklyApps.attempts;
   report.lines = feedback.getNumBlocksUsed();
 
-  // Disable the run button until onReportComplete is called.
-  if (!BlocklyApps.share) {
-    var onAttemptCallback = (function() {
-      return function(builderDetails) {
-        for (var option in builderDetails) {
-          report[option] = builderDetails[option];
-        }
-        onAttempt(report);
-      };
-    })();
+  var onAttemptCallback = (function() {
+    return function(builderDetails) {
+      for (var option in builderDetails) {
+        report[option] = builderDetails[option];
+      }
+      onAttempt(report);
+    };
+  })();
 
-    // If this is the level builder, go to builderForm to get more info from
-    // the level builder.
-    if (options.builder) {
-      builder.builderForm(onAttemptCallback);
-    } else {
-      onAttemptCallback();
-    }
+  // If this is the level builder, go to builderForm to get more info from
+  // the level builder.
+  if (options.builder) {
+    builder.builderForm(onAttemptCallback);
+  } else {
+    onAttemptCallback();
   }
 };
 
