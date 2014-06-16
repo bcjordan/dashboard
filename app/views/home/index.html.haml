@@ -90,11 +90,6 @@
       .span12
         %p
           =link_to image_tag('signup_header_cropped.jpg'), k8intro_chapter_path(ScriptLevel::NEXT)
-      - if eligible_for_prize?
-        .span10
-          %p#prizes.lightgreytext
-            #{t('home.prize_info')}
-          %br/
 
   .row#stats
     .span12#rightside

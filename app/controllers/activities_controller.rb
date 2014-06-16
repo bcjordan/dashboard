@@ -31,8 +31,7 @@ class ActivitiesController < ApplicationController
                                  time: [[params[:time].to_i, 0].max, MAX_INT_MILESTONE].min,
                                  level_source: @level_source )
 
-
-    retryable on: Mysql2::Error, matching: /Duplicate entry/ do # catch race conditions in first_or_create
+    retryable on: ActiveRecord::RecordNotUnique do
       user_level = UserLevel.where(user: current_user, level: @script_level.level).first_or_create
 
       user_level.attempts += 1 unless user_level.best?
@@ -237,13 +236,15 @@ class ActivitiesController < ApplicationController
         if t_prize && !teacher.teacher_prize_earned
           teacher.teacher_prize_earned = true
           teacher.save!
+          # teacher prizes disabled, but we still are sending a congrats mail to people who would have received a prize
           PrizeMailer.teacher_prize_earned(teacher).deliver if teacher.email.present? && eligible_for_prize?
         end
 
         if t_bonus && !teacher.teacher_bonus_prize_earned
           teacher.teacher_bonus_prize_earned = true
           teacher.save!
-          PrizeMailer.teacher_bonus_prize_earned(teacher).deliver if teacher.email.present? && eligible_for_prize?
+          # teacher bonus prizes disabled
+          # PrizeMailer.teacher_bonus_prize_earned(teacher).deliver if teacher.email.present? && eligible_for_prize?
         end
       end
     end
