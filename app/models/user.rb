@@ -270,6 +270,7 @@ SQL
   def age=(val)
     val = val.to_i
     return unless val > 0
+    return unless val < 200 
     return if val == age # don't change birthday if we want to stay the same age
     self.birthday = val.years.ago
   end
