@@ -848,7 +848,7 @@ BlocklyApps.getTestResults = function() {
 BlocklyApps.report = function(options) {
   // copy from options: app, level, result, testResult, program, onComplete
   var report = options;
-  report.pass = feedback.canContinueToNextLevel(options.testResults);
+  report.pass = feedback.canContinueToNextLevel(options.testResult);
   report.time = ((new Date().getTime()) - BlocklyApps.initTime);
   report.attempt = BlocklyApps.attempts;
   report.lines = feedback.getNumBlocksUsed();
@@ -7115,6 +7115,8 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short.png'),
     longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    longLine: assetUrl('media/common_images/move-long.png'),
+    shortLine: assetUrl('media/common_images/move-short.png'),
     soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
     startIcon: assetUrl('media/common_images/when-run.png'),
@@ -7934,6 +7936,97 @@ exports.install = function(blockly, blockInstallOptions) {
       name: 'setSpritePosition'});
   };
 
+  var SimpleMove = {
+    DIRECTION_CONFIGS: {
+      West: {
+        letter: commonMsg.directionWestLetter(),
+        image: skin.leftArrow,
+        studioValue: Direction.WEST.toString(),
+        tooltip: msg.moveLeftTooltip()
+      },
+      East: {
+        letter: commonMsg.directionEastLetter(),
+        image: skin.rightArrow,
+        studioValue: Direction.EAST.toString(),
+        tooltip: msg.moveRightTooltip()
+      },
+      North: {
+        letter: commonMsg.directionNorthLetter(),
+        image: skin.upArrow,
+        studioValue: Direction.NORTH.toString(),
+        tooltip: msg.moveUpTooltip()
+      },
+      South: { letter: commonMsg.directionSouthLetter(),
+        image: skin.downArrow,
+        studioValue: Direction.SOUTH.toString(),
+        tooltip: msg.moveDownTooltip()
+      }
+    },
+    DISTANCES: [
+      [skin.shortLine, '25'],
+      [skin.longLine, '400']
+    ],
+    DEFAULT_MOVE_DISTANCE: '100',
+    generateBlocksForAllDirections: function() {
+      SimpleMove.generateBlocksForDirection("North");
+      SimpleMove.generateBlocksForDirection("South");
+      SimpleMove.generateBlocksForDirection("West");
+      SimpleMove.generateBlocksForDirection("East");
+    },
+    generateBlocksForDirection: function(direction) {
+      generator["studio_move" + direction] = SimpleMove.generateCodeGenerator(direction, true);
+      blockly.Blocks['studio_move' + direction] = SimpleMove.generateMoveBlock(direction, false);
+      generator["studio_move" + direction + "Distance"] = SimpleMove.generateCodeGenerator(direction, false);
+      blockly.Blocks['studio_move' + direction + "Distance"] = SimpleMove.generateMoveBlock(direction, false);
+      generator["studio_move" + direction + "_length"] = SimpleMove.generateCodeGenerator(direction, false);
+      blockly.Blocks['studio_move' + direction + "_length"] = SimpleMove.generateMoveBlock(direction, true);
+    },
+    generateMoveBlock: function(direction, hasLengthInput) {
+      var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
+
+      return {
+        helpUrl: '',
+        init: function () {
+          this.setHSV(184, 1.00, 0.74);
+          this.appendDummyInput()
+            .appendTitle(msg.moveSprite()) // move
+            .appendTitle(new blockly.FieldImage(directionConfig.image)) // arrow
+            .appendTitle(directionConfig.letter); // NESW
+
+          if (blockly.Blocks.studio_spriteCount > 1) {
+            this.appendDummyInput().appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+          }
+
+          if (hasLengthInput) {
+            this.appendDummyInput().appendTitle(new blockly.FieldImageDropdown(SimpleMove.DISTANCES), 'DISTANCE');
+          }
+
+          this.setPreviousStatement(true);
+          this.setInputsInline(true);
+          this.setNextStatement(true);
+          this.setTooltip(directionConfig.tooltip);
+        }
+      };
+    },
+    generateCodeGenerator: function(direction, isEventMove) {
+      var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
+
+      return function() {
+        var sprite = this.getTitleValue('SPRITE') || '0';
+        var direction = directionConfig.studioValue;
+        var methodName = isEventMove ? 'move' : 'moveDistance';
+        var distance = this.getTitleValue('DISTANCE') || SimpleMove.DEFAULT_MOVE_DISTANCE;
+        return 'Studio.' + methodName + '(\'block_id_' + this.id + '\'' +
+          ', ' + sprite +
+          ', ' + direction +
+          (isEventMove ? '' : (', ' + distance)) +
+          ');\n';
+      };
+    }
+  };
+
+  SimpleMove.generateBlocksForAllDirections();
+
   blockly.Blocks.studio_move = {
     // Block for moving one frame a time.
     helpUrl: '',
@@ -7953,8 +8046,14 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.moveSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldImageDropdown(this.K1_DIR), 'DIR');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+      }
       this.setPreviousStatement(true);
       this.setInputsInline(true);
       this.setNextStatement(true);
@@ -7963,10 +8062,10 @@ exports.install = function(blockly, blockInstallOptions) {
   };
 
   blockly.Blocks.studio_move.K1_DIR =
-      [[skin.upArrowSmall, Direction.NORTH.toString()],
-       [skin.rightArrowSmall, Direction.EAST.toString()],
-       [skin.downArrowSmall, Direction.SOUTH.toString()],
-       [skin.leftArrowSmall, Direction.WEST.toString()]];
+      [[skin.upArrow, Direction.NORTH.toString()],
+       [skin.rightArrow, Direction.EAST.toString()],
+       [skin.downArrow, Direction.SOUTH.toString()],
+       [skin.leftArrow, Direction.WEST.toString()]];
 
   blockly.Blocks.studio_move.DIR =
       [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -8000,8 +8099,15 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.moveSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldImageDropdown(this.K1_DIR), 'DIR');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+      }
+
       this.appendDummyInput()
         .appendTitle('\t');
       if (block.params) {
@@ -8010,14 +8116,25 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.moveDistancePixels());
       } else {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.DISTANCE), 'DISTANCE');
+        if (isK1) {
+          this.appendDummyInput()
+            .appendTitle(new blockly.FieldImageDropdown(this.K1_DISTANCE), 'DISTANCE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(new blockly.FieldDropdown(this.DISTANCE), 'DISTANCE');
+        }
       }
       this.setPreviousStatement(true);
       this.setInputsInline(true);
       this.setNextStatement(true);
       this.setTooltip(msg.moveDistanceTooltip());
     };
+
+    block.K1_DIR =
+        [[skin.upArrow, Direction.NORTH.toString()],
+          [skin.rightArrow, Direction.EAST.toString()],
+          [skin.downArrow, Direction.SOUTH.toString()],
+          [skin.leftArrow, Direction.WEST.toString()]];
 
     block.DIR =
         [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -8034,6 +8151,10 @@ exports.install = function(blockly, blockInstallOptions) {
            [msg.moveDistance200(), '200'],
            [msg.moveDistance400(), '400'],
            [msg.moveDistanceRandom(), 'random']];
+
+      block.K1_DISTANCE =
+        [[skin.shortLine, '25'],
+        [skin.longLine, '400']];
     }
   };
 
@@ -9120,11 +9241,11 @@ module.exports = {
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
            <title name="SPRITE">1</title></block>' +
-         '<block type="studio_saySprite"> \
-           <title name="SPRITE">1</title></block>' +
-         '<block type="studio_playSound"> \
-           <title name="SOUND">crunch</title></block>' +
-         blockOfType('studio_changeScore')),
+        '<block type="studio_saySprite"> \
+          <title name="SPRITE">1</title></block>' +
+        '<block type="studio_playSound"> \
+          <title name="SOUND">crunch</title></block>' +
+        blockOfType('studio_changeScore')),
     'startBlocks':
      '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
         <next><block type="studio_move"> \
@@ -9483,18 +9604,184 @@ module.exports = {
   },
 };
 
-// K-1 levels:
-module.exports.k1_1 = utils.extend(module.exports['1'],  {'is_k1': true});
-module.exports.k1_2 = utils.extend(module.exports['7'],  {'is_k1': true});
-module.exports.k1_3 = utils.extend(module.exports['2'],  {'is_k1': true});
-module.exports.k1_4 = utils.extend(module.exports['3'],  {'is_k1': true});
-module.exports.k1_5 = utils.extend(module.exports['8'],  {'is_k1': true});
-module.exports.k1_6 = utils.extend(module.exports['4'],  {'is_k1': true});
-module.exports.k1_7 = utils.extend(module.exports['9'],  {'is_k1': true});
-module.exports.k1_8 = utils.extend(module.exports['10'], {'is_k1': true});
-module.exports.k1_9 = utils.extend(module.exports['11'], {'is_k1': true});
-module.exports.k1_10 = utils.extend(module.exports['12'], {'is_k1': true});
+/**
+ * K1 levels. We base them off of existing non-k1 levels, marking them as is_k1 and
+ * overriding the requiredBlocks and toolboxes as appropriate for the k1 progression
+ */
+
+var moveDistanceNSEW = blockOfType('studio_moveNorthDistance') +
+  blockOfType('studio_moveEastDistance') +
+  blockOfType('studio_moveSouthDistance') +
+  blockOfType('studio_moveWestDistance');
+
+var moveNSEW = blockOfType('studio_moveNorth') +
+  blockOfType('studio_moveEast') +
+  blockOfType('studio_moveSouth') +
+  blockOfType('studio_moveWest');
+
+function whenMoveBlocks(yOffset) {
+  return '<block type="studio_whenLeft" deletable="false" x="20" y="' + (20 + yOffset).toString() + '"> \
+   <next><block type="studio_moveWest"></block> \
+   </next></block> \
+ <block type="studio_whenRight" deletable="false" x="20" y="'+ (150 + yOffset).toString() +'"> \
+   <next><block type="studio_moveEast"></block> \
+   </next></block> \
+ <block type="studio_whenUp" deletable="false" x="20" y="' + (280 + yOffset).toString() + '"> \
+   <next><block type="studio_moveNorth"></block> \
+   </next></block> \
+ <block type="studio_whenDown" deletable="false" x="20" y="' + (410 + yOffset).toString() + '"> \
+   <next><block type="studio_moveSouth"></block> \
+   </next></block>';
+}
+
+function foreverUpAndDownBlocks(yPosition) {
+  return '<block type="studio_repeatForever" deletable="false" x="20" y="' + yPosition + '"> \
+      <statement name="DO"><block type="studio_moveDistance"> \
+        <title name="SPRITE">1</title> \
+        <title name="DISTANCE">400</title> \
+        <next><block type="studio_moveDistance"> \
+          <title name="SPRITE">1</title> \
+          <title name="DISTANCE">400</title> \
+          <title name="DIR">4</title></block> \
+        </next></block> \
+      </statement></block>';
+}
+
+module.exports.k1_1 = utils.extend(module.exports['1'],  {
+  'is_k1': true,
+  'toolbox': tb(blockOfType('studio_moveEastDistance') + blockOfType('studio_saySprite'))
+});
+module.exports.k1_2 = utils.extend(module.exports['7'],  {
+  'is_k1': true,
+  'toolbox': tb(blockOfType('studio_moveEastDistance') + blockOfType('studio_saySprite'))
+});
+module.exports.k1_3 = utils.extend(module.exports['2'],  {
+  'is_k1': true,
+  'requiredBlocks': [
+    [{'test': 'move', 'type': 'studio_moveEastDistance'}]
+  ],
+  'toolbox': tb(moveDistanceNSEW + blockOfType('studio_saySprite'))
+});
+module.exports.k1_4 = utils.extend(module.exports['3'],  {
+  'is_k1': true,
+  'requiredBlocks': [
+    [{'test': 'move', 'type': 'studio_moveEastDistance', 'titles': {'SPRITE': '0'}}],
+    [{'test': 'saySprite', 'type': 'studio_saySprite', 'titles': {'SPRITE': '1'}}]
+  ],
+  'toolbox': tb(moveDistanceNSEW + blockOfType('studio_saySprite')),
+  'startBlocks':
+    '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
+     <block type="studio_whenSpriteCollided" deletable="false" x="20" y="140"></block>'
+});
+module.exports.k1_5 = utils.extend(module.exports['8'],  {
+  'is_k1': true,
+  'toolbox': tb(moveDistanceNSEW + blockOfType('studio_setSpriteEmotion'))
+});
+module.exports.k1_6 = utils.extend(module.exports['4'],  {
+  'is_k1': true,
+  'toolbox': tb(moveNSEW + blockOfType('studio_saySprite')),
+  'startBlocks':
+    '<block type="studio_whenLeft" deletable="false" x="20" y="20"></block> \
+     <block type="studio_whenRight" deletable="false" x="180" y="20"></block> \
+     <block type="studio_whenUp" deletable="false" x="20" y="140"></block> \
+     <block type="studio_whenDown" deletable="false" x="180" y="140"></block>'
+});
+module.exports.k1_7 = utils.extend(module.exports['9'],  {
+  'is_k1': true,
+  'toolbox': tb(
+      '<block type="studio_moveNorth_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      '<block type="studio_moveEast_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      '<block type="studio_moveSouth_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      '<block type="studio_moveWest_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      blockOfType('studio_saySprite')),
+  'startBlocks':
+    whenMoveBlocks(0) +
+     '<block type="studio_repeatForever" deletable="false" x="20" y="540"></block>',
+  'requiredBlocks': [
+    [{'test': 'moveDistance', 'type': 'studio_moveNorth_length', 'titles': {'SPRITE': '1', 'DISTANCE': '400'}}],
+  ]
+});
+module.exports.k1_8 = utils.extend(module.exports['10'], {
+  'is_k1': true,
+  'startBlocks':
+    whenMoveBlocks(0) +
+     '<block type="studio_repeatForever" deletable="false" x="20" y="540"> \
+       <statement name="DO"><block type="studio_moveNorth_length"> \
+               <title name="SPRITE">1</title> \
+               <title name="DISTANCE">400</title> \
+         <next><block type="studio_moveSouth_length"> \
+                 <title name="SPRITE">1</title> \
+                 <title name="DISTANCE">400</title></block> \
+         </next></block> \
+     </statement></block> \
+     <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"></block>',
+    'toolbox':
+      tb(moveDistanceNSEW +
+        '<block type="studio_playSound"> \
+          <title name="SOUND">crunch</title></block>')
+});
+module.exports.k1_9 = utils.extend(module.exports['11'], {
+  'is_k1': true,
+  'toolbox':
+    tb(moveDistanceNSEW +
+      '<block type="studio_saySprite"> \
+        <title name="SPRITE">1</title></block>' +
+      '<block type="studio_playSound"> \
+        <title name="SOUND">crunch</title></block>' +
+      blockOfType('studio_changeScore')),
+  'startBlocks':
+    whenMoveBlocks(0) +
+    foreverUpAndDownBlocks(540) +
+    '<block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"> \
+      <next><block type="studio_playSound"> \
+        <title name="SOUND">crunch</title></block> \
+      </next></block> \
+    <block type="studio_whenSpriteCollided" deletable="false" x="20" y="860"> \
+      <title name="SPRITE2">2</title></block>'
+});
+module.exports.k1_10 = utils.extend(module.exports['12'], {
+  'is_k1': true,
+  'toolbox':
+      tb(
+        '<block type="studio_setBackground"> \
+           <title name="VALUE">"night"</title></block>' +
+        '<block type="studio_saySprite"> \
+          <title name="SPRITE">1</title></block>' +
+        '<block type="studio_playSound"> \
+          <title name="SOUND">crunch</title></block>' +
+        blockOfType('studio_changeScore') +
+        '<block type="studio_setSpriteSpeed"> \
+         <title name="VALUE">Studio.SpriteSpeed.FAST</title></block>'),
+  'startBlocks':
+    '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>' +
+    whenMoveBlocks(180) +
+    foreverUpAndDownBlocks(720) +
+    '<block type="studio_whenSpriteCollided" deletable="false" x="20" y="910"> \
+      <next><block type="studio_playSound"> \
+        <title name="SOUND">crunch</title></block> \
+      </next></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1040"> \
+        <title name="SPRITE2">2</title> \
+        <next><block type="studio_changeScore"></block> \
+      </next></block>'
+});
 module.exports.k1_11 = utils.extend(module.exports['13'], {'is_k1': true});
+module.exports.k1_block_test = utils.extend(module.exports['99'], {
+  'toolbox':
+    tb(
+      blockOfType('studio_setSprite') +
+      blockOfType('studio_whenGameStarts') +
+      blockOfType('studio_moveNorth') +
+      blockOfType('studio_moveSouth') +
+      blockOfType('studio_moveEast') +
+      blockOfType('studio_moveWest') +
+      blockOfType('studio_moveNorth_length') +
+      blockOfType('studio_moveSouth_length') +
+      blockOfType('studio_moveEast_length') +
+      blockOfType('studio_moveWest_length')
+    ),
+  'is_k1': true
+});
 
 },{"../../locale/da_dk/studio":39,"../block_utils":3,"../utils":36,"./tiles":23}],19:[function(require,module,exports){
 (function (global){
