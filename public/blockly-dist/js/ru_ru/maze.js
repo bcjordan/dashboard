@@ -848,7 +848,7 @@ BlocklyApps.getTestResults = function() {
 BlocklyApps.report = function(options) {
   // copy from options: app, level, result, testResult, program, onComplete
   var report = options;
-  report.pass = feedback.canContinueToNextLevel(options.testResults);
+  report.pass = feedback.canContinueToNextLevel(options.testResult);
   report.time = ((new Date().getTime()) - BlocklyApps.initTime);
   report.attempt = BlocklyApps.attempts;
   report.lines = feedback.getNumBlocksUsed();
@@ -5795,6 +5795,7 @@ BeeItemDrawer.prototype.updateNectarCounter = function (nectarCount) {
 'use strict';
 
 var msg = require('../../locale/ru_ru/maze');
+var commonMsg = require('../../locale/ru_ru/common');
 var codegen = require('../codegen');
 var blockUtils = require('../block_utils');
 
@@ -5810,10 +5811,10 @@ exports.install = function(blockly, blockInstallOptions) {
 
   var SimpleMove = {
     DIRECTION_CONFIGS: {
-      West: { letter: 'W', image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
-      East: { letter: 'E', image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
-      North: { letter: 'N', image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
-      South: { letter: 'S', image: skin.downArrow, tooltip: msg.moveSouthTooltip() }
+      West: { letter: commonMsg.directionWestLetter(), image: skin.leftArrow, tooltip: msg.moveWestTooltip() },
+      East: { letter: commonMsg.directionEastLetter(), image: skin.rightArrow, tooltip: msg.moveEastTooltip() },
+      North: { letter: commonMsg.directionNorthLetter(), image: skin.upArrow, tooltip: msg.moveNorthTooltip() },
+      South: { letter: commonMsg.directionSouthLetter(), image: skin.downArrow, tooltip: msg.moveSouthTooltip() }
     },
     generateBlocksForAllDirections: function() {
       SimpleMove.generateBlocksForDirection("North");
@@ -6153,7 +6154,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/ru_ru/maze":53,"../block_utils":3,"../codegen":6,"./beeBlocks":14}],17:[function(require,module,exports){
+},{"../../locale/ru_ru/common":52,"../../locale/ru_ru/maze":53,"../block_utils":3,"../codegen":6,"./beeBlocks":14}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10894,6 +10895,8 @@ exports.load = function(assetUrl, id) {
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
     shortLineDraw: assetUrl('media/common_images/draw-short.png'),
     longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    longLine: assetUrl('media/common_images/move-long.png'),
+    shortLine: assetUrl('media/common_images/move-short.png'),
     soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
     startIcon: assetUrl('media/common_images/when-run.png'),
