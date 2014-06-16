@@ -70,7 +70,11 @@ module.exports = function(app, levels, options) {
 
   addReadyListener(function() {
     if (options.readonly) {
-      BlocklyApps.initReadonly(options);
+      if (app.initReadonly) {
+        app.initReadonly(options);
+      } else {
+        BlocklyApps.initReadonly(options);
+      }
     } else {
       app.init(options);
       if (options.onInitialize) {
@@ -762,6 +766,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -1239,10 +1255,12 @@ exports.displayFeedback = function(options) {
   var canContinue = exports.canContinueToNextLevel(options.feedbackType);
   var displayShowCode = BlocklyApps.enableShowCode && canContinue;
   var feedback = document.createElement('div');
-  var feedbackMessage = getFeedbackMessage(options);
   var sharingDiv = (canContinue && options.showingSharing) ? exports.createSharingDiv(options) : null;
   var showCode = displayShowCode ? getShowCodeElement(options) : null;
   var feedbackBlocks = new FeedbackBlocks(options);
+  // feedbackMessage must be initialized after feedbackBlocks
+  // because FeedbackBlocks can mutate options.response.hint.
+  var feedbackMessage = getFeedbackMessage(options);
 
   if (feedbackMessage) {
     feedback.appendChild(feedbackMessage);
@@ -1252,7 +1270,12 @@ exports.displayFeedback = function(options) {
     feedback.appendChild(trophies);
   }
   if (feedbackBlocks.div) {
-    feedback.appendChild(feedbackBlocks.div);
+    if (feedbackMessage && useSpecialFeedbackDesign(options)) {
+      // put the blocks iframe inside the feedbackMessage for this special case:
+      feedbackMessage.appendChild(feedbackBlocks.div);
+    } else {
+      feedback.appendChild(feedbackBlocks.div);
+    }
   }
   if (sharingDiv) {
     feedback.appendChild(sharingDiv);
@@ -1423,6 +1446,12 @@ var getFeedbackButtons = function(options) {
   return buttons;
 };
 
+var useSpecialFeedbackDesign = function (options) {
+ return options.response &&
+        options.response.design &&
+        isFeedbackMessageCustomized(options);
+};
+
 var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
@@ -1504,8 +1533,7 @@ var getFeedbackMessage = function(options) {
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-  if (options.response && options.response.design &&
-      isFeedbackMessageCustomized(options)) {
+  if (useSpecialFeedbackDesign(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1660,15 +1688,39 @@ var getGeneratedCodeString = function() {
 };
 
 var FeedbackBlocks = function(options) {
-  var missingBlocks = getMissingRequiredBlocks();
-  if (missingBlocks.length === 0) {
-    return;
+  // Check whether blocks are embedded in the hint returned from dashboard.
+  // See below comment for format.
+  var embeddedBlocks = options.response && options.response.hint &&
+      options.response.hint.indexOf("[{") !== 0;
+  if (!embeddedBlocks &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_FINISHED) {
+      return;
   }
-  if ((options.response && options.response.hint) ||
-      (options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
-       options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_FINISHED)) {
+
+  var blocksToDisplay = [];
+  if (embeddedBlocks) {
+    // Hint should be of the form: SOME TEXT {[..], [..], ...} IGNORED.
+    // Example: 'Try the following block: [{"type": "maze_moveForward"}]'
+    // Note that double quotes are required by the JSON parser.
+    var parts = options.response.hint.match(/(.*)(\[.*\])/);
+    if (!parts) {
+      return;
+    }
+    options.response.hint = parts[1].trim();  // Remove blocks from hint.
+    try {
+      blocksToDisplay = JSON.parse(parts[2]);
+    } catch(err) {
+      // The blocks could not be parsed.  Ignore them.
+      return;
+    }
+  } else {
+    blocksToDisplay = getMissingRequiredBlocks();
+  }
+
+  if (blocksToDisplay.length === 0) {
     return;
   }
 
@@ -1684,11 +1736,12 @@ var FeedbackBlocks = function(options) {
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
       level: options.level,
-      blocks: generateXMLForBlocks(missingBlocks)
+      blocks: generateXMLForBlocks(blocksToDisplay)
     }
   });
   this.iframe = document.createElement('iframe');
   this.iframe.setAttribute('id', 'feedbackBlocks');
+  this.iframe.setAttribute('allowtransparency', 'true');
   this.div.appendChild(this.iframe);
 };
 
@@ -7060,11 +7113,16 @@ exports.load = function(assetUrl, id) {
     downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
     upJumpArrow: assetUrl('media/common_images/jumpup.png'),
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
-    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
-    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -7399,6 +7457,7 @@ var Emotions = tiles.Emotions;
 
 var RANDOM_VALUE = 'random';
 var HIDDEN_VALUE = '"hidden"';
+var CLICK_VALUE = '"click"';
 var VISIBLE_VALUE = '"visible"';
 var CAVE_VALUE = '"cave"';
 
@@ -7408,7 +7467,7 @@ var generateSetterCode = function (opts) {
     var possibleValues =
       _(opts.ctx.VALUES)
         .map(function (item) { return item[1]; })
-        .without(RANDOM_VALUE, HIDDEN_VALUE);
+        .without(RANDOM_VALUE, HIDDEN_VALUE, CLICK_VALUE);
     value = 'Studio.random([' + possibleValues + '])';
   }
 
@@ -7449,14 +7508,20 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_edgeCollisions = false;
   blockly.Blocks.studio_spritesOutsidePlayspace = false;
 
+  function spriteNumberTextArray(string) {
+    var spriteNumbers = _.range(0, blockly.Blocks.studio_spriteCount);
+    return _.map(spriteNumbers, function (index) {
+        return [ string({spriteIndex: index + 1}),
+                 index.toString() ];
+    });
+  }
   /**
    * Creates a dropdown with options for each sprite number
    * @param choices
    * @returns {Blockly.FieldDropdown}
    */
-  function spriteNumberTextDropdown(choices) {
-    var dropdownArray = choices.slice(0, blockly.Blocks.studio_spriteCount);
-    return new blockly.FieldDropdown(dropdownArray);
+  function spriteNumberTextDropdown(string) {
+    return new blockly.FieldDropdown(spriteNumberTextArray(string));
   }
 
   /**
@@ -7480,8 +7545,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenLeft());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenLeft));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenLeft());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenLeftTooltip());
@@ -7495,8 +7565,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenRight());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenRight));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenRight());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenRightTooltip());
@@ -7510,8 +7585,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenUp());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenUp));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenUp());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenUpTooltip());
@@ -7525,8 +7605,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenDown());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenDown));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenDown());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenDownTooltip());
@@ -7540,8 +7625,14 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenGameStarts());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.startIcon));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.whenGameStarts());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenGameStartsTooltip());
@@ -7555,10 +7646,17 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(322, 0.90, 0.95);
-      this.appendDummyInput()
-        .appendTitle(msg.repeatForever());
-      this.appendStatementInput('DO')
-        .appendTitle(msg.repeatDo());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.repeat());
+        this.appendStatementInput('DO')
+          .appendTitle(new blockly.FieldImage(skin.repeatImage));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.repeatForever());
+        this.appendStatementInput('DO')
+          .appendTitle(msg.repeatDo());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(false);
       this.setTooltip(msg.repeatForeverTooltip());
@@ -7575,11 +7673,10 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.whenSpriteClickedN),
+                       'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.whenSpriteClicked());
@@ -7590,14 +7687,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.whenSpriteClickedTooltip());
     },
   };
-
-  blockly.Blocks.studio_whenSpriteClicked.SPRITE =
-    [[msg.whenSpriteClicked1(), '0'],
-     [msg.whenSpriteClicked2(), '1'],
-     [msg.whenSpriteClicked3(), '2'],
-     [msg.whenSpriteClicked4(), '3'],
-     [msg.whenSpriteClicked5(), '4'],
-     [msg.whenSpriteClicked6(), '5']];
 
   generator.studio_whenSpriteClicked = generator.studio_eventHandlerPrologue;
 
@@ -7614,13 +7703,14 @@ exports.install = function(blockly, blockInstallOptions) {
         dropdown1 = startingSpriteImageDropdown();
         dropdown2 = startingSpriteImageDropdown();
         this.appendDummyInput().appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.collide))
           .appendTitle(dropdown1, 'SPRITE1');
-        this.appendDummyInput().appendTitle(msg.whenSpriteCollidedWith())
+        this.appendDummyInput()
+          .appendTitle(commonMsg.and())
           .appendTitle(dropdown2, 'SPRITE2');
       } else {
-        dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
-        var dropdownArray2 =
-            this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
+        dropdown1 = spriteNumberTextDropdown(msg.whenSpriteCollidedN);
+        var dropdownArray2 = spriteNumberTextArray(msg.whenSpriteCollidedWithN);
         if (blockly.Blocks.studio_projectileCollisions) {
           dropdownArray2 = dropdownArray2.concat(this.PROJECTILES);
         }
@@ -7643,22 +7733,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_whenSpriteCollided.SPRITE1 =
-      [[msg.whenSpriteCollided1(), '0'],
-       [msg.whenSpriteCollided2(), '1'],
-       [msg.whenSpriteCollided3(), '2'],
-       [msg.whenSpriteCollided4(), '3'],
-       [msg.whenSpriteCollided5(), '4'],
-       [msg.whenSpriteCollided6(), '5']];
-
-  blockly.Blocks.studio_whenSpriteCollided.SPRITE2 =
-      [[msg.whenSpriteCollidedWith1(), '0'],
-       [msg.whenSpriteCollidedWith2(), '1'],
-       [msg.whenSpriteCollidedWith3(), '2'],
-       [msg.whenSpriteCollidedWith4(), '3'],
-       [msg.whenSpriteCollidedWith5(), '4'],
-       [msg.whenSpriteCollidedWith6(), '5']];
-
   blockly.Blocks.studio_whenSpriteCollided.PROJECTILES =
       [[msg.whenSpriteCollidedWithFireball(), 'fireball'],
        [msg.whenSpriteCollidedWithFlower(), 'flower']];
@@ -7675,12 +7749,10 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for stopping the movement of a sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.stopSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.stopSprite());
@@ -7692,14 +7764,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_stop.SPRITE =
-      [[msg.stopSprite1(), '0'],
-       [msg.stopSprite2(), '1'],
-       [msg.stopSprite3(), '2'],
-       [msg.stopSprite4(), '3'],
-       [msg.stopSprite5(), '4'],
-       [msg.stopSprite6(), '5']];
-
   generator.studio_stop = function() {
     // Generate JavaScript for stopping the movement of a sprite.
     return 'Studio.stop(\'block_id_' + this.id + '\', ' +
@@ -7710,12 +7774,10 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for throwing a projectile from a sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.throwSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.throwSprite());
@@ -7732,14 +7794,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.throwTooltip());
     }
   };
-
-  blockly.Blocks.studio_throw.SPRITE =
-      [[msg.throwSprite1(), '0'],
-       [msg.throwSprite2(), '1'],
-       [msg.throwSprite3(), '2'],
-       [msg.throwSprite4(), '3'],
-       [msg.throwSprite5(), '4'],
-       [msg.throwSprite6(), '5']];
 
   blockly.Blocks.studio_throw.DIR =
         [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -7814,8 +7868,6 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for jumping a sprite to different position.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       var dropdown;
       if (blockly.Blocks.studio_spritesOutsidePlayspace) {
         dropdown = new blockly.FieldDropdown(this.VALUES_EXTENDED);
@@ -7827,7 +7879,7 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
@@ -7840,14 +7892,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.setSpritePositionTooltip());
     }
   };
-
-  blockly.Blocks.studio_setSpritePosition.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
 
   // 9 possible positions in playspace (+ random):
   blockly.Blocks.studio_setSpritePosition.VALUES =
@@ -7901,7 +7945,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.moveSpriteN), 'SPRITE');
         }
         this.appendDummyInput()
           .appendTitle('\t');
@@ -7918,13 +7962,11 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_move.SPRITE =
-      [[msg.moveSprite1(), '0'],
-       [msg.moveSprite2(), '1'],
-       [msg.moveSprite3(), '2'],
-       [msg.moveSprite4(), '3'],
-       [msg.moveSprite5(), '4'],
-       [msg.moveSprite6(), '5']];
+  blockly.Blocks.studio_move.K1_DIR =
+      [[skin.upArrowSmall, Direction.NORTH.toString()],
+       [skin.rightArrowSmall, Direction.EAST.toString()],
+       [skin.downArrowSmall, Direction.SOUTH.toString()],
+       [skin.leftArrowSmall, Direction.WEST.toString()]];
 
   blockly.Blocks.studio_move.DIR =
       [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -7950,7 +7992,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.moveSpriteN), 'SPRITE');
         }
         this.appendDummyInput()
           .appendTitle('\t');
@@ -7976,14 +8018,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setNextStatement(true);
       this.setTooltip(msg.moveDistanceTooltip());
     };
-
-    block.SPRITE =
-      [[msg.moveSprite1(), '0'],
-       [msg.moveSprite2(), '1'],
-       [msg.moveSprite3(), '2'],
-       [msg.moveSprite4(), '3'],
-       [msg.moveSprite5(), '4'],
-       [msg.moveSprite6(), '5']];
 
     block.DIR =
         [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -8065,14 +8099,34 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected),
-                       'SOUND');
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.play())
+          .appendTitle(new blockly.FieldImage(skin.soundIcon))
+          .appendTitle(new blockly.FieldDropdown(this.K1_SOUNDS, onSoundSelected), 'SOUND');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected), 'SOUND');
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
     }
   };
+
+  blockly.Blocks.studio_playSound.K1_SOUNDS =
+      [[msg.soundHit(), 'hit'],
+       [msg.soundWood(), 'wood'],
+       [msg.soundRetro(), 'retro'],
+       [msg.soundSlap(), 'slap'],
+       [msg.soundRubber(), 'rubber'],
+       [msg.soundCrunch(), 'crunch'],
+       [msg.soundWinPoint(), 'winpoint'],
+       [msg.soundWinPoint2(), 'winpoint2'],
+       [msg.soundLosePoint(), 'losepoint'],
+       [msg.soundLosePoint2(), 'losepoint2'],
+       [msg.soundGoal1(), 'goal1'],
+       [msg.soundGoal2(), 'goal2']];
 
   blockly.Blocks.studio_playSound.SOUNDS =
       [[msg.playSoundHit(), 'hit'],
@@ -8101,7 +8155,8 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (isK1) {
         this.appendDummyInput()
-          .appendTitle(msg.incrementPlayerScore());
+          .appendTitle(commonMsg.score())
+          .appendTitle(new blockly.FieldImage(skin.scoreCard));
       } else {
         this.appendDummyInput()
           .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
@@ -8150,28 +8205,44 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for setting sprite speed
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[3][1]); // default to normal
-
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
       this.setHSV(184, 1.00, 0.74);
+
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.setSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(dropdown, 'VALUE');
+
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES);
+        fieldImageDropdown.setValue(this.K1_VALUES[1][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.speed())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[3][1]); // default to normal
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
+
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.setSpriteSpeedTooltip());
     }
   };
+
+  blockly.Blocks.studio_setSpriteSpeed.K1_VALUES =
+      [[skin.speedSlow, 'Studio.SpriteSpeed.SLOW'],
+       [skin.speedMedium, 'Studio.SpriteSpeed.NORMAL'],
+       [skin.speedFast, 'Studio.SpriteSpeed.FAST']];
 
   blockly.Blocks.studio_setSpriteSpeed.VALUES =
       [[msg.setSpriteSpeedRandom(), RANDOM_VALUE],
@@ -8180,14 +8251,6 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSpriteSpeedNormal(), 'Studio.SpriteSpeed.NORMAL'],
        [msg.setSpriteSpeedFast(), 'Studio.SpriteSpeed.FAST'],
        [msg.setSpriteSpeedVeryFast(), 'Studio.SpriteSpeed.VERY_FAST']];
-
-  blockly.Blocks.studio_setSpriteSpeed.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
 
   generator.studio_setSpriteSpeed = function () {
     return generateSetterCode({
@@ -8334,14 +8397,6 @@ exports.install = function(blockly, blockInstallOptions) {
       }
     };
 
-    blockly.Blocks.studio_setSprite.SPRITE =
-        [[msg.sprite1(), '0'],
-         [msg.sprite2(), '1'],
-         [msg.sprite3(), '2'],
-         [msg.sprite4(), '3'],
-         [msg.sprite5(), '4'],
-         [msg.sprite6(), '5']];
-
     blockly.Blocks.studio_setSprite.VALUES =
         [[msg.setSpriteHideK1(), HIDDEN_VALUE],
          [msg.setSpriteShowK1(), VISIBLE_VALUE]];
@@ -8355,13 +8410,10 @@ exports.install = function(blockly, blockInstallOptions) {
         var dropdown = new blockly.FieldDropdown(this.VALUES);
         dropdown.setValue(this.VALUES[2][1]);  // default to witch
 
-        var dropdownArray =
-            this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
         this.setHSV(312, 0.32, 0.62);
         if (blockly.Blocks.studio_spriteCount > 1) {
           this.appendDummyInput()
-            .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
         } else {
           this.appendDummyInput()
             .appendTitle(msg.setSprite());
@@ -8375,14 +8427,6 @@ exports.install = function(blockly, blockInstallOptions) {
       }
     };
 
-    blockly.Blocks.studio_setSprite.SPRITE =
-        [[msg.setSprite1(), '0'],
-         [msg.setSprite2(), '1'],
-         [msg.setSprite3(), '2'],
-         [msg.setSprite4(), '3'],
-         [msg.setSprite5(), '4'],
-         [msg.setSprite6(), '5']];
-
     blockly.Blocks.studio_setSprite.VALUES =
         [[msg.setSpriteHidden(), HIDDEN_VALUE],
          [msg.setSpriteRandom(), RANDOM_VALUE],
@@ -8391,7 +8435,12 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.setSpriteDinosaur(), '"dinosaur"'],
          [msg.setSpriteDog(), '"dog"'],
          [msg.setSpriteOctopus(), '"octopus"'],
-         [msg.setSpritePenguin(), '"penguin"']];
+         [msg.setSpritePenguin(), '"penguin"'],
+         [msg.setSpriteBat(), '"bat"'],
+         [msg.setSpriteBird(), '"bird"'],
+         [msg.setSpriteDragon(), '"dragon"'],
+         [msg.setSpriteSquirrel(), '"squirrel"'],
+         [msg.setSpriteWizard(), '"wizard"']];
   }
 
   generator.studio_setSprite = function() {
@@ -8416,9 +8465,6 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_setSpriteEmotion = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]);  // default to normal
-
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         if (isK1) {
@@ -8426,14 +8472,25 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
         }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(dropdown, 'VALUE');
+
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES, 34, 34);
+        fieldImageDropdown.setValue(this.K1_VALUES[0][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.emotion())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[1][1]);  // default to normal
+        this.appendDummyInput()
+          .appendTitle(dropdown, 'VALUE');
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
@@ -8441,20 +8498,19 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_setSpriteEmotion.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
-
   blockly.Blocks.studio_setSpriteEmotion.VALUES =
       [[msg.setSpriteEmotionRandom(), RANDOM_VALUE],
        [msg.setSpriteEmotionNormal(), Emotions.NORMAL.toString()],
        [msg.setSpriteEmotionHappy(), Emotions.HAPPY.toString()],
        [msg.setSpriteEmotionAngry(), Emotions.ANGRY.toString()],
        [msg.setSpriteEmotionSad(), Emotions.SAD.toString()]];
+
+  blockly.Blocks.studio_setSpriteEmotion.K1_VALUES =
+      [[skin.emotionNormal, Emotions.NORMAL.toString()],
+       [skin.emotionHappy, Emotions.HAPPY.toString()],
+       [skin.emotionAngry, Emotions.ANGRY.toString()],
+       [skin.emotionSad, Emotions.SAD.toString()],
+       [skin.randomPurpleIcon, RANDOM_VALUE]];
 
   generator.studio_setSpriteEmotion = function() {
     return generateSetterCode({
@@ -8474,7 +8530,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.saySpriteN), 'SPRITE');
         }
       } else {
         this.appendDummyInput()
@@ -8484,8 +8540,11 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendValueInput('TEXT')
           .setCheck('String');
       } else {
-        this.appendDummyInput()
-          .appendTitle(new Blockly.FieldImage(
+        var quotedTextInput = this.appendDummyInput();
+        if (isK1) {
+          quotedTextInput.appendTitle(new Blockly.FieldImage(skin.speechBubble));
+        }
+        quotedTextInput.appendTitle(new Blockly.FieldImage(
                   Blockly.assetUrl('media/quote0.png'), 12, 12))
           .appendTitle(new Blockly.FieldTextInput(msg.defaultSayText()), 'TEXT')
           .appendTitle(new Blockly.FieldImage(
@@ -8496,14 +8555,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setNextStatement(true);
       this.setTooltip(msg.saySpriteTooltip());
     };
-
-    block.SPRITE =
-        [[msg.saySprite1(), '0'],
-         [msg.saySprite2(), '1'],
-         [msg.saySprite3(), '2'],
-         [msg.saySprite4(), '3'],
-         [msg.saySprite5(), '4'],
-         [msg.saySprite6(), '5']];
   };
 
   blockly.Blocks.studio_saySprite = {};
@@ -8558,7 +8609,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
     if (!block.params) {
       block.VALUES =
-        [[msg.waitForClick(), '0'],
+        [[msg.waitForClick(), '"click"'],
          [msg.waitForRandom(), 'random'],
          [msg.waitForHalfSecond(), '500'],
          [msg.waitFor1Second(), '1000'],
@@ -8680,7 +8731,7 @@ module.exports = {
   },
   '2': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}]
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}]
     ],
     'scale': {
       'snapRadius': 2
@@ -8704,7 +8755,7 @@ module.exports = {
   },
   '3': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}],
       [{'test': 'saySprite', 'type': 'studio_saySprite'}]
     ],
     'scale': {
@@ -8913,7 +8964,9 @@ module.exports = {
   },
   '9': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance',
+        'type': 'studio_moveDistance',
+        'titles': {'SPRITE': '1', 'DISTANCE': '400'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -8937,7 +8990,7 @@ module.exports = {
     'spriteStartingImage': 2,
     'spriteFinishIndex': 1,
     'timeoutFailureTick': 150,
-    'minWorkspaceHeight': 750,
+    'minWorkspaceHeight': 800,
     'toolbox':
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
@@ -8949,23 +9002,23 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"></block>'
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"></block>'
   },
   '10': {
     'requiredBlocks': [
-      [{'test': 'playSound', 'type': 'studio_playSound'}],
+      [{'test': 'playSound', 'type': 'studio_playSound', 'titles': {'SOUND': 'crunch'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -8987,7 +9040,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 950,
+    'minWorkspaceHeight': 900,
     'goal': {
       successCondition: function () {
         return (Studio.playSoundCount > 0) &&
@@ -9008,19 +9061,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9030,7 +9083,7 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"></block>'
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"></block>'
   },
   '11': {
     'requiredBlocks': [
@@ -9077,19 +9130,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9099,17 +9152,21 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="820"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="860"> \
        <title name="SPRITE2">2</title></block>'
   },
   '12': {
     'requiredBlocks': [
-      [{'test': 'setBackground', 'type': 'studio_setBackground'}],
-      [{'test': 'setSpriteSpeed', 'type': 'studio_setSpriteSpeed'}],
+      [{'test': 'setBackground',
+        'type': 'studio_setBackground',
+        'titles': {'VALUE': '"night"'}}],
+      [{'test': 'setSpriteSpeed',
+        'type': 'studio_setSpriteSpeed',
+        'titles': {'VALUE': 'Studio.SpriteSpeed.FAST'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -9131,7 +9188,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 1200,
+    'minWorkspaceHeight': 1250,
     'goal': {
       successCondition: function () {
         return Studio.sprite[0].collisionMask & Math.pow(2, 2);
@@ -9150,26 +9207,26 @@ module.exports = {
            <title name="SOUND">crunch</title></block>' +
          blockOfType('studio_changeScore') +
          '<block type="studio_setSpriteSpeed"> \
-          <title name="VALUE">Studio.SpriteSpeed.VERY_FAST</title></block>'),
+          <title name="VALUE">Studio.SpriteSpeed.FAST</title></block>'),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
       <block type="studio_whenLeft" deletable="false" x="20" y="200"> \
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="320"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="330"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="440"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="460"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="560"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="590"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="680"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="720"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -9179,11 +9236,11 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="880"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="910"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1000"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1040"> \
        <title name="SPRITE2">2</title> \
         <next><block type="studio_changeScore"></block> \
         </next></block>'
@@ -9200,17 +9257,17 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1300,
+    'minWorkspaceHeight': 1500,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0,16, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0,16, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'toolbox':
@@ -9245,7 +9302,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1300,
+    'minWorkspaceHeight': 1400,
     'edgeCollisions': true,
     'projectileCollisions': true,
     'spritesOutsidePlayspace': true,
@@ -9300,7 +9357,7 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1000,
+    'minWorkspaceHeight': 1400,
     'edgeCollisions': true,
     'projectileCollisions': true,
     'spritesOutsidePlayspace': true,
@@ -9529,8 +9586,43 @@ exports.load = function(assetUrl, id) {
     dropdownThumbnail: skin.assetUrl('witch_thumb.png'),
     sprite: skin.assetUrl('witch_sprite_200px.png'),
   };
+  skin.bat = {
+    sprite: skin.assetUrl('bat_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('bat_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.bird = {
+    sprite: skin.assetUrl('bird_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('bird_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.dragon = {
+    sprite: skin.assetUrl('dragon_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dragon_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.squirrel = {
+    sprite: skin.assetUrl('squirrel_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('squirrel_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.wizard = {
+    sprite: skin.assetUrl('wizard_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('wizard_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
 
   // Images
+  skin.whenUp = skin.assetUrl('when-up.png');
+  skin.whenDown = skin.assetUrl('when-down.png');
+  skin.whenLeft = skin.assetUrl('when-left.png');
+  skin.whenRight = skin.assetUrl('when-right.png');
+  skin.collide = skin.assetUrl('when-sprite-collide.png');
+  skin.emotionAngry = skin.assetUrl('emotion-angry.png');
+  skin.emotionNormal = skin.assetUrl('emotion-nothing.png');
+  skin.emotionSad = skin.assetUrl('emotion-sad.png');
+  skin.emotionHappy = skin.assetUrl('emotion-happy.png');
+  skin.speechBubble = skin.assetUrl('say-sprite.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
   skin.approachingGoalAnimation =
@@ -9743,6 +9835,7 @@ var feedback = require('../feedback.js');
 var dom = require('../dom');
 var Sprite = require('./sprite').Sprite;
 var Hammer = require('../hammer');
+var parseXmlElement = require('../xml').parseElement;
 
 var Direction = tiles.Direction;
 var NextTurn = tiles.NextTurn;
@@ -9822,7 +9915,7 @@ var skin;
 var onSharePage;
 
 var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
-  "witch" ];
+  "witch", "bat", "bird", "dragon", "squirrel", "wizard" ];
 
 Studio.nthStartingSkin = function(n) {
   var skinStartOffset = Studio.spriteStartingImage || 0;
@@ -9840,6 +9933,9 @@ BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
 
 //The number of blocks to show as feedback.
 BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = 1;
+
+Studio.BLOCK_X_COORDINATE = 20;
+Studio.BLOCK_Y_COORDINATE = 20;
 
 // Default Scalings
 Studio.scale = {
@@ -9925,7 +10021,7 @@ var drawMap = function() {
   svg.setAttribute('height', Studio.MAZE_HEIGHT);
 
   // Attach click handler.
-  var hammerSvg = new Hammer(svg, {preventDefault: true});
+  var hammerSvg = new Hammer(svg);
   hammerSvg.on("tap", Studio.onSvgClicked);
   hammerSvg.on("drag", Studio.onSvgDrag);
 
@@ -10485,8 +10581,11 @@ Studio.onTick = function() {
 };
 
 Studio.onSvgDrag = function(e) {
-  Studio.gesturesObserved[e.gesture.direction] =
-    Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+  if (Studio.intervalId) {
+    Studio.gesturesObserved[e.gesture.direction] =
+      Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+    e.gesture.preventDefault();
+  }
 };
 
 Studio.onKey = function(e) {
@@ -10541,6 +10640,110 @@ Studio.onArrowButtonUp = function(e, idBtn) {
 Studio.onMouseUp = function(e) {
   // Reset btnState on mouse up
   Studio.btnState = {};
+};
+
+Studio.initSprites = function () {
+  Studio.spriteFinishCount = 0;
+  Studio.spriteCount = 0;
+  Studio.sprite = [];
+  Studio.projectiles = [];
+
+  // Locate the start and finish positions.
+  for (var y = 0; y < Studio.ROWS; y++) {
+    for (var x = 0; x < Studio.COLS; x++) {
+      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
+        if (0 === Studio.spriteFinishCount) {
+          Studio.spriteFinish_ = [];
+        }
+        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
+        Studio.spriteFinishCount++;
+      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
+        if (0 === Studio.spriteCount) {
+          Studio.spriteStart_ = [];
+        }
+        Studio.sprite[Studio.spriteCount] = {};
+        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
+        Studio.spriteCount++;
+      }
+    }
+  }
+
+  // Update the sprite count in the blocks:
+  blocks.setSpriteCount(Blockly, Studio.spriteCount);
+
+  if (level.projectileCollisions) {
+    blocks.enableProjectileCollisions(Blockly);
+  }
+
+  if (level.edgeCollisions) {
+    blocks.enableEdgeCollisions(Blockly);
+  }
+
+  if (level.spritesOutsidePlayspace) {
+    blocks.enableSpritesOutsidePlayspace(Blockly);
+  }
+};
+
+/**
+ * Initialize Blockly and Studio for read-only (blocks feedback).
+ * Called on iframe load for read-only.
+ */
+Studio.initReadonly = function(config) {
+  // Do some minimal level loading and sprite initialization so that
+  // we can ensure that the blocks are appropriately modified for this level
+  skin = config.skin;
+  level = config.level;
+  loadLevel();
+
+  Studio.initSprites();
+
+  BlocklyApps.initReadonly(config);
+};
+
+/**
+ * Arrange the start blocks to spread them out in the workspace.
+ * This uses unique logic for studio - spread event blocks vertically even
+ * over the total height of the workspace.
+ */
+var arrangeStartBlocks = function (config) {
+  var xml = parseXmlElement(config.level.startBlocks);
+  var numUnplacedElementNodes = 0;
+  //
+  // two passes through, one to count the nodes:
+  //
+  for (var x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+    xmlChild = xml.childNodes[x];
+
+    // Only look at element nodes without a y coordinate:
+    if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+      numUnplacedElementNodes++;
+    }
+  }
+  //
+  // and one to place the nodes:
+  //
+  if (numUnplacedElementNodes) {
+    var numberOfPlacedBlocks = 0;
+    var totalHeightAvail =
+        (config.level.minWorkspaceHeight || 1000) - Studio.BLOCK_Y_COORDINATE;
+    var yCoordInterval = totalHeightAvail / numUnplacedElementNodes;
+    for (x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+      xmlChild = xml.childNodes[x];
+
+      // Only look at element nodes without a y coordinate:
+      if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+        xmlChild.setAttribute(
+            'x',
+            xmlChild.getAttribute('x') || Studio.BLOCK_X_COORDINATE);
+        xmlChild.setAttribute(
+            'y',
+            Studio.BLOCK_Y_COORDINATE + yCoordInterval * numberOfPlacedBlocks);
+        numberOfPlacedBlocks += 1;
+      }
+    }
+    // replace the startBlocks since we changed the attributes in the xml dom:
+    config.level.startBlocks = Blockly.Xml.domToText(xml);
+  }
 };
 
 /**
@@ -10621,13 +10824,7 @@ Studio.init = function(config) {
     return visualization.getBoundingClientRect().width;
   };
 
-  // TODO: update this for Studio
-  // Block placement default (used as fallback in the share levels)
-  config.blockArrangement = {
-    'studio_whenGameStarts': { x: 20, y: 20},
-    'studio_whenLeft': { x: 20, y: 110},
-    'studio_whenRight': { x: 180, y: 110},
-  };
+  arrangeStartBlocks(config);
 
   config.twitter = twitterOptions;
 
@@ -10644,45 +10841,7 @@ Studio.init = function(config) {
 
   config.preventExtraTopLevelBlocks = true;
 
-  Studio.spriteFinishCount = 0;
-  Studio.spriteCount = 0;
-  Studio.sprite = [];
-  Studio.projectiles = [];
-
-  // Locate the start and finish positions.
-  for (var y = 0; y < Studio.ROWS; y++) {
-    for (var x = 0; x < Studio.COLS; x++) {
-      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
-        if (0 === Studio.spriteFinishCount) {
-          Studio.spriteFinish_ = [];
-        }
-        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
-        Studio.spriteFinishCount++;
-      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
-        if (0 === Studio.spriteCount) {
-          Studio.spriteStart_ = [];
-        }
-        Studio.sprite[Studio.spriteCount] = [];
-        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
-        Studio.spriteCount++;
-      }
-    }
-  }
-
-  // Update the sprite count in the blocks:
-  blocks.setSpriteCount(Blockly, Studio.spriteCount);
-
-  if (level.projectileCollisions) {
-    blocks.enableProjectileCollisions(Blockly);
-  }
-
-  if (level.edgeCollisions) {
-    blocks.enableEdgeCollisions(Blockly);
-  }
-
-  if (level.spritesOutsidePlayspace) {
-    blocks.enableSpritesOutsidePlayspace(Blockly);
-  }
+  Studio.initSprites();
 
   BlocklyApps.init(config);
 
@@ -10712,6 +10871,7 @@ Studio.clearEventHandlersKillTickLoop = function() {
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
+  Studio.tickCount = 0;
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
@@ -10767,6 +10927,7 @@ BlocklyApps.reset = function(first) {
 
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
+    Studio.sprite[i] = {};
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
     Studio.sprite[i].y = Studio.spriteStart_[i].y;
     Studio.sprite[i].speed = tiles.DEFAULT_SPRITE_SPEED;
@@ -10844,17 +11005,6 @@ BlocklyApps.runButtonClick = function() {
   if (level.showZeroScore) {
     Studio.displayScore();
   }
-};
-
-/**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
 };
 
 /**
@@ -10981,7 +11131,7 @@ var defineProcedures = function (blockType) {
  */
 Studio.execute = function() {
   var code;
-  Studio.result = ResultType.UNSET;
+  Studio.result = BlocklyApps.ResultType.UNSET;
   Studio.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Studio.waitingForReport = false;
   Studio.response = null;
@@ -11031,13 +11181,12 @@ Studio.execute = function() {
 
   // Set event handlers and start the onTick timer
   Studio.eventHandlers = handlers;
-  Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
 
 Studio.onPuzzleComplete = function() {
   if (level.freePlay) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
   }
 
   // Stop everything on screen
@@ -11045,7 +11194,7 @@ Studio.onPuzzleComplete = function() {
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Studio.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Studio.result == BlocklyApps.ResultType.SUCCESS);
 
   // If the current level is a free play, always return the free play
   // result type
@@ -11080,7 +11229,7 @@ Studio.onPuzzleComplete = function() {
   BlocklyApps.report({
                      app: 'studio',
                      level: level.id,
-                     result: Studio.result === ResultType.SUCCESS,
+                     result: Studio.result === BlocklyApps.ResultType.SUCCESS,
                      testResult: Studio.testResults,
                      program: encodeURIComponent(textBlocks),
                      onComplete: Studio.onReportComplete
@@ -11481,9 +11630,9 @@ Studio.wait = function (opts) {
   if (!opts.started) {
     opts.started = true;
 
-    // opts.value is the number of milliseconds to wait - or zero which means
+    // opts.value is the number of milliseconds to wait - or 'click' which means
     // "wait for click"
-    if (0 === opts.value) {
+    if ('click' === opts.value) {
       opts.waitForClick = true;
     } else {
       opts.waitTimeout = window.setTimeout(
@@ -11610,12 +11759,21 @@ Studio.hideSpeechBubble = function (opts) {
   speechBubble.removeAttribute('onRight');
   speechBubble.removeAttribute('height');
   opts.complete = true;
+  delete Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc;
   Studio.sayComplete++;
 };
 
 Studio.saySprite = function (opts) {
   if (!opts.started) {
     opts.started = true;
+
+    // Remove any existing speech bubble on this sprite:
+    if (Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc) {
+      Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc();
+    }
+    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+
+    // Start creating the new speech bubble:
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
 
@@ -11642,9 +11800,10 @@ Studio.saySprite = function (opts) {
     Studio.displaySprite(opts.spriteIndex);
     speechBubble.setAttribute('visibility', 'visible');
 
-    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+    Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc =
+        delegate(this, Studio.hideSpeechBubble, opts);
     Studio.sprite[opts.spriteIndex].bubbleTimeout = window.setTimeout(
-        delegate(this, Studio.hideSpeechBubble, opts),
+        Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc,
         Studio.SPEECH_BUBBLE_TIMEOUT);
   }
 
@@ -11949,30 +12108,30 @@ Studio.allFinishesComplete = function() {
 var checkFinished = function () {
   // if we have a succcess condition and have accomplished it, we're done and successful
   if (level.goal && level.goal.successCondition && level.goal.successCondition()) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
-    Studio.result = ResultType.FAILURE;
+    Studio.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
   if (Studio.allFinishesComplete()) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   if (Studio.timedOut()) {
-    Studio.result = ResultType.FAILURE;
+    Studio.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
   return false;
 };
 
-},{"../../locale/bn_bd/common":38,"../../locale/bn_bd/studio":39,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../hammer":9,"../skins":12,"../templates/page.html":31,"./api":14,"./blocks":15,"./controls.html":16,"./extraControlRows.html":17,"./sprite":21,"./tiles":23,"./visualization.html":24}],23:[function(require,module,exports){
+},{"../../locale/bn_bd/common":38,"../../locale/bn_bd/studio":39,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../hammer":9,"../skins":12,"../templates/page.html":31,"../xml":37,"./api":14,"./blocks":15,"./controls.html":16,"./extraControlRows.html":17,"./sprite":21,"./tiles":23,"./visualization.html":24}],23:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
@@ -12315,7 +12474,7 @@ escape = escape || function (html){
 var buf = [];
 with (locals || {}) { (function(){ 
  buf.push('<!DOCTYPE html>\n<html dir="', escape((2,  options.localeDirection )), '">\n<head>\n  <meta charset="utf-8">\n  <title>Blockly</title>\n  <script type="text/javascript" src="', escape((6,  assetUrl('js/' + options.locale + '/vendor.js') )), '"></script>\n  <script type="text/javascript" src="', escape((7,  assetUrl('js/' + options.locale + '/' + app + '.js') )), '"></script>\n  <script type="text/javascript">\n    ');9; // delay to onload to fix IE9. 
-; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: #fff;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
+; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: transparent;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      background-color: transparent;\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
 } 
 return buf.join('');
 };
@@ -12526,6 +12685,8 @@ exports.parseElement = function(text) {
 
 },{}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bn=function(n){return n===1?"one":"other"}
+exports.and = function(d){return "and"};
+
 exports.blocklyMessage = function(d){return "Blockly"};
 
 exports.catActions = function(d){return "ক্রিয়া"};
@@ -12602,13 +12763,19 @@ exports.numBlocksNeeded = function(d){return "Congratulations! You completed Puz
 
 exports.numLinesOfCodeWritten = function(d){return "You just wrote "+p(d,"numLines",0,"bn",{"one":"1 line","other":n(d,"numLines")+" lines"})+" of code!"};
 
+exports.play = function(d){return "play"};
+
 exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" of "+v(d,"stage_total")};
+
+exports.repeat = function(d){return "repeat"};
 
 exports.resetProgram = function(d){return "পুনরায় সেট করুন"};
 
 exports.runProgram = function(d){return "প্রোগ্রাম চালান"};
 
 exports.runTooltip = function(d){return "Run the program defined by the blocks in the workspace."};
+
+exports.score = function(d){return "score"};
 
 exports.showCodeHeader = function(d){return "কোড প্রদর্শন করুন"};
 
@@ -12667,6 +12834,8 @@ exports.hintHeader = function(d){return "Here's a tip:"};
 
 },{"messageformat":51}],39:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.bn=function(n){return n===1?"one":"other"}
+exports.actor = function(d){return "actor"};
+
 exports.catActions = function(d){return "Actions"};
 
 exports.catControl = function(d){return "Loops"};
@@ -12692,6 +12861,8 @@ exports.continue = function(d){return "চালিয়ে যান"};
 exports.decrementPlayerScore = function(d){return "remove point"};
 
 exports.defaultSayText = function(d){return "type here"};
+
+exports.emotion = function(d){return "emotion"};
 
 exports.finalLevel = function(d){return "Congratulations! You have solved the final puzzle."};
 
@@ -12737,17 +12908,7 @@ exports.moveDistanceTooltip = function(d){return "Move a character a specific di
 
 exports.moveSprite = function(d){return "move"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
-
-exports.moveSprite2 = function(d){return "move character 2"};
-
-exports.moveSprite3 = function(d){return "move character 3"};
-
-exports.moveSprite4 = function(d){return "move character 4"};
-
-exports.moveSprite5 = function(d){return "move character 5"};
-
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSpriteN = function(d){return "move actor "+v(d,"spriteIndex")};
 
 exports.moveDown = function(d){return "move down"};
 
@@ -12853,17 +13014,7 @@ exports.repeatForeverTooltip = function(d){return "Execute the actions in this b
 
 exports.saySprite = function(d){return "say"};
 
-exports.saySprite1 = function(d){return "character 1 say"};
-
-exports.saySprite2 = function(d){return "character 2 say"};
-
-exports.saySprite3 = function(d){return "character 3 say"};
-
-exports.saySprite4 = function(d){return "character 4 say"};
-
-exports.saySprite5 = function(d){return "character 5 say"};
-
-exports.saySprite6 = function(d){return "character 6 say"};
+exports.saySpriteN = function(d){return "actor "+v(d,"spriteIndex")+" say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
@@ -12903,11 +13054,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
+exports.setSpriteBat = function(d){return "to a bat image"};
+
+exports.setSpriteBird = function(d){return "to a bird image"};
+
 exports.setSpriteCat = function(d){return "to a cat image"};
 
 exports.setSpriteDinosaur = function(d){return "to a dinosaur image"};
 
 exports.setSpriteDog = function(d){return "to a dog image"};
+
+exports.setSpriteDragon = function(d){return "to a dragon image"};
 
 exports.setSpriteHidden = function(d){return "to a hidden image"};
 
@@ -12921,7 +13078,11 @@ exports.setSpriteRandom = function(d){return "to a random image"};
 
 exports.setSpriteShowK1 = function(d){return "show"};
 
+exports.setSpriteSquirrel = function(d){return "to a squirrel image"};
+
 exports.setSpriteWitch = function(d){return "to a witch image"};
+
+exports.setSpriteWizard = function(d){return "to a wizard image"};
 
 exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor to the specified location."};
 
@@ -12963,59 +13124,43 @@ exports.showTitleScreenTooltip = function(d){return "Show a title screen with th
 
 exports.setSprite = function(d){return "set"};
 
-exports.setSprite1 = function(d){return "set character 1"};
+exports.setSpriteN = function(d){return "set actor "+v(d,"spriteIndex")};
 
-exports.setSprite2 = function(d){return "set character 2"};
+exports.soundCrunch = function(d){return "crunch"};
 
-exports.setSprite3 = function(d){return "set character 3"};
+exports.soundGoal1 = function(d){return "goal 1"};
 
-exports.setSprite4 = function(d){return "set character 4"};
+exports.soundGoal2 = function(d){return "goal 2"};
 
-exports.setSprite5 = function(d){return "set character 5"};
+exports.soundHit = function(d){return "hit"};
 
-exports.setSprite6 = function(d){return "set character 6"};
+exports.soundLosePoint = function(d){return "lose point"};
 
-exports.sprite1 = function(d){return "actor 1"};
+exports.soundLosePoint2 = function(d){return "lose point 2"};
 
-exports.sprite2 = function(d){return "actor 2"};
+exports.soundRetro = function(d){return "retro"};
 
-exports.sprite3 = function(d){return "actor 3"};
+exports.soundRubber = function(d){return "rubber"};
 
-exports.sprite4 = function(d){return "actor 4"};
+exports.soundSlap = function(d){return "slap"};
 
-exports.sprite5 = function(d){return "actor 5"};
+exports.soundWinPoint = function(d){return "win point"};
 
-exports.sprite6 = function(d){return "actor 6"};
+exports.soundWinPoint2 = function(d){return "win point 2"};
+
+exports.soundWood = function(d){return "wood"};
+
+exports.speed = function(d){return "speed"};
 
 exports.stopSprite = function(d){return "stop"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
-
-exports.stopSprite2 = function(d){return "stop actor 2"};
-
-exports.stopSprite3 = function(d){return "stop actor 3"};
-
-exports.stopSprite4 = function(d){return "stop actor 4"};
-
-exports.stopSprite5 = function(d){return "stop actor 5"};
-
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSpriteN = function(d){return "stop actor "+v(d,"spriteIndex")};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
 exports.throwSprite = function(d){return "throw"};
 
-exports.throwSprite1 = function(d){return "actor 1 throw"};
-
-exports.throwSprite2 = function(d){return "actor 2 throw"};
-
-exports.throwSprite3 = function(d){return "actor 3 throw"};
-
-exports.throwSprite4 = function(d){return "actor 4 throw"};
-
-exports.throwSprite5 = function(d){return "actor 5 throw"};
-
-exports.throwSprite6 = function(d){return "actor 6 throw"};
+exports.throwSpriteN = function(d){return "actor "+v(d,"spriteIndex")+" throw"};
 
 exports.throwTooltip = function(d){return "Throws a projectile from the specified actor."};
 
@@ -13059,47 +13204,17 @@ exports.whenRightTooltip = function(d){return "Execute the actions below when th
 
 exports.whenSpriteClicked = function(d){return "when actor clicked"};
 
-exports.whenSpriteClicked1 = function(d){return "when character 1 clicked"};
-
-exports.whenSpriteClicked2 = function(d){return "when character 2 clicked"};
-
-exports.whenSpriteClicked3 = function(d){return "when character 3 clicked"};
-
-exports.whenSpriteClicked4 = function(d){return "when character 4 clicked"};
-
-exports.whenSpriteClicked5 = function(d){return "when character 5 clicked"};
-
-exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
+exports.whenSpriteClickedN = function(d){return "when actor "+v(d,"spriteIndex")+" clicked"};
 
 exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
-
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
-
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
-
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
-
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
-
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteCollidedN = function(d){return "when actor "+v(d,"spriteIndex")};
 
 exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
 
 exports.whenSpriteCollidedWith = function(d){return "touches"};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
-
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
-
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
-
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
-
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
-
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollidedWithN = function(d){return "touches actor "+v(d,"spriteIndex")};
 
 exports.whenSpriteCollidedWithFireball = function(d){return "touches fireball"};
 

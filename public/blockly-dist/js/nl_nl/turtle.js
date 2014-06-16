@@ -70,7 +70,11 @@ module.exports = function(app, levels, options) {
 
   addReadyListener(function() {
     if (options.readonly) {
-      BlocklyApps.initReadonly(options);
+      if (app.initReadonly) {
+        app.initReadonly(options);
+      } else {
+        BlocklyApps.initReadonly(options);
+      }
     } else {
       app.init(options);
       if (options.onInitialize) {
@@ -762,6 +766,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -1239,10 +1255,12 @@ exports.displayFeedback = function(options) {
   var canContinue = exports.canContinueToNextLevel(options.feedbackType);
   var displayShowCode = BlocklyApps.enableShowCode && canContinue;
   var feedback = document.createElement('div');
-  var feedbackMessage = getFeedbackMessage(options);
   var sharingDiv = (canContinue && options.showingSharing) ? exports.createSharingDiv(options) : null;
   var showCode = displayShowCode ? getShowCodeElement(options) : null;
   var feedbackBlocks = new FeedbackBlocks(options);
+  // feedbackMessage must be initialized after feedbackBlocks
+  // because FeedbackBlocks can mutate options.response.hint.
+  var feedbackMessage = getFeedbackMessage(options);
 
   if (feedbackMessage) {
     feedback.appendChild(feedbackMessage);
@@ -1252,7 +1270,12 @@ exports.displayFeedback = function(options) {
     feedback.appendChild(trophies);
   }
   if (feedbackBlocks.div) {
-    feedback.appendChild(feedbackBlocks.div);
+    if (feedbackMessage && useSpecialFeedbackDesign(options)) {
+      // put the blocks iframe inside the feedbackMessage for this special case:
+      feedbackMessage.appendChild(feedbackBlocks.div);
+    } else {
+      feedback.appendChild(feedbackBlocks.div);
+    }
   }
   if (sharingDiv) {
     feedback.appendChild(sharingDiv);
@@ -1423,6 +1446,12 @@ var getFeedbackButtons = function(options) {
   return buttons;
 };
 
+var useSpecialFeedbackDesign = function (options) {
+ return options.response &&
+        options.response.design &&
+        isFeedbackMessageCustomized(options);
+};
+
 var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
@@ -1504,8 +1533,7 @@ var getFeedbackMessage = function(options) {
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-  if (options.response && options.response.design &&
-      isFeedbackMessageCustomized(options)) {
+  if (useSpecialFeedbackDesign(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1660,15 +1688,39 @@ var getGeneratedCodeString = function() {
 };
 
 var FeedbackBlocks = function(options) {
-  var missingBlocks = getMissingRequiredBlocks();
-  if (missingBlocks.length === 0) {
-    return;
+  // Check whether blocks are embedded in the hint returned from dashboard.
+  // See below comment for format.
+  var embeddedBlocks = options.response && options.response.hint &&
+      options.response.hint.indexOf("[{") !== 0;
+  if (!embeddedBlocks &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_FINISHED) {
+      return;
   }
-  if ((options.response && options.response.hint) ||
-      (options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
-       options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_FINISHED)) {
+
+  var blocksToDisplay = [];
+  if (embeddedBlocks) {
+    // Hint should be of the form: SOME TEXT {[..], [..], ...} IGNORED.
+    // Example: 'Try the following block: [{"type": "maze_moveForward"}]'
+    // Note that double quotes are required by the JSON parser.
+    var parts = options.response.hint.match(/(.*)(\[.*\])/);
+    if (!parts) {
+      return;
+    }
+    options.response.hint = parts[1].trim();  // Remove blocks from hint.
+    try {
+      blocksToDisplay = JSON.parse(parts[2]);
+    } catch(err) {
+      // The blocks could not be parsed.  Ignore them.
+      return;
+    }
+  } else {
+    blocksToDisplay = getMissingRequiredBlocks();
+  }
+
+  if (blocksToDisplay.length === 0) {
     return;
   }
 
@@ -1684,11 +1736,12 @@ var FeedbackBlocks = function(options) {
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
       level: options.level,
-      blocks: generateXMLForBlocks(missingBlocks)
+      blocks: generateXMLForBlocks(blocksToDisplay)
     }
   });
   this.iframe = document.createElement('iframe');
   this.iframe.setAttribute('id', 'feedbackBlocks');
+  this.iframe.setAttribute('allowtransparency', 'true');
   this.div.appendChild(this.iframe);
 };
 
@@ -1989,7 +2042,7 @@ exports.call = function(name) {
   return {
     test: function(block) {
       return block.type == 'procedures_callnoreturn' &&
-          block.getTitleValue('NAME') == name;
+          block.getTitleValue('NAME').toLowerCase() == name.toLowerCase();
     },
     type: 'procedures_callnoreturn',
     titles: {'NAME': name}
@@ -2007,7 +2060,7 @@ exports.callWithArg = function(func_name, arg_name) {
   return {
     test: function(block) {
       return block.type == 'procedures_callnoreturn' &&
-          block.getTitleValue('NAME') == func_name;
+          block.getTitleValue('NAME').toLowerCase() == func_name.toLowerCase();
     },
     type: 'procedures_callnoreturn',
     extra: '<mutation name="' + func_name + '"><arg name="' + arg_name +
@@ -2027,7 +2080,7 @@ exports.define = function(name) {
   return {
     test: function(block) {
       return block.type == 'procedures_defnoreturn' &&
-          block.getTitleValue('NAME') == name;
+          block.getTitleValue('NAME').toLowerCase() == name.toLowerCase();
     },
     type: 'procedures_defnoreturn',
     titles: {'NAME': name}
@@ -4955,11 +5008,16 @@ exports.load = function(assetUrl, id) {
     downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
     upJumpArrow: assetUrl('media/common_images/jumpup.png'),
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
-    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
-    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -5341,7 +5399,7 @@ escape = escape || function (html){
 var buf = [];
 with (locals || {}) { (function(){ 
  buf.push('<!DOCTYPE html>\n<html dir="', escape((2,  options.localeDirection )), '">\n<head>\n  <meta charset="utf-8">\n  <title>Blockly</title>\n  <script type="text/javascript" src="', escape((6,  assetUrl('js/' + options.locale + '/vendor.js') )), '"></script>\n  <script type="text/javascript" src="', escape((7,  assetUrl('js/' + options.locale + '/' + app + '.js') )), '"></script>\n  <script type="text/javascript">\n    ');9; // delay to onload to fix IE9. 
-; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: #fff;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
+; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: transparent;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      background-color: transparent;\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
 } 
 return buf.join('');
 };
@@ -6378,13 +6436,12 @@ exports.install = function(blockly, blockInstallOptions) {
         helpUrl: '',
         init: function () {
           this.setHSV(184, 1.00, 0.74);
-          var imageToUse = hasLengthInput ? directionConfig.smallImage : directionConfig.image;
           var input = this.appendDummyInput();
           if (directionConfig.isJump) {
             input.appendTitle(commonMsg.jump());
           }
           input.appendTitle(new blockly.FieldLabel(directionConfig.title, {fixedSize: {width: directionLetterWidth, height: 18}}));
-          input.appendTitle(new blockly.FieldImage(imageToUse));
+          input.appendTitle(new blockly.FieldImage(directionConfig.image));
           this.setPreviousStatement(true);
           this.setNextStatement(true);
           this.setTooltip(directionConfig.tooltip);
@@ -8781,6 +8838,8 @@ exports.parseElement = function(text) {
 
 },{}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.nl=function(n){return n===1?"one":"other"}
+exports.and = function(d){return "and"};
+
 exports.blocklyMessage = function(d){return "Blockly"};
 
 exports.catActions = function(d){return "Acties"};
@@ -8857,13 +8916,19 @@ exports.numBlocksNeeded = function(d){return "Gefeliciteerd! U voltooide puzzel 
 
 exports.numLinesOfCodeWritten = function(d){return "Je schreef zojuist "+p(d,"numLines",0,"nl",{"one":"1 regel","other":n(d,"numLines")+" regels"})+" code!"};
 
+exports.play = function(d){return "play"};
+
 exports.puzzleTitle = function(d){return "Puzzel "+v(d,"puzzle_number")+" van "+v(d,"stage_total")};
+
+exports.repeat = function(d){return "repeat"};
 
 exports.resetProgram = function(d){return "Herstellen"};
 
 exports.runProgram = function(d){return "Programma uitvoeren"};
 
 exports.runTooltip = function(d){return "Voer het programma gedefinieerd door de blokken uit in de werkruimte."};
+
+exports.score = function(d){return "score"};
 
 exports.showCodeHeader = function(d){return "Code weergeven"};
 

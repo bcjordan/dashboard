@@ -70,7 +70,11 @@ module.exports = function(app, levels, options) {
 
   addReadyListener(function() {
     if (options.readonly) {
-      BlocklyApps.initReadonly(options);
+      if (app.initReadonly) {
+        app.initReadonly(options);
+      } else {
+        BlocklyApps.initReadonly(options);
+      }
     } else {
       app.init(options);
       if (options.onInitialize) {
@@ -760,6 +764,18 @@ BlocklyApps.reset = function(first) {};
 
 // Override to change run behavior.
 BlocklyApps.runButtonClick = function() {};
+
+/**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
 
 /**
  * Enumeration of test results.
@@ -1948,7 +1964,7 @@ var drawMap = function() {
   svg.setAttribute('height', Bounce.MAZE_HEIGHT);
 
   // Attach drag handler.
-  var hammerSvg = new Hammer(svg, {preventDefault: true});
+  var hammerSvg = new Hammer(svg);
   hammerSvg.on("drag", Bounce.onSvgDrag);
 
   // Adjust visualization and belowVisualization width.
@@ -2323,7 +2339,7 @@ Bounce.onTick = function() {
         if (Bounce.respawnBalls) {
           Bounce.launchBall(i);
         } else if (Bounce.failOnBallExit) {
-          Bounce.result = ResultType.FAILURE;
+          Bounce.result = BlocklyApps.ResultType.FAILURE;
           Bounce.onPuzzleComplete();
         }
       }
@@ -2340,8 +2356,11 @@ Bounce.onTick = function() {
 };
 
 Bounce.onSvgDrag = function(e) {
-  Bounce.gesturesObserved[e.gesture.direction] =
-    Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+  if (Bounce.intervalId) {
+    Bounce.gesturesObserved[e.gesture.direction] =
+      Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+    e.gesture.preventDefault();
+  }
 };
 
 Bounce.onKey = function(e) {
@@ -2750,17 +2769,6 @@ BlocklyApps.runButtonClick = function() {
 };
 
 /**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
-
-/**
  * App specific displayFeedback function that calls into
  * BlocklyApps.displayFeedback when appropriate
  */
@@ -2797,7 +2805,7 @@ Bounce.onReportComplete = function(response) {
  */
 Bounce.execute = function() {
   var code = Blockly.Generator.workspaceToCode('JavaScript', 'bounce_whenRun');
-  Bounce.result = ResultType.UNSET;
+  Bounce.result = BlocklyApps.ResultType.UNSET;
   Bounce.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Bounce.waitingForReport = false;
   Bounce.response = null;
@@ -2909,7 +2917,7 @@ Bounce.execute = function() {
 
 Bounce.onPuzzleComplete = function() {
   if (level.freePlay) {
-    Bounce.result = ResultType.SUCCESS;
+    Bounce.result = BlocklyApps.ResultType.SUCCESS;
   }
 
   // Stop everything on screen
@@ -2917,7 +2925,7 @@ Bounce.onPuzzleComplete = function() {
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Bounce.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Bounce.result == BlocklyApps.ResultType.SUCCESS);
 
   // If the current level is a free play, always return the free play
   // result type
@@ -2952,7 +2960,7 @@ Bounce.onPuzzleComplete = function() {
   BlocklyApps.report({
                      app: 'bounce',
                      level: level.id,
-                     result: Bounce.result === ResultType.SUCCESS,
+                     result: Bounce.result === BlocklyApps.ResultType.SUCCESS,
                      testResult: Bounce.testResults,
                      program: encodeURIComponent(textBlocks),
                      onComplete: Bounce.onReportComplete
@@ -3152,23 +3160,23 @@ Bounce.allFinishesComplete = function() {
 var checkFinished = function () {
   // if we have a succcess condition and have accomplished it, we're done and successful
   if (level.goal && level.goal.successCondition && level.goal.successCondition()) {
-    Bounce.result = ResultType.SUCCESS;
+    Bounce.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
-    Bounce.result = ResultType.FAILURE;
+    Bounce.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
   if (Bounce.allFinishesComplete()) {
-    Bounce.result = ResultType.SUCCESS;
+    Bounce.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   if (Bounce.timedOut()) {
-    Bounce.result = ResultType.FAILURE;
+    Bounce.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
@@ -4006,10 +4014,12 @@ exports.displayFeedback = function(options) {
   var canContinue = exports.canContinueToNextLevel(options.feedbackType);
   var displayShowCode = BlocklyApps.enableShowCode && canContinue;
   var feedback = document.createElement('div');
-  var feedbackMessage = getFeedbackMessage(options);
   var sharingDiv = (canContinue && options.showingSharing) ? exports.createSharingDiv(options) : null;
   var showCode = displayShowCode ? getShowCodeElement(options) : null;
   var feedbackBlocks = new FeedbackBlocks(options);
+  // feedbackMessage must be initialized after feedbackBlocks
+  // because FeedbackBlocks can mutate options.response.hint.
+  var feedbackMessage = getFeedbackMessage(options);
 
   if (feedbackMessage) {
     feedback.appendChild(feedbackMessage);
@@ -4019,7 +4029,12 @@ exports.displayFeedback = function(options) {
     feedback.appendChild(trophies);
   }
   if (feedbackBlocks.div) {
-    feedback.appendChild(feedbackBlocks.div);
+    if (feedbackMessage && useSpecialFeedbackDesign(options)) {
+      // put the blocks iframe inside the feedbackMessage for this special case:
+      feedbackMessage.appendChild(feedbackBlocks.div);
+    } else {
+      feedback.appendChild(feedbackBlocks.div);
+    }
   }
   if (sharingDiv) {
     feedback.appendChild(sharingDiv);
@@ -4190,6 +4205,12 @@ var getFeedbackButtons = function(options) {
   return buttons;
 };
 
+var useSpecialFeedbackDesign = function (options) {
+ return options.response &&
+        options.response.design &&
+        isFeedbackMessageCustomized(options);
+};
+
 var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
@@ -4271,8 +4292,7 @@ var getFeedbackMessage = function(options) {
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-  if (options.response && options.response.design &&
-      isFeedbackMessageCustomized(options)) {
+  if (useSpecialFeedbackDesign(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -4427,15 +4447,39 @@ var getGeneratedCodeString = function() {
 };
 
 var FeedbackBlocks = function(options) {
-  var missingBlocks = getMissingRequiredBlocks();
-  if (missingBlocks.length === 0) {
-    return;
+  // Check whether blocks are embedded in the hint returned from dashboard.
+  // See below comment for format.
+  var embeddedBlocks = options.response && options.response.hint &&
+      options.response.hint.indexOf("[{") !== 0;
+  if (!embeddedBlocks &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_FINISHED) {
+      return;
   }
-  if ((options.response && options.response.hint) ||
-      (options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
-       options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_FINISHED)) {
+
+  var blocksToDisplay = [];
+  if (embeddedBlocks) {
+    // Hint should be of the form: SOME TEXT {[..], [..], ...} IGNORED.
+    // Example: 'Try the following block: [{"type": "maze_moveForward"}]'
+    // Note that double quotes are required by the JSON parser.
+    var parts = options.response.hint.match(/(.*)(\[.*\])/);
+    if (!parts) {
+      return;
+    }
+    options.response.hint = parts[1].trim();  // Remove blocks from hint.
+    try {
+      blocksToDisplay = JSON.parse(parts[2]);
+    } catch(err) {
+      // The blocks could not be parsed.  Ignore them.
+      return;
+    }
+  } else {
+    blocksToDisplay = getMissingRequiredBlocks();
+  }
+
+  if (blocksToDisplay.length === 0) {
     return;
   }
 
@@ -4451,11 +4495,12 @@ var FeedbackBlocks = function(options) {
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
       level: options.level,
-      blocks: generateXMLForBlocks(missingBlocks)
+      blocks: generateXMLForBlocks(blocksToDisplay)
     }
   });
   this.iframe = document.createElement('iframe');
   this.iframe.setAttribute('id', 'feedbackBlocks');
+  this.iframe.setAttribute('allowtransparency', 'true');
   this.div.appendChild(this.iframe);
 };
 
@@ -9827,11 +9872,16 @@ exports.load = function(assetUrl, id) {
     downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
     upJumpArrow: assetUrl('media/common_images/jumpup.png'),
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
-    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
-    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -10213,7 +10263,7 @@ escape = escape || function (html){
 var buf = [];
 with (locals || {}) { (function(){ 
  buf.push('<!DOCTYPE html>\n<html dir="', escape((2,  options.localeDirection )), '">\n<head>\n  <meta charset="utf-8">\n  <title>Blockly</title>\n  <script type="text/javascript" src="', escape((6,  assetUrl('js/' + options.locale + '/vendor.js') )), '"></script>\n  <script type="text/javascript" src="', escape((7,  assetUrl('js/' + options.locale + '/' + app + '.js') )), '"></script>\n  <script type="text/javascript">\n    ');9; // delay to onload to fix IE9. 
-; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: #fff;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
+; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: transparent;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      background-color: transparent;\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
 } 
 return buf.join('');
 };
@@ -10681,6 +10731,8 @@ exports.yes = function(d){return "Sim"};
 
 },{"messageformat":50}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.pt=function(n){return n===1?"one":"other"}
+exports.and = function(d){return "and"};
+
 exports.blocklyMessage = function(d){return "Blockly"};
 
 exports.catActions = function(d){return "Ações"};
@@ -10757,13 +10809,19 @@ exports.numBlocksNeeded = function(d){return "Parabéns! Completaste o puzzle "+
 
 exports.numLinesOfCodeWritten = function(d){return "Acabaste de escrever "+p(d,"numLines",0,"pt",{"one":"1 linha","other":n(d,"numLines")+" linhas"})+" de código!"};
 
+exports.play = function(d){return "play"};
+
 exports.puzzleTitle = function(d){return "Puzzle "+v(d,"puzzle_number")+" de "+v(d,"stage_total")};
+
+exports.repeat = function(d){return "repeat"};
 
 exports.resetProgram = function(d){return "Repor"};
 
 exports.runProgram = function(d){return "Executa o programa"};
 
 exports.runTooltip = function(d){return "Executa o programa definido pelos blocos na área de trabalho."};
+
+exports.score = function(d){return "score"};
 
 exports.showCodeHeader = function(d){return "Mostrar o Código"};
 

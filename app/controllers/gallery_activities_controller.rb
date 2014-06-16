@@ -15,7 +15,7 @@ class GalleryActivitiesController < ApplicationController
   # POST /gallery_activities
   # POST /gallery_activities.json
   def create
-    retryable on: Mysql2::Error, matching: /Duplicate entry/ do # catch race conditions between first_or_intialize and save
+    retryable on: ActiveRecord::RecordNotUnique do
       @gallery_activity = GalleryActivity.where(gallery_activity_params).first_or_initialize
       authorize! :save_to_gallery, @gallery_activity.activity
 

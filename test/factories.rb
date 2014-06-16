@@ -5,6 +5,7 @@ FactoryGirl.define do
     password "00secret"
     locale 'en-US'
     name { "#{username} Codeberg" }
+    user_type User::TYPE_STUDENT
 
     # Child of :user factory, since it's in the `factory :user` block
     factory :admin do

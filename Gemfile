@@ -24,6 +24,7 @@ group :development, :test do
   gem 'simplecov', require: false
   gem 'mocha', require: false
   gem "codeclimate-test-reporter", require: false
+  gem 'timecop'
 end
 
 group :test do
@@ -32,7 +33,6 @@ group :test do
   gem 'rspec'
   gem 'chromedriver-helper'
   gem 'colorize'
-  gem 'timecop'
 end
 
 group :doc do
