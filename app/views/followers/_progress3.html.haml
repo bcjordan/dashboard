@@ -1,8 +1,16 @@
-- stage_map = @all_script_levels.group_by { |sl| sl.level.game }
+-# @all_script_levels = Script.twenty_hour_script.script_levels.includes({ level: :game })
+-# @all_script_levels = Script.get_from_cache("k-1").script_levels.includes({ level: :game })
+- stage_map = @all_script_levels.group_by { |sl| sl.stage ? sl.stage : sl.level.game }
 
 - stage_lengths = []
 
-- widthpx = 7
+- # Work out how many levels we show, then calculate number of pixels per level based on a 940px width scene.
+- numLevels = 0
+- stage_map.each_pair do |game, levels|
+  - width = levels.length
+  - if width > 0
+    - numLevels += levels.length
+- widthpx = (780 / numLevels).floor
 
 #progress
   - @section_map.each_pair do |section, students|
@@ -62,7 +70,7 @@
 %br/
 
 -# Set this to true if you just want to see some random student values.  Handy for testing.
-- showRandomValues = true
+- showRandomValues = false
 
 :javascript
   $.ready()
