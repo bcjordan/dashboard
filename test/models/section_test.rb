@@ -24,4 +24,17 @@ class SectionTest < ActiveSupport::TestCase
 
     assert s3.code =~ /^[A-Z]{6}$/
   end
+
+  test "user must be teacher" do
+    teacher = create(:teacher)
+    student = create(:student_user)
+
+    teacher_section = Section.create(user: teacher, name: "a section")
+    assert teacher_section.persisted?
+
+    student_section = Section.create(user: student, name: "a section")
+
+    assert !student_section.persisted?
+    assert_equal ["User must be a teacher"], student_section.errors.full_messages
+  end
 end
