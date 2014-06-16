@@ -52,8 +52,11 @@ If you won't be making modifications to blockly code, you can just skip the syml
             + `mysql -uroot`
       + Add this line to your ~/.profile to configure rbenv: `if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi`
       + `source ~/.profile`
+    - EC2: using pre-built AMI
+      + Launch an instance using the AMI identifier `ami-f56a739c`, or by [clicking here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#LaunchInstanceWizard:ami=ami-f56a739c)
+      + This includes an install of blockly as well
     - Ubuntu: using apt-get
-      + install MySQL packages and other prerequisites (leave MySQL root password blank when prompted): `sudo apt-get install mysql-client mysql-server libmysqlclient-dev libmagickwand-dev imagemagick`
+      + install MySQL packages and other prerequisites (**note: leave MySQL root password blank when prompted**): `sudo apt-get install mysql-client mysql-server libmysqlclient-dev libmagickwand-dev imagemagick`
       + Start service (should auto-start on system boot): `sudo start mysql`
       + To connect:
         - `mysql`
@@ -135,11 +138,29 @@ We pull our tasks from a Pivotal Tracker and mark certain tickets as volunteer-f
 
 For the time being—for access to Pivotal Tracker, email [brian@code.org](mailto:brian@code.org).
 
-## Submitting Pull Requests
+## Submitting Contributions
+
+### Testing your changes
+
+#### Manually
+
+We support recent versions of Firefox, Chrome, IE9, iOS Safari and the Android browsers. Be sure to try your feature out in IE9, iOS and Android if it's a risk. [BrowserStack live](http://www.browserstack.com) or [Sauce Labs manual](https://saucelabs.com/manual) let you run manual tests in these browsers remotely.
+
+#### Unit tests
+
+For dashboard changes, be sure to test your changes using `rake test`. For [blockly](https://github.com/code-dot-org/blockly) changes, see our [grunt testing instructions](https://github.com/code-dot-org/blockly#running-tests).
+
+#### UI tests
+
+Our continuous integration server regularly runs a suite of [UI tests](https://github.com/code-dot-org/dashboard/tree/finished/test/ui) using Selenium / Cucumber which run against many browsers via [BrowserStack Automate](https://www.browserstack.com/automate), and can also be run locally using `chromedriver`. See the [README](https://github.com/code-dot-org/dashboard/tree/finished/test/ui) in that folder for instructions.
+
+If your changes might affect level paths, blockly UI, or critical path site logic, be sure to test your changes with a local UI test.
+
+### Submitting your Pull Request
 
 Contributors should follow the GitHub [fork-and-pull model](https://help.github.com/articles/using-pull-requests) to submit pull requests into this repository.
 
-1. On your fork, either push to your own finished branch or checkout a new branch for your feature
+1. On your fork, you'll either push to your own finished branch or checkout a new branch for your feature before you start your feature
     - `git checkout -b branch_name`
 2. Develop the new feature and push the changes to **your** fork and branch
     - `git add YYY`
@@ -148,4 +169,4 @@ Contributors should follow the GitHub [fork-and-pull model](https://help.github.
 3. Go to the dashboard GitHub page
     - [https://github.com/code-dot-org/dashboard](https://github.com/code-dot-org/dashboard)
 4. Click on the "Pull Request" link, look over your diff, and submit it to others to review.
-    - For bonus points, include screenshots. Command + Ctrl + Shift + 4 in OS X lets you copy a screen selection to your clipboard, which GitHub will let you paste right into the description
+    - For bonus points, include screenshots in the description. Command + Ctrl + Shift + 4 in OS X lets you copy a screen selection to your clipboard, which GitHub will let you paste right into the description

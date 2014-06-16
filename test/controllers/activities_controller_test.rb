@@ -337,7 +337,7 @@ class ActivitiesControllerTest < ActionController::TestCase
     existing_user_level = UserLevel.create(user: @user, level: @script_level.level)
     user_level_creator = mock('user_level_creator')
     user_level_creator.stubs(:first_or_create).
-      raises(Mysql2::Error.new("Duplicate entry '1208682-37' for key 'index_user_levels_on_user_id_and_level_id'")).
+      raises(ActiveRecord::RecordNotUnique.new(Mysql2::Error.new("Duplicate entry '1208682-37' for key 'index_user_levels_on_user_id_and_level_id'"))).
       then.
       returns(existing_user_level)
 
@@ -372,11 +372,11 @@ class ActivitiesControllerTest < ActionController::TestCase
     # supposed to happen, but we shouldn't get stuck in a loop anyway)
     user_level_creator = mock('user_level_creator')
     user_level_creator.stubs(:first_or_create).
-      raises(Mysql2::Error.new("Duplicate entry '1208682-37' for key 'index_user_levels_on_user_id_and_level_id'"))
+      raises(ActiveRecord::RecordNotUnique.new(Mysql2::Error.new("Duplicate entry '1208682-37' for key 'index_user_levels_on_user_id_and_level_id'")))
     UserLevel.stubs(:where).returns(user_level_creator)
 
     # we should just raise the exception
-    assert_raises(Mysql2::Error) do
+    assert_raises(ActiveRecord::RecordNotUnique) do
       post :milestone, user_id: @user, script_level_id: @script_level, :lines => 20, :attempt => "1", :result => "true", :testResult => "100", :time => "1000", :app => "test", :program => "<hey>"
       p @response.body
     end

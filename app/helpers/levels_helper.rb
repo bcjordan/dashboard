@@ -148,7 +148,7 @@ module LevelsHelper
     # Map Dashboard-style names to Blockly-style names in level object.
     # Dashboard underscore_names mapped to Blockly lowerCamelCase, or explicit 'Dashboard:Blockly'
     Hash[%w(
-      start_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal
+      start_blocks solution_blocks predraw_blocks slider_speed start_direction instructions initial_dirt final_dirt nectar_goal honey_goal flower_type
       required_blocks:levelBuilderRequiredBlocks
       toolbox_blocks:toolbox
       x:initialX
@@ -175,9 +175,10 @@ module LevelsHelper
 
     # Fetch localized strings
     %w(instructions levelIncompleteError other1StarError tooFewBlocksMsg).each do |label|
-      level[label] ||= [@level.game.app, @level.game.name].map { |name|
+      val = [@level.game.app, @level.game.name].map { |name|
         data_t("level.#{label}", "#{name}_#{@level.level_num}")
-      }.compact!.first
+      }.compact.first
+      level[label] ||= val unless val.nil?
     end
 
     # Set some values that Blockly expects on the root of its options string

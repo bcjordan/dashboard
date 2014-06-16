@@ -1084,6 +1084,20 @@ a.download-video {
 }
 
 .match {
+  .mainblock {
+    margin-left: 0px; 
+  }
+  .column {
+    width: 260px; 
+    float: left;
+  }
+  .draggablecolumn {
+    cursor: default;
+  }
+  img {
+    height: 100%;
+    width: auto;
+  }
   li {
     padding-top: 7px;
     padding-bottom: 7px;
@@ -1106,7 +1120,7 @@ a.download-video {
   }
   #slots {
     list-style-type: none;
-    margin-left:0px;
+    margin-left: 0px;
     .emptyslot {
       background-color: #eee;
       .giantmark {
@@ -1118,7 +1132,7 @@ a.download-video {
     }
     .active {
       background-color: lightyellow;
-    }    
+    }
   }
   .answer {
     background-color: lightblue;
@@ -1126,9 +1140,28 @@ a.download-video {
       background-color: green;
     }
   }
+  #answerdest {
+    width: 240px;
+  }
   #answers {
     list-style-type: none;
-    margin-left:0px;
+    margin-left: 0px;
+  }
+  #correctmarkscolumn
+  {
+    width: 20px;
+    padding-right:20px;
+  }
+  #correctmarks {
+    margin-left: 0px;
+  }
+  .correctmark {
+    list-style-type: none;
+    margin-left: 0px;
+    width: 30px;
+    padding-left: 0px;
+    padding-right: 0px;
+    background-color: white;
   }
 }
 
@@ -1215,11 +1248,22 @@ div.gallery_activity {
   }
   input {
     margin-top: 0px;
-    margin-right: 20px;
   }
   .item-radio {
     display: inline-block;
     float: left;
+    width: 32px;
+    text-align: right;
+    padding-right: 10px;
+    box-sizing: border-box;
+  }
+  .item-cross {
+    display: inline-block;
+    float: left;
+    width: 32px;
+    text-align: right;
+    padding-right: 10px;
+    box-sizing: border-box;
   }
   .item-label {
     display: inline-block;
@@ -1227,25 +1271,6 @@ div.gallery_activity {
   }
   img {
     max-height: 100%;
-  }
-}
-
-/* matching choice */
-
-.match {
-  .mainblock {
-    margin-left: 0px; 
-  }
-  .column {
-    width: 260px; 
-    float: left;
-  }
-  .draggablecolumn {
-    cursor: default;
-  }
-  img {
-    height: 100%;
-    width: auto;
   }
 }
 

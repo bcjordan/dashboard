@@ -22,7 +22,7 @@
       %ul#questions
         - data['questions'].each do |question|
           %li{style: "height: #{height}px"}!= match_t(question['text'])
-    .column
+    .column#answerdest
       %ul#slots.draggablecolumn
         - shuffled_answers.each do |answer|
           %li.emptyslot{style: "height: #{height}px"}
@@ -30,6 +30,14 @@
               .gap{style: "height: #{gap_height}px"}
               .text{style: "font-size: #{giantmark_height}px; line-height: #{giantmark_height}px"}
                 ?
+
+    .column#correctmarkscolumn
+      %ul#correctmarks
+        - data['questions'].each_with_index do |question, index|
+          %li.correctmark{style: "height: #{height}px"}
+            .xmark{style: "display: none", id: "xmark_#{index}"}
+              %b X
+
     .column
       %ul#answers.draggablecolumn
         - shuffled_answers.each do |answer|
@@ -66,6 +74,16 @@
           %button#ok-button.secondary
             =t("dialog.ok")
 
+    #success-dialogcontent
+      .modal-content
+        %p.dialog-title
+          =t("match.correct_title")
+        %p
+          =t("match.correct_body")
+        .farSide
+          %button#ok-button.secondary
+            =t("dialog.ok")
+
 
 :javascript
 
@@ -80,9 +98,19 @@
     return this; 
   };
 
+  function dialogHidden()
+  {
+    if (dialogType == "success" && nextRedirect)
+    {
+      window.location.href = nextRedirect;
+    }
+  }
+
   function showDialog(type)
   {
-    var dialog = new Dialog({ body: "" });
+    dialogType = type;
+
+    var dialog = new Dialog({ body: "", onHidden: dialogHidden });
 
     // use our prefabricated dialog content
     $(".modal-body").append($("#" + type + "-dialogcontent").clone(true));
@@ -106,6 +134,7 @@
 
   var solution = "none";    // "none", "wrong", "right"
   var buttonEnabled = true;  // avoid multiple simultaneous submissions
+  var dialogType = null;
 
   function enableButton(enable)
   {
@@ -119,7 +148,7 @@
 
   $(function() 
   {
-    if ("#{data['pre_title']}")
+    if ("#{data['pre_title']}" != "")
     {
       setTimeout(function() {
         showDialog("pre");
@@ -208,11 +237,28 @@
       {
         value = elements[index];
 
-        console.log(value.getAttribute("originalIndex"));
-
-        if (value.getAttribute("originalIndex") != index)
+        var originalIndex = value.getAttribute("originalIndex");
+        if (originalIndex == null)
         {
+          // nothing dragged in this slot yet
           wrongAnswer = true;
+
+          $("#xmark_" + index).hide();
+          console.log("hide " + index);
+        }
+        else if (originalIndex != String(index))
+        {
+          // wrong answer
+          wrongAnswer = true;
+
+          $("#xmark_" + index).show();
+          console.log("show " + index);
+        }
+        else
+        {
+          // correct answer
+          $("#xmark_" + index).hide();
+          console.log("hide " + index);
         }
       }
 
@@ -245,7 +291,7 @@
             } 
             else if (nextRedirect) 
             {
-              window.location.href = nextRedirect;
+              showDialog("success");
             }
           }
        });

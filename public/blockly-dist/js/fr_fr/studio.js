@@ -70,7 +70,11 @@ module.exports = function(app, levels, options) {
 
   addReadyListener(function() {
     if (options.readonly) {
-      BlocklyApps.initReadonly(options);
+      if (app.initReadonly) {
+        app.initReadonly(options);
+      } else {
+        BlocklyApps.initReadonly(options);
+      }
     } else {
       app.init(options);
       if (options.onInitialize) {
@@ -82,7 +86,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":10,"./utils":35}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":11,"./utils":36}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -762,6 +766,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -832,7 +848,7 @@ BlocklyApps.getTestResults = function() {
 BlocklyApps.report = function(options) {
   // copy from options: app, level, result, testResult, program, onComplete
   var report = options;
-  report.pass = feedback.canContinueToNextLevel(options.testResults);
+  report.pass = feedback.canContinueToNextLevel(options.testResult);
   report.time = ((new Date().getTime()) - BlocklyApps.initTime);
   report.attempt = BlocklyApps.attempts;
   report.lines = feedback.getNumBlocksUsed();
@@ -909,7 +925,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/fr_fr/common":37,"./builder":5,"./dom":7,"./feedback.js":8,"./lodash":9,"./slider":12,"./templates/buttons.html":25,"./templates/instructions.html":27,"./templates/learn.html":28,"./templates/makeYourOwn.html":29,"./utils":35,"./xml":36}],3:[function(require,module,exports){
+},{"../locale/fr_fr/common":38,"./builder":5,"./dom":7,"./feedback.js":8,"./lodash":10,"./slider":13,"./templates/buttons.html":26,"./templates/instructions.html":28,"./templates/learn.html":29,"./templates/makeYourOwn.html":30,"./utils":36,"./xml":37}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -996,7 +1012,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":36}],4:[function(require,module,exports){
+},{"./xml":37}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1059,7 +1075,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":24,"./utils.js":35,"url":49}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":8,"./templates/builder.html":25,"./utils.js":36,"url":50}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
@@ -1239,10 +1255,12 @@ exports.displayFeedback = function(options) {
   var canContinue = exports.canContinueToNextLevel(options.feedbackType);
   var displayShowCode = BlocklyApps.enableShowCode && canContinue;
   var feedback = document.createElement('div');
-  var feedbackMessage = getFeedbackMessage(options);
   var sharingDiv = (canContinue && options.showingSharing) ? exports.createSharingDiv(options) : null;
   var showCode = displayShowCode ? getShowCodeElement(options) : null;
   var feedbackBlocks = new FeedbackBlocks(options);
+  // feedbackMessage must be initialized after feedbackBlocks
+  // because FeedbackBlocks can mutate options.response.hint.
+  var feedbackMessage = getFeedbackMessage(options);
 
   if (feedbackMessage) {
     feedback.appendChild(feedbackMessage);
@@ -1252,7 +1270,12 @@ exports.displayFeedback = function(options) {
     feedback.appendChild(trophies);
   }
   if (feedbackBlocks.div) {
-    feedback.appendChild(feedbackBlocks.div);
+    if (feedbackMessage && useSpecialFeedbackDesign(options)) {
+      // put the blocks iframe inside the feedbackMessage for this special case:
+      feedbackMessage.appendChild(feedbackBlocks.div);
+    } else {
+      feedback.appendChild(feedbackBlocks.div);
+    }
   }
   if (sharingDiv) {
     feedback.appendChild(sharingDiv);
@@ -1423,6 +1446,12 @@ var getFeedbackButtons = function(options) {
   return buttons;
 };
 
+var useSpecialFeedbackDesign = function (options) {
+ return options.response &&
+        options.response.design &&
+        isFeedbackMessageCustomized(options);
+};
+
 var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
@@ -1504,8 +1533,7 @@ var getFeedbackMessage = function(options) {
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-  if (options.response && options.response.design &&
-      isFeedbackMessageCustomized(options)) {
+  if (useSpecialFeedbackDesign(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1660,15 +1688,39 @@ var getGeneratedCodeString = function() {
 };
 
 var FeedbackBlocks = function(options) {
-  var missingBlocks = getMissingRequiredBlocks();
-  if (missingBlocks.length === 0) {
-    return;
+  // Check whether blocks are embedded in the hint returned from dashboard.
+  // See below comment for format.
+  var embeddedBlocks = options.response && options.response.hint &&
+      options.response.hint.indexOf("[{") !== 0;
+  if (!embeddedBlocks &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_FINISHED) {
+      return;
   }
-  if ((options.response && options.response.hint) ||
-      (options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
-       options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_FINISHED)) {
+
+  var blocksToDisplay = [];
+  if (embeddedBlocks) {
+    // Hint should be of the form: SOME TEXT {[..], [..], ...} IGNORED.
+    // Example: 'Try the following block: [{"type": "maze_moveForward"}]'
+    // Note that double quotes are required by the JSON parser.
+    var parts = options.response.hint.match(/(.*)(\[.*\])/);
+    if (!parts) {
+      return;
+    }
+    options.response.hint = parts[1].trim();  // Remove blocks from hint.
+    try {
+      blocksToDisplay = JSON.parse(parts[2]);
+    } catch(err) {
+      // The blocks could not be parsed.  Ignore them.
+      return;
+    }
+  } else {
+    blocksToDisplay = getMissingRequiredBlocks();
+  }
+
+  if (blocksToDisplay.length === 0) {
     return;
   }
 
@@ -1684,11 +1736,12 @@ var FeedbackBlocks = function(options) {
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
       level: options.level,
-      blocks: generateXMLForBlocks(missingBlocks)
+      blocks: generateXMLForBlocks(blocksToDisplay)
     }
   });
   this.iframe = document.createElement('iframe');
   this.iframe.setAttribute('id', 'feedbackBlocks');
+  this.iframe.setAttribute('allowtransparency', 'true');
   this.div.appendChild(this.iframe);
 };
 
@@ -1975,12 +2028,2176 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/fr_fr/common":37,"./codegen":6,"./dom":7,"./templates/buttons.html":25,"./templates/code.html":26,"./templates/readonly.html":31,"./templates/sharing.html":32,"./templates/showCode.html":33,"./templates/trophy.html":34,"./utils":35}],9:[function(require,module,exports){
+},{"../locale/fr_fr/common":38,"./codegen":6,"./dom":7,"./templates/buttons.html":26,"./templates/code.html":27,"./templates/readonly.html":32,"./templates/sharing.html":33,"./templates/showCode.html":34,"./templates/trophy.html":35,"./utils":36}],9:[function(require,module,exports){
+/*! Hammer.JS - v1.1.3 - 2014-05-22
+ * http://eightmedia.github.io/hammer.js
+ *
+ * Copyright (c) 2014 Jorik Tangelder <j.tangelder@gmail.com>;
+ * Licensed under the MIT license */
+
+(function(window, undefined) {
+  'use strict';
+
+/**
+ * @main
+ * @module hammer
+ *
+ * @class Hammer
+ * @static
+ */
+
+/**
+ * Hammer, use this to create instances
+ * ````
+ * var hammertime = new Hammer(myElement);
+ * ````
+ *
+ * @method Hammer
+ * @param {HTMLElement} element
+ * @param {Object} [options={}]
+ * @return {Hammer.Instance}
+ */
+var Hammer = function Hammer(element, options) {
+    return new Hammer.Instance(element, options || {});
+};
+
+/**
+ * version, as defined in package.json
+ * the value will be set at each build
+ * @property VERSION
+ * @final
+ * @type {String}
+ */
+Hammer.VERSION = '1.1.3';
+
+/**
+ * default settings.
+ * more settings are defined per gesture at `/gestures`. Each gesture can be disabled/enabled
+ * by setting it's name (like `swipe`) to false.
+ * You can set the defaults for all instances by changing this object before creating an instance.
+ * @example
+ * ````
+ *  Hammer.defaults.drag = false;
+ *  Hammer.defaults.behavior.touchAction = 'pan-y';
+ *  delete Hammer.defaults.behavior.userSelect;
+ * ````
+ * @property defaults
+ * @type {Object}
+ */
+Hammer.defaults = {
+    /**
+     * this setting object adds styles and attributes to the element to prevent the browser from doing
+     * its native behavior. The css properties are auto prefixed for the browsers when needed.
+     * @property defaults.behavior
+     * @type {Object}
+     */
+    behavior: {
+        /**
+         * Disables text selection to improve the dragging gesture. When the value is `none` it also sets
+         * `onselectstart=false` for IE on the element. Mainly for desktop browsers.
+         * @property defaults.behavior.userSelect
+         * @type {String}
+         * @default 'none'
+         */
+        userSelect: 'none',
+
+        /**
+         * Specifies whether and how a given region can be manipulated by the user (for instance, by panning or zooming).
+         * Used by Chrome 35> and IE10>. By default this makes the element blocking any touch event.
+         * @property defaults.behavior.touchAction
+         * @type {String}
+         * @default: 'pan-y'
+         */
+        touchAction: 'pan-y',
+
+        /**
+         * Disables the default callout shown when you touch and hold a touch target.
+         * On iOS, when you touch and hold a touch target such as a link, Safari displays
+         * a callout containing information about the link. This property allows you to disable that callout.
+         * @property defaults.behavior.touchCallout
+         * @type {String}
+         * @default 'none'
+         */
+        touchCallout: 'none',
+
+        /**
+         * Specifies whether zooming is enabled. Used by IE10>
+         * @property defaults.behavior.contentZooming
+         * @type {String}
+         * @default 'none'
+         */
+        contentZooming: 'none',
+
+        /**
+         * Specifies that an entire element should be draggable instead of its contents.
+         * Mainly for desktop browsers.
+         * @property defaults.behavior.userDrag
+         * @type {String}
+         * @default 'none'
+         */
+        userDrag: 'none',
+
+        /**
+         * Overrides the highlight color shown when the user taps a link or a JavaScript
+         * clickable element in Safari on iPhone. This property obeys the alpha value, if specified.
+         *
+         * If you don't specify an alpha value, Safari on iPhone applies a default alpha value
+         * to the color. To disable tap highlighting, set the alpha value to 0 (invisible).
+         * If you set the alpha value to 1.0 (opaque), the element is not visible when tapped.
+         * @property defaults.behavior.tapHighlightColor
+         * @type {String}
+         * @default 'rgba(0,0,0,0)'
+         */
+        tapHighlightColor: 'rgba(0,0,0,0)'
+    }
+};
+
+/**
+ * hammer document where the base events are added at
+ * @property DOCUMENT
+ * @type {HTMLElement}
+ * @default window.document
+ */
+Hammer.DOCUMENT = document;
+
+/**
+ * detect support for pointer events
+ * @property HAS_POINTEREVENTS
+ * @type {Boolean}
+ */
+Hammer.HAS_POINTEREVENTS = navigator.pointerEnabled || navigator.msPointerEnabled;
+
+/**
+ * detect support for touch events
+ * @property HAS_TOUCHEVENTS
+ * @type {Boolean}
+ */
+Hammer.HAS_TOUCHEVENTS = ('ontouchstart' in window);
+
+/**
+ * detect mobile browsers
+ * @property IS_MOBILE
+ * @type {Boolean}
+ */
+Hammer.IS_MOBILE = /mobile|tablet|ip(ad|hone|od)|android|silk/i.test(navigator.userAgent);
+
+/**
+ * detect if we want to support mouseevents at all
+ * @property NO_MOUSEEVENTS
+ * @type {Boolean}
+ */
+Hammer.NO_MOUSEEVENTS = (Hammer.HAS_TOUCHEVENTS && Hammer.IS_MOBILE) || Hammer.HAS_POINTEREVENTS;
+
+/**
+ * interval in which Hammer recalculates current velocity/direction/angle in ms
+ * @property CALCULATE_INTERVAL
+ * @type {Number}
+ * @default 25
+ */
+Hammer.CALCULATE_INTERVAL = 25;
+
+/**
+ * eventtypes per touchevent (start, move, end) are filled by `Event.determineEventTypes` on `setup`
+ * the object contains the DOM event names per type (`EVENT_START`, `EVENT_MOVE`, `EVENT_END`)
+ * @property EVENT_TYPES
+ * @private
+ * @writeOnce
+ * @type {Object}
+ */
+var EVENT_TYPES = {};
+
+/**
+ * direction strings, for safe comparisons
+ * @property DIRECTION_DOWN|LEFT|UP|RIGHT
+ * @final
+ * @type {String}
+ * @default 'down' 'left' 'up' 'right'
+ */
+var DIRECTION_DOWN = Hammer.DIRECTION_DOWN = 'down';
+var DIRECTION_LEFT = Hammer.DIRECTION_LEFT = 'left';
+var DIRECTION_UP = Hammer.DIRECTION_UP = 'up';
+var DIRECTION_RIGHT = Hammer.DIRECTION_RIGHT = 'right';
+
+/**
+ * pointertype strings, for safe comparisons
+ * @property POINTER_MOUSE|TOUCH|PEN
+ * @final
+ * @type {String}
+ * @default 'mouse' 'touch' 'pen'
+ */
+var POINTER_MOUSE = Hammer.POINTER_MOUSE = 'mouse';
+var POINTER_TOUCH = Hammer.POINTER_TOUCH = 'touch';
+var POINTER_PEN = Hammer.POINTER_PEN = 'pen';
+
+/**
+ * eventtypes
+ * @property EVENT_START|MOVE|END|RELEASE|TOUCH
+ * @final
+ * @type {String}
+ * @default 'start' 'change' 'move' 'end' 'release' 'touch'
+ */
+var EVENT_START = Hammer.EVENT_START = 'start';
+var EVENT_MOVE = Hammer.EVENT_MOVE = 'move';
+var EVENT_END = Hammer.EVENT_END = 'end';
+var EVENT_RELEASE = Hammer.EVENT_RELEASE = 'release';
+var EVENT_TOUCH = Hammer.EVENT_TOUCH = 'touch';
+
+/**
+ * if the window events are set...
+ * @property READY
+ * @writeOnce
+ * @type {Boolean}
+ * @default false
+ */
+Hammer.READY = false;
+
+/**
+ * plugins namespace
+ * @property plugins
+ * @type {Object}
+ */
+Hammer.plugins = Hammer.plugins || {};
+
+/**
+ * gestures namespace
+ * see `/gestures` for the definitions
+ * @property gestures
+ * @type {Object}
+ */
+Hammer.gestures = Hammer.gestures || {};
+
+/**
+ * setup events to detect gestures on the document
+ * this function is called when creating an new instance
+ * @private
+ */
+function setup() {
+    if(Hammer.READY) {
+        return;
+    }
+
+    // find what eventtypes we add listeners to
+    Event.determineEventTypes();
+
+    // Register all gestures inside Hammer.gestures
+    Utils.each(Hammer.gestures, function(gesture) {
+        Detection.register(gesture);
+    });
+
+    // Add touch events on the document
+    Event.onTouch(Hammer.DOCUMENT, EVENT_MOVE, Detection.detect);
+    Event.onTouch(Hammer.DOCUMENT, EVENT_END, Detection.detect);
+
+    // Hammer is ready...!
+    Hammer.READY = true;
+}
+
+/**
+ * @module hammer
+ *
+ * @class Utils
+ * @static
+ */
+var Utils = Hammer.utils = {
+    /**
+     * extend method, could also be used for cloning when `dest` is an empty object.
+     * changes the dest object
+     * @method extend
+     * @param {Object} dest
+     * @param {Object} src
+     * @param {Boolean} [merge=false]  do a merge
+     * @return {Object} dest
+     */
+    extend: function extend(dest, src, merge) {
+        for(var key in src) {
+            if(!src.hasOwnProperty(key) || (dest[key] !== undefined && merge)) {
+                continue;
+            }
+            dest[key] = src[key];
+        }
+        return dest;
+    },
+
+    /**
+     * simple addEventListener wrapper
+     * @method on
+     * @param {HTMLElement} element
+     * @param {String} type
+     * @param {Function} handler
+     */
+    on: function on(element, type, handler) {
+        element.addEventListener(type, handler, false);
+    },
+
+    /**
+     * simple removeEventListener wrapper
+     * @method off
+     * @param {HTMLElement} element
+     * @param {String} type
+     * @param {Function} handler
+     */
+    off: function off(element, type, handler) {
+        element.removeEventListener(type, handler, false);
+    },
+
+    /**
+     * forEach over arrays and objects
+     * @method each
+     * @param {Object|Array} obj
+     * @param {Function} iterator
+     * @param {any} iterator.item
+     * @param {Number} iterator.index
+     * @param {Object|Array} iterator.obj the source object
+     * @param {Object} context value to use as `this` in the iterator
+     */
+    each: function each(obj, iterator, context) {
+        var i, len;
+
+        // native forEach on arrays
+        if('forEach' in obj) {
+            obj.forEach(iterator, context);
+        // arrays
+        } else if(obj.length !== undefined) {
+            for(i = 0, len = obj.length; i < len; i++) {
+                if(iterator.call(context, obj[i], i, obj) === false) {
+                    return;
+                }
+            }
+        // objects
+        } else {
+            for(i in obj) {
+                if(obj.hasOwnProperty(i) &&
+                    iterator.call(context, obj[i], i, obj) === false) {
+                    return;
+                }
+            }
+        }
+    },
+
+    /**
+     * find if a string contains the string using indexOf
+     * @method inStr
+     * @param {String} src
+     * @param {String} find
+     * @return {Boolean} found
+     */
+    inStr: function inStr(src, find) {
+        return src.indexOf(find) > -1;
+    },
+
+    /**
+     * find if a array contains the object using indexOf or a simple polyfill
+     * @method inArray
+     * @param {String} src
+     * @param {String} find
+     * @return {Boolean|Number} false when not found, or the index
+     */
+    inArray: function inArray(src, find) {
+        if(src.indexOf) {
+            var index = src.indexOf(find);
+            return (index === -1) ? false : index;
+        } else {
+            for(var i = 0, len = src.length; i < len; i++) {
+                if(src[i] === find) {
+                    return i;
+                }
+            }
+            return false;
+        }
+    },
+
+    /**
+     * convert an array-like object (`arguments`, `touchlist`) to an array
+     * @method toArray
+     * @param {Object} obj
+     * @return {Array}
+     */
+    toArray: function toArray(obj) {
+        return Array.prototype.slice.call(obj, 0);
+    },
+
+    /**
+     * find if a node is in the given parent
+     * @method hasParent
+     * @param {HTMLElement} node
+     * @param {HTMLElement} parent
+     * @return {Boolean} found
+     */
+    hasParent: function hasParent(node, parent) {
+        while(node) {
+            if(node == parent) {
+                return true;
+            }
+            node = node.parentNode;
+        }
+        return false;
+    },
+
+    /**
+     * get the center of all the touches
+     * @method getCenter
+     * @param {Array} touches
+     * @return {Object} center contains `pageX`, `pageY`, `clientX` and `clientY` properties
+     */
+    getCenter: function getCenter(touches) {
+        var pageX = [],
+            pageY = [],
+            clientX = [],
+            clientY = [],
+            min = Math.min,
+            max = Math.max;
+
+        // no need to loop when only one touch
+        if(touches.length === 1) {
+            return {
+                pageX: touches[0].pageX,
+                pageY: touches[0].pageY,
+                clientX: touches[0].clientX,
+                clientY: touches[0].clientY
+            };
+        }
+
+        Utils.each(touches, function(touch) {
+            pageX.push(touch.pageX);
+            pageY.push(touch.pageY);
+            clientX.push(touch.clientX);
+            clientY.push(touch.clientY);
+        });
+
+        return {
+            pageX: (min.apply(Math, pageX) + max.apply(Math, pageX)) / 2,
+            pageY: (min.apply(Math, pageY) + max.apply(Math, pageY)) / 2,
+            clientX: (min.apply(Math, clientX) + max.apply(Math, clientX)) / 2,
+            clientY: (min.apply(Math, clientY) + max.apply(Math, clientY)) / 2
+        };
+    },
+
+    /**
+     * calculate the velocity between two points. unit is in px per ms.
+     * @method getVelocity
+     * @param {Number} deltaTime
+     * @param {Number} deltaX
+     * @param {Number} deltaY
+     * @return {Object} velocity `x` and `y`
+     */
+    getVelocity: function getVelocity(deltaTime, deltaX, deltaY) {
+        return {
+            x: Math.abs(deltaX / deltaTime) || 0,
+            y: Math.abs(deltaY / deltaTime) || 0
+        };
+    },
+
+    /**
+     * calculate the angle between two coordinates
+     * @method getAngle
+     * @param {Touch} touch1
+     * @param {Touch} touch2
+     * @return {Number} angle
+     */
+    getAngle: function getAngle(touch1, touch2) {
+        var x = touch2.clientX - touch1.clientX,
+            y = touch2.clientY - touch1.clientY;
+
+        return Math.atan2(y, x) * 180 / Math.PI;
+    },
+
+    /**
+     * do a small comparision to get the direction between two touches.
+     * @method getDirection
+     * @param {Touch} touch1
+     * @param {Touch} touch2
+     * @return {String} direction matches `DIRECTION_LEFT|RIGHT|UP|DOWN`
+     */
+    getDirection: function getDirection(touch1, touch2) {
+        var x = Math.abs(touch1.clientX - touch2.clientX),
+            y = Math.abs(touch1.clientY - touch2.clientY);
+
+        if(x >= y) {
+            return touch1.clientX - touch2.clientX > 0 ? DIRECTION_LEFT : DIRECTION_RIGHT;
+        }
+        return touch1.clientY - touch2.clientY > 0 ? DIRECTION_UP : DIRECTION_DOWN;
+    },
+
+    /**
+     * calculate the distance between two touches
+     * @method getDistance
+     * @param {Touch}touch1
+     * @param {Touch} touch2
+     * @return {Number} distance
+     */
+    getDistance: function getDistance(touch1, touch2) {
+        var x = touch2.clientX - touch1.clientX,
+            y = touch2.clientY - touch1.clientY;
+
+        return Math.sqrt((x * x) + (y * y));
+    },
+
+    /**
+     * calculate the scale factor between two touchLists
+     * no scale is 1, and goes down to 0 when pinched together, and bigger when pinched out
+     * @method getScale
+     * @param {Array} start array of touches
+     * @param {Array} end array of touches
+     * @return {Number} scale
+     */
+    getScale: function getScale(start, end) {
+        // need two fingers...
+        if(start.length >= 2 && end.length >= 2) {
+            return this.getDistance(end[0], end[1]) / this.getDistance(start[0], start[1]);
+        }
+        return 1;
+    },
+
+    /**
+     * calculate the rotation degrees between two touchLists
+     * @method getRotation
+     * @param {Array} start array of touches
+     * @param {Array} end array of touches
+     * @return {Number} rotation
+     */
+    getRotation: function getRotation(start, end) {
+        // need two fingers
+        if(start.length >= 2 && end.length >= 2) {
+            return this.getAngle(end[1], end[0]) - this.getAngle(start[1], start[0]);
+        }
+        return 0;
+    },
+
+    /**
+     * find out if the direction is vertical   *
+     * @method isVertical
+     * @param {String} direction matches `DIRECTION_UP|DOWN`
+     * @return {Boolean} is_vertical
+     */
+    isVertical: function isVertical(direction) {
+        return direction == DIRECTION_UP || direction == DIRECTION_DOWN;
+    },
+
+    /**
+     * set css properties with their prefixes
+     * @param {HTMLElement} element
+     * @param {String} prop
+     * @param {String} value
+     * @param {Boolean} [toggle=true]
+     * @return {Boolean}
+     */
+    setPrefixedCss: function setPrefixedCss(element, prop, value, toggle) {
+        var prefixes = ['', 'Webkit', 'Moz', 'O', 'ms'];
+        prop = Utils.toCamelCase(prop);
+
+        for(var i = 0; i < prefixes.length; i++) {
+            var p = prop;
+            // prefixes
+            if(prefixes[i]) {
+                p = prefixes[i] + p.slice(0, 1).toUpperCase() + p.slice(1);
+            }
+
+            // test the style
+            if(p in element.style) {
+                element.style[p] = (toggle == null || toggle) && value || '';
+                break;
+            }
+        }
+    },
+
+    /**
+     * toggle browser default behavior by setting css properties.
+     * `userSelect='none'` also sets `element.onselectstart` to false
+     * `userDrag='none'` also sets `element.ondragstart` to false
+     *
+     * @method toggleBehavior
+     * @param {HtmlElement} element
+     * @param {Object} props
+     * @param {Boolean} [toggle=true]
+     */
+    toggleBehavior: function toggleBehavior(element, props, toggle) {
+        if(!props || !element || !element.style) {
+            return;
+        }
+
+        // set the css properties
+        Utils.each(props, function(value, prop) {
+            Utils.setPrefixedCss(element, prop, value, toggle);
+        });
+
+        var falseFn = toggle && function() {
+            return false;
+        };
+
+        // also the disable onselectstart
+        if(props.userSelect == 'none') {
+            element.onselectstart = falseFn;
+        }
+        // and disable ondragstart
+        if(props.userDrag == 'none') {
+            element.ondragstart = falseFn;
+        }
+    },
+
+    /**
+     * convert a string with underscores to camelCase
+     * so prevent_default becomes preventDefault
+     * @param {String} str
+     * @return {String} camelCaseStr
+     */
+    toCamelCase: function toCamelCase(str) {
+        return str.replace(/[_-]([a-z])/g, function(s) {
+            return s[1].toUpperCase();
+        });
+    }
+};
+
+
+/**
+ * @module hammer
+ */
+/**
+ * @class Event
+ * @static
+ */
+var Event = Hammer.event = {
+    /**
+     * when touch events have been fired, this is true
+     * this is used to stop mouse events
+     * @property prevent_mouseevents
+     * @private
+     * @type {Boolean}
+     */
+    preventMouseEvents: false,
+
+    /**
+     * if EVENT_START has been fired
+     * @property started
+     * @private
+     * @type {Boolean}
+     */
+    started: false,
+
+    /**
+     * when the mouse is hold down, this is true
+     * @property should_detect
+     * @private
+     * @type {Boolean}
+     */
+    shouldDetect: false,
+
+    /**
+     * simple event binder with a hook and support for multiple types
+     * @method on
+     * @param {HTMLElement} element
+     * @param {String} type
+     * @param {Function} handler
+     * @param {Function} [hook]
+     * @param {Object} hook.type
+     */
+    on: function on(element, type, handler, hook) {
+        var types = type.split(' ');
+        Utils.each(types, function(type) {
+            Utils.on(element, type, handler);
+            hook && hook(type);
+        });
+    },
+
+    /**
+     * simple event unbinder with a hook and support for multiple types
+     * @method off
+     * @param {HTMLElement} element
+     * @param {String} type
+     * @param {Function} handler
+     * @param {Function} [hook]
+     * @param {Object} hook.type
+     */
+    off: function off(element, type, handler, hook) {
+        var types = type.split(' ');
+        Utils.each(types, function(type) {
+            Utils.off(element, type, handler);
+            hook && hook(type);
+        });
+    },
+
+    /**
+     * the core touch event handler.
+     * this finds out if we should to detect gestures
+     * @method onTouch
+     * @param {HTMLElement} element
+     * @param {String} eventType matches `EVENT_START|MOVE|END`
+     * @param {Function} handler
+     * @return onTouchHandler {Function} the core event handler
+     */
+    onTouch: function onTouch(element, eventType, handler) {
+        var self = this;
+
+        var onTouchHandler = function onTouchHandler(ev) {
+            var srcType = ev.type.toLowerCase(),
+                isPointer = Hammer.HAS_POINTEREVENTS,
+                isMouse = Utils.inStr(srcType, 'mouse'),
+                triggerType;
+
+            // if we are in a mouseevent, but there has been a touchevent triggered in this session
+            // we want to do nothing. simply break out of the event.
+            if(isMouse && self.preventMouseEvents) {
+                return;
+
+            // mousebutton must be down
+            } else if(isMouse && eventType == EVENT_START && ev.button === 0) {
+                self.preventMouseEvents = false;
+                self.shouldDetect = true;
+            } else if(isPointer && eventType == EVENT_START) {
+                self.shouldDetect = (ev.buttons === 1 || PointerEvent.matchType(POINTER_TOUCH, ev));
+            // just a valid start event, but no mouse
+            } else if(!isMouse && eventType == EVENT_START) {
+                self.preventMouseEvents = true;
+                self.shouldDetect = true;
+            }
+
+            // update the pointer event before entering the detection
+            if(isPointer && eventType != EVENT_END) {
+                PointerEvent.updatePointer(eventType, ev);
+            }
+
+            // we are in a touch/down state, so allowed detection of gestures
+            if(self.shouldDetect) {
+                triggerType = self.doDetect.call(self, ev, eventType, element, handler);
+            }
+
+            // ...and we are done with the detection
+            // so reset everything to start each detection totally fresh
+            if(triggerType == EVENT_END) {
+                self.preventMouseEvents = false;
+                self.shouldDetect = false;
+                PointerEvent.reset();
+            // update the pointerevent object after the detection
+            }
+
+            if(isPointer && eventType == EVENT_END) {
+                PointerEvent.updatePointer(eventType, ev);
+            }
+        };
+
+        this.on(element, EVENT_TYPES[eventType], onTouchHandler);
+        return onTouchHandler;
+    },
+
+    /**
+     * the core detection method
+     * this finds out what hammer-touch-events to trigger
+     * @method doDetect
+     * @param {Object} ev
+     * @param {String} eventType matches `EVENT_START|MOVE|END`
+     * @param {HTMLElement} element
+     * @param {Function} handler
+     * @return {String} triggerType matches `EVENT_START|MOVE|END`
+     */
+    doDetect: function doDetect(ev, eventType, element, handler) {
+        var touchList = this.getTouchList(ev, eventType);
+        var touchListLength = touchList.length;
+        var triggerType = eventType;
+        var triggerChange = touchList.trigger; // used by fakeMultitouch plugin
+        var changedLength = touchListLength;
+
+        // at each touchstart-like event we want also want to trigger a TOUCH event...
+        if(eventType == EVENT_START) {
+            triggerChange = EVENT_TOUCH;
+        // ...the same for a touchend-like event
+        } else if(eventType == EVENT_END) {
+            triggerChange = EVENT_RELEASE;
+
+            // keep track of how many touches have been removed
+            changedLength = touchList.length - ((ev.changedTouches) ? ev.changedTouches.length : 1);
+        }
+
+        // after there are still touches on the screen,
+        // we just want to trigger a MOVE event. so change the START or END to a MOVE
+        // but only after detection has been started, the first time we actualy want a START
+        if(changedLength > 0 && this.started) {
+            triggerType = EVENT_MOVE;
+        }
+
+        // detection has been started, we keep track of this, see above
+        this.started = true;
+
+        // generate some event data, some basic information
+        var evData = this.collectEventData(element, triggerType, touchList, ev);
+
+        // trigger the triggerType event before the change (TOUCH, RELEASE) events
+        // but the END event should be at last
+        if(eventType != EVENT_END) {
+            handler.call(Detection, evData);
+        }
+
+        // trigger a change (TOUCH, RELEASE) event, this means the length of the touches changed
+        if(triggerChange) {
+            evData.changedLength = changedLength;
+            evData.eventType = triggerChange;
+
+            handler.call(Detection, evData);
+
+            evData.eventType = triggerType;
+            delete evData.changedLength;
+        }
+
+        // trigger the END event
+        if(triggerType == EVENT_END) {
+            handler.call(Detection, evData);
+
+            // ...and we are done with the detection
+            // so reset everything to start each detection totally fresh
+            this.started = false;
+        }
+
+        return triggerType;
+    },
+
+    /**
+     * we have different events for each device/browser
+     * determine what we need and set them in the EVENT_TYPES constant
+     * the `onTouch` method is bind to these properties.
+     * @method determineEventTypes
+     * @return {Object} events
+     */
+    determineEventTypes: function determineEventTypes() {
+        var types;
+        if(Hammer.HAS_POINTEREVENTS) {
+            if(window.PointerEvent) {
+                types = [
+                    'pointerdown',
+                    'pointermove',
+                    'pointerup pointercancel lostpointercapture'
+                ];
+            } else {
+                types = [
+                    'MSPointerDown',
+                    'MSPointerMove',
+                    'MSPointerUp MSPointerCancel MSLostPointerCapture'
+                ];
+            }
+        } else if(Hammer.NO_MOUSEEVENTS) {
+            types = [
+                'touchstart',
+                'touchmove',
+                'touchend touchcancel'
+            ];
+        } else {
+            types = [
+                'touchstart mousedown',
+                'touchmove mousemove',
+                'touchend touchcancel mouseup'
+            ];
+        }
+
+        EVENT_TYPES[EVENT_START] = types[0];
+        EVENT_TYPES[EVENT_MOVE] = types[1];
+        EVENT_TYPES[EVENT_END] = types[2];
+        return EVENT_TYPES;
+    },
+
+    /**
+     * create touchList depending on the event
+     * @method getTouchList
+     * @param {Object} ev
+     * @param {String} eventType
+     * @return {Array} touches
+     */
+    getTouchList: function getTouchList(ev, eventType) {
+        // get the fake pointerEvent touchlist
+        if(Hammer.HAS_POINTEREVENTS) {
+            return PointerEvent.getTouchList();
+        }
+
+        // get the touchlist
+        if(ev.touches) {
+            if(eventType == EVENT_MOVE) {
+                return ev.touches;
+            }
+
+            var identifiers = [];
+            var concat = [].concat(Utils.toArray(ev.touches), Utils.toArray(ev.changedTouches));
+            var touchList = [];
+
+            Utils.each(concat, function(touch) {
+                if(Utils.inArray(identifiers, touch.identifier) === false) {
+                    touchList.push(touch);
+                }
+                identifiers.push(touch.identifier);
+            });
+
+            return touchList;
+        }
+
+        // make fake touchList from mouse position
+        ev.identifier = 1;
+        return [ev];
+    },
+
+    /**
+     * collect basic event data
+     * @method collectEventData
+     * @param {HTMLElement} element
+     * @param {String} eventType matches `EVENT_START|MOVE|END`
+     * @param {Array} touches
+     * @param {Object} ev
+     * @return {Object} ev
+     */
+    collectEventData: function collectEventData(element, eventType, touches, ev) {
+        // find out pointerType
+        var pointerType = POINTER_TOUCH;
+        if(Utils.inStr(ev.type, 'mouse') || PointerEvent.matchType(POINTER_MOUSE, ev)) {
+            pointerType = POINTER_MOUSE;
+        } else if(PointerEvent.matchType(POINTER_PEN, ev)) {
+            pointerType = POINTER_PEN;
+        }
+
+        return {
+            center: Utils.getCenter(touches),
+            timeStamp: Date.now(),
+            target: ev.target,
+            touches: touches,
+            eventType: eventType,
+            pointerType: pointerType,
+            srcEvent: ev,
+
+            /**
+             * prevent the browser default actions
+             * mostly used to disable scrolling of the browser
+             */
+            preventDefault: function() {
+                var srcEvent = this.srcEvent;
+                srcEvent.preventManipulation && srcEvent.preventManipulation();
+                srcEvent.preventDefault && srcEvent.preventDefault();
+            },
+
+            /**
+             * stop bubbling the event up to its parents
+             */
+            stopPropagation: function() {
+                this.srcEvent.stopPropagation();
+            },
+
+            /**
+             * immediately stop gesture detection
+             * might be useful after a swipe was detected
+             * @return {*}
+             */
+            stopDetect: function() {
+                return Detection.stopDetect();
+            }
+        };
+    }
+};
+
+
+/**
+ * @module hammer
+ *
+ * @class PointerEvent
+ * @static
+ */
+var PointerEvent = Hammer.PointerEvent = {
+    /**
+     * holds all pointers, by `identifier`
+     * @property pointers
+     * @type {Object}
+     */
+    pointers: {},
+
+    /**
+     * get the pointers as an array
+     * @method getTouchList
+     * @return {Array} touchlist
+     */
+    getTouchList: function getTouchList() {
+        var touchlist = [];
+        // we can use forEach since pointerEvents only is in IE10
+        Utils.each(this.pointers, function(pointer) {
+            touchlist.push(pointer);
+        });
+
+        return touchlist;
+    },
+
+    /**
+     * update the position of a pointer
+     * @method updatePointer
+     * @param {String} eventType matches `EVENT_START|MOVE|END`
+     * @param {Object} pointerEvent
+     */
+    updatePointer: function updatePointer(eventType, pointerEvent) {
+        if(eventType == EVENT_END) {
+            delete this.pointers[pointerEvent.pointerId];
+        } else {
+            pointerEvent.identifier = pointerEvent.pointerId;
+            this.pointers[pointerEvent.pointerId] = pointerEvent;
+        }
+    },
+
+    /**
+     * check if ev matches pointertype
+     * @method matchType
+     * @param {String} pointerType matches `POINTER_MOUSE|TOUCH|PEN`
+     * @param {PointerEvent} ev
+     */
+    matchType: function matchType(pointerType, ev) {
+        if(!ev.pointerType) {
+            return false;
+        }
+
+        var pt = ev.pointerType,
+            types = {};
+
+        types[POINTER_MOUSE] = (pt === (ev.MSPOINTER_TYPE_MOUSE || POINTER_MOUSE));
+        types[POINTER_TOUCH] = (pt === (ev.MSPOINTER_TYPE_TOUCH || POINTER_TOUCH));
+        types[POINTER_PEN] = (pt === (ev.MSPOINTER_TYPE_PEN || POINTER_PEN));
+        return types[pointerType];
+    },
+
+    /**
+     * reset the stored pointers
+     * @method reset
+     */
+    reset: function resetList() {
+        this.pointers = {};
+    }
+};
+
+
+/**
+ * @module hammer
+ *
+ * @class Detection
+ * @static
+ */
+var Detection = Hammer.detection = {
+    // contains all registred Hammer.gestures in the correct order
+    gestures: [],
+
+    // data of the current Hammer.gesture detection session
+    current: null,
+
+    // the previous Hammer.gesture session data
+    // is a full clone of the previous gesture.current object
+    previous: null,
+
+    // when this becomes true, no gestures are fired
+    stopped: false,
+
+    /**
+     * start Hammer.gesture detection
+     * @method startDetect
+     * @param {Hammer.Instance} inst
+     * @param {Object} eventData
+     */
+    startDetect: function startDetect(inst, eventData) {
+        // already busy with a Hammer.gesture detection on an element
+        if(this.current) {
+            return;
+        }
+
+        this.stopped = false;
+
+        // holds current session
+        this.current = {
+            inst: inst, // reference to HammerInstance we're working for
+            startEvent: Utils.extend({}, eventData), // start eventData for distances, timing etc
+            lastEvent: false, // last eventData
+            lastCalcEvent: false, // last eventData for calculations.
+            futureCalcEvent: false, // last eventData for calculations.
+            lastCalcData: {}, // last lastCalcData
+            name: '' // current gesture we're in/detected, can be 'tap', 'hold' etc
+        };
+
+        this.detect(eventData);
+    },
+
+    /**
+     * Hammer.gesture detection
+     * @method detect
+     * @param {Object} eventData
+     * @return {any}
+     */
+    detect: function detect(eventData) {
+        if(!this.current || this.stopped) {
+            return;
+        }
+
+        // extend event data with calculations about scale, distance etc
+        eventData = this.extendEventData(eventData);
+
+        // hammer instance and instance options
+        var inst = this.current.inst,
+            instOptions = inst.options;
+
+        // call Hammer.gesture handlers
+        Utils.each(this.gestures, function triggerGesture(gesture) {
+            // only when the instance options have enabled this gesture
+            if(!this.stopped && inst.enabled && instOptions[gesture.name]) {
+                gesture.handler.call(gesture, eventData, inst);
+            }
+        }, this);
+
+        // store as previous event event
+        if(this.current) {
+            this.current.lastEvent = eventData;
+        }
+
+        if(eventData.eventType == EVENT_END) {
+            this.stopDetect();
+        }
+
+        return eventData;
+    },
+
+    /**
+     * clear the Hammer.gesture vars
+     * this is called on endDetect, but can also be used when a final Hammer.gesture has been detected
+     * to stop other Hammer.gestures from being fired
+     * @method stopDetect
+     */
+    stopDetect: function stopDetect() {
+        // clone current data to the store as the previous gesture
+        // used for the double tap gesture, since this is an other gesture detect session
+        this.previous = Utils.extend({}, this.current);
+
+        // reset the current
+        this.current = null;
+        this.stopped = true;
+    },
+
+    /**
+     * calculate velocity, angle and direction
+     * @method getVelocityData
+     * @param {Object} ev
+     * @param {Object} center
+     * @param {Number} deltaTime
+     * @param {Number} deltaX
+     * @param {Number} deltaY
+     */
+    getCalculatedData: function getCalculatedData(ev, center, deltaTime, deltaX, deltaY) {
+        var cur = this.current,
+            recalc = false,
+            calcEv = cur.lastCalcEvent,
+            calcData = cur.lastCalcData;
+
+        if(calcEv && ev.timeStamp - calcEv.timeStamp > Hammer.CALCULATE_INTERVAL) {
+            center = calcEv.center;
+            deltaTime = ev.timeStamp - calcEv.timeStamp;
+            deltaX = ev.center.clientX - calcEv.center.clientX;
+            deltaY = ev.center.clientY - calcEv.center.clientY;
+            recalc = true;
+        }
+
+        if(ev.eventType == EVENT_TOUCH || ev.eventType == EVENT_RELEASE) {
+            cur.futureCalcEvent = ev;
+        }
+
+        if(!cur.lastCalcEvent || recalc) {
+            calcData.velocity = Utils.getVelocity(deltaTime, deltaX, deltaY);
+            calcData.angle = Utils.getAngle(center, ev.center);
+            calcData.direction = Utils.getDirection(center, ev.center);
+
+            cur.lastCalcEvent = cur.futureCalcEvent || ev;
+            cur.futureCalcEvent = ev;
+        }
+
+        ev.velocityX = calcData.velocity.x;
+        ev.velocityY = calcData.velocity.y;
+        ev.interimAngle = calcData.angle;
+        ev.interimDirection = calcData.direction;
+    },
+
+    /**
+     * extend eventData for Hammer.gestures
+     * @method extendEventData
+     * @param {Object} ev
+     * @return {Object} ev
+     */
+    extendEventData: function extendEventData(ev) {
+        var cur = this.current,
+            startEv = cur.startEvent,
+            lastEv = cur.lastEvent || startEv;
+
+        // update the start touchlist to calculate the scale/rotation
+        if(ev.eventType == EVENT_TOUCH || ev.eventType == EVENT_RELEASE) {
+            startEv.touches = [];
+            Utils.each(ev.touches, function(touch) {
+                startEv.touches.push({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+            });
+        }
+
+        var deltaTime = ev.timeStamp - startEv.timeStamp,
+            deltaX = ev.center.clientX - startEv.center.clientX,
+            deltaY = ev.center.clientY - startEv.center.clientY;
+
+        this.getCalculatedData(ev, lastEv.center, deltaTime, deltaX, deltaY);
+
+        Utils.extend(ev, {
+            startEvent: startEv,
+
+            deltaTime: deltaTime,
+            deltaX: deltaX,
+            deltaY: deltaY,
+
+            distance: Utils.getDistance(startEv.center, ev.center),
+            angle: Utils.getAngle(startEv.center, ev.center),
+            direction: Utils.getDirection(startEv.center, ev.center),
+            scale: Utils.getScale(startEv.touches, ev.touches),
+            rotation: Utils.getRotation(startEv.touches, ev.touches)
+        });
+
+        return ev;
+    },
+
+    /**
+     * register new gesture
+     * @method register
+     * @param {Object} gesture object, see `gestures/` for documentation
+     * @return {Array} gestures
+     */
+    register: function register(gesture) {
+        // add an enable gesture options if there is no given
+        var options = gesture.defaults || {};
+        if(options[gesture.name] === undefined) {
+            options[gesture.name] = true;
+        }
+
+        // extend Hammer default options with the Hammer.gesture options
+        Utils.extend(Hammer.defaults, options, true);
+
+        // set its index
+        gesture.index = gesture.index || 1000;
+
+        // add Hammer.gesture to the list
+        this.gestures.push(gesture);
+
+        // sort the list by index
+        this.gestures.sort(function(a, b) {
+            if(a.index < b.index) {
+                return -1;
+            }
+            if(a.index > b.index) {
+                return 1;
+            }
+            return 0;
+        });
+
+        return this.gestures;
+    }
+};
+
+
+/**
+ * @module hammer
+ */
+
+/**
+ * create new hammer instance
+ * all methods should return the instance itself, so it is chainable.
+ *
+ * @class Instance
+ * @constructor
+ * @param {HTMLElement} element
+ * @param {Object} [options={}] options are merged with `Hammer.defaults`
+ * @return {Hammer.Instance}
+ */
+Hammer.Instance = function(element, options) {
+    var self = this;
+
+    // setup HammerJS window events and register all gestures
+    // this also sets up the default options
+    setup();
+
+    /**
+     * @property element
+     * @type {HTMLElement}
+     */
+    this.element = element;
+
+    /**
+     * @property enabled
+     * @type {Boolean}
+     * @protected
+     */
+    this.enabled = true;
+
+    /**
+     * options, merged with the defaults
+     * options with an _ are converted to camelCase
+     * @property options
+     * @type {Object}
+     */
+    Utils.each(options, function(value, name) {
+        delete options[name];
+        options[Utils.toCamelCase(name)] = value;
+    });
+
+    this.options = Utils.extend(Utils.extend({}, Hammer.defaults), options || {});
+
+    // add some css to the element to prevent the browser from doing its native behavoir
+    if(this.options.behavior) {
+        Utils.toggleBehavior(this.element, this.options.behavior, true);
+    }
+
+    /**
+     * event start handler on the element to start the detection
+     * @property eventStartHandler
+     * @type {Object}
+     */
+    this.eventStartHandler = Event.onTouch(element, EVENT_START, function(ev) {
+        if(self.enabled && ev.eventType == EVENT_START) {
+            Detection.startDetect(self, ev);
+        } else if(ev.eventType == EVENT_TOUCH) {
+            Detection.detect(ev);
+        }
+    });
+
+    /**
+     * keep a list of user event handlers which needs to be removed when calling 'dispose'
+     * @property eventHandlers
+     * @type {Array}
+     */
+    this.eventHandlers = [];
+};
+
+Hammer.Instance.prototype = {
+    /**
+     * bind events to the instance
+     * @method on
+     * @chainable
+     * @param {String} gestures multiple gestures by splitting with a space
+     * @param {Function} handler
+     * @param {Object} handler.ev event object
+     */
+    on: function onEvent(gestures, handler) {
+        var self = this;
+        Event.on(self.element, gestures, handler, function(type) {
+            self.eventHandlers.push({ gesture: type, handler: handler });
+        });
+        return self;
+    },
+
+    /**
+     * unbind events to the instance
+     * @method off
+     * @chainable
+     * @param {String} gestures
+     * @param {Function} handler
+     */
+    off: function offEvent(gestures, handler) {
+        var self = this;
+
+        Event.off(self.element, gestures, handler, function(type) {
+            var index = Utils.inArray({ gesture: type, handler: handler });
+            if(index !== false) {
+                self.eventHandlers.splice(index, 1);
+            }
+        });
+        return self;
+    },
+
+    /**
+     * trigger gesture event
+     * @method trigger
+     * @chainable
+     * @param {String} gesture
+     * @param {Object} [eventData]
+     */
+    trigger: function triggerEvent(gesture, eventData) {
+        // optional
+        if(!eventData) {
+            eventData = {};
+        }
+
+        // create DOM event
+        var event = Hammer.DOCUMENT.createEvent('Event');
+        event.initEvent(gesture, true, true);
+        event.gesture = eventData;
+
+        // trigger on the target if it is in the instance element,
+        // this is for event delegation tricks
+        var element = this.element;
+        if(Utils.hasParent(eventData.target, element)) {
+            element = eventData.target;
+        }
+
+        element.dispatchEvent(event);
+        return this;
+    },
+
+    /**
+     * enable of disable hammer.js detection
+     * @method enable
+     * @chainable
+     * @param {Boolean} state
+     */
+    enable: function enable(state) {
+        this.enabled = state;
+        return this;
+    },
+
+    /**
+     * dispose this hammer instance
+     * @method dispose
+     * @return {Null}
+     */
+    dispose: function dispose() {
+        var i, eh;
+
+        // undo all changes made by stop_browser_behavior
+        Utils.toggleBehavior(this.element, this.options.behavior, false);
+
+        // unbind all custom event handlers
+        for(i = -1; (eh = this.eventHandlers[++i]);) {
+            Utils.off(this.element, eh.gesture, eh.handler);
+        }
+
+        this.eventHandlers = [];
+
+        // unbind the start event listener
+        Event.off(this.element, EVENT_TYPES[EVENT_START], this.eventStartHandler);
+
+        return null;
+    }
+};
+
+
+/**
+ * @module gestures
+ */
+/**
+ * Move with x fingers (default 1) around on the page.
+ * Preventing the default browser behavior is a good way to improve feel and working.
+ * ````
+ *  hammertime.on("drag", function(ev) {
+ *    console.log(ev);
+ *    ev.gesture.preventDefault();
+ *  });
+ * ````
+ *
+ * @class Drag
+ * @static
+ */
+/**
+ * @event drag
+ * @param {Object} ev
+ */
+/**
+ * @event dragstart
+ * @param {Object} ev
+ */
+/**
+ * @event dragend
+ * @param {Object} ev
+ */
+/**
+ * @event drapleft
+ * @param {Object} ev
+ */
+/**
+ * @event dragright
+ * @param {Object} ev
+ */
+/**
+ * @event dragup
+ * @param {Object} ev
+ */
+/**
+ * @event dragdown
+ * @param {Object} ev
+ */
+
+/**
+ * @param {String} name
+ */
+(function(name) {
+    var triggered = false;
+
+    function dragGesture(ev, inst) {
+        var cur = Detection.current;
+
+        // max touches
+        if(inst.options.dragMaxTouches > 0 &&
+            ev.touches.length > inst.options.dragMaxTouches) {
+            return;
+        }
+
+        switch(ev.eventType) {
+            case EVENT_START:
+                triggered = false;
+                break;
+
+            case EVENT_MOVE:
+                // when the distance we moved is too small we skip this gesture
+                // or we can be already in dragging
+                if(ev.distance < inst.options.dragMinDistance &&
+                    cur.name != name) {
+                    return;
+                }
+
+                var startCenter = cur.startEvent.center;
+
+                // we are dragging!
+                if(cur.name != name) {
+                    cur.name = name;
+                    if(inst.options.dragDistanceCorrection && ev.distance > 0) {
+                        // When a drag is triggered, set the event center to dragMinDistance pixels from the original event center.
+                        // Without this correction, the dragged distance would jumpstart at dragMinDistance pixels instead of at 0.
+                        // It might be useful to save the original start point somewhere
+                        var factor = Math.abs(inst.options.dragMinDistance / ev.distance);
+                        startCenter.pageX += ev.deltaX * factor;
+                        startCenter.pageY += ev.deltaY * factor;
+                        startCenter.clientX += ev.deltaX * factor;
+                        startCenter.clientY += ev.deltaY * factor;
+
+                        // recalculate event data using new start point
+                        ev = Detection.extendEventData(ev);
+                    }
+                }
+
+                // lock drag to axis?
+                if(cur.lastEvent.dragLockToAxis ||
+                    ( inst.options.dragLockToAxis &&
+                        inst.options.dragLockMinDistance <= ev.distance
+                        )) {
+                    ev.dragLockToAxis = true;
+                }
+
+                // keep direction on the axis that the drag gesture started on
+                var lastDirection = cur.lastEvent.direction;
+                if(ev.dragLockToAxis && lastDirection !== ev.direction) {
+                    if(Utils.isVertical(lastDirection)) {
+                        ev.direction = (ev.deltaY < 0) ? DIRECTION_UP : DIRECTION_DOWN;
+                    } else {
+                        ev.direction = (ev.deltaX < 0) ? DIRECTION_LEFT : DIRECTION_RIGHT;
+                    }
+                }
+
+                // first time, trigger dragstart event
+                if(!triggered) {
+                    inst.trigger(name + 'start', ev);
+                    triggered = true;
+                }
+
+                // trigger events
+                inst.trigger(name, ev);
+                inst.trigger(name + ev.direction, ev);
+
+                var isVertical = Utils.isVertical(ev.direction);
+
+                // block the browser events
+                if((inst.options.dragBlockVertical && isVertical) ||
+                    (inst.options.dragBlockHorizontal && !isVertical)) {
+                    ev.preventDefault();
+                }
+                break;
+
+            case EVENT_RELEASE:
+                if(triggered && ev.changedLength <= inst.options.dragMaxTouches) {
+                    inst.trigger(name + 'end', ev);
+                    triggered = false;
+                }
+                break;
+
+            case EVENT_END:
+                triggered = false;
+                break;
+        }
+    }
+
+    Hammer.gestures.Drag = {
+        name: name,
+        index: 50,
+        handler: dragGesture,
+        defaults: {
+            /**
+             * minimal movement that have to be made before the drag event gets triggered
+             * @property dragMinDistance
+             * @type {Number}
+             * @default 10
+             */
+            dragMinDistance: 10,
+
+            /**
+             * Set dragDistanceCorrection to true to make the starting point of the drag
+             * be calculated from where the drag was triggered, not from where the touch started.
+             * Useful to avoid a jerk-starting drag, which can make fine-adjustments
+             * through dragging difficult, and be visually unappealing.
+             * @property dragDistanceCorrection
+             * @type {Boolean}
+             * @default true
+             */
+            dragDistanceCorrection: true,
+
+            /**
+             * set 0 for unlimited, but this can conflict with transform
+             * @property dragMaxTouches
+             * @type {Number}
+             * @default 1
+             */
+            dragMaxTouches: 1,
+
+            /**
+             * prevent default browser behavior when dragging occurs
+             * be careful with it, it makes the element a blocking element
+             * when you are using the drag gesture, it is a good practice to set this true
+             * @property dragBlockHorizontal
+             * @type {Boolean}
+             * @default false
+             */
+            dragBlockHorizontal: false,
+
+            /**
+             * same as `dragBlockHorizontal`, but for vertical movement
+             * @property dragBlockVertical
+             * @type {Boolean}
+             * @default false
+             */
+            dragBlockVertical: false,
+
+            /**
+             * dragLockToAxis keeps the drag gesture on the axis that it started on,
+             * It disallows vertical directions if the initial direction was horizontal, and vice versa.
+             * @property dragLockToAxis
+             * @type {Boolean}
+             * @default false
+             */
+            dragLockToAxis: false,
+
+            /**
+             * drag lock only kicks in when distance > dragLockMinDistance
+             * This way, locking occurs only when the distance has become large enough to reliably determine the direction
+             * @property dragLockMinDistance
+             * @type {Number}
+             * @default 25
+             */
+            dragLockMinDistance: 25
+        }
+    };
+})('drag');
+
+/**
+ * @module gestures
+ */
+/**
+ * trigger a simple gesture event, so you can do anything in your handler.
+ * only usable if you know what your doing...
+ *
+ * @class Gesture
+ * @static
+ */
+/**
+ * @event gesture
+ * @param {Object} ev
+ */
+Hammer.gestures.Gesture = {
+    name: 'gesture',
+    index: 1337,
+    handler: function releaseGesture(ev, inst) {
+        inst.trigger(this.name, ev);
+    }
+};
+
+/**
+ * @module gestures
+ */
+/**
+ * Touch stays at the same place for x time
+ *
+ * @class Hold
+ * @static
+ */
+/**
+ * @event hold
+ * @param {Object} ev
+ */
+
+/**
+ * @param {String} name
+ */
+(function(name) {
+    var timer;
+
+    function holdGesture(ev, inst) {
+        var options = inst.options,
+            current = Detection.current;
+
+        switch(ev.eventType) {
+            case EVENT_START:
+                clearTimeout(timer);
+
+                // set the gesture so we can check in the timeout if it still is
+                current.name = name;
+
+                // set timer and if after the timeout it still is hold,
+                // we trigger the hold event
+                timer = setTimeout(function() {
+                    if(current && current.name == name) {
+                        inst.trigger(name, ev);
+                    }
+                }, options.holdTimeout);
+                break;
+
+            case EVENT_MOVE:
+                if(ev.distance > options.holdThreshold) {
+                    clearTimeout(timer);
+                }
+                break;
+
+            case EVENT_RELEASE:
+                clearTimeout(timer);
+                break;
+        }
+    }
+
+    Hammer.gestures.Hold = {
+        name: name,
+        index: 10,
+        defaults: {
+            /**
+             * @property holdTimeout
+             * @type {Number}
+             * @default 500
+             */
+            holdTimeout: 500,
+
+            /**
+             * movement allowed while holding
+             * @property holdThreshold
+             * @type {Number}
+             * @default 2
+             */
+            holdThreshold: 2
+        },
+        handler: holdGesture
+    };
+})('hold');
+
+/**
+ * @module gestures
+ */
+/**
+ * when a touch is being released from the page
+ *
+ * @class Release
+ * @static
+ */
+/**
+ * @event release
+ * @param {Object} ev
+ */
+Hammer.gestures.Release = {
+    name: 'release',
+    index: Infinity,
+    handler: function releaseGesture(ev, inst) {
+        if(ev.eventType == EVENT_RELEASE) {
+            inst.trigger(this.name, ev);
+        }
+    }
+};
+
+/**
+ * @module gestures
+ */
+/**
+ * triggers swipe events when the end velocity is above the threshold
+ * for best usage, set `preventDefault` (on the drag gesture) to `true`
+ * ````
+ *  hammertime.on("dragleft swipeleft", function(ev) {
+ *    console.log(ev);
+ *    ev.gesture.preventDefault();
+ *  });
+ * ````
+ *
+ * @class Swipe
+ * @static
+ */
+/**
+ * @event swipe
+ * @param {Object} ev
+ */
+/**
+ * @event swipeleft
+ * @param {Object} ev
+ */
+/**
+ * @event swiperight
+ * @param {Object} ev
+ */
+/**
+ * @event swipeup
+ * @param {Object} ev
+ */
+/**
+ * @event swipedown
+ * @param {Object} ev
+ */
+Hammer.gestures.Swipe = {
+    name: 'swipe',
+    index: 40,
+    defaults: {
+        /**
+         * @property swipeMinTouches
+         * @type {Number}
+         * @default 1
+         */
+        swipeMinTouches: 1,
+
+        /**
+         * @property swipeMaxTouches
+         * @type {Number}
+         * @default 1
+         */
+        swipeMaxTouches: 1,
+
+        /**
+         * horizontal swipe velocity
+         * @property swipeVelocityX
+         * @type {Number}
+         * @default 0.6
+         */
+        swipeVelocityX: 0.6,
+
+        /**
+         * vertical swipe velocity
+         * @property swipeVelocityY
+         * @type {Number}
+         * @default 0.6
+         */
+        swipeVelocityY: 0.6
+    },
+
+    handler: function swipeGesture(ev, inst) {
+        if(ev.eventType == EVENT_RELEASE) {
+            var touches = ev.touches.length,
+                options = inst.options;
+
+            // max touches
+            if(touches < options.swipeMinTouches ||
+                touches > options.swipeMaxTouches) {
+                return;
+            }
+
+            // when the distance we moved is too small we skip this gesture
+            // or we can be already in dragging
+            if(ev.velocityX > options.swipeVelocityX ||
+                ev.velocityY > options.swipeVelocityY) {
+                // trigger swipe events
+                inst.trigger(this.name, ev);
+                inst.trigger(this.name + ev.direction, ev);
+            }
+        }
+    }
+};
+
+/**
+ * @module gestures
+ */
+/**
+ * Single tap and a double tap on a place
+ *
+ * @class Tap
+ * @static
+ */
+/**
+ * @event tap
+ * @param {Object} ev
+ */
+/**
+ * @event doubletap
+ * @param {Object} ev
+ */
+
+/**
+ * @param {String} name
+ */
+(function(name) {
+    var hasMoved = false;
+
+    function tapGesture(ev, inst) {
+        var options = inst.options,
+            current = Detection.current,
+            prev = Detection.previous,
+            sincePrev,
+            didDoubleTap;
+
+        switch(ev.eventType) {
+            case EVENT_START:
+                hasMoved = false;
+                break;
+
+            case EVENT_MOVE:
+                hasMoved = hasMoved || (ev.distance > options.tapMaxDistance);
+                break;
+
+            case EVENT_END:
+                if(!Utils.inStr(ev.srcEvent.type, 'cancel') && ev.deltaTime < options.tapMaxTime && !hasMoved) {
+                    // previous gesture, for the double tap since these are two different gesture detections
+                    sincePrev = prev && prev.lastEvent && ev.timeStamp - prev.lastEvent.timeStamp;
+                    didDoubleTap = false;
+
+                    // check if double tap
+                    if(prev && prev.name == name &&
+                        (sincePrev && sincePrev < options.doubleTapInterval) &&
+                        ev.distance < options.doubleTapDistance) {
+                        inst.trigger('doubletap', ev);
+                        didDoubleTap = true;
+                    }
+
+                    // do a single tap
+                    if(!didDoubleTap || options.tapAlways) {
+                        current.name = name;
+                        inst.trigger(current.name, ev);
+                    }
+                }
+                break;
+        }
+    }
+
+    Hammer.gestures.Tap = {
+        name: name,
+        index: 100,
+        handler: tapGesture,
+        defaults: {
+            /**
+             * max time of a tap, this is for the slow tappers
+             * @property tapMaxTime
+             * @type {Number}
+             * @default 250
+             */
+            tapMaxTime: 250,
+
+            /**
+             * max distance of movement of a tap, this is for the slow tappers
+             * @property tapMaxDistance
+             * @type {Number}
+             * @default 10
+             */
+            tapMaxDistance: 10,
+
+            /**
+             * always trigger the `tap` event, even while double-tapping
+             * @property tapAlways
+             * @type {Boolean}
+             * @default true
+             */
+            tapAlways: true,
+
+            /**
+             * max distance between two taps
+             * @property doubleTapDistance
+             * @type {Number}
+             * @default 20
+             */
+            doubleTapDistance: 20,
+
+            /**
+             * max time between two taps
+             * @property doubleTapInterval
+             * @type {Number}
+             * @default 300
+             */
+            doubleTapInterval: 300
+        }
+    };
+})('tap');
+
+/**
+ * @module gestures
+ */
+/**
+ * when a touch is being touched at the page
+ *
+ * @class Touch
+ * @static
+ */
+/**
+ * @event touch
+ * @param {Object} ev
+ */
+Hammer.gestures.Touch = {
+    name: 'touch',
+    index: -Infinity,
+    defaults: {
+        /**
+         * call preventDefault at touchstart, and makes the element blocking by disabling the scrolling of the page,
+         * but it improves gestures like transforming and dragging.
+         * be careful with using this, it can be very annoying for users to be stuck on the page
+         * @property preventDefault
+         * @type {Boolean}
+         * @default false
+         */
+        preventDefault: false,
+
+        /**
+         * disable mouse events, so only touch (or pen!) input triggers events
+         * @property preventMouse
+         * @type {Boolean}
+         * @default false
+         */
+        preventMouse: false
+    },
+    handler: function touchGesture(ev, inst) {
+        if(inst.options.preventMouse && ev.pointerType == POINTER_MOUSE) {
+            ev.stopDetect();
+            return;
+        }
+
+        if(inst.options.preventDefault) {
+            ev.preventDefault();
+        }
+
+        if(ev.eventType == EVENT_TOUCH) {
+            inst.trigger('touch', ev);
+        }
+    }
+};
+
+/**
+ * @module gestures
+ */
+/**
+ * User want to scale or rotate with 2 fingers
+ * Preventing the default browser behavior is a good way to improve feel and working. This can be done with the
+ * `preventDefault` option.
+ *
+ * @class Transform
+ * @static
+ */
+/**
+ * @event transform
+ * @param {Object} ev
+ */
+/**
+ * @event transformstart
+ * @param {Object} ev
+ */
+/**
+ * @event transformend
+ * @param {Object} ev
+ */
+/**
+ * @event pinchin
+ * @param {Object} ev
+ */
+/**
+ * @event pinchout
+ * @param {Object} ev
+ */
+/**
+ * @event rotate
+ * @param {Object} ev
+ */
+
+/**
+ * @param {String} name
+ */
+(function(name) {
+    var triggered = false;
+
+    function transformGesture(ev, inst) {
+        switch(ev.eventType) {
+            case EVENT_START:
+                triggered = false;
+                break;
+
+            case EVENT_MOVE:
+                // at least multitouch
+                if(ev.touches.length < 2) {
+                    return;
+                }
+
+                var scaleThreshold = Math.abs(1 - ev.scale);
+                var rotationThreshold = Math.abs(ev.rotation);
+
+                // when the distance we moved is too small we skip this gesture
+                // or we can be already in dragging
+                if(scaleThreshold < inst.options.transformMinScale &&
+                    rotationThreshold < inst.options.transformMinRotation) {
+                    return;
+                }
+
+                // we are transforming!
+                Detection.current.name = name;
+
+                // first time, trigger dragstart event
+                if(!triggered) {
+                    inst.trigger(name + 'start', ev);
+                    triggered = true;
+                }
+
+                inst.trigger(name, ev); // basic transform event
+
+                // trigger rotate event
+                if(rotationThreshold > inst.options.transformMinRotation) {
+                    inst.trigger('rotate', ev);
+                }
+
+                // trigger pinch event
+                if(scaleThreshold > inst.options.transformMinScale) {
+                    inst.trigger('pinch', ev);
+                    inst.trigger('pinch' + (ev.scale < 1 ? 'in' : 'out'), ev);
+                }
+                break;
+
+            case EVENT_RELEASE:
+                if(triggered && ev.changedLength < 2) {
+                    inst.trigger(name + 'end', ev);
+                    triggered = false;
+                }
+                break;
+        }
+    }
+
+    Hammer.gestures.Transform = {
+        name: name,
+        index: 45,
+        defaults: {
+            /**
+             * minimal scale factor, no scale is 1, zoomin is to 0 and zoomout until higher then 1
+             * @property transformMinScale
+             * @type {Number}
+             * @default 0.01
+             */
+            transformMinScale: 0.01,
+
+            /**
+             * rotation in degrees
+             * @property transformMinRotation
+             * @type {Number}
+             * @default 1
+             */
+            transformMinRotation: 1
+        },
+
+        handler: transformGesture
+    };
+})('transform');
+
+/**
+ * @module hammer
+ */
+
+// AMD export
+if(typeof define == 'function' && define.amd) {
+    define(function() {
+        return Hammer;
+    });
+// commonjs export
+} else if(typeof module !== 'undefined' && module.exports) {
+    module.exports = Hammer;
+// browser export
+} else {
+    window.Hammer = Hammer;
+}
+
+})(window);
+},{}],10:[function(require,module,exports){
 (function (global){
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash include="debounce,reject,map,value,range,without,sample" --output build/js/lodash.js`
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample,create" --output build/js/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3339,6 +5556,21 @@ var generateXMLForBlocks = function(blocks) {
     'loop': 'if (callback(iterable[index], index, collection) === false) return result'
   };
 
+  /** Reusable iterator options for `assign` and `defaults` */
+  var defaultsIteratorOptions = {
+    'args': 'object, source, guard',
+    'top':
+      'var args = arguments,\n' +
+      '    argsIndex = 0,\n' +
+      "    argsLength = typeof guard == 'number' ? 2 : args.length;\n" +
+      'while (++argsIndex < argsLength) {\n' +
+      '  iterable = args[argsIndex];\n' +
+      '  if (iterable && objectTypes[typeof iterable]) {',
+    'keys': keys,
+    'loop': "if (typeof result[index] == 'undefined') result[index] = iterable[index]",
+    'bottom': '  }\n}'
+  };
+
   /** Reusable iterator options for `forIn` and `forOwn` */
   var forOwnIteratorOptions = {
     'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
@@ -3362,6 +5594,85 @@ var generateXMLForBlocks = function(blocks) {
   var baseEach = createIterator(eachIteratorOptions);
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Assigns own enumerable properties of source object(s) to the destination
+   * object. Subsequent sources will overwrite property assignments of previous
+   * sources. If a callback is provided it will be executed to produce the
+   * assigned values. The callback is bound to `thisArg` and invoked with two
+   * arguments; (objectValue, sourceValue).
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @alias extend
+   * @category Objects
+   * @param {Object} object The destination object.
+   * @param {...Object} [source] The source objects.
+   * @param {Function} [callback] The function to customize assigning values.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns the destination object.
+   * @example
+   *
+   * _.assign({ 'name': 'fred' }, { 'employer': 'slate' });
+   * // => { 'name': 'fred', 'employer': 'slate' }
+   *
+   * var defaults = _.partialRight(_.assign, function(a, b) {
+   *   return typeof a == 'undefined' ? b : a;
+   * });
+   *
+   * var object = { 'name': 'barney' };
+   * defaults(object, { 'name': 'fred', 'employer': 'slate' });
+   * // => { 'name': 'barney', 'employer': 'slate' }
+   */
+  var assign = createIterator(defaultsIteratorOptions, {
+    'top':
+      defaultsIteratorOptions.top.replace(';',
+        ';\n' +
+        "if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {\n" +
+        '  var callback = baseCreateCallback(args[--argsLength - 1], args[argsLength--], 2);\n' +
+        "} else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {\n" +
+        '  callback = args[--argsLength];\n' +
+        '}'
+      ),
+    'loop': 'result[index] = callback ? callback(result[index], iterable[index]) : iterable[index]'
+  });
+
+  /**
+   * Creates an object that inherits from the given `prototype` object. If a
+   * `properties` object is provided its own enumerable properties are assigned
+   * to the created object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} prototype The object to inherit from.
+   * @param {Object} [properties] The properties to assign to the object.
+   * @returns {Object} Returns the new object.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * function Circle() {
+   *   Shape.call(this);
+   * }
+   *
+   * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
+   *
+   * var circle = new Circle;
+   * circle instanceof Circle;
+   * // => true
+   *
+   * circle instanceof Shape;
+   * // => true
+   */
+  function create(prototype, properties) {
+    var result = baseCreate(prototype);
+    return properties ? assign(result, properties) : result;
+  }
 
   /**
    * Iterates over own and inherited enumerable properties of an object,
@@ -4472,8 +6783,10 @@ var generateXMLForBlocks = function(blocks) {
 
   /*--------------------------------------------------------------------------*/
 
+  lodash.assign = assign;
   lodash.bind = bind;
   lodash.chain = chain;
+  lodash.create = create;
   lodash.createCallback = createCallback;
   lodash.debounce = debounce;
   lodash.filter = filter;
@@ -4493,6 +6806,7 @@ var generateXMLForBlocks = function(blocks) {
   // add aliases
   lodash.collect = map;
   lodash.each = forEach;
+  lodash.extend = assign;
   lodash.methods = functions;
   lodash.select = filter;
 
@@ -4643,7 +6957,7 @@ var generateXMLForBlocks = function(blocks) {
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var xml = require('./xml');
 var blockUtils = require('./block_utils');
 var utils = require('./utils');
@@ -4763,7 +7077,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":35,"./xml":36}],11:[function(require,module,exports){
+},{"./block_utils":3,"./utils":36,"./xml":37}],12:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -4799,11 +7113,18 @@ exports.load = function(assetUrl, id) {
     downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
     upJumpArrow: assetUrl('media/common_images/jumpup.png'),
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
-    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
-    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    longLine: assetUrl('media/common_images/move-long.png'),
+    shortLine: assetUrl('media/common_images/move-short.png'),
+    soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -4813,7 +7134,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -5018,10 +7339,8 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var tiles = require('./tiles');
-var xFromPosition = tiles.xFromPosition;
-var yFromPosition = tiles.yFromPosition;
 
 exports.SpriteSpeed = {
   VERY_SLOW: 0.04,
@@ -5069,9 +7388,7 @@ exports.setSpriteSpeed = function (id, spriteIndex, value) {
 exports.setSpritePosition = function (id, spriteIndex, value) {
   Studio.queueCmd(id,
                   'setSpritePosition',
-                  {'spriteIndex': spriteIndex,
-                   'x': xFromPosition[value],
-                   'y': yFromPosition[value]});
+                  {'spriteIndex': spriteIndex, 'value': value});
 };
 
 exports.playSound = function(id, soundName) {
@@ -5119,7 +7436,7 @@ exports.wait = function(id, value) {
   Studio.queueCmd(id, 'wait', {'value': value});
 };
 
-},{"./tiles":22}],14:[function(require,module,exports){
+},{"./tiles":23}],15:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -5142,6 +7459,7 @@ var Emotions = tiles.Emotions;
 
 var RANDOM_VALUE = 'random';
 var HIDDEN_VALUE = '"hidden"';
+var CLICK_VALUE = '"click"';
 var VISIBLE_VALUE = '"visible"';
 var CAVE_VALUE = '"cave"';
 
@@ -5151,7 +7469,7 @@ var generateSetterCode = function (opts) {
     var possibleValues =
       _(opts.ctx.VALUES)
         .map(function (item) { return item[1]; })
-        .without(RANDOM_VALUE, HIDDEN_VALUE);
+        .without(RANDOM_VALUE, HIDDEN_VALUE, CLICK_VALUE);
     value = 'Studio.random([' + possibleValues + '])';
   }
 
@@ -5167,6 +7485,14 @@ exports.enableProjectileCollisions = function(blockly) {
   blockly.Blocks.studio_projectileCollisions = true;
 };
 
+exports.enableEdgeCollisions = function(blockly) {
+  blockly.Blocks.studio_edgeCollisions = true;
+};
+
+exports.enableSpritesOutsidePlayspace = function(blockly) {
+  blockly.Blocks.studio_spritesOutsidePlayspace = true;
+};
+
 // Install extensions to Blockly's language and JavaScript generator.
 exports.install = function(blockly, blockInstallOptions) {
   var skin = blockInstallOptions.skin;
@@ -5178,17 +7504,26 @@ exports.install = function(blockly, blockInstallOptions) {
     return '\n';
   };
 
-  blockly.Blocks.studio_spriteCount = 6; // will be overridden
+  // These constants are set to the default values, but may be overridden
+  blockly.Blocks.studio_spriteCount = 6;
   blockly.Blocks.studio_projectileCollisions = false;
+  blockly.Blocks.studio_edgeCollisions = false;
+  blockly.Blocks.studio_spritesOutsidePlayspace = false;
 
+  function spriteNumberTextArray(string) {
+    var spriteNumbers = _.range(0, blockly.Blocks.studio_spriteCount);
+    return _.map(spriteNumbers, function (index) {
+        return [ string({spriteIndex: index + 1}),
+                 index.toString() ];
+    });
+  }
   /**
    * Creates a dropdown with options for each sprite number
    * @param choices
    * @returns {Blockly.FieldDropdown}
    */
-  function spriteNumberTextDropdown(choices) {
-    var dropdownArray = choices.slice(0, blockly.Blocks.studio_spriteCount);
-    return new blockly.FieldDropdown(dropdownArray);
+  function spriteNumberTextDropdown(string) {
+    return new blockly.FieldDropdown(spriteNumberTextArray(string));
   }
 
   /**
@@ -5212,8 +7547,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenLeft());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenLeft));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenLeft());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenLeftTooltip());
@@ -5227,8 +7567,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenRight());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenRight));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenRight());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenRightTooltip());
@@ -5242,8 +7587,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenUp());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenUp));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenUp());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenUpTooltip());
@@ -5257,8 +7607,13 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenDown());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new Blockly.FieldImage(skin.whenDown));
+      } else {
+        this.appendDummyInput().appendTitle(msg.whenDown());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenDownTooltip());
@@ -5272,8 +7627,14 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenGameStarts());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.startIcon));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.whenGameStarts());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenGameStartsTooltip());
@@ -5287,10 +7648,17 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(322, 0.90, 0.95);
-      this.appendDummyInput()
-        .appendTitle(msg.repeatForever());
-      this.appendStatementInput('DO')
-        .appendTitle(msg.repeatDo());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.repeat());
+        this.appendStatementInput('DO')
+          .appendTitle(new blockly.FieldImage(skin.repeatImage));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.repeatForever());
+        this.appendStatementInput('DO')
+          .appendTitle(msg.repeatDo());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(false);
       this.setTooltip(msg.repeatForeverTooltip());
@@ -5307,11 +7675,10 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(140, 1.00, 0.74);
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.whenSpriteClickedN),
+                       'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.whenSpriteClicked());
@@ -5322,14 +7689,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.whenSpriteClickedTooltip());
     },
   };
-
-  blockly.Blocks.studio_whenSpriteClicked.SPRITE =
-    [[msg.whenSpriteClicked1(), '0'],
-     [msg.whenSpriteClicked2(), '1'],
-     [msg.whenSpriteClicked3(), '2'],
-     [msg.whenSpriteClicked4(), '3'],
-     [msg.whenSpriteClicked5(), '4'],
-     [msg.whenSpriteClicked6(), '5']];
 
   generator.studio_whenSpriteClicked = generator.studio_eventHandlerPrologue;
 
@@ -5342,29 +7701,31 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(140, 1.00, 0.74);
 
       if (isK1) {
-        // NOTE: K1 block does not yet support projectile collisions
+        // NOTE: K1 block does not yet support projectile or edge collisions
         dropdown1 = startingSpriteImageDropdown();
         dropdown2 = startingSpriteImageDropdown();
         this.appendDummyInput().appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.collide))
           .appendTitle(dropdown1, 'SPRITE1');
-        this.appendDummyInput().appendTitle(msg.whenSpriteCollidedWith())
+        this.appendDummyInput()
+          .appendTitle(commonMsg.and())
           .appendTitle(dropdown2, 'SPRITE2');
       } else {
-        dropdown1 = spriteNumberTextDropdown(this.SPRITE1);
-        var dropdownArray2 =
-            this.SPRITE2.slice(0, blockly.Blocks.studio_spriteCount);
+        dropdown1 = spriteNumberTextDropdown(msg.whenSpriteCollidedN);
+        var dropdownArray2 = spriteNumberTextArray(msg.whenSpriteCollidedWithN);
         if (blockly.Blocks.studio_projectileCollisions) {
-          dropdownArray2.push(
-              [msg.whenSpriteCollidedWithFireball(), 'fireball']);
-          dropdownArray2.push(
-              [msg.whenSpriteCollidedWithFlower(), 'flower']);
+          dropdownArray2 = dropdownArray2.concat(this.PROJECTILES);
+        }
+        if (blockly.Blocks.studio_edgeCollisions) {
+          dropdownArray2 = dropdownArray2.concat(this.EDGES);
         }
         dropdown2 = new blockly.FieldDropdown(dropdownArray2);
         this.appendDummyInput().appendTitle(dropdown1, 'SPRITE1');
         this.appendDummyInput().appendTitle(dropdown2, 'SPRITE2');
       }
       if (blockly.Blocks.studio_spriteCount > 1) {
-        dropdown2.setValue(dropdown2.getOptions()[1][1]); // default second dropdown to second item
+        // default second dropdown to second item
+        dropdown2.setValue(dropdown2.getOptions()[1][1]);
       }
 
       this.setPreviousStatement(false);
@@ -5374,21 +7735,15 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_whenSpriteCollided.SPRITE1 =
-      [[msg.whenSpriteCollided1(), '0'],
-       [msg.whenSpriteCollided2(), '1'],
-       [msg.whenSpriteCollided3(), '2'],
-       [msg.whenSpriteCollided4(), '3'],
-       [msg.whenSpriteCollided5(), '4'],
-       [msg.whenSpriteCollided6(), '5']];
+  blockly.Blocks.studio_whenSpriteCollided.PROJECTILES =
+      [[msg.whenSpriteCollidedWithFireball(), 'fireball'],
+       [msg.whenSpriteCollidedWithFlower(), 'flower']];
 
-  blockly.Blocks.studio_whenSpriteCollided.SPRITE2 =
-      [[msg.whenSpriteCollidedWith1(), '0'],
-       [msg.whenSpriteCollidedWith2(), '1'],
-       [msg.whenSpriteCollidedWith3(), '2'],
-       [msg.whenSpriteCollidedWith4(), '3'],
-       [msg.whenSpriteCollidedWith5(), '4'],
-       [msg.whenSpriteCollidedWith6(), '5']];
+  blockly.Blocks.studio_whenSpriteCollided.EDGES =
+      [[msg.whenSpriteCollidedWithTopEdge(), 'top'],
+       [msg.whenSpriteCollidedWithLeftEdge(), 'left'],
+       [msg.whenSpriteCollidedWithBottomEdge(), 'bottom'],
+       [msg.whenSpriteCollidedWithRightEdge(), 'right']];
 
   generator.studio_whenSpriteCollided = generator.studio_eventHandlerPrologue;
 
@@ -5396,12 +7751,10 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for stopping the movement of a sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.stopSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.stopSprite());
@@ -5413,14 +7766,6 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_stop.SPRITE =
-      [[msg.stopSprite1(), '0'],
-       [msg.stopSprite2(), '1'],
-       [msg.stopSprite3(), '2'],
-       [msg.stopSprite4(), '3'],
-       [msg.stopSprite5(), '4'],
-       [msg.stopSprite6(), '5']];
-
   generator.studio_stop = function() {
     // Generate JavaScript for stopping the movement of a sprite.
     return 'Studio.stop(\'block_id_' + this.id + '\', ' +
@@ -5431,12 +7776,10 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for throwing a projectile from a sprite.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.throwSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.throwSprite());
@@ -5453,14 +7796,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.throwTooltip());
     }
   };
-
-  blockly.Blocks.studio_throw.SPRITE =
-      [[msg.throwSprite1(), '0'],
-       [msg.throwSprite2(), '1'],
-       [msg.throwSprite3(), '2'],
-       [msg.throwSprite4(), '3'],
-       [msg.throwSprite5(), '4'],
-       [msg.throwSprite6(), '5']];
 
   blockly.Blocks.studio_throw.DIR =
         [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -5535,14 +7870,18 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for jumping a sprite to different position.
     helpUrl: '',
     init: function() {
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]); // default to top-left
+      var dropdown;
+      if (blockly.Blocks.studio_spritesOutsidePlayspace) {
+        dropdown = new blockly.FieldDropdown(this.VALUES_EXTENDED);
+        dropdown.setValue(this.VALUES_EXTENDED[4][1]); // default to top-left
+      } else {
+        dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[1][1]); // default to top-left
+      }
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+          .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
@@ -5556,14 +7895,7 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_setSpritePosition.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
-
+  // 9 possible positions in playspace (+ random):
   blockly.Blocks.studio_setSpritePosition.VALUES =
       [[msg.positionRandom(), RANDOM_VALUE],
        [msg.positionTopLeft(), Position.TOPLEFT.toString()],
@@ -5576,12 +7908,124 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.positionBottomCenter(), Position.BOTTOMCENTER.toString()],
        [msg.positionBottomRight(), Position.BOTTOMRIGHT.toString()]];
 
+  // Still a slightly reduced set of 17 out of 25 possible positions (+ random):
+  blockly.Blocks.studio_setSpritePosition.VALUES_EXTENDED =
+      [[msg.positionRandom(), RANDOM_VALUE],
+       [msg.positionOutTopLeft(), Position.OUTTOPLEFT.toString()],
+       [msg.positionOutTopRight(), Position.OUTTOPRIGHT.toString()],
+       [msg.positionTopOutLeft(), Position.TOPOUTLEFT.toString()],
+       [msg.positionTopLeft(), Position.TOPLEFT.toString()],
+       [msg.positionTopCenter(), Position.TOPCENTER.toString()],
+       [msg.positionTopRight(), Position.TOPRIGHT.toString()],
+       [msg.positionTopOutRight(), Position.TOPOUTRIGHT.toString()],
+       [msg.positionMiddleLeft(), Position.MIDDLELEFT.toString()],
+       [msg.positionMiddleCenter(), Position.MIDDLECENTER.toString()],
+       [msg.positionMiddleRight(), Position.MIDDLERIGHT.toString()],
+       [msg.positionBottomOutLeft(), Position.BOTTOMOUTLEFT.toString()],
+       [msg.positionBottomLeft(), Position.BOTTOMLEFT.toString()],
+       [msg.positionBottomCenter(), Position.BOTTOMCENTER.toString()],
+       [msg.positionBottomRight(), Position.BOTTOMRIGHT.toString()],
+       [msg.positionBottomOutRight(), Position.BOTTOMOUTRIGHT.toString()],
+       [msg.positionOutBottomLeft(), Position.OUTBOTTOMLEFT.toString()],
+       [msg.positionOutBottomRight(), Position.OUTBOTTOMRIGHT.toString()]];
+
   generator.studio_setSpritePosition = function() {
     return generateSetterCode({
       ctx: this,
       extraParams: (this.getTitleValue('SPRITE') || '0'),
       name: 'setSpritePosition'});
   };
+
+  var SimpleMove = {
+    DIRECTION_CONFIGS: {
+      West: {
+        letter: commonMsg.directionWestLetter(),
+        image: skin.leftArrow,
+        studioValue: Direction.WEST.toString(),
+        tooltip: msg.moveLeftTooltip()
+      },
+      East: {
+        letter: commonMsg.directionEastLetter(),
+        image: skin.rightArrow,
+        studioValue: Direction.EAST.toString(),
+        tooltip: msg.moveRightTooltip()
+      },
+      North: {
+        letter: commonMsg.directionNorthLetter(),
+        image: skin.upArrow,
+        studioValue: Direction.NORTH.toString(),
+        tooltip: msg.moveUpTooltip()
+      },
+      South: { letter: commonMsg.directionSouthLetter(),
+        image: skin.downArrow,
+        studioValue: Direction.SOUTH.toString(),
+        tooltip: msg.moveDownTooltip()
+      }
+    },
+    DISTANCES: [
+      [skin.shortLine, '25'],
+      [skin.longLine, '400']
+    ],
+    DEFAULT_MOVE_DISTANCE: '100',
+    generateBlocksForAllDirections: function() {
+      SimpleMove.generateBlocksForDirection("North");
+      SimpleMove.generateBlocksForDirection("South");
+      SimpleMove.generateBlocksForDirection("West");
+      SimpleMove.generateBlocksForDirection("East");
+    },
+    generateBlocksForDirection: function(direction) {
+      generator["studio_move" + direction] = SimpleMove.generateCodeGenerator(direction, true);
+      blockly.Blocks['studio_move' + direction] = SimpleMove.generateMoveBlock(direction, false);
+      generator["studio_move" + direction + "Distance"] = SimpleMove.generateCodeGenerator(direction, false);
+      blockly.Blocks['studio_move' + direction + "Distance"] = SimpleMove.generateMoveBlock(direction, false);
+      generator["studio_move" + direction + "_length"] = SimpleMove.generateCodeGenerator(direction, false);
+      blockly.Blocks['studio_move' + direction + "_length"] = SimpleMove.generateMoveBlock(direction, true);
+    },
+    generateMoveBlock: function(direction, hasLengthInput) {
+      var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
+
+      return {
+        helpUrl: '',
+        init: function () {
+          this.setHSV(184, 1.00, 0.74);
+          this.appendDummyInput()
+            .appendTitle(msg.moveSprite()) // move
+            .appendTitle(new blockly.FieldImage(directionConfig.image)) // arrow
+            .appendTitle(directionConfig.letter); // NESW
+
+          if (blockly.Blocks.studio_spriteCount > 1) {
+            this.appendDummyInput().appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+          }
+
+          if (hasLengthInput) {
+            this.appendDummyInput().appendTitle(new blockly.FieldImageDropdown(SimpleMove.DISTANCES), 'DISTANCE');
+          }
+
+          this.setPreviousStatement(true);
+          this.setInputsInline(true);
+          this.setNextStatement(true);
+          this.setTooltip(directionConfig.tooltip);
+        }
+      };
+    },
+    generateCodeGenerator: function(direction, isEventMove) {
+      var directionConfig = SimpleMove.DIRECTION_CONFIGS[direction];
+
+      return function() {
+        var sprite = this.getTitleValue('SPRITE') || '0';
+        var direction = directionConfig.studioValue;
+        var methodName = isEventMove ? 'move' : 'moveDistance';
+        var distance = this.getTitleValue('DISTANCE') || SimpleMove.DEFAULT_MOVE_DISTANCE;
+        return 'Studio.' + methodName + '(\'block_id_' + this.id + '\'' +
+          ', ' + sprite +
+          ', ' + direction +
+          (isEventMove ? '' : (', ' + distance)) +
+          ');\n';
+      };
+    }
+  };
+
+  SimpleMove.generateBlocksForAllDirections();
 
   blockly.Blocks.studio_move = {
     // Block for moving one frame a time.
@@ -5594,7 +8038,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.moveSpriteN), 'SPRITE');
         }
         this.appendDummyInput()
           .appendTitle('\t');
@@ -5602,8 +8046,14 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.moveSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldImageDropdown(this.K1_DIR), 'DIR');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+      }
       this.setPreviousStatement(true);
       this.setInputsInline(true);
       this.setNextStatement(true);
@@ -5611,13 +8061,11 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_move.SPRITE =
-      [[msg.moveSprite1(), '0'],
-       [msg.moveSprite2(), '1'],
-       [msg.moveSprite3(), '2'],
-       [msg.moveSprite4(), '3'],
-       [msg.moveSprite5(), '4'],
-       [msg.moveSprite6(), '5']];
+  blockly.Blocks.studio_move.K1_DIR =
+      [[skin.upArrow, Direction.NORTH.toString()],
+       [skin.rightArrow, Direction.EAST.toString()],
+       [skin.downArrow, Direction.SOUTH.toString()],
+       [skin.leftArrow, Direction.WEST.toString()]];
 
   blockly.Blocks.studio_move.DIR =
       [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -5643,7 +8091,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.moveSpriteN), 'SPRITE');
         }
         this.appendDummyInput()
           .appendTitle('\t');
@@ -5651,8 +8099,15 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.moveSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldImageDropdown(this.K1_DIR), 'DIR');
+      } else {
+        this.appendDummyInput()
+          .appendTitle(new blockly.FieldDropdown(this.DIR), 'DIR');
+      }
+
       this.appendDummyInput()
         .appendTitle('\t');
       if (block.params) {
@@ -5661,8 +8116,13 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendDummyInput()
           .appendTitle(msg.moveDistancePixels());
       } else {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(this.DISTANCE), 'DISTANCE');
+        if (isK1) {
+          this.appendDummyInput()
+            .appendTitle(new blockly.FieldImageDropdown(this.K1_DISTANCE), 'DISTANCE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(new blockly.FieldDropdown(this.DISTANCE), 'DISTANCE');
+        }
       }
       this.setPreviousStatement(true);
       this.setInputsInline(true);
@@ -5670,13 +8130,11 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setTooltip(msg.moveDistanceTooltip());
     };
 
-    block.SPRITE =
-      [[msg.moveSprite1(), '0'],
-       [msg.moveSprite2(), '1'],
-       [msg.moveSprite3(), '2'],
-       [msg.moveSprite4(), '3'],
-       [msg.moveSprite5(), '4'],
-       [msg.moveSprite6(), '5']];
+    block.K1_DIR =
+        [[skin.upArrow, Direction.NORTH.toString()],
+          [skin.rightArrow, Direction.EAST.toString()],
+          [skin.downArrow, Direction.SOUTH.toString()],
+          [skin.leftArrow, Direction.WEST.toString()]];
 
     block.DIR =
         [[msg.moveDirectionUp(), Direction.NORTH.toString()],
@@ -5693,6 +8151,10 @@ exports.install = function(blockly, blockInstallOptions) {
            [msg.moveDistance200(), '200'],
            [msg.moveDistance400(), '400'],
            [msg.moveDistanceRandom(), 'random']];
+
+      block.K1_DISTANCE =
+        [[skin.shortLine, '25'],
+        [skin.longLine, '400']];
     }
   };
 
@@ -5758,13 +8220,34 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.play())
+          .appendTitle(new blockly.FieldImage(skin.soundIcon))
+          .appendTitle(new blockly.FieldDropdown(this.K1_SOUNDS, onSoundSelected), 'SOUND');
+      } else {
+        this.appendDummyInput()
           .appendTitle(new blockly.FieldDropdown(this.SOUNDS, onSoundSelected), 'SOUND');
+      }
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
     }
   };
+
+  blockly.Blocks.studio_playSound.K1_SOUNDS =
+      [[msg.soundHit(), 'hit'],
+       [msg.soundWood(), 'wood'],
+       [msg.soundRetro(), 'retro'],
+       [msg.soundSlap(), 'slap'],
+       [msg.soundRubber(), 'rubber'],
+       [msg.soundCrunch(), 'crunch'],
+       [msg.soundWinPoint(), 'winpoint'],
+       [msg.soundWinPoint2(), 'winpoint2'],
+       [msg.soundLosePoint(), 'losepoint'],
+       [msg.soundLosePoint2(), 'losepoint2'],
+       [msg.soundGoal1(), 'goal1'],
+       [msg.soundGoal2(), 'goal2']];
 
   blockly.Blocks.studio_playSound.SOUNDS =
       [[msg.playSoundHit(), 'hit'],
@@ -5793,7 +8276,8 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setHSV(184, 1.00, 0.74);
       if (isK1) {
         this.appendDummyInput()
-          .appendTitle(msg.incrementPlayerScore());
+          .appendTitle(commonMsg.score())
+          .appendTitle(new blockly.FieldImage(skin.scoreCard));
       } else {
         this.appendDummyInput()
           .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
@@ -5842,28 +8326,44 @@ exports.install = function(blockly, blockInstallOptions) {
     // Block for setting sprite speed
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[3][1]); // default to normal
-
-      var dropdownArray =
-          this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
       this.setHSV(184, 1.00, 0.74);
+
       if (blockly.Blocks.studio_spriteCount > 1) {
-        this.appendDummyInput()
-          .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+        if (isK1) {
+          this.appendDummyInput().appendTitle(msg.setSprite())
+            .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+        } else {
+          this.appendDummyInput()
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
+        }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(dropdown, 'VALUE');
+
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES);
+        fieldImageDropdown.setValue(this.K1_VALUES[1][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.speed())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[3][1]); // default to normal
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
+
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.setSpriteSpeedTooltip());
     }
   };
+
+  blockly.Blocks.studio_setSpriteSpeed.K1_VALUES =
+      [[skin.speedSlow, 'Studio.SpriteSpeed.SLOW'],
+       [skin.speedMedium, 'Studio.SpriteSpeed.NORMAL'],
+       [skin.speedFast, 'Studio.SpriteSpeed.FAST']];
 
   blockly.Blocks.studio_setSpriteSpeed.VALUES =
       [[msg.setSpriteSpeedRandom(), RANDOM_VALUE],
@@ -5872,14 +8372,6 @@ exports.install = function(blockly, blockInstallOptions) {
        [msg.setSpriteSpeedNormal(), 'Studio.SpriteSpeed.NORMAL'],
        [msg.setSpriteSpeedFast(), 'Studio.SpriteSpeed.FAST'],
        [msg.setSpriteSpeedVeryFast(), 'Studio.SpriteSpeed.VERY_FAST']];
-
-  blockly.Blocks.studio_setSpriteSpeed.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
 
   generator.studio_setSpriteSpeed = function () {
     return generateSetterCode({
@@ -5898,8 +8390,13 @@ exports.install = function(blockly, blockInstallOptions) {
 
       var dropdown;
       if (isK1) {
-        dropdown = new blockly.FieldImageDropdown(this.IMAGE_CHOICES, skin.dropdownThumbnailWidth, skin.dropdownThumbnailHeight);
-        this.appendDummyInput().appendTitle(msg.setBackground()).appendTitle(dropdown, 'VALUE');
+        dropdown = new blockly.FieldImageDropdown(
+                                  this.IMAGE_CHOICES,
+                                  skin.dropdownThumbnailWidth,
+                                  skin.dropdownThumbnailHeight);
+        this.appendDummyInput()
+          .appendTitle(msg.setBackground())
+          .appendTitle(dropdown, 'VALUE');
       } else {
         dropdown = new blockly.FieldDropdown(this.VALUES);
         this.appendDummyInput().appendTitle(dropdown, 'VALUE');
@@ -6011,7 +8508,8 @@ exports.install = function(blockly, blockInstallOptions) {
         visibilityTextDropdown.setValue(VISIBLE_VALUE);  // default to visible
         this.appendDummyInput().appendTitle(visibilityTextDropdown, 'VALUE');
         if (blockly.Blocks.studio_spriteCount > 1) {
-            this.appendDummyInput().appendTitle(startingSpriteImageDropdown(), 'SPRITE');
+            this.appendDummyInput()
+              .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         }
         this.setInputsInline(true);
         this.setPreviousStatement(true);
@@ -6019,14 +8517,6 @@ exports.install = function(blockly, blockInstallOptions) {
         this.setTooltip(msg.setSpriteK1Tooltip());
       }
     };
-
-    blockly.Blocks.studio_setSprite.SPRITE =
-        [[msg.sprite1(), '0'],
-         [msg.sprite2(), '1'],
-         [msg.sprite3(), '2'],
-         [msg.sprite4(), '3'],
-         [msg.sprite5(), '4'],
-         [msg.sprite6(), '5']];
 
     blockly.Blocks.studio_setSprite.VALUES =
         [[msg.setSpriteHideK1(), HIDDEN_VALUE],
@@ -6041,13 +8531,10 @@ exports.install = function(blockly, blockInstallOptions) {
         var dropdown = new blockly.FieldDropdown(this.VALUES);
         dropdown.setValue(this.VALUES[2][1]);  // default to witch
 
-        var dropdownArray =
-            this.SPRITE.slice(0, blockly.Blocks.studio_spriteCount);
-
         this.setHSV(312, 0.32, 0.62);
         if (blockly.Blocks.studio_spriteCount > 1) {
           this.appendDummyInput()
-            .appendTitle(new blockly.FieldDropdown(dropdownArray), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
         } else {
           this.appendDummyInput()
             .appendTitle(msg.setSprite());
@@ -6061,14 +8548,6 @@ exports.install = function(blockly, blockInstallOptions) {
       }
     };
 
-    blockly.Blocks.studio_setSprite.SPRITE =
-        [[msg.setSprite1(), '0'],
-         [msg.setSprite2(), '1'],
-         [msg.setSprite3(), '2'],
-         [msg.setSprite4(), '3'],
-         [msg.setSprite5(), '4'],
-         [msg.setSprite6(), '5']];
-
     blockly.Blocks.studio_setSprite.VALUES =
         [[msg.setSpriteHidden(), HIDDEN_VALUE],
          [msg.setSpriteRandom(), RANDOM_VALUE],
@@ -6077,7 +8556,12 @@ exports.install = function(blockly, blockInstallOptions) {
          [msg.setSpriteDinosaur(), '"dinosaur"'],
          [msg.setSpriteDog(), '"dog"'],
          [msg.setSpriteOctopus(), '"octopus"'],
-         [msg.setSpritePenguin(), '"penguin"']];
+         [msg.setSpritePenguin(), '"penguin"'],
+         [msg.setSpriteBat(), '"bat"'],
+         [msg.setSpriteBird(), '"bird"'],
+         [msg.setSpriteDragon(), '"dragon"'],
+         [msg.setSpriteSquirrel(), '"squirrel"'],
+         [msg.setSpriteWizard(), '"wizard"']];
   }
 
   generator.studio_setSprite = function() {
@@ -6102,9 +8586,6 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.studio_setSpriteEmotion = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[1][1]);  // default to normal
-
       this.setHSV(184, 1.00, 0.74);
       if (blockly.Blocks.studio_spriteCount > 1) {
         if (isK1) {
@@ -6112,14 +8593,25 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.setSpriteN), 'SPRITE');
         }
       } else {
         this.appendDummyInput()
           .appendTitle(msg.setSprite());
       }
-      this.appendDummyInput()
-        .appendTitle(dropdown, 'VALUE');
+
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES, 34, 34);
+        fieldImageDropdown.setValue(this.K1_VALUES[0][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.emotion())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[1][1]);  // default to normal
+        this.appendDummyInput()
+          .appendTitle(dropdown, 'VALUE');
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
@@ -6127,20 +8619,19 @@ exports.install = function(blockly, blockInstallOptions) {
     }
   };
 
-  blockly.Blocks.studio_setSpriteEmotion.SPRITE =
-      [[msg.setSprite1(), '0'],
-       [msg.setSprite2(), '1'],
-       [msg.setSprite3(), '2'],
-       [msg.setSprite4(), '3'],
-       [msg.setSprite5(), '4'],
-       [msg.setSprite6(), '5']];
-
   blockly.Blocks.studio_setSpriteEmotion.VALUES =
       [[msg.setSpriteEmotionRandom(), RANDOM_VALUE],
        [msg.setSpriteEmotionNormal(), Emotions.NORMAL.toString()],
        [msg.setSpriteEmotionHappy(), Emotions.HAPPY.toString()],
        [msg.setSpriteEmotionAngry(), Emotions.ANGRY.toString()],
        [msg.setSpriteEmotionSad(), Emotions.SAD.toString()]];
+
+  blockly.Blocks.studio_setSpriteEmotion.K1_VALUES =
+      [[skin.emotionNormal, Emotions.NORMAL.toString()],
+       [skin.emotionHappy, Emotions.HAPPY.toString()],
+       [skin.emotionAngry, Emotions.ANGRY.toString()],
+       [skin.emotionSad, Emotions.SAD.toString()],
+       [skin.randomPurpleIcon, RANDOM_VALUE]];
 
   generator.studio_setSpriteEmotion = function() {
     return generateSetterCode({
@@ -6160,7 +8651,7 @@ exports.install = function(blockly, blockInstallOptions) {
             .appendTitle(startingSpriteImageDropdown(), 'SPRITE');
         } else {
           this.appendDummyInput()
-            .appendTitle(spriteNumberTextDropdown(this.SPRITE), 'SPRITE');
+            .appendTitle(spriteNumberTextDropdown(msg.saySpriteN), 'SPRITE');
         }
       } else {
         this.appendDummyInput()
@@ -6170,8 +8661,11 @@ exports.install = function(blockly, blockInstallOptions) {
         this.appendValueInput('TEXT')
           .setCheck('String');
       } else {
-        this.appendDummyInput()
-          .appendTitle(new Blockly.FieldImage(
+        var quotedTextInput = this.appendDummyInput();
+        if (isK1) {
+          quotedTextInput.appendTitle(new Blockly.FieldImage(skin.speechBubble));
+        }
+        quotedTextInput.appendTitle(new Blockly.FieldImage(
                   Blockly.assetUrl('media/quote0.png'), 12, 12))
           .appendTitle(new Blockly.FieldTextInput(msg.defaultSayText()), 'TEXT')
           .appendTitle(new Blockly.FieldImage(
@@ -6182,14 +8676,6 @@ exports.install = function(blockly, blockInstallOptions) {
       this.setNextStatement(true);
       this.setTooltip(msg.saySpriteTooltip());
     };
-
-    block.SPRITE =
-        [[msg.saySprite1(), '0'],
-         [msg.saySprite2(), '1'],
-         [msg.saySprite3(), '2'],
-         [msg.saySprite4(), '3'],
-         [msg.saySprite5(), '4'],
-         [msg.saySprite6(), '5']];
   };
 
   blockly.Blocks.studio_saySprite = {};
@@ -6244,7 +8730,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
     if (!block.params) {
       block.VALUES =
-        [[msg.waitForClick(), '0'],
+        [[msg.waitForClick(), '"click"'],
          [msg.waitForRandom(), 'random'],
          [msg.waitForHalfSecond(), '500'],
          [msg.waitFor1Second(), '1000'],
@@ -6275,7 +8761,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/fr_fr/common":37,"../../locale/fr_fr/studio":38,"../codegen":6,"../lodash":9,"../utils":35,"./studio":21,"./tiles":22}],15:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"../../locale/fr_fr/studio":39,"../codegen":6,"../lodash":10,"../utils":36,"./studio":22,"./tiles":23}],16:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6296,7 +8782,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/studio":38,"ejs":39}],16:[function(require,module,exports){
+},{"../../locale/fr_fr/studio":39,"ejs":40}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6317,7 +8803,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/studio":38,"ejs":39}],17:[function(require,module,exports){
+},{"../../locale/fr_fr/studio":39,"ejs":40}],18:[function(require,module,exports){
 /*jshint multistr: true */
 
 var msg = require('../../locale/fr_fr/studio');
@@ -6366,7 +8852,7 @@ module.exports = {
   },
   '2': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}]
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}]
     ],
     'scale': {
       'snapRadius': 2
@@ -6390,7 +8876,7 @@ module.exports = {
   },
   '3': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance', 'type': 'studio_moveDistance', 'titles': {'DIR': '2'}}],
       [{'test': 'saySprite', 'type': 'studio_saySprite'}]
     ],
     'scale': {
@@ -6599,7 +9085,9 @@ module.exports = {
   },
   '9': {
     'requiredBlocks': [
-      [{'test': 'moveDistance', 'type': 'studio_moveDistance'}],
+      [{'test': 'moveDistance',
+        'type': 'studio_moveDistance',
+        'titles': {'SPRITE': '1', 'DISTANCE': '400'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -6623,7 +9111,7 @@ module.exports = {
     'spriteStartingImage': 2,
     'spriteFinishIndex': 1,
     'timeoutFailureTick': 150,
-    'minWorkspaceHeight': 750,
+    'minWorkspaceHeight': 800,
     'toolbox':
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
@@ -6635,23 +9123,23 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"></block>'
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"></block>'
   },
   '10': {
     'requiredBlocks': [
-      [{'test': 'playSound', 'type': 'studio_playSound'}],
+      [{'test': 'playSound', 'type': 'studio_playSound', 'titles': {'SOUND': 'crunch'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -6673,7 +9161,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 950,
+    'minWorkspaceHeight': 900,
     'goal': {
       successCondition: function () {
         return (Studio.playSoundCount > 0) &&
@@ -6694,19 +9182,19 @@ module.exports = {
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -6716,7 +9204,7 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"></block>'
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"></block>'
   },
   '11': {
     'requiredBlocks': [
@@ -6753,29 +9241,29 @@ module.exports = {
       tb('<block type="studio_moveDistance"> \
            <title name="DISTANCE">400</title> \
            <title name="SPRITE">1</title></block>' +
-         '<block type="studio_saySprite"> \
-           <title name="SPRITE">1</title></block>' +
-         '<block type="studio_playSound"> \
-           <title name="SOUND">crunch</title></block>' +
-         blockOfType('studio_changeScore')),
+        '<block type="studio_saySprite"> \
+          <title name="SPRITE">1</title></block>' +
+        '<block type="studio_playSound"> \
+          <title name="SOUND">crunch</title></block>' +
+        blockOfType('studio_changeScore')),
     'startBlocks':
      '<block type="studio_whenLeft" deletable="false" x="20" y="20"> \
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="140"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="150"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="260"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="280"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="380"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="410"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="500"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="540"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -6785,17 +9273,21 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="700"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="820"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="860"> \
        <title name="SPRITE2">2</title></block>'
   },
   '12': {
     'requiredBlocks': [
-      [{'test': 'setBackground', 'type': 'studio_setBackground'}],
-      [{'test': 'setSpriteSpeed', 'type': 'studio_setSpriteSpeed'}],
+      [{'test': 'setBackground',
+        'type': 'studio_setBackground',
+        'titles': {'VALUE': '"night"'}}],
+      [{'test': 'setSpriteSpeed',
+        'type': 'studio_setSpriteSpeed',
+        'titles': {'VALUE': 'Studio.SpriteSpeed.FAST'}}],
     ],
     'scale': {
       'snapRadius': 2
@@ -6817,7 +9309,7 @@ module.exports = {
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'spriteStartingImage': 2,
-    'minWorkspaceHeight': 1200,
+    'minWorkspaceHeight': 1250,
     'goal': {
       successCondition: function () {
         return Studio.sprite[0].collisionMask & Math.pow(2, 2);
@@ -6836,26 +9328,26 @@ module.exports = {
            <title name="SOUND">crunch</title></block>' +
          blockOfType('studio_changeScore') +
          '<block type="studio_setSpriteSpeed"> \
-          <title name="VALUE">Studio.SpriteSpeed.VERY_FAST</title></block>'),
+          <title name="VALUE">Studio.SpriteSpeed.FAST</title></block>'),
     'startBlocks':
      '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
       <block type="studio_whenLeft" deletable="false" x="20" y="200"> \
         <next><block type="studio_move"> \
                 <title name="DIR">8</title></block> \
         </next></block> \
-      <block type="studio_whenRight" deletable="false" x="20" y="320"> \
+      <block type="studio_whenRight" deletable="false" x="20" y="330"> \
         <next><block type="studio_move"> \
                 <title name="DIR">2</title></block> \
         </next></block> \
-      <block type="studio_whenUp" deletable="false" x="20" y="440"> \
+      <block type="studio_whenUp" deletable="false" x="20" y="460"> \
         <next><block type="studio_move"> \
                 <title name="DIR">1</title></block> \
         </next></block> \
-      <block type="studio_whenDown" deletable="false" x="20" y="560"> \
+      <block type="studio_whenDown" deletable="false" x="20" y="590"> \
         <next><block type="studio_move"> \
                 <title name="DIR">4</title></block> \
         </next></block> \
-      <block type="studio_repeatForever" deletable="false" x="20" y="680"> \
+      <block type="studio_repeatForever" deletable="false" x="20" y="720"> \
         <statement name="DO"><block type="studio_moveDistance"> \
                 <title name="SPRITE">1</title> \
                 <title name="DISTANCE">400</title> \
@@ -6865,11 +9357,11 @@ module.exports = {
                   <title name="DIR">4</title></block> \
           </next></block> \
       </statement></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="880"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="910"> \
         <next><block type="studio_playSound"> \
                 <title name="SOUND">crunch</title></block> \
         </next></block> \
-      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1000"> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1040"> \
        <title name="SPRITE2">2</title> \
         <next><block type="studio_changeScore"></block> \
         </next></block>'
@@ -6886,17 +9378,17 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1300,
+    'minWorkspaceHeight': 1500,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0,16, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0,16, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0,16, 0, 0, 0,16, 0, 0],
+      [16,0,16, 0,16, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0]
     ],
     'toolbox':
@@ -6931,8 +9423,10 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1300,
-    'enableProjectileCollisions': true,
+    'minWorkspaceHeight': 1400,
+    'edgeCollisions': true,
+    'projectileCollisions': true,
+    'spritesOutsidePlayspace': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -6984,8 +9478,10 @@ module.exports = {
       'downButton',
       'upButton'
     ],
-    'minWorkspaceHeight': 1000,
-    'enableProjectileCollisions': true,
+    'minWorkspaceHeight': 1400,
+    'edgeCollisions': true,
+    'projectileCollisions': true,
+    'spritesOutsidePlayspace': true,
     'spritesHiddenToStart': true,
     'freePlay': true,
     'map': [
@@ -7108,20 +9604,186 @@ module.exports = {
   },
 };
 
-// K-1 levels:
-module.exports.k1_1 = utils.extend(module.exports['1'],  {'is_k1': true});
-module.exports.k1_2 = utils.extend(module.exports['7'],  {'is_k1': true});
-module.exports.k1_3 = utils.extend(module.exports['2'],  {'is_k1': true});
-module.exports.k1_4 = utils.extend(module.exports['3'],  {'is_k1': true});
-module.exports.k1_5 = utils.extend(module.exports['8'],  {'is_k1': true});
-module.exports.k1_6 = utils.extend(module.exports['4'],  {'is_k1': true});
-module.exports.k1_7 = utils.extend(module.exports['9'],  {'is_k1': true});
-module.exports.k1_8 = utils.extend(module.exports['10'], {'is_k1': true});
-module.exports.k1_9 = utils.extend(module.exports['11'], {'is_k1': true});
-module.exports.k1_10 = utils.extend(module.exports['12'], {'is_k1': true});
-module.exports.k1_11 = utils.extend(module.exports['13'], {'is_k1': true});
+/**
+ * K1 levels. We base them off of existing non-k1 levels, marking them as is_k1 and
+ * overriding the requiredBlocks and toolboxes as appropriate for the k1 progression
+ */
 
-},{"../../locale/fr_fr/studio":38,"../block_utils":3,"../utils":35,"./tiles":22}],18:[function(require,module,exports){
+var moveDistanceNSEW = blockOfType('studio_moveNorthDistance') +
+  blockOfType('studio_moveEastDistance') +
+  blockOfType('studio_moveSouthDistance') +
+  blockOfType('studio_moveWestDistance');
+
+var moveNSEW = blockOfType('studio_moveNorth') +
+  blockOfType('studio_moveEast') +
+  blockOfType('studio_moveSouth') +
+  blockOfType('studio_moveWest');
+
+function whenMoveBlocks(yOffset) {
+  return '<block type="studio_whenLeft" deletable="false" x="20" y="' + (20 + yOffset).toString() + '"> \
+   <next><block type="studio_moveWest"></block> \
+   </next></block> \
+ <block type="studio_whenRight" deletable="false" x="20" y="'+ (150 + yOffset).toString() +'"> \
+   <next><block type="studio_moveEast"></block> \
+   </next></block> \
+ <block type="studio_whenUp" deletable="false" x="20" y="' + (280 + yOffset).toString() + '"> \
+   <next><block type="studio_moveNorth"></block> \
+   </next></block> \
+ <block type="studio_whenDown" deletable="false" x="20" y="' + (410 + yOffset).toString() + '"> \
+   <next><block type="studio_moveSouth"></block> \
+   </next></block>';
+}
+
+function foreverUpAndDownBlocks(yPosition) {
+  return '<block type="studio_repeatForever" deletable="false" x="20" y="' + yPosition + '"> \
+      <statement name="DO"><block type="studio_moveDistance"> \
+        <title name="SPRITE">1</title> \
+        <title name="DISTANCE">400</title> \
+        <next><block type="studio_moveDistance"> \
+          <title name="SPRITE">1</title> \
+          <title name="DISTANCE">400</title> \
+          <title name="DIR">4</title></block> \
+        </next></block> \
+      </statement></block>';
+}
+
+module.exports.k1_1 = utils.extend(module.exports['1'],  {
+  'is_k1': true,
+  'toolbox': tb(blockOfType('studio_moveEastDistance') + blockOfType('studio_saySprite'))
+});
+module.exports.k1_2 = utils.extend(module.exports['7'],  {
+  'is_k1': true,
+  'toolbox': tb(blockOfType('studio_moveEastDistance') + blockOfType('studio_saySprite'))
+});
+module.exports.k1_3 = utils.extend(module.exports['2'],  {
+  'is_k1': true,
+  'requiredBlocks': [
+    [{'test': 'move', 'type': 'studio_moveEastDistance'}]
+  ],
+  'toolbox': tb(moveDistanceNSEW + blockOfType('studio_saySprite'))
+});
+module.exports.k1_4 = utils.extend(module.exports['3'],  {
+  'is_k1': true,
+  'requiredBlocks': [
+    [{'test': 'move', 'type': 'studio_moveEastDistance', 'titles': {'SPRITE': '0'}}],
+    [{'test': 'saySprite', 'type': 'studio_saySprite', 'titles': {'SPRITE': '1'}}]
+  ],
+  'toolbox': tb(moveDistanceNSEW + blockOfType('studio_saySprite')),
+  'startBlocks':
+    '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block> \
+     <block type="studio_whenSpriteCollided" deletable="false" x="20" y="140"></block>'
+});
+module.exports.k1_5 = utils.extend(module.exports['8'],  {
+  'is_k1': true,
+  'toolbox': tb(moveDistanceNSEW + blockOfType('studio_setSpriteEmotion'))
+});
+module.exports.k1_6 = utils.extend(module.exports['4'],  {
+  'is_k1': true,
+  'toolbox': tb(moveNSEW + blockOfType('studio_saySprite')),
+  'startBlocks':
+    '<block type="studio_whenLeft" deletable="false" x="20" y="20"></block> \
+     <block type="studio_whenRight" deletable="false" x="180" y="20"></block> \
+     <block type="studio_whenUp" deletable="false" x="20" y="140"></block> \
+     <block type="studio_whenDown" deletable="false" x="180" y="140"></block>'
+});
+module.exports.k1_7 = utils.extend(module.exports['9'],  {
+  'is_k1': true,
+  'toolbox': tb(
+      '<block type="studio_moveNorth_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      '<block type="studio_moveEast_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      '<block type="studio_moveSouth_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      '<block type="studio_moveWest_length"><title name="DISTANCE">400</title><title name="SPRITE">1</title></block>' +
+      blockOfType('studio_saySprite')),
+  'startBlocks':
+    whenMoveBlocks(0) +
+     '<block type="studio_repeatForever" deletable="false" x="20" y="540"></block>',
+  'requiredBlocks': [
+    [{'test': 'moveDistance', 'type': 'studio_moveNorth_length', 'titles': {'SPRITE': '1', 'DISTANCE': '400'}}],
+  ]
+});
+module.exports.k1_8 = utils.extend(module.exports['10'], {
+  'is_k1': true,
+  'startBlocks':
+    whenMoveBlocks(0) +
+     '<block type="studio_repeatForever" deletable="false" x="20" y="540"> \
+       <statement name="DO"><block type="studio_moveNorth_length"> \
+               <title name="SPRITE">1</title> \
+               <title name="DISTANCE">400</title> \
+         <next><block type="studio_moveSouth_length"> \
+                 <title name="SPRITE">1</title> \
+                 <title name="DISTANCE">400</title></block> \
+         </next></block> \
+     </statement></block> \
+     <block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"></block>',
+    'toolbox':
+      tb(moveDistanceNSEW +
+        '<block type="studio_playSound"> \
+          <title name="SOUND">crunch</title></block>')
+});
+module.exports.k1_9 = utils.extend(module.exports['11'], {
+  'is_k1': true,
+  'toolbox':
+    tb(moveDistanceNSEW +
+      '<block type="studio_saySprite"> \
+        <title name="SPRITE">1</title></block>' +
+      '<block type="studio_playSound"> \
+        <title name="SOUND">crunch</title></block>' +
+      blockOfType('studio_changeScore')),
+  'startBlocks':
+    whenMoveBlocks(0) +
+    foreverUpAndDownBlocks(540) +
+    '<block type="studio_whenSpriteCollided" deletable="false" x="20" y="730"> \
+      <next><block type="studio_playSound"> \
+        <title name="SOUND">crunch</title></block> \
+      </next></block> \
+    <block type="studio_whenSpriteCollided" deletable="false" x="20" y="860"> \
+      <title name="SPRITE2">2</title></block>'
+});
+module.exports.k1_10 = utils.extend(module.exports['12'], {
+  'is_k1': true,
+  'toolbox':
+      tb(
+        '<block type="studio_setBackground"> \
+           <title name="VALUE">"night"</title></block>' +
+        '<block type="studio_saySprite"> \
+          <title name="SPRITE">1</title></block>' +
+        '<block type="studio_playSound"> \
+          <title name="SOUND">crunch</title></block>' +
+        blockOfType('studio_changeScore') +
+        '<block type="studio_setSpriteSpeed"> \
+         <title name="VALUE">Studio.SpriteSpeed.FAST</title></block>'),
+  'startBlocks':
+    '<block type="studio_whenGameStarts" deletable="false" x="20" y="20"></block>' +
+    whenMoveBlocks(180) +
+    foreverUpAndDownBlocks(720) +
+    '<block type="studio_whenSpriteCollided" deletable="false" x="20" y="910"> \
+      <next><block type="studio_playSound"> \
+        <title name="SOUND">crunch</title></block> \
+      </next></block> \
+      <block type="studio_whenSpriteCollided" deletable="false" x="20" y="1040"> \
+        <title name="SPRITE2">2</title> \
+        <next><block type="studio_changeScore"></block> \
+      </next></block>'
+});
+module.exports.k1_11 = utils.extend(module.exports['13'], {'is_k1': true});
+module.exports.k1_block_test = utils.extend(module.exports['99'], {
+  'toolbox':
+    tb(
+      blockOfType('studio_setSprite') +
+      blockOfType('studio_whenGameStarts') +
+      blockOfType('studio_moveNorth') +
+      blockOfType('studio_moveSouth') +
+      blockOfType('studio_moveEast') +
+      blockOfType('studio_moveWest') +
+      blockOfType('studio_moveNorth_length') +
+      blockOfType('studio_moveSouth_length') +
+      blockOfType('studio_moveEast_length') +
+      blockOfType('studio_moveWest_length')
+    ),
+  'is_k1': true
+});
+
+},{"../../locale/fr_fr/studio":39,"../block_utils":3,"../utils":36,"./tiles":23}],19:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Studio = require('./studio');
@@ -7139,7 +9801,7 @@ window.studioMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":14,"./levels":17,"./skins":19,"./studio":21}],19:[function(require,module,exports){
+},{"../appMain":1,"./blocks":15,"./levels":18,"./skins":20,"./studio":22}],20:[function(require,module,exports){
 /**
  * Load Skin for Studio.
  */
@@ -7211,11 +9873,45 @@ exports.load = function(assetUrl, id) {
     dropdownThumbnail: skin.assetUrl('witch_thumb.png'),
     sprite: skin.assetUrl('witch_sprite_200px.png'),
   };
+  skin.bat = {
+    sprite: skin.assetUrl('bat_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('bat_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.bird = {
+    sprite: skin.assetUrl('bird_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('bird_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.dragon = {
+    sprite: skin.assetUrl('dragon_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('dragon_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.squirrel = {
+    sprite: skin.assetUrl('squirrel_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('squirrel_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
+  skin.wizard = {
+    sprite: skin.assetUrl('wizard_spritesheet_200px.png'),
+    dropdownThumbnail: skin.assetUrl('wizard_thumb.png'),
+    spriteFlags: 28,  // flags: emotions, animation, turns
+  };
 
   // Images
+  skin.whenUp = skin.assetUrl('when-up.png');
+  skin.whenDown = skin.assetUrl('when-down.png');
+  skin.whenLeft = skin.assetUrl('when-left.png');
+  skin.whenRight = skin.assetUrl('when-right.png');
+  skin.collide = skin.assetUrl('when-sprite-collide.png');
+  skin.emotionAngry = skin.assetUrl('emotion-angry.png');
+  skin.emotionNormal = skin.assetUrl('emotion-nothing.png');
+  skin.emotionSad = skin.assetUrl('emotion-sad.png');
+  skin.emotionHappy = skin.assetUrl('emotion-happy.png');
+  skin.speechBubble = skin.assetUrl('say-sprite.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
-  skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.approachingGoalAnimation =
       skin.assetUrl(config.approachingGoalAnimation);
   // Sounds
@@ -7257,7 +9953,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../skins":11}],20:[function(require,module,exports){
+},{"../skins":12}],21:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -7306,7 +10002,7 @@ exports.Sprite.prototype.createElement = function (parentElement) {
 
 exports.Sprite.prototype.removeElement = function () {
   if (this.element) {
-    this.element.parentElement.removeChild(this.element);
+    this.element.parentNode.removeChild(this.element);
     this.element = null;
   }
 };
@@ -7403,7 +10099,7 @@ exports.Sprite.prototype.display = function () {
 };
 
 
-},{"./studio":21,"./tiles":22}],21:[function(require,module,exports){
+},{"./studio":22,"./tiles":23}],22:[function(require,module,exports){
 /**
  * Blockly App: Studio
  *
@@ -7425,6 +10121,8 @@ var page = require('../templates/page.html');
 var feedback = require('../feedback.js');
 var dom = require('../dom');
 var Sprite = require('./sprite').Sprite;
+var Hammer = require('../hammer');
+var parseXmlElement = require('../xml').parseElement;
 
 var Direction = tiles.Direction;
 var NextTurn = tiles.NextTurn;
@@ -7437,6 +10135,7 @@ var Emotions = tiles.Emotions;
 var Studio = module.exports;
 
 Studio.keyState = {};
+Studio.gesturesObserved = {};
 Studio.btnState = {};
 
 var ButtonState = {
@@ -7474,9 +10173,28 @@ var Keycodes = {
   DOWN: 40
 };
 
+var DRAG_DISTANCE_TO_MOVE_RATIO = 25;
+
+// NOTE: all class names should be unique. eventhandler naming won't work
+// if we name a projectile class 'left' for example.
+
 var ProjectileClassNames = [
   'fireball',
   'flower'
+];
+
+var EdgeClassNames = [
+  'top',
+  'left',
+  'bottom',
+  'right',
+];
+
+var EdgeCollisionBits = [
+  65536,    // 'top'
+  131072,   // 'left'
+  262144,   // 'bottom'
+  524288,   // 'right'
 ];
 
 var level;
@@ -7484,7 +10202,7 @@ var skin;
 var onSharePage;
 
 var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
-  "witch" ];
+  "witch", "bat", "bird", "dragon", "squirrel", "wizard" ];
 
 Studio.nthStartingSkin = function(n) {
   var skinStartOffset = Studio.spriteStartingImage || 0;
@@ -7502,6 +10220,9 @@ BlocklyApps.CHECK_FOR_EMPTY_BLOCKS = true;
 
 //The number of blocks to show as feedback.
 BlocklyApps.NUM_REQUIRED_BLOCKS_TO_FLAG = 1;
+
+Studio.BLOCK_X_COORDINATE = 20;
+Studio.BLOCK_Y_COORDINATE = 20;
 
 // Default Scalings
 Studio.scale = {
@@ -7551,6 +10272,7 @@ var loadLevel = function() {
   Studio.minWorkspaceHeight = level.minWorkspaceHeight;
   Studio.spriteStartingImage = level.spriteStartingImage;
   Studio.spritesHiddenToStart = level.spritesHiddenToStart;
+  Studio.spritesOutsidePlayspace = level.spritesOutsidePlayspace;
   Studio.softButtons_ = level.softButtons || [];
   Studio.spriteFinishIndex = level.spriteFinishIndex || 0;
 
@@ -7566,8 +10288,8 @@ var loadLevel = function() {
   Studio.COLS = Studio.map[0].length;
   // Pixel height and width of each maze square (i.e. tile).
   Studio.SQUARE_SIZE = 50;
-  Studio.SPRITE_HEIGHT = skin.spriteHeight;
-  Studio.SPRITE_WIDTH = skin.spriteWidth;
+  Studio.DEFAULT_SPRITE_HEIGHT = skin.spriteHeight;
+  Studio.DEFAULT_SPRITE_WIDTH = skin.spriteWidth;
   Studio.SPRITE_Y_OFFSET = skin.spriteYOffset;
   // Height and width of the goal and obstacles.
   Studio.MARKER_HEIGHT = 100;
@@ -7586,7 +10308,9 @@ var drawMap = function() {
   svg.setAttribute('height', Studio.MAZE_HEIGHT);
 
   // Attach click handler.
-  dom.addMouseDownTouchEvent(svg, Studio.onSvgClicked);
+  var hammerSvg = new Hammer(svg);
+  hammerSvg.on("tap", Studio.onSvgClicked);
+  hammerSvg.on("drag", Studio.onSvgDrag);
 
   // Adjust visualization and belowVisualization width.
   var visualization = document.getElementById('visualization');
@@ -7620,20 +10344,18 @@ var drawMap = function() {
 
   if (Studio.spriteStart_) {
     for (i = 0; i < Studio.spriteCount; i++) {
-      // Sprite clipPath element, whose (x, y) is reset by Studio.displaySprite
+      // Sprite clipPath element
+      // (not setting x, y, height, or width until displaySprite)
       var spriteClip = document.createElementNS(Blockly.SVG_NS, 'clipPath');
       spriteClip.setAttribute('id', 'spriteClipPath' + i);
       var spriteClipRect = document.createElementNS(Blockly.SVG_NS, 'rect');
       spriteClipRect.setAttribute('id', 'spriteClipRect' + i);
-      spriteClipRect.setAttribute('width', Studio.SPRITE_WIDTH);
-      spriteClipRect.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteClip.appendChild(spriteClipRect);
       svg.appendChild(spriteClip);
 
-      // Add sprite (not setting href attribute or width until displaySprite).
+      // Add sprite (not setting href, height, or width until displaySprite).
       var spriteIcon = document.createElementNS(Blockly.SVG_NS, 'image');
       spriteIcon.setAttribute('id', 'sprite' + i);
-      spriteIcon.setAttribute('height', Studio.SPRITE_HEIGHT);
       spriteIcon.setAttribute('clip-path', 'url(#spriteClipPath' + i + ')');
       svg.appendChild(spriteIcon);
 
@@ -7724,9 +10446,8 @@ var drawMap = function() {
   svg.appendChild(titleScreenTextGroup);
 };
 
-var essentiallyEqual = function(float1, float2, opt_variance) {
-  var variance = opt_variance || 0.01;
-  return (Math.abs(float1 - float2) < variance);
+var collisionTest = function(x1, x2, xVariance, y1, y2, yVariance) {
+  return (Math.abs(x1 - x2) < xVariance) && (Math.abs(y1 - y2) < yVariance);
 };
 
 /**
@@ -7809,23 +10530,30 @@ var getNextPosition = function (i, yAxis, modifyQueues) {
 // Perform Queued Moves in the X and Y axes (called from inside onTick)
 //
 var performQueuedMoves = function (i) {
-  // Make queued moves in the X axis (fixed to .01 values):
   var nextX = getNextPosition(i, false, true);
-  // Clamp nextX to boundaries as newX:
-  var newX = Math.min(Studio.COLS - 2, Math.max(0, nextX));
-  if (nextX != newX) {
-    cancelQueuedMovements(i, false);
-  }
-  Studio.sprite[i].x = newX;
-
-  // Make queued moves in the Y axis (fixed to .01 values):
   var nextY = getNextPosition(i, true, true);
-  // Clamp nextY to boundaries as newY:
-  var newY = Math.min(Studio.ROWS - 2, Math.max(0, nextY));
-  if (nextY != newY) {
-    cancelQueuedMovements(i, true);
+  if (Studio.spritesOutsidePlayspace) {
+    Studio.sprite[i].x = nextX;
+    Studio.sprite[i].y = nextY;
+  } else {
+    // Clamp nextX to boundaries as newX:
+    var newX = Math.min(
+                  Studio.COLS - (Studio.sprite[i].width / Studio.SQUARE_SIZE),
+                  Math.max(0, nextX));
+    if (nextX != newX) {
+      cancelQueuedMovements(i, false);
+    }
+    Studio.sprite[i].x = newX;
+
+    // Clamp nextY to boundaries as newY:
+    var newY = Math.min(
+                  Studio.ROWS - (Studio.sprite[i].height / Studio.SQUARE_SIZE),
+                  Math.max(0, nextY));
+    if (nextY != newY) {
+      cancelQueuedMovements(i, true);
+    }
+    Studio.sprite[i].y = newY;
   }
-  Studio.sprite[i].y = newY;
 };
 
 //
@@ -7968,6 +10696,26 @@ Studio.onTick = function() {
     }
   }
 
+  for (var gesture in Studio.gesturesObserved) {
+    switch (gesture) {
+      case 'left':
+        callHandler('whenLeft');
+        break;
+      case 'up':
+        callHandler('whenUp');
+        break;
+      case 'right':
+        callHandler('whenRight');
+        break;
+      case 'down':
+        callHandler('whenDown');
+        break;
+    }
+    if (0 === Studio.gesturesObserved[gesture]--) {
+      delete Studio.gesturesObserved[gesture];
+    }
+  }
+
   Studio.executeQueue('whenLeft');
   Studio.executeQueue('whenUp');
   Studio.executeQueue('whenRight');
@@ -7981,19 +10729,50 @@ Studio.onTick = function() {
     Studio.executeQueue('whenSpriteCollided-' + i + '-' + className);
   };
 
+  var spriteCollisionDistance = function (i1, i2, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[i1].height : Studio.sprite[i1].width;
+    var dim2 = yAxis ? Studio.sprite[i2].height : Studio.sprite[i2].width;
+    return tiles.SPRITE_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
+  var projectileCollisionDistance = function (iS, iP, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[iS].height : Studio.sprite[iS].width;
+    var dim2 = yAxis ?
+                  Studio.projectiles[iP].height :
+                  Studio.projectiles[iP].width;
+    return tiles.SPRITE_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
+  var edgeCollisionDistance = function (iS, edgeName, yAxis) {
+    var dim1 = yAxis ? Studio.sprite[iS].height : Studio.sprite[iS].width;
+    var dim2;
+    if (edgeName === 'left' || edgeName === 'right') {
+      dim2 = yAxis ? Studio.MAZE_HEIGHT : 0;
+    } else {
+      dim2 = yAxis ? 0 : Studio.MAZE_WIDTH;
+    }
+    return (dim1 + dim2) / (2 * Studio.SQUARE_SIZE);
+  };
+
   for (i = 0; i < Studio.spriteCount; i++) {
-    var nextXPos_i = getNextPosition(i, false, false);
-    var nextYPos_i = getNextPosition(i, true, false);
+    var iHalfWidth = Studio.sprite[i].width / (Studio.SQUARE_SIZE * 2);
+    var iHalfHeight = Studio.sprite[i].height / (Studio.SQUARE_SIZE * 2);
+    var iXCenter = getNextPosition(i, false, false) + iHalfWidth;
+    var iYCenter = getNextPosition(i, true, false) + iHalfHeight;
     for (var j = 0; j < Studio.spriteCount; j++) {
       if (i == j) {
         continue;
       }
-      if (essentiallyEqual(nextXPos_i,
-                           getNextPosition(j, false, false),
-                           tiles.SPRITE_COLLIDE_DISTANCE) &&
-          essentiallyEqual(nextYPos_i,
-                           getNextPosition(j, true, false),
-                           tiles.SPRITE_COLLIDE_DISTANCE)) {
+      var jXCenter = getNextPosition(j, false, false) +
+                      Studio.sprite[j].width / (Studio.SQUARE_SIZE * 2);
+      var jYCenter = getNextPosition(j, true, false) +
+                      Studio.sprite[j].height / (Studio.SQUARE_SIZE * 2);
+      if (collisionTest(iXCenter,
+                        jXCenter,
+                        spriteCollisionDistance(i, j, false),
+                        iYCenter,
+                        jYCenter,
+                        spriteCollisionDistance(i, j, true))) {
         if (0 === (Studio.sprite[i].collisionMask & Math.pow(2, j))) {
           Studio.sprite[i].collisionMask |= Math.pow(2, j);
           callHandler('whenSpriteCollided-' + i + '-' + j);
@@ -8003,15 +10782,13 @@ Studio.onTick = function() {
       }
       Studio.executeQueue('whenSpriteCollided-' + i + '-' + j);
     }
-    var xCenter = nextXPos_i + 1;
-    var yCenter = nextYPos_i + 1;
     for (j = 0; j < Studio.projectiles.length; j++) {
-      if (essentiallyEqual(xCenter,
-                           Studio.projectiles[j].getNextPosition(false),
-                           tiles.PROJECTILE_COLLIDE_DISTANCE) &&
-          essentiallyEqual(yCenter,
-                           Studio.projectiles[j].getNextPosition(true),
-                           tiles.PROJECTILE_COLLIDE_DISTANCE)) {
+      if (collisionTest(iXCenter,
+                        Studio.projectiles[j].getNextPosition(false),
+                        projectileCollisionDistance(i, j, false),
+                        iYCenter,
+                        Studio.projectiles[j].getNextPosition(true),
+                        projectileCollisionDistance(i, j, true))) {
         if (Studio.projectiles[j].startCollision(i)) {
           Studio.currentEventParams = { projectile: Studio.projectiles[j] };
           // Allow cmdQueue extension (pass true) since this handler
@@ -8026,7 +10803,43 @@ Studio.onTick = function() {
         Studio.projectiles[j].markNotColliding(i);
       }
     }
+    for (j = 0; j < EdgeClassNames.length; j++) {
+      var edgeXCenter, edgeYCenter;
+      var edgeCollisionBit = EdgeCollisionBits[j];
+      switch (EdgeClassNames[j]) {
+        case 'top':
+          edgeXCenter = Studio.COLS / 2;
+          edgeYCenter = 0;
+          break;
+        case 'left':
+          edgeXCenter = 0;
+          edgeYCenter = Studio.ROWS / 2;
+          break;
+        case 'bottom':
+          edgeXCenter = Studio.COLS / 2;
+          edgeYCenter = Studio.ROWS;
+          break;
+        case 'right':
+          edgeXCenter = Studio.COLS;
+          edgeYCenter = Studio.ROWS / 2;
+          break;
+      }
+      if (collisionTest(iXCenter,
+                        edgeXCenter,
+                        edgeCollisionDistance(i, EdgeClassNames[j], false),
+                        iYCenter,
+                        edgeYCenter,
+                        edgeCollisionDistance(i, EdgeClassNames[j], true))) {
+        if (0 === (Studio.sprite[i].collisionMask & edgeCollisionBit)) {
+          Studio.sprite[i].collisionMask |= edgeCollisionBit;
+          callHandler('whenSpriteCollided-' + i + '-' + EdgeClassNames[j]);
+        }
+      } else {
+        Studio.sprite[i].collisionMask &= ~edgeCollisionBit;
+      }
+    }
     ProjectileClassNames.forEach(executeCollisionQueueForClass);
+    EdgeClassNames.forEach(executeCollisionQueueForClass);
   }
 
   for (i = 0; i < Studio.spriteCount; i++) {
@@ -8051,6 +10864,14 @@ Studio.onTick = function() {
 
   if (checkFinished()) {
     Studio.onPuzzleComplete();
+  }
+};
+
+Studio.onSvgDrag = function(e) {
+  if (Studio.intervalId) {
+    Studio.gesturesObserved[e.gesture.direction] =
+      Math.round(e.gesture.distance / DRAG_DISTANCE_TO_MOVE_RATIO);
+    e.gesture.preventDefault();
   }
 };
 
@@ -8106,6 +10927,110 @@ Studio.onArrowButtonUp = function(e, idBtn) {
 Studio.onMouseUp = function(e) {
   // Reset btnState on mouse up
   Studio.btnState = {};
+};
+
+Studio.initSprites = function () {
+  Studio.spriteFinishCount = 0;
+  Studio.spriteCount = 0;
+  Studio.sprite = [];
+  Studio.projectiles = [];
+
+  // Locate the start and finish positions.
+  for (var y = 0; y < Studio.ROWS; y++) {
+    for (var x = 0; x < Studio.COLS; x++) {
+      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
+        if (0 === Studio.spriteFinishCount) {
+          Studio.spriteFinish_ = [];
+        }
+        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
+        Studio.spriteFinishCount++;
+      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
+        if (0 === Studio.spriteCount) {
+          Studio.spriteStart_ = [];
+        }
+        Studio.sprite[Studio.spriteCount] = {};
+        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
+        Studio.spriteCount++;
+      }
+    }
+  }
+
+  // Update the sprite count in the blocks:
+  blocks.setSpriteCount(Blockly, Studio.spriteCount);
+
+  if (level.projectileCollisions) {
+    blocks.enableProjectileCollisions(Blockly);
+  }
+
+  if (level.edgeCollisions) {
+    blocks.enableEdgeCollisions(Blockly);
+  }
+
+  if (level.spritesOutsidePlayspace) {
+    blocks.enableSpritesOutsidePlayspace(Blockly);
+  }
+};
+
+/**
+ * Initialize Blockly and Studio for read-only (blocks feedback).
+ * Called on iframe load for read-only.
+ */
+Studio.initReadonly = function(config) {
+  // Do some minimal level loading and sprite initialization so that
+  // we can ensure that the blocks are appropriately modified for this level
+  skin = config.skin;
+  level = config.level;
+  loadLevel();
+
+  Studio.initSprites();
+
+  BlocklyApps.initReadonly(config);
+};
+
+/**
+ * Arrange the start blocks to spread them out in the workspace.
+ * This uses unique logic for studio - spread event blocks vertically even
+ * over the total height of the workspace.
+ */
+var arrangeStartBlocks = function (config) {
+  var xml = parseXmlElement(config.level.startBlocks);
+  var numUnplacedElementNodes = 0;
+  //
+  // two passes through, one to count the nodes:
+  //
+  for (var x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+    xmlChild = xml.childNodes[x];
+
+    // Only look at element nodes without a y coordinate:
+    if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+      numUnplacedElementNodes++;
+    }
+  }
+  //
+  // and one to place the nodes:
+  //
+  if (numUnplacedElementNodes) {
+    var numberOfPlacedBlocks = 0;
+    var totalHeightAvail =
+        (config.level.minWorkspaceHeight || 1000) - Studio.BLOCK_Y_COORDINATE;
+    var yCoordInterval = totalHeightAvail / numUnplacedElementNodes;
+    for (x = 0, xmlChild; xml.childNodes && x < xml.childNodes.length; x++) {
+      xmlChild = xml.childNodes[x];
+
+      // Only look at element nodes without a y coordinate:
+      if (xmlChild.nodeType === 1 && !xmlChild.getAttribute('y')) {
+        xmlChild.setAttribute(
+            'x',
+            xmlChild.getAttribute('x') || Studio.BLOCK_X_COORDINATE);
+        xmlChild.setAttribute(
+            'y',
+            Studio.BLOCK_Y_COORDINATE + yCoordInterval * numberOfPlacedBlocks);
+        numberOfPlacedBlocks += 1;
+      }
+    }
+    // replace the startBlocks since we changed the attributes in the xml dom:
+    config.level.startBlocks = Blockly.Xml.domToText(xml);
+  }
 };
 
 /**
@@ -8186,13 +11111,7 @@ Studio.init = function(config) {
     return visualization.getBoundingClientRect().width;
   };
 
-  // TODO: update this for Studio
-  // Block placement default (used as fallback in the share levels)
-  config.blockArrangement = {
-    'studio_whenGameStarts': { x: 20, y: 20},
-    'studio_whenLeft': { x: 20, y: 110},
-    'studio_whenRight': { x: 180, y: 110},
-  };
+  arrangeStartBlocks(config);
 
   config.twitter = twitterOptions;
 
@@ -8209,37 +11128,7 @@ Studio.init = function(config) {
 
   config.preventExtraTopLevelBlocks = true;
 
-  Studio.spriteFinishCount = 0;
-  Studio.spriteCount = 0;
-  Studio.sprite = [];
-  Studio.projectiles = [];
-
-  // Locate the start and finish squares.
-  for (var y = 0; y < Studio.ROWS; y++) {
-    for (var x = 0; x < Studio.COLS; x++) {
-      if (Studio.map[y][x] & SquareType.SPRITEFINISH) {
-        if (0 === Studio.spriteFinishCount) {
-          Studio.spriteFinish_ = [];
-        }
-        Studio.spriteFinish_[Studio.spriteFinishCount] = {x: x, y: y};
-        Studio.spriteFinishCount++;
-      } else if (Studio.map[y][x] & SquareType.SPRITESTART) {
-        if (0 === Studio.spriteCount) {
-          Studio.spriteStart_ = [];
-        }
-        Studio.sprite[Studio.spriteCount] = [];
-        Studio.spriteStart_[Studio.spriteCount] = {x: x, y: y};
-        Studio.spriteCount++;
-      }
-    }
-  }
-
-  // Update the sprite count in the blocks:
-  blocks.setSpriteCount(Blockly, Studio.spriteCount);
-
-  if (level.enableProjectileCollisions) {
-    blocks.enableProjectileCollisions(Blockly);
-  }
+  Studio.initSprites();
 
   BlocklyApps.init(config);
 
@@ -8269,6 +11158,7 @@ Studio.clearEventHandlersKillTickLoop = function() {
   if (Studio.intervalId) {
     window.clearInterval(Studio.intervalId);
   }
+  Studio.tickCount = 0;
   Studio.intervalId = 0;
   for (var i = 0; i < Studio.spriteCount; i++) {
     window.clearTimeout(Studio.sprite[i].bubbleTimeout);
@@ -8314,6 +11204,7 @@ BlocklyApps.reset = function(first) {
   Studio.setBackground({'value': 'cave'});
 
   // Reset currentCmdQueue and various counts:
+  Studio.gesturesObserved = {};
   Studio.currentCmdQueue = null;
   Studio.sayComplete = 0;
   Studio.playSoundCount = 0;
@@ -8323,6 +11214,7 @@ BlocklyApps.reset = function(first) {
 
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
+    Studio.sprite[i] = {};
     Studio.sprite[i].x = Studio.spriteStart_[i].x;
     Studio.sprite[i].y = Studio.spriteStart_[i].y;
     Studio.sprite[i].speed = tiles.DEFAULT_SPRITE_SPEED;
@@ -8403,17 +11295,6 @@ BlocklyApps.runButtonClick = function() {
 };
 
 /**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
-
-/**
  * App specific displayFeedback function that calls into
  * BlocklyApps.displayFeedback when appropriate
  */
@@ -8483,7 +11364,7 @@ var registerHandlers =
 var registerHandlersWithSpriteParam =
       function (handlers, blockName, eventNameBase, blockParam) {
   for (var i = 0; i < Studio.spriteCount; i++) {
-    registerHandlers(handlers, blockName, eventNameBase, blockParam, i);
+    registerHandlers(handlers, blockName, eventNameBase, blockParam, String(i));
   }
 };
 
@@ -8514,6 +11395,7 @@ var registerHandlersWithSpriteParams =
                        String(j));
     }
     ProjectileClassNames.forEach(registerHandlersForClassName);
+    EdgeClassNames.forEach(registerHandlersForClassName);
   }
 };
 
@@ -8536,7 +11418,7 @@ var defineProcedures = function (blockType) {
  */
 Studio.execute = function() {
   var code;
-  Studio.result = ResultType.UNSET;
+  Studio.result = BlocklyApps.ResultType.UNSET;
   Studio.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Studio.waitingForReport = false;
   Studio.response = null;
@@ -8586,13 +11468,12 @@ Studio.execute = function() {
 
   // Set event handlers and start the onTick timer
   Studio.eventHandlers = handlers;
-  Studio.tickCount = 0;
   Studio.intervalId = window.setInterval(Studio.onTick, Studio.scale.stepSpeed);
 };
 
 Studio.onPuzzleComplete = function() {
   if (level.freePlay) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
   }
 
   // Stop everything on screen
@@ -8600,7 +11481,7 @@ Studio.onPuzzleComplete = function() {
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Studio.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Studio.result == BlocklyApps.ResultType.SUCCESS);
 
   // If the current level is a free play, always return the free play
   // result type
@@ -8635,7 +11516,7 @@ Studio.onPuzzleComplete = function() {
   BlocklyApps.report({
                      app: 'studio',
                      level: level.id,
-                     result: Studio.result === ResultType.SUCCESS,
+                     result: Studio.result === BlocklyApps.ResultType.SUCCESS,
                      testResult: Studio.testResults,
                      program: encodeURIComponent(textBlocks),
                      onComplete: Studio.onReportComplete
@@ -8709,10 +11590,11 @@ var updateSpeechBubblePath = function (element) {
 };
 
 Studio.displaySprite = function(i) {
-  var xCoord = Studio.sprite[i].x * Studio.SQUARE_SIZE;
-  var yCoord = Studio.sprite[i].y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
+  var sprite = Studio.sprite[i];
+  var xCoord = sprite.x * Studio.SQUARE_SIZE;
+  var yCoord = sprite.y * Studio.SQUARE_SIZE + Studio.SPRITE_Y_OFFSET;
 
-  var xOffset = Studio.SPRITE_WIDTH * spriteFrameNumber(i);
+  var xOffset = sprite.width * spriteFrameNumber(i);
 
   var spriteIcon = document.getElementById('sprite' + i);
   var spriteClipRect = document.getElementById('spriteClipRect' + i);
@@ -8720,31 +11602,30 @@ Studio.displaySprite = function(i) {
   var xCoordPrev = spriteClipRect.getAttribute('x');
   var yCoordPrev = spriteClipRect.getAttribute('y');
 
-  var dirPrev = Studio.sprite[i].dir;
+  var dirPrev = sprite.dir;
   if (dirPrev === Direction.NONE) {
     // direction not yet set, start at SOUTH (forward facing)
-    Studio.sprite[i].dir = Direction.SOUTH;
+    sprite.dir = Direction.SOUTH;
   }
   else if ((xCoord != xCoordPrev) || (yCoord != yCoordPrev)) {
-    Studio.sprite[i].dir = Direction.NONE;
+    sprite.dir = Direction.NONE;
     if (xCoord < xCoordPrev) {
-      Studio.sprite[i].dir |= Direction.WEST;
+      sprite.dir |= Direction.WEST;
     } else if (xCoord > xCoordPrev) {
-      Studio.sprite[i].dir |= Direction.EAST;
+      sprite.dir |= Direction.EAST;
     }
     if (yCoord < yCoordPrev) {
-      Studio.sprite[i].dir |= Direction.NORTH;
+      sprite.dir |= Direction.NORTH;
     } else if (yCoord > yCoordPrev) {
-      Studio.sprite[i].dir |= Direction.SOUTH;
+      sprite.dir |= Direction.SOUTH;
     }
   }
 
-  if (Studio.sprite[i].dir !== Studio.sprite[i].displayDir) {
+  if (sprite.dir !== sprite.displayDir) {
     // Every other frame, assign a new displayDir from state table
     // (only one turn at a time):
     if (Studio.tickCount && (0 === Studio.tickCount % 2)) {
-      Studio.sprite[i].displayDir =
-          NextTurn[Studio.sprite[i].displayDir][Studio.sprite[i].dir];
+      sprite.displayDir = NextTurn[sprite.displayDir][sprite.dir];
     }
   }
 
@@ -8763,12 +11644,12 @@ Studio.displaySprite = function(i) {
   var nowOnRight = true;
   var ySpeech = yCoord - (bblHeight + SPEECH_BUBBLE_PADDING);
   if (ySpeech < 0) {
-    ySpeech = yCoord + Studio.SPRITE_HEIGHT + SPEECH_BUBBLE_PADDING;
+    ySpeech = yCoord + sprite.height + SPEECH_BUBBLE_PADDING;
     nowOnTop = false;
   }
   var xSpeech = xCoord + SPEECH_BUBBLE_H_OFFSET;
   if (xSpeech > Studio.MAZE_WIDTH - SPEECH_BUBBLE_WIDTH) {
-    xSpeech = xCoord + Studio.SPRITE_WIDTH -
+    xSpeech = xCoord + sprite.width -
                 (SPEECH_BUBBLE_WIDTH + SPEECH_BUBBLE_H_OFFSET);
     nowOnRight = false;
   }
@@ -8943,22 +11824,33 @@ var computeSpriteFrameNums = function (index) {
 };
 
 Studio.setSprite = function (opts) {
-  // Inherit some flags from the skin:
+  var sprite = Studio.sprite[opts.index];
   if (opts.value !== 'hidden' && opts.value !== 'visible') {
-    Studio.sprite[opts.index].flags &= ~SF_SKINS_MASK;
-    Studio.sprite[opts.index].flags |= skin[opts.value].spriteFlags;
+    // Inherit some flags from the skin:
+    sprite.flags &= ~SF_SKINS_MASK;
+    sprite.flags |= skin[opts.value].spriteFlags;
+    // Reset height and width:
+    sprite.height =
+        skin[opts.value].spriteHeight || Studio.DEFAULT_SPRITE_HEIGHT;
+    sprite.width = skin[opts.value].spriteWidth || Studio.DEFAULT_SPRITE_WIDTH;
   }
-  Studio.sprite[opts.index].value = opts.forceHidden ? 'hidden' : opts.value;
+  sprite.value = opts.forceHidden ? 'hidden' : opts.value;
 
-  var element = document.getElementById('sprite' + opts.index);
-  element.setAttribute(
+  var spriteIcon = document.getElementById('sprite' + opts.index);
+  spriteIcon.setAttribute(
       'visibility',
       (opts.value === 'hidden' || opts.forceHidden) ? 'hidden' : 'visible');
   if ((opts.value !== 'hidden') && (opts.value !== 'visible')) {
-    element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-                           skin[opts.value].sprite);
-    element.setAttribute('width',
-                         Studio.SPRITE_WIDTH * spriteTotalFrames(opts.index));
+    var spriteClipRect = document.getElementById('spriteClipRect' + opts.index);
+    spriteClipRect.setAttribute('width', sprite.width);
+    spriteClipRect.setAttribute('height', sprite.height);
+
+    spriteIcon.setAttributeNS('http://www.w3.org/1999/xlink',
+                              'xlink:href',
+                              skin[opts.value].sprite);
+    spriteIcon.setAttribute('width',
+                            sprite.width * spriteTotalFrames(opts.index));
+    spriteIcon.setAttribute('height', sprite.height);
     computeSpriteFrameNums(opts.index);
     // call display right away since the frame number may have changed:
     Studio.displaySprite(opts.index);
@@ -9025,9 +11917,9 @@ Studio.wait = function (opts) {
   if (!opts.started) {
     opts.started = true;
 
-    // opts.value is the number of milliseconds to wait - or zero which means
+    // opts.value is the number of milliseconds to wait - or 'click' which means
     // "wait for click"
-    if (0 === opts.value) {
+    if ('click' === opts.value) {
       opts.waitForClick = true;
     } else {
       opts.waitTimeout = window.setTimeout(
@@ -9154,12 +12046,21 @@ Studio.hideSpeechBubble = function (opts) {
   speechBubble.removeAttribute('onRight');
   speechBubble.removeAttribute('height');
   opts.complete = true;
+  delete Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc;
   Studio.sayComplete++;
 };
 
 Studio.saySprite = function (opts) {
   if (!opts.started) {
     opts.started = true;
+
+    // Remove any existing speech bubble on this sprite:
+    if (Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc) {
+      Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc();
+    }
+    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+
+    // Start creating the new speech bubble:
     var bblText =
         document.getElementById('speechBubbleText' + opts.spriteIndex);
 
@@ -9186,9 +12087,10 @@ Studio.saySprite = function (opts) {
     Studio.displaySprite(opts.spriteIndex);
     speechBubble.setAttribute('visibility', 'visible');
 
-    window.clearTimeout(Studio.sprite[opts.spriteIndex].bubbleTimeout);
+    Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc =
+        delegate(this, Studio.hideSpeechBubble, opts);
     Studio.sprite[opts.spriteIndex].bubbleTimeout = window.setTimeout(
-        delegate(this, Studio.hideSpeechBubble, opts),
+        Studio.sprite[opts.spriteIndex].bubbleTimeoutFunc,
         Studio.SPEECH_BUBBLE_TIMEOUT);
   }
 
@@ -9295,8 +12197,91 @@ Studio.makeProjectile = function (opts) {
   }
 };
 
+//
+// xFromPosition: return left-most point of sprite given position constant
+//
+
+var xFromPosition = function (sprite, position) {
+  switch (position) {
+    case tiles.Position.OUTTOPOUTLEFT:
+    case tiles.Position.TOPOUTLEFT:
+    case tiles.Position.MIDDLEOUTLEFT:
+    case tiles.Position.BOTTOMOUTLEFT:
+    case tiles.Position.OUTBOTTOMOUTLEFT:
+      return -sprite.width / Studio.SQUARE_SIZE;
+    case tiles.Position.OUTTOPLEFT:
+    case tiles.Position.TOPLEFT:
+    case tiles.Position.MIDDLELEFT:
+    case tiles.Position.BOTTOMLEFT:
+    case tiles.Position.OUTBOTTOMLEFT:
+      return 0;
+    case tiles.Position.OUTTOPCENTER:
+    case tiles.Position.TOPCENTER:
+    case tiles.Position.MIDDLECENTER:
+    case tiles.Position.BOTTOMCENTER:
+    case tiles.Position.OUTBOTTOMCENTER:
+      return (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.OUTTOPRIGHT:
+    case tiles.Position.TOPRIGHT:
+    case tiles.Position.MIDDLERIGHT:
+    case tiles.Position.BOTTOMRIGHT:
+    case tiles.Position.OUTBOTTOMRIGHT:
+      return Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
+    case tiles.Position.OUTTOPOUTRIGHT:
+    case tiles.Position.TOPOUTRIGHT:
+    case tiles.Position.MIDDLEOUTRIGHT:
+    case tiles.Position.BOTTOMOUTRIGHT:
+    case tiles.Position.OUTBOTTOMOUTRIGHT:
+      return Studio.COLS;
+  }
+};
+
+//
+// yFromPosition: return top-most point of sprite given position constant
+//
+
+var yFromPosition = function (sprite, position) {
+  switch (position) {
+    case tiles.Position.OUTTOPOUTLEFT:
+    case tiles.Position.OUTTOPLEFT:
+    case tiles.Position.OUTTOPCENTER:
+    case tiles.Position.OUTTOPRIGHT:
+    case tiles.Position.OUTTOPOUTRIGHT:
+      return -sprite.height / Studio.SQUARE_SIZE;
+    case tiles.Position.TOPOUTLEFT:
+    case tiles.Position.TOPLEFT:
+    case tiles.Position.TOPCENTER:
+    case tiles.Position.TOPRIGHT:
+    case tiles.Position.TOPOUTRIGHT:
+      return 0;
+    case tiles.Position.MIDDLEOUTLEFT:
+    case tiles.Position.MIDDLELEFT:
+    case tiles.Position.MIDDLECENTER:
+    case tiles.Position.MIDDLERIGHT:
+    case tiles.Position.MIDDLEOUTRIGHT:
+      return (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE)) / 2;
+    case tiles.Position.BOTTOMOUTLEFT:
+    case tiles.Position.BOTTOMLEFT:
+    case tiles.Position.BOTTOMCENTER:
+    case tiles.Position.BOTTOMRIGHT:
+    case tiles.Position.BOTTOMOUTRIGHT:
+      return Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
+    case tiles.Position.OUTBOTTOMOUTLEFT:
+    case tiles.Position.OUTBOTTOMLEFT:
+    case tiles.Position.OUTBOTTOMCENTER:
+    case tiles.Position.OUTBOTTOMRIGHT:
+    case tiles.Position.OUTBOTTOMOUTRIGHT:
+      return Studio.ROWS;
+  }
+};
+
 Studio.setSpritePosition = function (opts) {
   var sprite = Studio.sprite[opts.spriteIndex];
+  if (opts.value) {
+    // fill in .x and .y from the tiles.Position value in opts.value
+    opts.x = xFromPosition(sprite, opts.value);
+    opts.y = yFromPosition(sprite, opts.value);
+  }
   var samePosition = (sprite.x === opts.x && sprite.y === opts.y);
 
   // Don't reset collisions inside stop() if we're in the same position
@@ -9313,25 +12298,27 @@ Studio.moveSingle = function (opts) {
   switch (opts.dir) {
     case Direction.NORTH:
       sprite.y -= sprite.speed;
-      if (sprite.y < 0) {
+      if (!Studio.spritesOutsidePlayspace && sprite.y < 0) {
         sprite.y = 0;
       }
       break;
     case Direction.EAST:
       sprite.x += sprite.speed;
-      if (sprite.x > (Studio.COLS - 2)) {
-        sprite.x = Studio.COLS - 2;
+      if (!Studio.spritesOutsidePlayspace &&
+          sprite.x > (Studio.COLS - (sprite.width / Studio.SQUARE_SIZE))) {
+        sprite.x = Studio.COLS - (sprite.width / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.SOUTH:
       sprite.y += sprite.speed;
-      if (sprite.y > (Studio.ROWS - 2)) {
-        sprite.y = Studio.ROWS - 2;
+      if (!Studio.spritesOutsidePlayspace &&
+          sprite.y > (Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE))) {
+        sprite.y = Studio.ROWS - (sprite.height / Studio.SQUARE_SIZE);
       }
       break;
     case Direction.WEST:
       sprite.x -= sprite.speed;
-      if (sprite.x < 0) {
+      if (!Studio.spritesOutsidePlayspace && sprite.x < 0) {
         sprite.x = 0;
       }
       break;
@@ -9353,16 +12340,34 @@ Studio.timedOut = function() {
 
 Studio.allFinishesComplete = function() {
   var i;
+  var finishCollisionDistance = function (yAxis) {
+    var dim1 = yAxis ?
+                  Studio.sprite[Studio.spriteFinishIndex].height :
+                  Studio.sprite[Studio.spriteFinishIndex].width;
+    var dim2 = yAxis ? Studio.MARKER_HEIGHT : Studio.MARKER_WIDTH;
+    return tiles.FINISH_COLLIDE_DISTANCE_SCALING * (dim1 + dim2) /
+              (2 * Studio.SQUARE_SIZE);
+  };
   if (Studio.spriteFinish_) {
     var finished, playSound;
+    var xSpriteCenter =
+      Studio.sprite[Studio.spriteFinishIndex].x +
+      Studio.sprite[Studio.spriteFinishIndex].width / (2 * Studio.SQUARE_SIZE);
+    var ySpriteCenter =
+      Studio.sprite[Studio.spriteFinishIndex].y +
+      Studio.sprite[Studio.spriteFinishIndex].height / (2 * Studio.SQUARE_SIZE);
     for (i = 0, finished = 0; i < Studio.spriteFinishCount; i++) {
       if (!Studio.spriteFinish_[i].finished) {
-        if (essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].x,
-                             Studio.spriteFinish_[i].x,
-                             tiles.FINISH_COLLIDE_DISTANCE) &&
-            essentiallyEqual(Studio.sprite[Studio.spriteFinishIndex].y,
-                             Studio.spriteFinish_[i].y,
-                             tiles.FINISH_COLLIDE_DISTANCE)) {
+        var xFinCenter = Studio.spriteFinish_[i].x +
+                          Studio.MARKER_WIDTH / (2 * Studio.SQUARE_SIZE);
+        var yFinCenter = Studio.spriteFinish_[i].y +
+                          Studio.MARKER_HEIGHT / (2 * Studio.SQUARE_SIZE);
+        if (collisionTest(xSpriteCenter,
+                          xFinCenter,
+                          finishCollisionDistance(false),
+                          ySpriteCenter,
+                          yFinCenter,
+                          finishCollisionDistance(true))) {
           Studio.spriteFinish_[i].finished = true;
           finished++;
           playSound = true;
@@ -9390,30 +12395,30 @@ Studio.allFinishesComplete = function() {
 var checkFinished = function () {
   // if we have a succcess condition and have accomplished it, we're done and successful
   if (level.goal && level.goal.successCondition && level.goal.successCondition()) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
-    Studio.result = ResultType.FAILURE;
+    Studio.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
   if (Studio.allFinishesComplete()) {
-    Studio.result = ResultType.SUCCESS;
+    Studio.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   if (Studio.timedOut()) {
-    Studio.result = ResultType.FAILURE;
+    Studio.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
   return false;
 };
 
-},{"../../locale/fr_fr/common":37,"../../locale/fr_fr/studio":38,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../skins":11,"../templates/page.html":30,"./api":13,"./blocks":14,"./controls.html":15,"./extraControlRows.html":16,"./sprite":20,"./tiles":22,"./visualization.html":23}],22:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"../../locale/fr_fr/studio":39,"../base":2,"../codegen":6,"../dom":7,"../feedback.js":8,"../hammer":9,"../skins":12,"../templates/page.html":31,"../xml":37,"./api":14,"./blocks":15,"./controls.html":16,"./extraControlRows.html":17,"./sprite":21,"./tiles":23,"./visualization.html":24}],23:[function(require,module,exports){
 'use strict';
 
 exports.Direction = {
@@ -9429,44 +12434,32 @@ exports.Direction = {
 };
 
 exports.Position = {
-  TOPLEFT: 1,
-  TOPCENTER: 2,
-  TOPRIGHT: 3,
-  MIDDLELEFT: 4,
-  MIDDLECENTER: 5,
-  MIDDLERIGHT: 6,
-  BOTTOMLEFT: 7,
-  BOTTOMCENTER: 8,
-  BOTTOMRIGHT: 9,
+  OUTTOPOUTLEFT:    1,
+  OUTTOPLEFT:       2,
+  OUTTOPCENTER:     3,
+  OUTTOPRIGHT:      4,
+  OUTTOPOUTRIGHT:   5,
+  TOPOUTLEFT:       6,
+  TOPLEFT:          7,
+  TOPCENTER:        8,
+  TOPRIGHT:         9,
+  TOPOUTRIGHT:      10,
+  MIDDLEOUTLEFT:    11,
+  MIDDLELEFT:       12,
+  MIDDLECENTER:     13,
+  MIDDLERIGHT:      14,
+  MIDDLEOUTRIGHT:   15,
+  BOTTOMOUTLEFT:    16,
+  BOTTOMLEFT:       17,
+  BOTTOMCENTER:     18,
+  BOTTOMRIGHT:      19,
+  BOTTOMOUTRIGHT:   20,
+  OUTBOTTOMOUTLEFT: 21,
+  OUTBOTTOMLEFT:    22,
+  OUTBOTTOMCENTER:  23,
+  OUTBOTTOMRIGHT:   24,
+  OUTBOTTOMOUTRIGHT:25,
 };
-
-//
-// Coordinates for each Position (revisit when Sprite size is variable)
-//
-
-var Pos = exports.Position;
-
-exports.xFromPosition = {};
-exports.xFromPosition[Pos.TOPLEFT] = 0;
-exports.xFromPosition[Pos.TOPCENTER] = 3;
-exports.xFromPosition[Pos.TOPRIGHT] = 6;
-exports.xFromPosition[Pos.MIDDLELEFT] = 0;
-exports.xFromPosition[Pos.MIDDLECENTER] = 3;
-exports.xFromPosition[Pos.MIDDLERIGHT] = 6;
-exports.xFromPosition[Pos.BOTTOMLEFT] = 0;
-exports.xFromPosition[Pos.BOTTOMCENTER] = 3;
-exports.xFromPosition[Pos.BOTTOMRIGHT] = 6;
-
-exports.yFromPosition = {};
-exports.yFromPosition[Pos.TOPLEFT] = 0;
-exports.yFromPosition[Pos.TOPCENTER] = 0;
-exports.yFromPosition[Pos.TOPRIGHT] = 0;
-exports.yFromPosition[Pos.MIDDLELEFT] = 3;
-exports.yFromPosition[Pos.MIDDLECENTER] = 3;
-exports.yFromPosition[Pos.MIDDLERIGHT] = 3;
-exports.yFromPosition[Pos.BOTTOMLEFT] = 6;
-exports.yFromPosition[Pos.BOTTOMCENTER] = 6;
-exports.yFromPosition[Pos.BOTTOMRIGHT] = 6;
 
 //
 // Turn state machine, use as NextTurn[fromDir][toDir]
@@ -9564,9 +12557,9 @@ exports.Emotions = {
   SAD: 3,
 };
 
-exports.FINISH_COLLIDE_DISTANCE = 1.5;
-exports.SPRITE_COLLIDE_DISTANCE = 1.8;
-exports.PROJECTILE_COLLIDE_DISTANCE = 1.3;
+// scale the collision bounding box to make it so they need to overlap a touch:
+exports.FINISH_COLLIDE_DISTANCE_SCALING = 0.75;
+exports.SPRITE_COLLIDE_DISTANCE_SCALING = 0.9;
 exports.DEFAULT_SPRITE_SPEED = 0.1;
 
 /**
@@ -9580,7 +12573,7 @@ exports.SquareType = {
   SPRITESTART: 16,
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9601,7 +12594,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],24:[function(require,module,exports){
+},{"ejs":40}],25:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9622,7 +12615,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],25:[function(require,module,exports){
+},{"ejs":40}],26:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9643,7 +12636,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/common":37,"ejs":39}],26:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"ejs":40}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9664,7 +12657,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],27:[function(require,module,exports){
+},{"ejs":40}],28:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9685,7 +12678,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/common":37,"ejs":39}],28:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"ejs":40}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9708,7 +12701,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/common":37,"ejs":39}],29:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"ejs":40}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9729,7 +12722,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/common":37,"ejs":39}],30:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"ejs":40}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9754,7 +12747,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/common":37,"ejs":39}],31:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"ejs":40}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9768,7 +12761,7 @@ escape = escape || function (html){
 var buf = [];
 with (locals || {}) { (function(){ 
  buf.push('<!DOCTYPE html>\n<html dir="', escape((2,  options.localeDirection )), '">\n<head>\n  <meta charset="utf-8">\n  <title>Blockly</title>\n  <script type="text/javascript" src="', escape((6,  assetUrl('js/' + options.locale + '/vendor.js') )), '"></script>\n  <script type="text/javascript" src="', escape((7,  assetUrl('js/' + options.locale + '/' + app + '.js') )), '"></script>\n  <script type="text/javascript">\n    ');9; // delay to onload to fix IE9. 
-; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: #fff;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
+; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: transparent;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      background-color: transparent;\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
 } 
 return buf.join('');
 };
@@ -9776,7 +12769,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],32:[function(require,module,exports){
+},{"ejs":40}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9797,7 +12790,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/common":37,"ejs":39}],33:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"ejs":40}],34:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9818,7 +12811,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/fr_fr/common":37,"ejs":39}],34:[function(require,module,exports){
+},{"../../locale/fr_fr/common":38,"ejs":40}],35:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -9839,7 +12832,9 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":39}],35:[function(require,module,exports){
+},{"ejs":40}],36:[function(require,module,exports){
+var _ = require('./lodash');
+
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -9940,7 +12935,14 @@ exports.stripQuotes = function(inputString) {
   return inputString.replace(/["']/g, "");
 };
 
-},{}],36:[function(require,module,exports){
+/**
+ * Defines an inheritance relationship between parent class and this class.
+ */
+Function.prototype.inherits = function (parent) {
+  this.prototype = _.create(parent.prototype, { constructor: parent });
+};
+
+},{"./lodash":10}],37:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -9968,8 +12970,10 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fr=function(n){return n===0||n==1?"one":"other"}
+exports.and = function(d){return "and"};
+
 exports.blocklyMessage = function(d){return "Blockly"};
 
 exports.catActions = function(d){return "Actions"};
@@ -10046,13 +13050,19 @@ exports.numBlocksNeeded = function(d){return "Félicitations ! Vous avez termin�
 
 exports.numLinesOfCodeWritten = function(d){return "Vous venez d'écrire "+p(d,"numLines",0,"fr",{"one":"1 ligne","other":n(d,"numLines")+" lignes "})+" de code!"};
 
+exports.play = function(d){return "play"};
+
 exports.puzzleTitle = function(d){return "Le Puzzle "+v(d,"puzzle_number")+" de "+v(d,"stage_total")};
+
+exports.repeat = function(d){return "repeat"};
 
 exports.resetProgram = function(d){return "Réinitialiser"};
 
 exports.runProgram = function(d){return "Exécuter le programme"};
 
 exports.runTooltip = function(d){return "Exécuter le programme défini par les blocs dans l'espace de travail."};
+
+exports.score = function(d){return "score"};
 
 exports.showCodeHeader = function(d){return "Afficher le Code"};
 
@@ -10109,8 +13119,10 @@ exports.signup = function(d){return "Inscrivez-vous au cours d'introduction"};
 exports.hintHeader = function(d){return "Voici une astuce :"};
 
 
-},{"messageformat":50}],38:[function(require,module,exports){
+},{"messageformat":51}],39:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.fr=function(n){return n===0||n==1?"one":"other"}
+exports.actor = function(d){return "actor"};
+
 exports.catActions = function(d){return "Actions"};
 
 exports.catControl = function(d){return "Loops"};
@@ -10136,6 +13148,8 @@ exports.continue = function(d){return "Continuer"};
 exports.decrementPlayerScore = function(d){return "remove point"};
 
 exports.defaultSayText = function(d){return "type here"};
+
+exports.emotion = function(d){return "emotion"};
 
 exports.finalLevel = function(d){return "Félicitations ! Vous avez résolu l'énigme finale."};
 
@@ -10181,17 +13195,7 @@ exports.moveDistanceTooltip = function(d){return "Move a character a specific di
 
 exports.moveSprite = function(d){return "move"};
 
-exports.moveSprite1 = function(d){return "move character 1"};
-
-exports.moveSprite2 = function(d){return "move character 2"};
-
-exports.moveSprite3 = function(d){return "move character 3"};
-
-exports.moveSprite4 = function(d){return "move character 4"};
-
-exports.moveSprite5 = function(d){return "move character 5"};
-
-exports.moveSprite6 = function(d){return "move character 6"};
+exports.moveSpriteN = function(d){return "move actor "+v(d,"spriteIndex")};
 
 exports.moveDown = function(d){return "déplacer vers le bas"};
 
@@ -10245,11 +13249,19 @@ exports.playSoundWinPoint2 = function(d){return "play win point 2 sound"};
 
 exports.playSoundWood = function(d){return "play wood sound"};
 
+exports.positionOutTopLeft = function(d){return "to the above top left position"};
+
+exports.positionOutTopRight = function(d){return "to the above top right position"};
+
+exports.positionTopOutLeft = function(d){return "to the top outside left position"};
+
 exports.positionTopLeft = function(d){return "to the top left position"};
 
 exports.positionTopCenter = function(d){return "to the top center position"};
 
 exports.positionTopRight = function(d){return "to the top right position"};
+
+exports.positionTopOutRight = function(d){return "to the top outside right position"};
 
 exports.positionMiddleLeft = function(d){return "to the middle left position"};
 
@@ -10257,11 +13269,19 @@ exports.positionMiddleCenter = function(d){return "to the middle center position
 
 exports.positionMiddleRight = function(d){return "to the middle right position"};
 
+exports.positionBottomOutLeft = function(d){return "to the bottom outside left position"};
+
 exports.positionBottomLeft = function(d){return "to the bottom left position"};
 
 exports.positionBottomCenter = function(d){return "to the bottom center position"};
 
 exports.positionBottomRight = function(d){return "to the bottom right position"};
+
+exports.positionBottomOutRight = function(d){return "to the bottom outside right position"};
+
+exports.positionOutBottomLeft = function(d){return "to the below bottom left position"};
+
+exports.positionOutBottomRight = function(d){return "to the below bottom right position"};
 
 exports.positionRandom = function(d){return "to the random position"};
 
@@ -10281,17 +13301,7 @@ exports.repeatForeverTooltip = function(d){return "Execute the actions in this b
 
 exports.saySprite = function(d){return "say"};
 
-exports.saySprite1 = function(d){return "character 1 say"};
-
-exports.saySprite2 = function(d){return "character 2 say"};
-
-exports.saySprite3 = function(d){return "character 3 say"};
-
-exports.saySprite4 = function(d){return "character 4 say"};
-
-exports.saySprite5 = function(d){return "character 5 say"};
-
-exports.saySprite6 = function(d){return "character 6 say"};
+exports.saySpriteN = function(d){return "actor "+v(d,"spriteIndex")+" say"};
 
 exports.saySpriteTooltip = function(d){return "Pop up a speech bubble with the associated text from the specified character."};
 
@@ -10331,11 +13341,17 @@ exports.setSpriteEmotionSad = function(d){return "to a sad emotion"};
 
 exports.setSpriteEmotionTooltip = function(d){return "Sets the actor emotion"};
 
+exports.setSpriteBat = function(d){return "to a bat image"};
+
+exports.setSpriteBird = function(d){return "to a bird image"};
+
 exports.setSpriteCat = function(d){return "to a cat image"};
 
 exports.setSpriteDinosaur = function(d){return "to a dinosaur image"};
 
 exports.setSpriteDog = function(d){return "to a dog image"};
+
+exports.setSpriteDragon = function(d){return "to a dragon image"};
 
 exports.setSpriteHidden = function(d){return "to a hidden image"};
 
@@ -10349,7 +13365,11 @@ exports.setSpriteRandom = function(d){return "to a random image"};
 
 exports.setSpriteShowK1 = function(d){return "show"};
 
+exports.setSpriteSquirrel = function(d){return "to a squirrel image"};
+
 exports.setSpriteWitch = function(d){return "to a witch image"};
+
+exports.setSpriteWizard = function(d){return "to a wizard image"};
 
 exports.setSpritePositionTooltip = function(d){return "Instantly moves an actor to the specified location."};
 
@@ -10391,59 +13411,43 @@ exports.showTitleScreenTooltip = function(d){return "Show a title screen with th
 
 exports.setSprite = function(d){return "set"};
 
-exports.setSprite1 = function(d){return "set character 1"};
+exports.setSpriteN = function(d){return "set actor "+v(d,"spriteIndex")};
 
-exports.setSprite2 = function(d){return "set character 2"};
+exports.soundCrunch = function(d){return "crunch"};
 
-exports.setSprite3 = function(d){return "set character 3"};
+exports.soundGoal1 = function(d){return "goal 1"};
 
-exports.setSprite4 = function(d){return "set character 4"};
+exports.soundGoal2 = function(d){return "goal 2"};
 
-exports.setSprite5 = function(d){return "set character 5"};
+exports.soundHit = function(d){return "hit"};
 
-exports.setSprite6 = function(d){return "set character 6"};
+exports.soundLosePoint = function(d){return "lose point"};
 
-exports.sprite1 = function(d){return "actor 1"};
+exports.soundLosePoint2 = function(d){return "lose point 2"};
 
-exports.sprite2 = function(d){return "actor 2"};
+exports.soundRetro = function(d){return "retro"};
 
-exports.sprite3 = function(d){return "actor 3"};
+exports.soundRubber = function(d){return "rubber"};
 
-exports.sprite4 = function(d){return "actor 4"};
+exports.soundSlap = function(d){return "slap"};
 
-exports.sprite5 = function(d){return "actor 5"};
+exports.soundWinPoint = function(d){return "win point"};
 
-exports.sprite6 = function(d){return "actor 6"};
+exports.soundWinPoint2 = function(d){return "win point 2"};
+
+exports.soundWood = function(d){return "wood"};
+
+exports.speed = function(d){return "speed"};
 
 exports.stopSprite = function(d){return "stop"};
 
-exports.stopSprite1 = function(d){return "stop actor 1"};
-
-exports.stopSprite2 = function(d){return "stop actor 2"};
-
-exports.stopSprite3 = function(d){return "stop actor 3"};
-
-exports.stopSprite4 = function(d){return "stop actor 4"};
-
-exports.stopSprite5 = function(d){return "stop actor 5"};
-
-exports.stopSprite6 = function(d){return "stop actor 6"};
+exports.stopSpriteN = function(d){return "stop actor "+v(d,"spriteIndex")};
 
 exports.stopTooltip = function(d){return "Stops an actor's movement."};
 
 exports.throwSprite = function(d){return "throw"};
 
-exports.throwSprite1 = function(d){return "actor 1 throw"};
-
-exports.throwSprite2 = function(d){return "actor 2 throw"};
-
-exports.throwSprite3 = function(d){return "actor 3 throw"};
-
-exports.throwSprite4 = function(d){return "actor 4 throw"};
-
-exports.throwSprite5 = function(d){return "actor 5 throw"};
-
-exports.throwSprite6 = function(d){return "actor 6 throw"};
+exports.throwSpriteN = function(d){return "actor "+v(d,"spriteIndex")+" throw"};
 
 exports.throwTooltip = function(d){return "Throws a projectile from the specified actor."};
 
@@ -10487,51 +13491,29 @@ exports.whenRightTooltip = function(d){return "Exécute les actions ci-dessous q
 
 exports.whenSpriteClicked = function(d){return "when actor clicked"};
 
-exports.whenSpriteClicked1 = function(d){return "when character 1 clicked"};
-
-exports.whenSpriteClicked2 = function(d){return "when character 2 clicked"};
-
-exports.whenSpriteClicked3 = function(d){return "when character 3 clicked"};
-
-exports.whenSpriteClicked4 = function(d){return "when character 4 clicked"};
-
-exports.whenSpriteClicked5 = function(d){return "when character 5 clicked"};
-
-exports.whenSpriteClicked6 = function(d){return "when character 6 clicked"};
+exports.whenSpriteClickedN = function(d){return "when actor "+v(d,"spriteIndex")+" clicked"};
 
 exports.whenSpriteClickedTooltip = function(d){return "Execute the actions below when a character is clicked."};
 
-exports.whenSpriteCollided1 = function(d){return "when character 1"};
-
-exports.whenSpriteCollided2 = function(d){return "when character 2"};
-
-exports.whenSpriteCollided3 = function(d){return "when character 3"};
-
-exports.whenSpriteCollided4 = function(d){return "when character 4"};
-
-exports.whenSpriteCollided5 = function(d){return "when character 5"};
-
-exports.whenSpriteCollided6 = function(d){return "when character 6"};
+exports.whenSpriteCollidedN = function(d){return "when actor "+v(d,"spriteIndex")};
 
 exports.whenSpriteCollidedTooltip = function(d){return "Execute the actions below when a character touches another character."};
 
 exports.whenSpriteCollidedWith = function(d){return "touches"};
 
-exports.whenSpriteCollidedWith1 = function(d){return "touches character 1"};
-
-exports.whenSpriteCollidedWith2 = function(d){return "touches character 2"};
-
-exports.whenSpriteCollidedWith3 = function(d){return "touches character 3"};
-
-exports.whenSpriteCollidedWith4 = function(d){return "touches character 4"};
-
-exports.whenSpriteCollidedWith5 = function(d){return "touches character 5"};
-
-exports.whenSpriteCollidedWith6 = function(d){return "touches character 6"};
+exports.whenSpriteCollidedWithN = function(d){return "touches actor "+v(d,"spriteIndex")};
 
 exports.whenSpriteCollidedWithFireball = function(d){return "touches fireball"};
 
 exports.whenSpriteCollidedWithFlower = function(d){return "touches flower"};
+
+exports.whenSpriteCollidedWithBottomEdge = function(d){return "touches bottom edge"};
+
+exports.whenSpriteCollidedWithLeftEdge = function(d){return "touches left edge"};
+
+exports.whenSpriteCollidedWithRightEdge = function(d){return "touches right edge"};
+
+exports.whenSpriteCollidedWithTopEdge = function(d){return "touches top edge"};
 
 exports.whenUp = function(d){return "quand flèche en haut"};
 
@@ -10540,7 +13522,7 @@ exports.whenUpTooltip = function(d){return "Exécute les actions ci-dessous quan
 exports.yes = function(d){return "Oui"};
 
 
-},{"messageformat":50}],39:[function(require,module,exports){
+},{"messageformat":51}],40:[function(require,module,exports){
 
 /*!
  * EJS
@@ -10899,7 +13881,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":40,"./utils":41,"fs":42,"path":44}],40:[function(require,module,exports){
+},{"./filters":41,"./utils":42,"fs":43,"path":45}],41:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -11102,7 +14084,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 
 /*!
  * EJS
@@ -11128,9 +14110,9 @@ exports.escape = function(html){
 };
  
 
-},{}],42:[function(require,module,exports){
-
 },{}],43:[function(require,module,exports){
+
+},{}],44:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -11185,7 +14167,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11413,7 +14395,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":43}],45:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":44}],46:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -11924,7 +14906,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12010,7 +14992,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12097,13 +15079,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":46,"./encode":47}],49:[function(require,module,exports){
+},{"./decode":47,"./encode":48}],50:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -12736,7 +15718,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":45,"querystring":48}],50:[function(require,module,exports){
+},{"punycode":46,"querystring":49}],51:[function(require,module,exports){
 /**
  * messageformat.js
  *
@@ -14319,4 +17301,4 @@ function parseHost(host) {
 
 })( this );
 
-},{}]},{},[18])
+},{}]},{},[19])

@@ -10,8 +10,8 @@ class User < ActiveRecord::Base
 
   TYPE_STUDENT = 'student'
   TYPE_TEACHER = 'teacher'
-  TYPE_PARENT = 'parent'
-
+  validates_inclusion_of :user_type, in: [TYPE_STUDENT, TYPE_TEACHER], on: :create
+  
   GENDER_OPTIONS = [[nil, ''], ['gender.male', 'm'], ['gender.female', 'f'], ['gender.none', '-']]
   
   STUDENTS_COMPLETED_FOR_PRIZE = 15
@@ -64,13 +64,14 @@ class User < ActiveRecord::Base
     update(admin: true) if Mail::Address.new(email).domain.downcase == 'code.org'
   end
   
-  def self.from_omniauth(auth)
+  def self.from_omniauth(auth, params)
     where(auth.slice(:provider, :uid)).first_or_create do |user|
       user.provider = auth.provider
       user.uid = auth.uid
       user.username = auth.info.nickname
       user.name = auth.info.name
       user.email = auth.info.email
+      user.user_type = params['user_type'] || User::TYPE_STUDENT
     end
   end
 
@@ -236,10 +237,6 @@ SQL
 
   def student?
     self.user_type == TYPE_STUDENT
-  end
-
-  def parent?
-    self.user_type == TYPE_PARENT
   end
 
   def teacher?

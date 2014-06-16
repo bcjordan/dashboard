@@ -24,7 +24,7 @@ namespace :seed do
     Hint.transaction do
       Hint.reset_db
       CSV.read('config/stanford-hint-messages.tsv', { col_sep: "\t" }).each do |row|
-        Hint.create!(id: row[0], source: 'Stanford simple', message: row[1])
+        Hint.create!(id: row[0], source: 'Stanford bestPath1', message: row[1])
       end
     end
   end

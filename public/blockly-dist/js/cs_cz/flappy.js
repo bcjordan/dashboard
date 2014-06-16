@@ -70,7 +70,11 @@ module.exports = function(app, levels, options) {
 
   addReadyListener(function() {
     if (options.readonly) {
-      BlocklyApps.initReadonly(options);
+      if (app.initReadonly) {
+        app.initReadonly(options);
+      } else {
+        BlocklyApps.initReadonly(options);
+      }
     } else {
       app.init(options);
       if (options.onInitialize) {
@@ -762,6 +766,18 @@ BlocklyApps.reset = function(first) {};
 BlocklyApps.runButtonClick = function() {};
 
 /**
+ * Enumeration of user program execution outcomes.
+ * These are determined by each app.
+ */
+BlocklyApps.ResultType = {
+  UNSET: 0,       // The result has not yet been computed.
+  SUCCESS: 1,     // The program completed successfully, achieving the goal.
+  FAILURE: -1,    // The program ran without error but did not achieve goal.
+  TIMEOUT: 2,     // The program did not complete (likely infinite loop).
+  ERROR: -2       // The program generated an error.
+};
+
+/**
  * Enumeration of test results.
  * BlocklyApps.getTestResults() runs checks in the below order.
  * EMPTY_BLOCKS_FAIL can only occur if BlocklyApps.CHECK_FOR_EMPTY_BLOCKS true.
@@ -832,7 +848,7 @@ BlocklyApps.getTestResults = function() {
 BlocklyApps.report = function(options) {
   // copy from options: app, level, result, testResult, program, onComplete
   var report = options;
-  report.pass = feedback.canContinueToNextLevel(options.testResults);
+  report.pass = feedback.canContinueToNextLevel(options.testResult);
   report.time = ((new Date().getTime()) - BlocklyApps.initTime);
   report.attempt = BlocklyApps.attempts;
   report.lines = feedback.getNumBlocksUsed();
@@ -1239,10 +1255,12 @@ exports.displayFeedback = function(options) {
   var canContinue = exports.canContinueToNextLevel(options.feedbackType);
   var displayShowCode = BlocklyApps.enableShowCode && canContinue;
   var feedback = document.createElement('div');
-  var feedbackMessage = getFeedbackMessage(options);
   var sharingDiv = (canContinue && options.showingSharing) ? exports.createSharingDiv(options) : null;
   var showCode = displayShowCode ? getShowCodeElement(options) : null;
   var feedbackBlocks = new FeedbackBlocks(options);
+  // feedbackMessage must be initialized after feedbackBlocks
+  // because FeedbackBlocks can mutate options.response.hint.
+  var feedbackMessage = getFeedbackMessage(options);
 
   if (feedbackMessage) {
     feedback.appendChild(feedbackMessage);
@@ -1252,7 +1270,12 @@ exports.displayFeedback = function(options) {
     feedback.appendChild(trophies);
   }
   if (feedbackBlocks.div) {
-    feedback.appendChild(feedbackBlocks.div);
+    if (feedbackMessage && useSpecialFeedbackDesign(options)) {
+      // put the blocks iframe inside the feedbackMessage for this special case:
+      feedbackMessage.appendChild(feedbackBlocks.div);
+    } else {
+      feedback.appendChild(feedbackBlocks.div);
+    }
   }
   if (sharingDiv) {
     feedback.appendChild(sharingDiv);
@@ -1423,6 +1446,12 @@ var getFeedbackButtons = function(options) {
   return buttons;
 };
 
+var useSpecialFeedbackDesign = function (options) {
+ return options.response &&
+        options.response.design &&
+        isFeedbackMessageCustomized(options);
+};
+
 var getFeedbackMessage = function(options) {
   var feedback = document.createElement('p');
   feedback.className = 'congrats';
@@ -1504,8 +1533,7 @@ var getFeedbackMessage = function(options) {
   dom.setText(feedback, message);
 
   // Update the feedback box design, if the hint message is customized.
-  if (options.response && options.response.design &&
-      isFeedbackMessageCustomized(options)) {
+  if (useSpecialFeedbackDesign(options)) {
     // Setup a new div
     var feedbackDiv = document.createElement('div');
     feedbackDiv.className = 'feedback-callout';
@@ -1660,15 +1688,39 @@ var getGeneratedCodeString = function() {
 };
 
 var FeedbackBlocks = function(options) {
-  var missingBlocks = getMissingRequiredBlocks();
-  if (missingBlocks.length === 0) {
-    return;
+  // Check whether blocks are embedded in the hint returned from dashboard.
+  // See below comment for format.
+  var embeddedBlocks = options.response && options.response.hint &&
+      options.response.hint.indexOf("[{") !== 0;
+  if (!embeddedBlocks &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
+      options.feedbackType !==
+      BlocklyApps.TestResults.MISSING_BLOCK_FINISHED) {
+      return;
   }
-  if ((options.response && options.response.hint) ||
-      (options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_UNFINISHED &&
-       options.feedbackType !==
-       BlocklyApps.TestResults.MISSING_BLOCK_FINISHED)) {
+
+  var blocksToDisplay = [];
+  if (embeddedBlocks) {
+    // Hint should be of the form: SOME TEXT {[..], [..], ...} IGNORED.
+    // Example: 'Try the following block: [{"type": "maze_moveForward"}]'
+    // Note that double quotes are required by the JSON parser.
+    var parts = options.response.hint.match(/(.*)(\[.*\])/);
+    if (!parts) {
+      return;
+    }
+    options.response.hint = parts[1].trim();  // Remove blocks from hint.
+    try {
+      blocksToDisplay = JSON.parse(parts[2]);
+    } catch(err) {
+      // The blocks could not be parsed.  Ignore them.
+      return;
+    }
+  } else {
+    blocksToDisplay = getMissingRequiredBlocks();
+  }
+
+  if (blocksToDisplay.length === 0) {
     return;
   }
 
@@ -1684,11 +1736,12 @@ var FeedbackBlocks = function(options) {
       cacheBust: BlocklyApps.CACHE_BUST,
       skinId: options.skin,
       level: options.level,
-      blocks: generateXMLForBlocks(missingBlocks)
+      blocks: generateXMLForBlocks(blocksToDisplay)
     }
   });
   this.iframe = document.createElement('iframe');
   this.iframe.setAttribute('id', 'feedbackBlocks');
+  this.iframe.setAttribute('allowtransparency', 'true');
   this.div.appendChild(this.iframe);
 };
 
@@ -2189,8 +2242,14 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function () {
       this.setHSV(140, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.whenEnterObstacle());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.when())
+          .appendTitle(new blockly.FieldImage(skin.enterObstacleIcon));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.whenEnterObstacle());
+      }
       this.setPreviousStatement(false);
       this.setNextStatement(true);
       this.setTooltip(msg.whenEnterObstacleTooltip());
@@ -2290,34 +2349,62 @@ exports.install = function(blockly, blockInstallOptions) {
 
   blockly.Blocks.flappy_playSound = {
     // Block for playing sound.
+    WING_FLAP_SOUND: '"sfx_wing"',
     helpUrl: '',
-    init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES, onSoundSelected);
-      dropdown.setValue(this.VALUES[7][1]);
+    init: function () {
+      this.VALUES = isK1 ? this.k1SoundChoices : this.soundChoices;
+      var soundDropdown = new blockly.FieldDropdown(this.VALUES, onSoundSelected);
+      soundDropdown.setValue(this.WING_FLAP_SOUND);
+
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.play())
+          .appendTitle(new blockly.FieldImage(skin.soundIcon))
+          .appendTitle(soundDropdown, 'VALUE');
+      } else {
+        this.appendDummyInput().appendTitle(soundDropdown, 'VALUE');
+      }
+
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.playSoundTooltip());
+    },
+    get k1SoundChoices() {
+      return [
+        [msg.soundRandom(), RANDOM_VALUE],
+        [msg.soundBounce(), '"wall"'],
+        [msg.soundCrunch(), '"wall0"'],
+        [msg.soundDie(), '"sfx_die"'],
+        [msg.soundHit(), '"sfx_hit"'],
+        [msg.soundPoint(), '"sfx_point"'],
+        [msg.soundSwoosh(), '"sfx_swooshing"'],
+        [msg.soundWing(), this.WING_FLAP_SOUND],
+        [msg.soundJet(), '"jet"'],
+        [msg.soundCrash(), '"crash"'],
+        [msg.soundJingle(), '"jingle"'],
+        [msg.soundSplash(), '"splash"'],
+        [msg.soundLaser(), '"laser"']
+      ];
+    },
+    get soundChoices() {
+      return [
+        [msg.playSoundRandom(), RANDOM_VALUE],
+        [msg.playSoundBounce(), '"wall"'],
+        [msg.playSoundCrunch(), '"wall0"'],
+        [msg.playSoundDie(), '"sfx_die"'],
+        [msg.playSoundHit(), '"sfx_hit"'],
+        [msg.playSoundPoint(), '"sfx_point"'],
+        [msg.playSoundSwoosh(), '"sfx_swooshing"'],
+        [msg.playSoundWing(), this.WING_FLAP_SOUND],
+        [msg.playSoundJet(), '"jet"'],
+        [msg.playSoundCrash(), '"crash"'],
+        [msg.playSoundJingle(), '"jingle"'],
+        [msg.playSoundSplash(), '"splash"'],
+        [msg.playSoundLaser(), '"laser"']
+      ];
     }
   };
-
-  blockly.Blocks.flappy_playSound.VALUES =
-      [[msg.playSoundRandom(), RANDOM_VALUE],
-       [msg.playSoundBounce(), '"wall"'],
-       [msg.playSoundCrunch(), '"wall0"'],
-       [msg.playSoundDie(), '"sfx_die"'],
-       [msg.playSoundHit(), '"sfx_hit"'],
-       [msg.playSoundPoint(), '"sfx_point"'],
-       [msg.playSoundSwoosh(), '"sfx_swooshing"'],
-       [msg.playSoundWing(), '"sfx_wing"'],
-       [msg.playSoundJet(), '"jet"'],
-       [msg.playSoundCrash(), '"crash"'],
-       [msg.playSoundJingle(), '"jingle"'],
-       [msg.playSoundSplash(), '"splash"'],
-       [msg.playSoundLaser(), '"laser"']
-     ];
 
   generator.flappy_playSound = function() {
     return generateSetterCode(this, 'playSound');
@@ -2328,8 +2415,15 @@ exports.install = function(blockly, blockInstallOptions) {
     helpUrl: '',
     init: function() {
       this.setHSV(184, 1.00, 0.74);
-      this.appendDummyInput()
-        .appendTitle(msg.incrementPlayerScore());
+      if (isK1) {
+        this.appendDummyInput()
+          .appendTitle(commonMsg.score())
+          .appendTitle(new blockly.FieldImage(skin.scoreCard));
+      } else {
+        this.appendDummyInput()
+          .appendTitle(msg.incrementPlayerScore());
+      }
+
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.incrementPlayerScoreTooltip());
@@ -2369,18 +2463,29 @@ exports.install = function(blockly, blockInstallOptions) {
   blockly.Blocks.flappy_setSpeed = {
     helpUrl: '',
     init: function() {
-      var dropdown = new blockly.FieldDropdown(this.VALUES);
-      dropdown.setValue(this.VALUES[3][1]);  // default to normal
-
       this.setHSV(312, 0.32, 0.62);
-      this.appendDummyInput()
-          .appendTitle(dropdown, 'VALUE');
+      if (isK1) {
+        var fieldImageDropdown = new blockly.FieldImageDropdown(this.K1_VALUES, 63, 33);
+        fieldImageDropdown.setValue(this.K1_VALUES[1][1]); // default to normal
+        this.appendDummyInput()
+          .appendTitle(msg.setSpeed())
+          .appendTitle(fieldImageDropdown, 'VALUE');
+      } else {
+        var dropdown = new blockly.FieldDropdown(this.VALUES);
+        dropdown.setValue(this.VALUES[3][1]); // default to normal
+        this.appendDummyInput().appendTitle(dropdown, 'VALUE');
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setTooltip(msg.setSpeedTooltip());
     }
   };
+
+  blockly.Blocks.flappy_setSpeed.K1_VALUES =
+    [[skin.speedSlow, 'Flappy.LevelSpeed.SLOW'],
+      [skin.speedMedium, 'Flappy.LevelSpeed.NORMAL'],
+      [skin.speedFast, 'Flappy.LevelSpeed.FAST']];
 
   blockly.Blocks.flappy_setSpeed.VALUES =
       [[msg.speedRandom(), RANDOM_VALUE],
@@ -3419,17 +3524,6 @@ BlocklyApps.runButtonClick = function() {
 };
 
 /**
- * Outcomes of running the user program.
- */
-var ResultType = {
-  UNSET: 0,
-  SUCCESS: 1,
-  FAILURE: -1,
-  TIMEOUT: 2,
-  ERROR: -2
-};
-
-/**
  * App specific displayFeedback function that calls into
  * BlocklyApps.displayFeedback when appropriate
  */
@@ -3465,7 +3559,7 @@ Flappy.onReportComplete = function(response) {
  * Execute the user's code.  Heaven help us...
  */
 Flappy.execute = function() {
-  Flappy.result = ResultType.UNSET;
+  Flappy.result = BlocklyApps.ResultType.UNSET;
   Flappy.testResults = BlocklyApps.TestResults.NO_TESTS_RUN;
   Flappy.waitingForReport = false;
   Flappy.response = null;
@@ -3548,7 +3642,7 @@ Flappy.execute = function() {
 
 Flappy.onPuzzleComplete = function() {
   if (level.freePlay) {
-    Flappy.result = ResultType.SUCCESS;
+    Flappy.result = BlocklyApps.ResultType.SUCCESS;
   }
 
   // Stop everything on screen
@@ -3556,7 +3650,7 @@ Flappy.onPuzzleComplete = function() {
 
   // If we know they succeeded, mark levelComplete true
   // Note that we have not yet animated the succesful run
-  BlocklyApps.levelComplete = (Flappy.result == ResultType.SUCCESS);
+  BlocklyApps.levelComplete = (Flappy.result == BlocklyApps.ResultType.SUCCESS);
 
   // If the current level is a free play, always return the free play
   // result type
@@ -3601,7 +3695,7 @@ Flappy.onPuzzleComplete = function() {
   BlocklyApps.report({
                      app: 'flappy',
                      level: level.id,
-                     result: Flappy.result === ResultType.SUCCESS,
+                     result: Flappy.result === BlocklyApps.ResultType.SUCCESS,
                      testResult: Flappy.testResults,
                      program: encodeURIComponent(textBlocks),
                      onComplete: Flappy.onReportComplete
@@ -3746,13 +3840,13 @@ var checkTickLimit = function() {
 var checkFinished = function () {
   // if we have a succcess condition and have accomplished it, we're done and successful
   if (level.goal && level.goal.successCondition && level.goal.successCondition()) {
-    Flappy.result = ResultType.SUCCESS;
+    Flappy.result = BlocklyApps.ResultType.SUCCESS;
     return true;
   }
 
   // if we have a failure condition, and it's been reached, we're done and failed
   if (level.goal && level.goal.failureCondition && level.goal.failureCondition()) {
-    Flappy.result = ResultType.FAILURE;
+    Flappy.result = BlocklyApps.ResultType.FAILURE;
     return true;
   }
 
@@ -4482,12 +4576,11 @@ exports.load = function(assetUrl, id) {
   skin.crashIcon = skin.assetUrl('when-crash.png');
   skin.collideObstacleIcon = skin.assetUrl('when-obstacle.png');
   skin.collideGroundIcon = skin.assetUrl('when-crash.png');
+  skin.enterObstacleIcon = skin.assetUrl('when-pass.png');
   skin.tiles = skin.assetUrl('tiles.png');
   skin.goal = skin.assetUrl('goal.png');
   skin.goalSuccess = skin.assetUrl('goal_success.png');
-  skin.goalAnimation = skin.assetUrl('goal.gif');
   skin.obstacle = skin.assetUrl('obstacle.png');
-  skin.obstacleAnimation = skin.assetUrl('obstacle.gif');
   skin.obstacleScale = config.obstacleScale || 1.0;
   skin.largerObstacleAnimationTiles =
       skin.assetUrl(config.largerObstacleAnimationTiles);
@@ -4548,7 +4641,7 @@ return buf.join('');
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash include="debounce,reject,map,value,range,without,sample" --output build/js/lodash.js`
+ * Build: `lodash include="debounce,reject,map,value,range,without,sample,create" --output build/js/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -5907,6 +6000,21 @@ return buf.join('');
     'loop': 'if (callback(iterable[index], index, collection) === false) return result'
   };
 
+  /** Reusable iterator options for `assign` and `defaults` */
+  var defaultsIteratorOptions = {
+    'args': 'object, source, guard',
+    'top':
+      'var args = arguments,\n' +
+      '    argsIndex = 0,\n' +
+      "    argsLength = typeof guard == 'number' ? 2 : args.length;\n" +
+      'while (++argsIndex < argsLength) {\n' +
+      '  iterable = args[argsIndex];\n' +
+      '  if (iterable && objectTypes[typeof iterable]) {',
+    'keys': keys,
+    'loop': "if (typeof result[index] == 'undefined') result[index] = iterable[index]",
+    'bottom': '  }\n}'
+  };
+
   /** Reusable iterator options for `forIn` and `forOwn` */
   var forOwnIteratorOptions = {
     'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
@@ -5930,6 +6038,85 @@ return buf.join('');
   var baseEach = createIterator(eachIteratorOptions);
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Assigns own enumerable properties of source object(s) to the destination
+   * object. Subsequent sources will overwrite property assignments of previous
+   * sources. If a callback is provided it will be executed to produce the
+   * assigned values. The callback is bound to `thisArg` and invoked with two
+   * arguments; (objectValue, sourceValue).
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @alias extend
+   * @category Objects
+   * @param {Object} object The destination object.
+   * @param {...Object} [source] The source objects.
+   * @param {Function} [callback] The function to customize assigning values.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns the destination object.
+   * @example
+   *
+   * _.assign({ 'name': 'fred' }, { 'employer': 'slate' });
+   * // => { 'name': 'fred', 'employer': 'slate' }
+   *
+   * var defaults = _.partialRight(_.assign, function(a, b) {
+   *   return typeof a == 'undefined' ? b : a;
+   * });
+   *
+   * var object = { 'name': 'barney' };
+   * defaults(object, { 'name': 'fred', 'employer': 'slate' });
+   * // => { 'name': 'barney', 'employer': 'slate' }
+   */
+  var assign = createIterator(defaultsIteratorOptions, {
+    'top':
+      defaultsIteratorOptions.top.replace(';',
+        ';\n' +
+        "if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {\n" +
+        '  var callback = baseCreateCallback(args[--argsLength - 1], args[argsLength--], 2);\n' +
+        "} else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {\n" +
+        '  callback = args[--argsLength];\n' +
+        '}'
+      ),
+    'loop': 'result[index] = callback ? callback(result[index], iterable[index]) : iterable[index]'
+  });
+
+  /**
+   * Creates an object that inherits from the given `prototype` object. If a
+   * `properties` object is provided its own enumerable properties are assigned
+   * to the created object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} prototype The object to inherit from.
+   * @param {Object} [properties] The properties to assign to the object.
+   * @returns {Object} Returns the new object.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * function Circle() {
+   *   Shape.call(this);
+   * }
+   *
+   * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
+   *
+   * var circle = new Circle;
+   * circle instanceof Circle;
+   * // => true
+   *
+   * circle instanceof Shape;
+   * // => true
+   */
+  function create(prototype, properties) {
+    var result = baseCreate(prototype);
+    return properties ? assign(result, properties) : result;
+  }
 
   /**
    * Iterates over own and inherited enumerable properties of an object,
@@ -7040,8 +7227,10 @@ return buf.join('');
 
   /*--------------------------------------------------------------------------*/
 
+  lodash.assign = assign;
   lodash.bind = bind;
   lodash.chain = chain;
+  lodash.create = create;
   lodash.createCallback = createCallback;
   lodash.debounce = debounce;
   lodash.filter = filter;
@@ -7061,6 +7250,7 @@ return buf.join('');
   // add aliases
   lodash.collect = map;
   lodash.each = forEach;
+  lodash.extend = assign;
   lodash.methods = functions;
   lodash.select = filter;
 
@@ -7367,11 +7557,18 @@ exports.load = function(assetUrl, id) {
     downJumpArrow: assetUrl('media/common_images/jumpdown.png'),
     upJumpArrow: assetUrl('media/common_images/jumpup.png'),
     rightJumpArrow: assetUrl('media/common_images/jumpright.png'),
-    shortLineDraw: assetUrl('media/common_images/draw-short-line-crayon.png'),
-    longLineDraw: assetUrl('media/common_images/draw-long-line-crayon.png'),
+    shortLineDraw: assetUrl('media/common_images/draw-short.png'),
+    longLineDraw: assetUrl('media/common_images/draw-long.png'),
+    longLine: assetUrl('media/common_images/move-long.png'),
+    shortLine: assetUrl('media/common_images/move-short.png'),
+    soundIcon: assetUrl('media/common_images/play-sound.png'),
     clickIcon: assetUrl('media/common_images/when-click-hand.png'),
-    startIcon: assetUrl('media/common_images/start-icon.png'),
+    startIcon: assetUrl('media/common_images/when-run.png'),
     endIcon: assetUrl('media/common_images/end-icon.png'),
+    speedFast: assetUrl('media/common_images/speed-fast.png'),
+    speedMedium: assetUrl('media/common_images/speed-medium.png'),
+    speedSlow: assetUrl('media/common_images/speed-slow.png'),
+    scoreCard: assetUrl('media/common_images/increment-score-75percent.png'),
     randomPurpleIcon: assetUrl('media/common_images/random-purple.png'),
     // Sounds
     startSound: [skinUrl('start.mp3'), skinUrl('start.ogg')],
@@ -7753,7 +7950,7 @@ escape = escape || function (html){
 var buf = [];
 with (locals || {}) { (function(){ 
  buf.push('<!DOCTYPE html>\n<html dir="', escape((2,  options.localeDirection )), '">\n<head>\n  <meta charset="utf-8">\n  <title>Blockly</title>\n  <script type="text/javascript" src="', escape((6,  assetUrl('js/' + options.locale + '/vendor.js') )), '"></script>\n  <script type="text/javascript" src="', escape((7,  assetUrl('js/' + options.locale + '/' + app + '.js') )), '"></script>\n  <script type="text/javascript">\n    ');9; // delay to onload to fix IE9. 
-; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: #fff;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
+; buf.push('\n    window.onload = function() {\n      ', escape((11,  app )), 'Main(', (11, filters. json ( options )), ');\n    };\n  </script>\n</head>\n<body>\n  <div id="blockly"></div>\n  <style>\n    html, body {\n      background-color: transparent;\n      margin: 0;\n      padding:0;\n      overflow: hidden;\n      height: 100%;\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    .blocklyText, .blocklyMenuText, .blocklyTreeLabel, .blocklyHtmlInput,\n        .blocklyIconMark, .blocklyTooltipText, .goog-menuitem-content {\n      font-family: \'Gotham A\', \'Gotham B\', sans-serif;\n    }\n    #blockly>svg {\n      background-color: transparent;\n      border: none;\n    }\n    #blockly {\n      position: absolute;\n      top: 0;\n      left: 0;\n      overflow: hidden;\n      height: 100%;\n      width: 100%;\n    }\n  </style>\n</body>\n</html>\n'); })();
 } 
 return buf.join('');
 };
@@ -7825,6 +8022,8 @@ return buf.join('');
   }
 }());
 },{"ejs":37}],33:[function(require,module,exports){
+var _ = require('./lodash');
+
 exports.shallowCopy = function(source) {
   var result = {};
   for (var prop in source) {
@@ -7925,7 +8124,14 @@ exports.stripQuotes = function(inputString) {
   return inputString.replace(/["']/g, "");
 };
 
-},{}],34:[function(require,module,exports){
+/**
+ * Defines an inheritance relationship between parent class and this class.
+ */
+Function.prototype.inherits = function (parent) {
+  this.prototype = _.create(parent.prototype, { constructor: parent });
+};
+
+},{"./lodash":18}],34:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -7963,6 +8169,8 @@ var MessageFormat = require("messageformat");MessageFormat.locale.cs = function 
   }
   return 'other';
 };
+exports.and = function(d){return "and"};
+
 exports.blocklyMessage = function(d){return "Blockly"};
 
 exports.catActions = function(d){return "Akce"};
@@ -8039,13 +8247,19 @@ exports.numBlocksNeeded = function(d){return "Dobrá práce! Dokončil jsi Háda
 
 exports.numLinesOfCodeWritten = function(d){return "Už jsi napsal "+p(d,"numLines",0,"cs",{"one":"1 řádek","other":n(d,"numLines")+" řádků"})+" kódu!"};
 
+exports.play = function(d){return "play"};
+
 exports.puzzleTitle = function(d){return "Hádanka "+v(d,"puzzle_number")+" z "+v(d,"stage_total")};
+
+exports.repeat = function(d){return "repeat"};
 
 exports.resetProgram = function(d){return "Obnovit"};
 
 exports.runProgram = function(d){return "Spustit Program"};
 
 exports.runTooltip = function(d){return "Spustí program definovaný bloky na pracovní ploše."};
+
+exports.score = function(d){return "score"};
 
 exports.showCodeHeader = function(d){return "Zobrazit Kód"};
 
@@ -8317,6 +8531,32 @@ exports.share = function(d){return "Sdílet"};
 exports.shareFlappyTwitter = function(d){return "Podívejte se na hru Flappy, kterou jsem vytvořil/a. Napsal/a jsem ji sám/sama s pomocí @codeorg"};
 
 exports.shareGame = function(d){return "Sdílet tvou hru:"};
+
+exports.soundRandom = function(d){return "random"};
+
+exports.soundBounce = function(d){return "bounce"};
+
+exports.soundCrunch = function(d){return "crunch"};
+
+exports.soundDie = function(d){return "sad"};
+
+exports.soundHit = function(d){return "smash"};
+
+exports.soundPoint = function(d){return "point"};
+
+exports.soundSwoosh = function(d){return "swoosh"};
+
+exports.soundWing = function(d){return "wing"};
+
+exports.soundJet = function(d){return "jet"};
+
+exports.soundCrash = function(d){return "crash"};
+
+exports.soundJingle = function(d){return "jingle"};
+
+exports.soundSplash = function(d){return "splash"};
+
+exports.soundLaser = function(d){return "laser"};
 
 exports.speedRandom = function(d){return "nastavit náhodnou rychlost"};
 

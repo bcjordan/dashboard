@@ -3,7 +3,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   before_filter :nonminimal
 
   def all
-    user = User.from_omniauth(request.env["omniauth.auth"])
+    user = User.from_omniauth(request.env["omniauth.auth"], request.env['omniauth.params'])
     if user.persisted?
       flash.notice = I18n.t('auth.signed_in')
       sign_in_and_redirect user

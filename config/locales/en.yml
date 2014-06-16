@@ -315,7 +315,7 @@ en:
     prize_earned:
       subject: "Redeem your prize at Code.org!"
     teacher_prize_earned:
-      subject: "Redeem your prize at Code.org!"
+      subject: "Congratulations from Code.org!"
     teacher_bonus_prize_earned:
       subject: "Redeem your bonus prize at Code.org!"
   reference_area:
@@ -374,9 +374,13 @@ en:
   multi:
     wrong_title: "Incorrect answer"
     wrong_body: "The answer you've entered is not correct.  Please try again!"
+    correct_title: "Correct"
+    correct_body: "That is the correct answer."
   match:
     wrong_title: "Incorrect solution"
     wrong_body: "The solution you've entered is not correct.  Please try again!"
+    correct_title: "Correct"
+    correct_body: "That is the correct answer."
   dialog:
     ok: "OK"
 
