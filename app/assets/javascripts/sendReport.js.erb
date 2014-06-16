@@ -46,11 +46,12 @@ var cancelReport = function() {
 };
 
 function getFallbackResponse(report) {
-  return report.fallbackResponse ?
-          (report.pass ?
+  if (!report.fallbackResponse) {
+    return null;
+  }
+  return report.pass ?
             report.fallbackResponse.success :
-            report.fallbackResponse.failure) :
-          null;
+            report.fallbackResponse.failure;
 }
 
 function reportComplete(report, response) {
