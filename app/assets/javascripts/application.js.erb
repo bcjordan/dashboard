@@ -43,7 +43,7 @@ window.onerror = function (msg, url, ln) {
     arguments[0] = 'Script Error: ' + url;
   }
   if (windowOnError) {
-    windowOnError.apply(this, arguments);
+    return windowOnError.apply(this, arguments);
   }
 };
 
