@@ -15,11 +15,6 @@
           = t('signup_form.overview_teacher').html_safe
           = link_to t('signup_form.teacher_educator_guide'), 'http://code.org/educate/20hr', :target => '_blank'
 
-        - if eligible_for_prize?
-          = sanitize(t('signup_form.teacher_prize_message').html_safe, tags: %w(a), attributes: %w(href target))
-          %br/
-          %br/
-
   .row
     .span8.signupblock
       = form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :class => 'signupform' }) do |f|

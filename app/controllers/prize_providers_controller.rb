@@ -28,32 +28,25 @@ class PrizeProvidersController < ApplicationController
     
     # confirm that user is in the US here
     eligible = true if eligible_for_prize?
-    if eligible
-      prize = case params[:type].downcase
-      when 'teacher'
-        earned = current_user.teacher_prize_earned
-        existing_prize_id = current_user.teacher_prize_id
-        TeacherPrize.assign_to_user(current_user, @prize_provider) if earned && !existing_prize_id
-        # e-mail confirmation with code?
-        # PrizeMailer.prize_redeemed(user).deliver
-      when 'teacher_bonus'
-        earned = current_user.teacher_bonus_prize_earned
-        existing_prize_id = current_user.teacher_bonus_prize_id
-        TeacherBonusPrize.assign_to_user(current_user, @prize_provider) if earned && !existing_prize_id
-        # e-mail confirmation with code?
-        # PrizeMailer.teacher_prize_redeemed(user).deliver
-      # student prizes disabled
+    # all prize claiming disabled
+    # if eligible
+      # prize = case params[:type].downcase
+      # when 'teacher'
+        # earned = current_user.teacher_prize_earned
+        # existing_prize_id = current_user.teacher_prize_id
+        # TeacherPrize.assign_to_user(current_user, @prize_provider) if earned && !existing_prize_id
+      # when 'teacher_bonus'
+        # earned = current_user.teacher_bonus_prize_earned
+        # existing_prize_id = current_user.teacher_bonus_prize_id
+        # TeacherBonusPrize.assign_to_user(current_user, @prize_provider) if earned && !existing_prize_id
       # when 'student'
         # earned = current_user.prize_earned
         # existing_prize_id = current_user.prize_id
         # Prize.assign_to_user(current_user, @prize_provider) if earned && !existing_prize_id
-        
-        # e-mail confirmation with code?
-        # PrizeMailer.teacher_bonus_prize_redeemed(user).deliver
-      else
-        raise 'type parameter missing'
-      end
-    end
+      # else
+        # raise 'type parameter missing'
+      # end
+    # end
 
     if prize.present?
       redirect_to my_prizes_url, notice: t('redeem_prizes.success')
