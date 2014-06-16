@@ -39,8 +39,8 @@ var KEY_ESCAPE = 27;
 // script error and a url, throw that so that we have the info in new relic.
 var windowOnError = window.onError;
 window.onerror = function (msg, url, ln) {
-  if (/^Script Error/.test(msg) && url) {
-    throw "Script Error: " + url;
+  if (/^Script error/.test(msg) && url) {
+    arguments[0] = 'Script Error: ' + url;
   }
   if (windowOnError) {
     windowOnError.apply(this, arguments);
