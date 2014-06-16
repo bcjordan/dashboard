@@ -46,14 +46,21 @@ var cancelReport = function() {
 };
 
 function getFallbackResponse(report) {
-  return report.pass ? report.fallbackResponse.success : report.fallbackResponse.failure;
+  if (!report.fallbackResponse) {
+    return null;
+  }
+  return report.pass ?
+            report.fallbackResponse.success :
+            report.fallbackResponse.failure;
 }
 
 function reportComplete(report, response) {
   lastAjax = null;
-  nextRedirect = response['redirect'];
-  previousLevelRedirect = response['previous_level'];
-  videoInfo = response['video_info'];
+  if (response) {
+    nextRedirect = response['redirect'];
+    previousLevelRedirect = response['previous_level'];
+    videoInfo = response['video_info'];
+  }
   if (report.onComplete) {
     report.onComplete(response);
   }
