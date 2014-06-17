@@ -52,10 +52,12 @@ en:
           desc: Custom script 4-5
           The Maze: The Maze
           The Coffee: The Coffee
+          'Studio: Create a Story': 'Studio: Create a Story'
         2-3:
           desc: Custom script 2-3
           The Maze: The Maze
           The Coffee: The Coffee
+          'Studio: Create a Story': 'Studio: Create a Story'
         test:
           desc: Custom script test
           'Jigsaw: Learn to drag and drop': 'Jigsaw: Learn to drag and drop'
