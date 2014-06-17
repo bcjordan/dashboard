@@ -419,7 +419,8 @@ input[type="radio"] {
     display: block;
     margin: 0px auto;
     position: relative;
-    left: -50px; }
+    left: -50px;
+    z-index: -1; }
   .modal-content .feedback-image {
     width: 40%;
     height: auto;

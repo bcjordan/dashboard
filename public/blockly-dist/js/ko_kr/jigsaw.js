@@ -2646,6 +2646,8 @@ var validateSimplePuzzle = function (types, options) {
 module.exports = {
   '1': {
     instructionsIcon: 'apple',
+    aniGifURL: '/script_assets/k_1_images/instruction_gifs/click-block.gif',
+    is_k1: true,
     image: {
       name: 'apple',
       width: 200,
@@ -2666,6 +2668,8 @@ module.exports = {
   },
   '2': {
     instructionsIcon: 'smiley',
+    aniGifURL: '/script_assets/k_1_images/instruction_gifs/drag-drop.gif',
+    is_k1: true,
     image: {
       name: 'smiley',
       width: 200,
@@ -2698,6 +2702,8 @@ module.exports = {
   },
   '3': {
     instructionsIcon: 'snail',
+    aniGifURL: '/script_assets/k_1_images/instruction_gifs/drag-connect.gif',
+    is_k1: true,
     image: {
       name: 'snail',
       width: 200,
@@ -2724,6 +2730,7 @@ module.exports = {
 
   '4': {
     instructionsIcon: 'elephant',
+    is_k1: true,
     image: {
       name: 'elephant',
       width: 200,
@@ -2750,6 +2757,7 @@ module.exports = {
 
   '5': {
     instructionsIcon: 'fish',
+    is_k1: true,
     image: {
       name: 'fish',
       width: 200,
@@ -2778,6 +2786,7 @@ module.exports = {
 
   '6': {
     instructionsIcon: 'doggie',
+    is_k1: true,
     image: {
       name: 'doggie',
       width: 200,
@@ -2806,6 +2815,7 @@ module.exports = {
 
   '7': {
     instructionsIcon: 'tree',
+    is_k1: true,
     image: {
       name: 'tree',
       width: 200,
@@ -2834,6 +2844,7 @@ module.exports = {
 
   '8': {
     instructionsIcon: 'flower',
+    is_k1: true,
     image: {
       name: 'flower',
       width: 200,
@@ -2862,6 +2873,7 @@ module.exports = {
 
   '9': {
     instructionsIcon: 'house',
+    is_k1: true,
     image: {
       name: 'house',
       width: 200,
@@ -2888,6 +2900,7 @@ module.exports = {
 
   '10': {
     instructionsIcon: 'computer',
+    is_k1: true,
     image: {
       name: 'computer',
       width: 200,
@@ -2914,6 +2927,7 @@ module.exports = {
 
   '11': {
     instructionsIcon: 'blocks',
+    is_k1: true,
     image: {
       name: 'blocks',
       width: 140,
@@ -2944,6 +2958,7 @@ module.exports = {
 
   '12': {
     instructionsIcon: 'blocks',
+    is_k1: true,
     image: {
       name: 'blocks',
       width: 140,
