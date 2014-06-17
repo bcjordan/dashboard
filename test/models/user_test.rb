@@ -120,6 +120,14 @@ class UserTest < ActiveSupport::TestCase
     end
   end
 
+  test "trying to create a user with too large age creates user without a birthday" do
+    assert_difference('User.count') do
+      user = User.create(@good_data.merge({age: 15000000, username: 'anewone', email: 'new@email.com'}))
+      assert_equal nil, user.birthday
+      assert_equal nil, user.age
+    end
+  end
+
   test "can update a user with age" do
     Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
       user = User.create(@good_data.merge({age: '7', username: 'anewone', email: 'new@email.com'}))
@@ -218,5 +226,4 @@ class UserTest < ActiveSupport::TestCase
     assert_equal nil, User.find_first_by_auth_conditions(email: {'$acunetix' => 1})
     # this used to raise a mysql error, now we sanitize it into a nonsense string
   end
-
 end

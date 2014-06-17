@@ -1,7 +1,7 @@
 class FollowersController < ApplicationController
   before_filter :authenticate_user!, except: [:student_user_new, :student_register]
-  check_authorization only: [:index, :new, :create]
-  load_and_authorize_resource only: [:index, :new, :create]
+  check_authorization only: [:index, :create, :manage, :sections]
+  load_and_authorize_resource only: [:index, :create, :manage, :sections]
 
   def index
     script = Script.twenty_hour_script
@@ -19,60 +19,29 @@ class FollowersController < ApplicationController
     @all_games = Game.where(['id in (select game_id from levels l inner join script_levels sl on sl.level_id = l.id where sl.script_id = ?)', script.id])
   end
 
-  def new
-  end
-
   def create
-    redirect_url = params[:redirect] || followers_path
+    redirect_url = params[:redirect] || root_path
 
-    if params[:student_email_or_username]
-      key = params[:student_email_or_username]
-      if key =~ Devise::email_regexp
-        student = User.find_by_email(key)
-        if student
-          FollowerMailer.invite_student(current_user, student).deliver
-          redirect_to redirect_url, notice: I18n.t('follower.invite_sent')
-        else
-          FollowerMailer.invite_new_student(current_user, key).deliver
-          redirect_to redirect_url, notice: I18n.t('follower.invite_sent')
-        end
-      else
-        student = User.find_by_username(key)
-        if student
-          # todo: queue invite for user if no email
-          FollowerMailer.invite_student(current_user, student).deliver
-          redirect_to redirect_url, notice: I18n.t('follower.invite_sent')
-        else
-          redirect_to redirect_url, notice: I18n.t('follower.error.username_not_found', username: key)
-        end
-      end
-    elsif params[:teacher_email_or_code]
-      if params[:teacher_email_or_code].blank?
-        flash[:alert] = I18n.t('follower.error.blank_code')
-        redirect_to root_path
-        return
-      end
-
-      target_section = Section.find_by_code(params[:teacher_email_or_code])
-      target_user = target_section.try(:user) || User.find_by_email(params[:teacher_email_or_code])
-
-      if target_user && target_user.email.present?
-        begin
-          Follower.create!(user: target_user, student_user: current_user, section: target_section)
-        rescue ActiveRecord::RecordNotUnique => e
-          Rails.logger.error("attempt to create duplicate follower from #{current_user.id} => #{target_user.id}")
-        end
-
-        # if the teacher has not confirmed their email, they should be sent email confirmation instrutions
-        target_user.send_confirmation_instructions if !target_user.confirmed?
-
-        redirect_to redirect_url, notice: I18n.t('follower.added_teacher', name: target_user.name)
-      else
-        redirect_to redirect_url, notice: I18n.t('follower.error.no_teacher', teacher_email_or_code: params[:teacher_email_or_code])
-      end
-    else
-      raise "unknown use"
+    if params[:section_code].blank?
+      redirect_to redirect_url, alert: I18n.t('follower.error.blank_code')
+      return
     end
+
+    unless @section = Section.find_by_code(params[:section_code])
+      redirect_to redirect_url, alert: I18n.t('follower.error.section_not_found', section_code: params[:section_code])
+      return
+    end
+
+    teacher = @section.user
+
+    retryable on: Mysql2::Error, matching: /Duplicate entry/ do # catch race conditions in first_or_create
+      @follower = Follower.where(user: teacher, student_user: current_user, section: @section).first_or_create!
+    end
+
+    # if the teacher has not confirmed their email, they should be sent email confirmation instrutions
+    teacher.send_confirmation_instructions if !teacher.confirmed?
+
+    redirect_to redirect_url, notice: I18n.t('follower.added_teacher', name: teacher.name)
   end
 
   def manage
@@ -82,21 +51,6 @@ class FollowersController < ApplicationController
 
   def sections
     @sections = current_user.sections.order('name')
-  end
-
-  def accept
-    # todo: add a guid/hash to prevent url hacking
-    @teacher = User.find(params[:teacher_user_id])
-
-    if Follower.find_by_user_id_and_student_user_id(@teacher, current_user)
-      redirect_to(root_path, notice: "#{@teacher.name} already added as a teacher")
-      return
-    end
-
-    if params[:confirm]
-      Follower.create!(user: @teacher.id, student_user: current_user.id)
-      redirect_to root_path, notice: "#{@teacher.name} was added as a teacher"
-    end
   end
 
   def add_to_section
@@ -120,23 +74,11 @@ SQL
     end
   end
 
-  def remove_from_section
-    section = Section.find(params[:section_id])
-    raise "not owner of that section" if section.user_id != current_user.id
-    
-    follower = Follower.find_by_student_user_id_and_section_id(params[:follower_id], section)
-    
-    follower.update_attributes!(:section_id => nil) if follower
-
-    redirect_to manage_followers_path, notice: "Updated class assignments"
-  end
-  
   def remove
     @user = User.find(params[:student_user_id])
     @teacher = User.find(params[:teacher_user_id])
 
     raise "not found" if !@user || !@teacher
-    raise "not authorized" if @user.id != current_user.id && @teacher.id != current_user.id
     
     removed_by_student = @user.id == current_user.id
 
@@ -147,6 +89,7 @@ SQL
     if !f.present?
       redirect_to redirect_url, alert: t('teacher.user_not_found')
     else
+      authorize! :destroy, f
       if @user.email.present? || @user.teachers.count > 1
         # if this was the student's first teacher, store that teacher id in the student's record
         @user.update_attributes(:prize_teacher_id => @teacher.id) if @user.teachers.first.try(:id) == @teacher.id && @user.prize_teacher_id.blank?

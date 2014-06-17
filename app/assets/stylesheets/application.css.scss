@@ -218,16 +218,16 @@ th {
 
 .user-stats-block
 {
-  display:inline-block; 
-  position:relative; 
-  overflow:hidden; 
+  display:inline-block;
+  position:relative;
+  overflow:hidden;
   float:left;
   width:100%;
 }
 
 .game-group {
-  display: table; 
-  padding: 10px; 
+  display: table;
+  padding: 10px;
   width: 100%;
   .stage {
     display: table-cell;
@@ -242,8 +242,8 @@ th {
     margin-top: 4px;
     margin-bottom: 4px;
     display: table-cell;
-    vertical-align: middle; 
-    padding-top: 4px; 
+    vertical-align: middle;
+    padding-top: 4px;
     padding-bottom: 4px;
     a {
       border-radius: 15px;
@@ -362,8 +362,8 @@ html, body {
   a:active {font-weight: 400; color:white; background-color: transparent;}  /* selected link */
   select {
     width: auto;
-    font-size:11px; 
-    height: 18px; 
+    font-size:11px;
+    height: 18px;
     margin-bottom: 4px
     }
   .fineprint {
@@ -557,7 +557,7 @@ html, body {
   overflow-y: auto;
   display: block;
   min-height: 1100px;
-  
+
   .loading {
     height: 400px;
     margin: 20px;
@@ -705,7 +705,7 @@ th.manage-th {
   border-color: white;
   border-width: 1px;
   border-style: solid;
-  
+
   border-top-color: rgb(0, 178, 192);
   border-left-color: rgb(0, 178, 192);
   border-right-color: rgb(0, 178, 192);
@@ -849,18 +849,18 @@ tr.manage-tr {
   $startHeight: 59px;
   $growth: 3px;
   $movement: 1px;
-  
+
   position: absolute;
   cursor: pointer;
   z-index: 1;
-  
+
   top: $cornerOffset;
   right: $cornerOffset;
   &:hover {
     top: $cornerOffset - $movement;
     right: $cornerOffset - $movement;
   }
-  
+
   img {
     width: $startWidth;
     height: $startHeight;
@@ -868,7 +868,7 @@ tr.manage-tr {
       width: $startWidth + $growth;
       height: $startHeight + $growth;
     }
-  }  
+  }
 }
 
 .x-close {
@@ -881,8 +881,8 @@ tr.manage-tr {
 
 .cdo-qtips {
   z-index: 1;
-  
-  
+
+
   .tooltip-x-close {
     @include close-button($cornerOffset: -35px);
     background: none;
@@ -959,7 +959,7 @@ a.download-video {
     padding-top:10px;
     .medium-size-text {
       font-size:18px; line-height:30px;
-    }  
+    }
     #maintext {
       text-align:left; padding-left:20px; color:#666;
     }
@@ -1016,7 +1016,7 @@ a.download-video {
     font-size:13px;
     padding-right:10px;
     font-weight:normal;
-  }   
+  }
   .imgspan {
     margin-left: 0px;
   }
@@ -1030,7 +1030,7 @@ a.download-video {
   .tryfirst {
     margin-bottom:10px;
     a {
-      font-size:18px; 
+      font-size:18px;
       font-weight:400;
     }
   }
@@ -1085,10 +1085,10 @@ a.download-video {
 
 .match {
   .mainblock {
-    margin-left: 0px; 
+    margin-left: 0px;
   }
   .column {
-    width: 260px; 
+    width: 260px;
     float: left;
   }
   .draggablecolumn {
@@ -1106,8 +1106,8 @@ a.download-video {
     padding-right: 10px;
     width: 220px;
     margin-top:2px;
-    margin-bottom:2px;  
-  } 
+    margin-bottom:2px;
+  }
   #questions {
     list-style-type: none;
     margin-left:0px;
@@ -1116,7 +1116,7 @@ a.download-video {
     }
   }
   li {
-    text-align: center; 
+    text-align: center;
   }
   #slots {
     list-style-type: none;
@@ -1290,16 +1290,6 @@ $modal-image-margin-gap: 10px;
     font-size: 27px;
     line-height: 30px;
     margin-bottom: 15px;
-  }
-
-  .instruction-image {
-    width: 40%;
-    height: auto;
-    float: left;
-  }
-
-  .instruction-with-image {
-    padding-left: 42%
   }
 
   .feedback-image {
