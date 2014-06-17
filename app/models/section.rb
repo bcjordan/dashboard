@@ -10,6 +10,11 @@ class Section < ActiveRecord::Base
   validates :name, uniqueness: { scope: :user_id }
   validates :name, presence: true
 
+  def user_must_be_teacher
+    errors.add(:user_id, "must be a teacher") unless user.user_type == User::TYPE_TEACHER
+  end
+  validate :user_must_be_teacher
+
   before_create :assign_code
 
   def assign_code

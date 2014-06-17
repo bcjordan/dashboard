@@ -9,7 +9,7 @@ class Ability
       can :manage, :all
     else
       can :read, :all
-      cannot :read, [PrizeProvider, Prize, TeacherPrize, TeacherBonusPrize, LevelSourceHint, FrequentUnsuccessfulLevelSource, :reports, User]
+      cannot :read, [PrizeProvider, Prize, TeacherPrize, TeacherBonusPrize, LevelSourceHint, FrequentUnsuccessfulLevelSource, :reports, User, Follower]
       can :claim_prize, PrizeProvider
     end
 
@@ -17,21 +17,23 @@ class Ability
       can :manage, user
 
       # TODO a bunch of these should probably be limited by user_id
-      can :manage, Section, user_id: user.id # TODO limit this to teachers
       can :create, Activity
       can :save_to_gallery, Activity, user_id: user.id
       can :create, GalleryActivity, user_id: user.id
       can :destroy, GalleryActivity, user_id: user.id
       can :create, UserLevel
-      can :create, Follower
+      can :create, Follower, student_user_id: user.id
+      can :destroy, Follower, student_user_id: user.id
     end
     if user.hint_access? || user.teacher?
       can :manage, [LevelSourceHint, FrequentUnsuccessfulLevelSource]
     end
 
-    if user.teacher? || !user.students.empty? # remove second when we fix users so all teachers are teachers
+    if user.teacher?
+      can :manage, Section, user_id: user.id
       can :manage, :teacher
       can :manage, user.students
+      can :manage, Follower
     end
     #
     # The first argument to `can` is the action you are giving the user 

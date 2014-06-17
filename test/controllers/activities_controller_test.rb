@@ -378,7 +378,6 @@ class ActivitiesControllerTest < ActionController::TestCase
     # we should just raise the exception
     assert_raises(ActiveRecord::RecordNotUnique) do
       post :milestone, user_id: @user, script_level_id: @script_level, :lines => 20, :attempt => "1", :result => "true", :testResult => "100", :time => "1000", :app => "test", :program => "<hey>"
-      p @response.body
     end
   end
 
