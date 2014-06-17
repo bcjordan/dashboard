@@ -269,8 +269,23 @@ input[type="radio"] {
   height: auto;
   float: left; }
 
+#ani-gif-preview {
+  cursor: pointer;
+  display: table-cell;
+  background-size: 80px 60px;
+  width: 80px;
+  height: 60px;
+  vertical-align: middle;
+  text-align: center; }
+  #ani-gif-preview #play-button {
+    clear: both;
+    height: 40px;
+    position: relative; }
+
 #prompt {
   display: table-cell; }
+  #prompt.with-ani-gif {
+    width: 260px; }
 
 #headers {
   background-color: #7665a0; }
@@ -400,12 +415,11 @@ input[type="radio"] {
     font-size: 27px;
     line-height: 30px;
     margin-bottom: 15px; }
-  .modal-content .instruction-image {
-    width: 40%;
-    height: auto;
-    float: left; }
-  .modal-content .instruction-with-image {
-    padding-left: 42%; }
+  .modal-content .aniGif {
+    display: block;
+    margin: 0px auto;
+    position: relative;
+    left: -50px; }
   .modal-content .feedback-image {
     width: 40%;
     height: auto;
