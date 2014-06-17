@@ -123,7 +123,6 @@ Dashboard::Application.routes.draw do
   post '/followers/save_password', to: 'followers#student_update_password', as: 'student_update_password'
 
   post '/followers/add_to_section', to: 'followers#add_to_section', as: 'add_to_section'
-  post '/followers/remove_from_section', to: 'followers#remove_from_section', as: 'remove_from_section'
   post '/followers/remove', to: 'followers#remove', as: 'remove_follower'
   get '/join(/:section_code)', to: 'followers#student_user_new', as: 'student_user_new'
   post '/join/:section_code', to: 'followers#student_register', as: 'student_register'

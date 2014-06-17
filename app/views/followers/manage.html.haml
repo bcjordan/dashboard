@@ -15,7 +15,6 @@
   .manage_section_area{style: "display:none;"}
     Assign checked students to section:
     - options_select = options_from_collection_for_select(@sections, :id, :name)
-    - options_select += '<option value="NULL">(None)</option>'.html_safe
     = select_tag('section_id', options_select, style: 'margin: 0 7px 0px 4px')
     = submit_tag 'Go'
 
@@ -47,13 +46,12 @@
           %td.manage-td= add_section_ui ? check_box_tag('follower_ids[]', followed.id, false, class: :checkstudent) : ''
           %td.manage-td{ class: 'fixed_width_cell' }
             = link_to followed.student_user.name || followed.student_user.username, user_stats_path(followed.student_user)
-            = link_to "(remove student)", remove_follower_path(teacher_user_id: current_user.id, student_user_id: followed.student_user_id), confirm: 'Are you sure you want to remove this student?', method: :post
+            = link_to "(remove student)", remove_follower_path(teacher_user_id: current_user.id, student_user_id: followed.student_user_id), data: {confirm: 'Are you sure you want to remove this student?'}, method: :post
           %td.manage-td{ class: 'fixed_width_cell' }
             = followed.student_user.username
           %td.manage-td= followed.student_user.email.blank? ? link_to("Edit", student_edit_password_path(followed.student_user)) : ''
           %td.manage-td
             = followed.section.try(:name)
-            = link_to("(remove from section)", remove_from_section_path(follower_id: followed.student_user_id, section_id: followed.section_id), method: :post) if followed.section.present?
 
   %div{style: 'min-height: 40px; margin-top: 10px'}
     = yield :section_assignment_dropdown
