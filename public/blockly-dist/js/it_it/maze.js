@@ -358,11 +358,15 @@ BlocklyApps.init = function(config) {
     BlocklyApps.WIN_ICON = config.skin[config.level.instructionsIcon];
   }
 
-  if (config.showInstructionsWrapper) {
-    config.showInstructionsWrapper(function() {
-      showInstructions(config.level);
-    });
-  }
+  var showInstructionsIfAvailable = function() {
+    if (config.showInstructionsWrapper) {
+      config.showInstructionsWrapper(function () {
+        showInstructions(config.level);
+      });
+    }
+  };
+
+  showInstructionsIfAvailable();
 
   // The share page does not show the rotateContainer.
   if (BlocklyApps.share) {
@@ -384,12 +388,21 @@ BlocklyApps.init = function(config) {
     config.loadAudio();
   }
 
+  var promptDiv = document.getElementById('prompt');
   if (config.level.instructions) {
-    var promptDiv = document.getElementById('prompt');
     dom.setText(promptDiv, config.level.instructions);
 
     var promptIcon = document.getElementById('prompt-icon');
     promptIcon.src = BlocklyApps.SMALL_ICON;
+  }
+
+  var aniGifPreview = document.getElementById('ani-gif-preview');
+  if (config.level.aniGifURL) {
+    aniGifPreview.style.backgroundImage = "url('" + config.level.aniGifURL + "')";
+    aniGifPreview.onclick = showInstructionsIfAvailable;
+    promptDiv.className += " with-ani-gif";
+  } else {
+    aniGifPreview.style.display = 'none';
   }
 
   // Allow empty blocks if editing blocks.
@@ -1681,11 +1694,6 @@ exports.createSharingDiv = function(options) {
   var facebookUrl = "https://www.facebook.com/sharer/sharer.php?u=" +
                     options.response.level_source;
   options.facebookUrl = facebookUrl;
-
-  // use a generic image for the level if a feedback image has not been supplied.
-  if (options.level && options.level.instructionImageUrl && !options.feedbackImage) {
-    options.feedbackImage = options.level.instructionImageUrl;
-  }
 
   var sharingDiv = document.createElement('div');
   sharingDiv.setAttribute('style', 'display:inline-block');
@@ -11192,7 +11200,7 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/it_it/common'); ; buf.push('\n\n<p class=\'dialog-title\'>', escape((3,  msg.puzzleTitle(locals) )), '</p>\n');4; if (locals.instructionImageUrl) {; buf.push('  <img class=\'instruction-image\' src=\'', escape((4,  locals.instructionImageUrl )), '\'>\n  <p class=\'instruction-with-image\'>', escape((5,  instructions )), '</p>\n');6; } else {; buf.push('  <p>', escape((6,  instructions )), '</p>\n');7; };; buf.push(''); })();
+ buf.push('');1; var msg = require('../../locale/it_it/common'); ; buf.push('\n\n<p class=\'dialog-title\'>', escape((3,  msg.puzzleTitle(locals) )), '</p>\n<p>', escape((4,  instructions )), '</p>\n');5; if (locals.aniGifURL) {; buf.push('  <img class="aniGif" src=\'', escape((5,  locals.aniGifURL )), '\'/>\n');6; };; buf.push(''); })();
 } 
 return buf.join('');
 };
@@ -11260,8 +11268,8 @@ with (locals || {}) { (function(){
  buf.push('');1;
   var msg = require('../../locale/it_it/common');
   var hideRunButton = locals.hideRunButton || false;
-; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble">\n    <img id="prompt-icon">\n    <p id="prompt">\n    </p>\n  </div>\n');17; };; buf.push('\n');18; // A spot for the server to inject some HTML for help content.
-var helpArea = function(html) {; buf.push('  ');19; if (html) {; buf.push('    <div id="helpArea">\n      ', (20,  html ), '\n    </div>\n  ');22; }; buf.push('');22; };; buf.push('\n');23; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((24,  msg.typeCode() )), '\n    <br>\n    // ', escape((26,  msg.typeHint() )), '\n    <br>\n  </div>\n');29; }; ; buf.push('\n\n<div id="visualization">\n  ', (32,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((40,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((41,  msg.runProgram() )), '</div>\n          <img src="', escape((42,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((45,  msg.resetProgram() )), '</div>\n          <img src="', escape((46,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');49; if (data.controls) { ; buf.push('\n        ', (50,  data.controls ), '\n      ');51; } ; buf.push('\n    </tr>\n    ');53; if (data.extraControlRows) { ; buf.push('\n      ', (54,  data.extraControlRows ), '\n    ');55; } ; buf.push('\n  </table>\n\n  ');58; instructions() ; buf.push('\n  ');59; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((64,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((65,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span>', escape((67,  msg.workspaceHeader())), ' </span>\n      <div id="blockCounter">\n        <div id="blockUsed" class=', escape((69,  data.blockCounterClass )), '>\n          ', escape((70,  data.blockUsed )), '\n        </div>\n        <span>&nbsp;/</span>\n        <span id="idealBlockNumber">', escape((73,  data.idealBlockNumber )), '</span>\n      </div>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((76,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');82; codeArea() ; buf.push('\n'); })();
+; buf.push('\n\n<div id="rotateContainer" style="background-image: url(', escape((6,  assetUrl('media/mobile_tutorial_turnphone.png') )), ')">\n  <div id="rotateText">\n    <p>', escape((8,  msg.rotateText() )), '<br>', escape((8,  msg.orientationLock() )), '</p>\n  </div>\n</div>\n\n');12; var instructions = function() {; buf.push('  <div id="bubble" class="clearfix">\n    <img id="prompt-icon"/>\n    <p id="prompt">\n    </p>\n    <div id="ani-gif-preview">\n      <img id="play-button" src="', escape((17,  assetUrl('media/play-circle.png') )), '"/>\n    </div>\n  </div>\n');20; };; buf.push('\n');21; // A spot for the server to inject some HTML for help content.
+var helpArea = function(html) {; buf.push('  ');22; if (html) {; buf.push('    <div id="helpArea">\n      ', (23,  html ), '\n    </div>\n  ');25; }; buf.push('');25; };; buf.push('\n');26; var codeArea = function() {; buf.push('  <div id="codeTextbox" contenteditable spellcheck=false>\n    // ', escape((27,  msg.typeCode() )), '\n    <br>\n    // ', escape((29,  msg.typeHint() )), '\n    <br>\n  </div>\n');32; }; ; buf.push('\n\n<div id="visualization">\n  ', (35,  data.visualization ), '\n</div>\n\n<div id="belowVisualization">\n\n  <table id="gameButtons">\n    <tr>\n      <td style="width:100%;">\n        <button id="runButton" class="launch blocklyLaunch ', escape((43,  hideRunButton ? 'hide' : '')), '">\n          <div>', escape((44,  msg.runProgram() )), '</div>\n          <img src="', escape((45,  assetUrl('media/1x1.gif') )), '" class="run26"/>\n        </button>\n        <button id="resetButton" class="launch blocklyLaunch" style="display: none">\n          <div>', escape((48,  msg.resetProgram() )), '</div>\n          <img src="', escape((49,  assetUrl('media/1x1.gif') )), '" class="reset26"/>\n        </button>\n      </td>\n      ');52; if (data.controls) { ; buf.push('\n        ', (53,  data.controls ), '\n      ');54; } ; buf.push('\n    </tr>\n    ');56; if (data.extraControlRows) { ; buf.push('\n      ', (57,  data.extraControlRows ), '\n    ');58; } ; buf.push('\n  </table>\n\n  ');61; instructions() ; buf.push('\n  ');62; helpArea(data.helpHtml) ; buf.push('\n\n</div>\n\n<div id="blockly">\n  <div id="headers" dir="', escape((67,  data.localeDirection )), '">\n    <div id="toolbox-header" class="blockly-header"><span>', escape((68,  msg.toolboxHeader() )), '</span></div>\n    <div id="workspace-header" class="blockly-header">\n      <span>', escape((70,  msg.workspaceHeader())), ' </span>\n      <div id="blockCounter">\n        <div id="blockUsed" class=', escape((72,  data.blockCounterClass )), '>\n          ', escape((73,  data.blockUsed )), '\n        </div>\n        <span>&nbsp;/</span>\n        <span id="idealBlockNumber">', escape((76,  data.idealBlockNumber )), '</span>\n      </div>\n    </div>\n    <div id="show-code-header" class="blockly-header"><span>', escape((79,  msg.showCodeHeader() )), '</span></div>\n  </div>\n</div>\n\n<div class="clear"></div>\n\n');85; codeArea() ; buf.push('\n'); })();
 } 
 return buf.join('');
 };
@@ -11304,7 +11312,7 @@ escape = escape || function (html){
 };
 var buf = [];
 with (locals || {}) { (function(){ 
- buf.push('');1; var msg = require('../../locale/it_it/common'); ; buf.push('\n');2; if (options.feedbackImage) { ; buf.push('\n  <div class="sharing-image">\n    <img class="feedback-image" src="', escape((4,  options.feedbackImage )), '">\n  </div>\n');6; } ; buf.push('\n\n<div class="sharing">\n');9; if (options.alreadySaved) { ; buf.push('\n  <div class="saved-to-gallery">\n    ', escape((11,  msg.savedToGallery() )), '\n  </div>\n');13; } else if (options.saveToGalleryUrl) { ; buf.push('\n  <div class="social-buttons">\n  <button id="save-to-gallery-button" class="launch">\n    ', escape((16,  msg.saveToGallery() )), '\n  </button>\n  </div>\n');19; } ; buf.push('\n\n');21; if (options.response && options.response.level_source) { ; buf.push('\n  ');22; if (options.appStrings && options.appStrings.sharingText) { ; buf.push('\n    <div>', escape((23,  options.appStrings.sharingText )), '</div>\n  ');24; } ; buf.push('\n\n  <div>\n    <input type="text" id="sharing-input" value=', escape((27,  options.response.level_source )), ' readonly>\n  </div>\n\n  <div class=\'social-buttons\'>\n    ');31; if (options.facebookUrl) {; buf.push('      <a href=', escape((31,  options.facebookUrl )), ' target="_blank">\n        <img src=', escape((32,  BlocklyApps.assetUrl("media/facebook_purple.png") )), '>\n      </a>\n    ');34; }; buf.push('  \n    ');35; if (options.twitterUrl) {; buf.push('      <a href=', escape((35,  options.twitterUrl )), ' target="_blank">\n        <img src=', escape((36,  BlocklyApps.assetUrl("media/twitter_purple.png") )), ' >\n      </a>\n    ');38; }; buf.push('  </div>\n');39; } ; buf.push('\n</div>\n\n'); })();
+ buf.push('');1; var msg = require('../../locale/it_it/common'); ; buf.push('\n');2; if (options.feedbackImage) { ; buf.push('\n  <div class="sharing-image">\n    <img class="feedback-image" src="', escape((4,  options.feedbackImage )), '">\n  </div>\n');6; } ; buf.push('\n\n<div class="sharing">\n');9; if (options.alreadySaved) { ; buf.push('\n  <div class="saved-to-gallery">\n    ', escape((11,  msg.savedToGallery() )), '\n  </div>\n');13; } else if (options.saveToGalleryUrl) { ; buf.push('\n  <div class="social-buttons">\n  <button id="save-to-gallery-button" class="launch">\n    ', escape((16,  msg.saveToGallery() )), '\n  </button>\n  </div>\n');19; } ; buf.push('\n\n');21; if (options.response && options.response.level_source) { ; buf.push('\n  ');22; if (options.appStrings && options.appStrings.sharingText) { ; buf.push('\n    <div>', escape((23,  options.appStrings.sharingText )), '</div>\n  ');24; } ; buf.push('\n\n  <div>\n    <input type="text" id="sharing-input" value=', escape((27,  options.response.level_source )), ' readonly>\n  </div>\n\n  <div class=\'social-buttons\'>\n    ');31; if (options.facebookUrl) {; buf.push('      <a href=', escape((31,  options.facebookUrl )), ' target="_blank">\n        <img src=', escape((32,  BlocklyApps.assetUrl("media/facebook_purple.png") )), '>\n      </a>\n    ');34; }; buf.push('\n    ');35; if (options.twitterUrl) {; buf.push('      <a href=', escape((35,  options.twitterUrl )), ' target="_blank">\n        <img src=', escape((36,  BlocklyApps.assetUrl("media/twitter_purple.png") )), ' >\n      </a>\n    ');38; }; buf.push('  </div>\n');39; } ; buf.push('\n</div>\n\n'); })();
 } 
 return buf.join('');
 };
