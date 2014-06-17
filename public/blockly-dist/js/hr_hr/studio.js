@@ -853,24 +853,21 @@ BlocklyApps.report = function(options) {
   report.attempt = BlocklyApps.attempts;
   report.lines = feedback.getNumBlocksUsed();
 
-  // Disable the run button until onReportComplete is called.
-  if (!BlocklyApps.share) {
-    var onAttemptCallback = (function() {
-      return function(builderDetails) {
-        for (var option in builderDetails) {
-          report[option] = builderDetails[option];
-        }
-        onAttempt(report);
-      };
-    })();
+  var onAttemptCallback = (function() {
+    return function(builderDetails) {
+      for (var option in builderDetails) {
+        report[option] = builderDetails[option];
+      }
+      onAttempt(report);
+    };
+  })();
 
-    // If this is the level builder, go to builderForm to get more info from
-    // the level builder.
-    if (options.builder) {
-      builder.builderForm(onAttemptCallback);
-    } else {
-      onAttemptCallback();
-    }
+  // If this is the level builder, go to builderForm to get more info from
+  // the level builder.
+  if (options.builder) {
+    builder.builderForm(onAttemptCallback);
+  } else {
+    onAttemptCallback();
   }
 };
 
@@ -10199,7 +10196,6 @@ var EdgeCollisionBits = [
 
 var level;
 var skin;
-var onSharePage;
 
 var spriteStartingSkins = [ "dog", "cat", "penguin", "dinosaur", "octopus",
   "witch", "bat", "bird", "dragon", "squirrel", "wizard" ];
@@ -11040,7 +11036,6 @@ Studio.init = function(config) {
   Studio.clearEventHandlersKillTickLoop();
   skin = config.skin;
   level = config.level;
-  onSharePage = config.share;
   loadLevel();
 
   window.addEventListener("keydown", Studio.onKey, false);
@@ -11132,10 +11127,8 @@ Studio.init = function(config) {
 
   BlocklyApps.init(config);
 
-  if (!onSharePage) {
-    var shareButton = document.getElementById('shareButton');
-    dom.addClickTouchEvent(shareButton, Studio.onPuzzleComplete);
-  }
+  var shareButton = document.getElementById('shareButton');
+  dom.addClickTouchEvent(shareButton, Studio.onPuzzleComplete);
 };
 
 /**
@@ -11284,7 +11277,7 @@ BlocklyApps.runButtonClick = function() {
   BlocklyApps.attempts++;
   Studio.execute();
 
-  if (level.freePlay && !onSharePage) {
+  if (level.freePlay) {
     var shareCell = document.getElementById('share-cell');
     shareCell.className = 'share-cell-enabled';
   }
