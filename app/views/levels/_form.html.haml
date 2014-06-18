@@ -54,9 +54,9 @@
     %br/
     (shift-click to select multiple)
   - unless @level.new_record?
+    :css
+      textarea { width: 100% }
     = f.fields_for :properties, @level.properties do |properties|
-      :css
-        .textarea { width: 100%}
       - if @level.is_a? Artist
         .field
           = link_to "Edit Solution Blocks", game_level_edit_blocks_path(@game, @level, :solution_blocks)
