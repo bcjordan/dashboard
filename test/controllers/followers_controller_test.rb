@@ -74,6 +74,48 @@ class FollowersControllerTest < ActionController::TestCase
     assert ! assigns(:user).persisted?
   end
 
+  test "student_user_new when signed in" do
+    sign_in @student
+
+    assert_creates(Follower) do
+      get :student_user_new, section_code: @chris_section.code
+    end
+    
+    assert_redirected_to '/'
+    assert_equal "You've registered for #{@chris_section.name}.", flash[:notice]
+
+    follower = Follower.last
+    assert_equal @student, follower.student_user
+    assert_equal @chris, follower.user
+    assert_equal @chris_section, follower.section
+  end
+
+  test "student_user_new when already followed by a teacher switches sections" do
+    sign_in @laurel_student_1.student_user
+
+    assert_does_not_create(Follower) do
+      get :student_user_new, section_code: @laurel_section_2.code
+    end
+    
+    assert_redirected_to '/'
+    assert_equal "You've registered for #{@laurel_section_2.name}.", flash[:notice]
+
+    assert_equal [@laurel_student_2.student_user], @laurel_section_1.reload.students # removed from old section
+    assert_equal [@laurel_student_1.student_user], @laurel_section_2.reload.students # added to new section
+  end
+
+
+  test "student_user_new does not allow joining your own section" do
+    sign_in @chris
+
+    assert_does_not_create(Follower) do
+      get :student_user_new, section_code: @chris_section.code
+    end
+    
+    assert_redirected_to '/'
+    assert_equal "Sorry, you can't join your own section.", flash[:alert]
+  end
+
 
   test "student_register with age" do
     Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do

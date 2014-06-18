@@ -146,6 +146,7 @@ en:
       no_teacher: "Could not find anyone signed in with '%{teacher_email_or_code}'. Please ask them to sign up here and then try adding them again"
       section_not_found: "Could not find a section with code '%{section_code}'."
       blank_code: "Please enter a section code"
+      cant_join_own_section: "Sorry, you can't join your own section."
     mail:
       invite_student:
         subject: "Join a class with %{teacher_name} at Code.org!"
