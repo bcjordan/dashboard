@@ -3,3 +3,9 @@ rvm:
   - 2.0.0
 env:
   - DB=mysql
+before_install:
+  - sudo apt-get install mysql-client mysql-server libmysqlclient-dev libmagickwand-dev imagemagick
+before_script:
+  - RAILS_ENV=test bundle exec rake db:create
+  - RAILS_ENV=test bundle exec rake db:migrate
+  - RAILS_ENV=test bundle exec rake seed:all
