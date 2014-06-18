@@ -7627,6 +7627,29 @@ exports.install = function(blockly, blockInstallOptions) {
 
   generator.studio_whenDown = generator.studio_eventHandlerPrologue;
 
+  blockly.Blocks.studio_whenArrow = {
+    // Block to handle event when an arrow button is pressed.
+    helpUrl: '',
+    init: function() {
+      this.setHSV(140, 1.00, 0.74);
+      this.appendDummyInput().appendTitle(commonMsg.when());
+      this.appendDummyInput()
+        .appendTitle(new blockly.FieldDropdown(this.VALUES), 'VALUE');
+      this.setPreviousStatement(false);
+      this.setInputsInline(true);
+      this.setNextStatement(true);
+      this.setTooltip(msg.whenArrowTooltip());
+    }
+  };
+
+  blockly.Blocks.studio_whenArrow.VALUES =
+      [[msg.whenArrowUp(),    'up'],
+       [msg.whenArrowDown(),  'down'],
+       [msg.whenArrowLeft(),  'left'],
+       [msg.whenArrowRight(), 'right']];
+
+  generator.studio_whenArrow = generator.studio_eventHandlerPrologue;
+
   blockly.Blocks.studio_whenGameStarts = {
     // Block to handle event when the game starts
     helpUrl: '',
@@ -9709,10 +9732,7 @@ module.exports = {
       tb(blockOfType('studio_setSprite') +
          blockOfType('studio_setBackground') +
          blockOfType('studio_whenGameStarts') +
-         blockOfType('studio_whenLeft') +
-         blockOfType('studio_whenRight') +
-         blockOfType('studio_whenUp') +
-         blockOfType('studio_whenDown') +
+         blockOfType('studio_whenArrow') +
          blockOfType('studio_whenSpriteClicked') +
          blockOfType('studio_whenSpriteCollided') +
          blockOfType('studio_repeatForever') +
@@ -9793,10 +9813,7 @@ module.exports = {
                           blockOfType('studio_setSpriteEmotion')) +
          createCategory(msg.catEvents(),
                           blockOfType('studio_whenGameStarts') +
-                          blockOfType('studio_whenLeft') +
-                          blockOfType('studio_whenRight') +
-                          blockOfType('studio_whenUp') +
-                          blockOfType('studio_whenDown') +
+                          blockOfType('studio_whenArrow') +
                           blockOfType('studio_whenSpriteClicked') +
                           blockOfType('studio_whenSpriteCollided')) +
          createCategory(msg.catControl(),
@@ -10538,7 +10555,7 @@ var loadLevel = function() {
   Studio.spriteStartingImage = level.spriteStartingImage;
   Studio.spritesHiddenToStart = level.spritesHiddenToStart;
   Studio.spritesOutsidePlayspace = level.spritesOutsidePlayspace;
-  Studio.softButtons_ = level.softButtons || [];
+  Studio.softButtons_ = level.softButtons || {};
   Studio.spriteFinishIndex = level.spriteFinishIndex || 0;
 
   // Override scalars.
@@ -10926,16 +10943,16 @@ Studio.onTick = function() {
         Studio.keyState[Keycodes[key]] == "keydown") {
       switch (Keycodes[key]) {
         case Keycodes.LEFT:
-          callHandler('whenLeft');
+          callHandler('when-left');
           break;
         case Keycodes.UP:
-          callHandler('whenUp');
+          callHandler('when-up');
           break;
         case Keycodes.RIGHT:
-          callHandler('whenRight');
+          callHandler('when-right');
           break;
         case Keycodes.DOWN:
-          callHandler('whenDown');
+          callHandler('when-down');
           break;
       }
     }
@@ -10946,16 +10963,16 @@ Studio.onTick = function() {
         Studio.btnState[ArrowIds[btn]] == ButtonState.DOWN) {
       switch (ArrowIds[btn]) {
         case ArrowIds.LEFT:
-          callHandler('whenLeft');
+          callHandler('when-left');
           break;
         case ArrowIds.UP:
-          callHandler('whenUp');
+          callHandler('when-up');
           break;
         case ArrowIds.RIGHT:
-          callHandler('whenRight');
+          callHandler('when-right');
           break;
         case ArrowIds.DOWN:
-          callHandler('whenDown');
+          callHandler('when-down');
           break;
       }
     }
@@ -10964,16 +10981,16 @@ Studio.onTick = function() {
   for (var gesture in Studio.gesturesObserved) {
     switch (gesture) {
       case 'left':
-        callHandler('whenLeft');
+        callHandler('when-left');
         break;
       case 'up':
-        callHandler('whenUp');
+        callHandler('when-up');
         break;
       case 'right':
-        callHandler('whenRight');
+        callHandler('when-right');
         break;
       case 'down':
-        callHandler('whenDown');
+        callHandler('when-down');
         break;
     }
     if (0 === Studio.gesturesObserved[gesture]--) {
@@ -10981,10 +10998,10 @@ Studio.onTick = function() {
     }
   }
 
-  Studio.executeQueue('whenLeft');
-  Studio.executeQueue('whenUp');
-  Studio.executeQueue('whenRight');
-  Studio.executeQueue('whenDown');
+  Studio.executeQueue('when-left');
+  Studio.executeQueue('when-up');
+  Studio.executeQueue('when-right');
+  Studio.executeQueue('when-down');
 
   // Check for collisions (note that we use the positions they are about
   // to attain with queued moves - this allows the moves to be canceled before
@@ -11473,11 +11490,11 @@ BlocklyApps.reset = function(first) {
 
   // Reset goal successState:
   if (level.goal) {
-    level.goal.successState = [];
+    level.goal.successState = {};
   }
 
   // Reset the Globals object used to contain program variables:
-  Studio.Globals = [];
+  Studio.Globals = {};
 
   // Move sprites into position.
   for (i = 0; i < Studio.spriteCount; i++) {
@@ -11639,6 +11656,12 @@ var registerHandlersWithSpriteParam =
   }
 };
 
+var registerHandlersWithTitleParam =
+      function (handlers, blockName, eventNameBase, titleParam, values) {
+  for (var i = 0; i < values.length; i++) {
+    registerHandlers(handlers, blockName, eventNameBase, titleParam, values[i]);
+  }
+};
 
 var registerHandlersWithSpriteParams =
       function (handlers, blockName, eventNameBase, blockParam1, blockParam2) {
@@ -11713,10 +11736,15 @@ Studio.execute = function() {
 
   var handlers = [];
   registerHandlers(handlers, 'studio_whenGameStarts', 'whenGameStarts');
-  registerHandlers(handlers, 'studio_whenLeft', 'whenLeft');
-  registerHandlers(handlers, 'studio_whenRight', 'whenRight');
-  registerHandlers(handlers, 'studio_whenUp', 'whenUp');
-  registerHandlers(handlers, 'studio_whenDown', 'whenDown');
+  registerHandlers(handlers, 'studio_whenLeft', 'when-left');
+  registerHandlers(handlers, 'studio_whenRight', 'when-right');
+  registerHandlers(handlers, 'studio_whenUp', 'when-up');
+  registerHandlers(handlers, 'studio_whenDown', 'when-down');
+  registerHandlersWithTitleParam(handlers,
+                                  'studio_whenArrow',
+                                  'when',
+                                  'VALUE',
+                                  ['left', 'right', 'up', 'down']);
   registerHandlers(handlers, 'studio_repeatForever', 'repeatForever');
   registerHandlersWithSpriteParam(handlers,
                                   'studio_whenSpriteClicked',
@@ -13758,6 +13786,16 @@ exports.waitFor10Seconds = function(d){return "wait for 10 seconds"};
 exports.waitParamsTooltip = function(d){return "Waits for a specified number of seconds or use zero to wait until a click occurs."};
 
 exports.waitTooltip = function(d){return "Waits for a specified amount of time or until a click occurs."};
+
+exports.whenArrowDown = function(d){return "down arrow"};
+
+exports.whenArrowLeft = function(d){return "left arrow"};
+
+exports.whenArrowRight = function(d){return "right arrow"};
+
+exports.whenArrowUp = function(d){return "up arrow"};
+
+exports.whenArrowTooltip = function(d){return "Execute the actions below when the specified arrow key is pressed."};
 
 exports.whenDown = function(d){return "Når pil ned"};
 
