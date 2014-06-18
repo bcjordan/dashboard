@@ -52,15 +52,8 @@ gem 'coffee-rails', '~> 4.0.0'
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 
-# Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
-# Removed since Blockly relies on standard the DomContentLoaded Event cycle, which turbolinks kills.
-# gem 'turbolinks'
-
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 1.2'
-
-# Use ActiveModel has_secure_password
-# gem 'bcrypt-ruby', '~> 3.0.0'
 
 # Use unicorn as the app server
 gem 'unicorn'
@@ -76,9 +69,6 @@ gem 'omniauth-windowslive'
 
 gem 'bootstrap-sass', '~> 2.3.2.2'
 gem 'haml'
-
-gem 'execjs'
-gem 'therubyracer', :platforms => :ruby
 
 gem 'jquery-ui-rails'
 
