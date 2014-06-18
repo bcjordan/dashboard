@@ -113,13 +113,17 @@ SQL
     if request.path != student_user_new_path(section_code: params[:section_code])
       redirect_to student_user_new_path(section_code: params[:section_code])
     elsif current_user && @section
+      if current_user == @section.user
+        redirect_to root_path, alert: I18n.t('follower.error.cant_join_own_section') and return
+      end
+
       follower_same_user_teacher = current_user.followeds.where(:user_id => @section.user_id).first
       if follower_same_user_teacher.present?
         follower_same_user_teacher.update_attributes!(:section_id => @section.id)
       else
         Follower.create!(user_id: @section.user_id, student_user: current_user, section: @section)
       end
-      redirect_to root_path, notice: I18n.t('follower.registered', section_name: @section.name)
+      redirect_to root_path, notice: I18n.t('follower.registered', section_name: @section.name) and return
     end
 
     @user = User.new

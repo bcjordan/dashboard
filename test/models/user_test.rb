@@ -4,7 +4,7 @@ require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
   setup do
-    @good_data = { email: 'foo@bar.com', password: 'foosbars', username: 'user.12-34', name: 'tester', user_type: User::TYPE_STUDENT}
+    @good_data = { email: 'foo@bar.com', password: 'foosbars', name: 'tester', user_type: User::TYPE_STUDENT}
   end
 
   test "log in with password with pepper" do
@@ -84,11 +84,11 @@ class UserTest < ActiveSupport::TestCase
   
   test "cannot create user with username with duplicate username" do
     # actually create a user
-    user = User.create(@good_data)
+    user = User.create(@good_data.merge(username: 'duplicate'))
     #puts user.errors.messages.inspect
     assert user.valid?
 
-    user = User.create(@good_data.merge({email: 'OTHER@bar.com', username: 'USER.12-34'}))
+    user = User.create(@good_data.merge(email: 'OTHER@bar.com', username: 'duplicate'))
     assert user.errors.messages.length == 1, "username should be rejected as a dup"
   end
 
@@ -226,4 +226,10 @@ class UserTest < ActiveSupport::TestCase
     assert_equal nil, User.find_first_by_auth_conditions(email: {'$acunetix' => 1})
     # this used to raise a mysql error, now we sanitize it into a nonsense string
   end
+
+  test "cannot create manual provider user without username" do
+    user = User.create(@good_data.merge({username: nil, provider: User::PROVIDER_MANUAL}))
+    assert_equal ["Username can't be blank"], user.errors.full_messages
+  end
+
 end

@@ -24,14 +24,6 @@
         = f.hidden_field :locale, value: locale
 
         .itemblock
-          .labelblock#labelusername
-            = t('activerecord.attributes.user.username')
-          = f.text_field :username, class: "fieldblock", class: 'input-xlarge fieldblock usernamefield', 'data-autocheck-url' => "/signup_check/username"
-          #usernamemessage
-            %span#username_message
-        %br/
-
-        .itemblock
           .labelblock
             = t('activerecord.attributes.user.name')
           = f.text_field :name, class: 'input-xlarge fieldblock', autofocus: true
@@ -100,12 +92,6 @@
     %br/
 
 :javascript
-  $( "#user_username" ).on('input',function(e){
-    $.post($(this).data('autocheckUrl'),{ username:$(this).val() } ,function(data) {
-      $('#username_message').text(data.message);
-    });
-  });
-
   $( "#user_password" ).on('input',function(e){
     var password = $(this).val();
     var password_message = $('#password_message');
@@ -133,5 +119,4 @@
 
   $( "#user_name" ).placeholder();
   $( "#user_email" ).placeholder();
-  $( "#user_username" ).placeholder();
   $( "#user_school" ).placeholder();
