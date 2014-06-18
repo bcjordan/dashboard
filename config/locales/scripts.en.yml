@@ -57,6 +57,7 @@ en:
           The Maze: The Maze
           The Coffee: The Coffee
           The Artist: The Artist
+          The Artist Debugging: The Artist Debugging
         test:
           desc: Custom script test
           'Jigsaw: Learn to drag and drop': 'Jigsaw: Learn to drag and drop'
