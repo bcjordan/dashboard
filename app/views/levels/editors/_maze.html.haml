@@ -24,6 +24,7 @@
       td.end {
         background-image: url('/blockly/media/skins/birds/goal.png');
         background-size: 100% 100%;
+        background-repeat: no-repeat;
       }
       td.obstacle {
         background-image: url('/blockly/media/skins/birds/obstacle.png');
@@ -45,7 +46,14 @@
         %li(class='start') 2 = start
         %li(class='end') 3 = end (for Maze levels only)
         %li(class='obstacle') 4 = obstacle
-        %li -x .. +x = piles (for Farmer levels only)
+        FARMER:
+        %ul(style="list-style-type:none;margin:0;")
+          %li -x .. +x = piles
+        BEE:
+        %ul(style="list-style-type:none;margin:0;")
+          %li +x = nectar. +99 = unlimited
+          %li -x = honey. -99 = unlimited
+
     %script{:type => 'text/javascript',
             :src  => '/assets/jquery.handsontable.full.js'}
     %link{:rel => :stylesheet, :type => :'text/css', :href => '/assets/jquery.handsontable.full.css'}

@@ -1,4 +1,7 @@
 .field
+  = f.label :flower_type, 'Flower Type (bee only)'
+  = f.select :flower_type, options_for_select(@level.class.flower_types, @level.flower_type)
+.field
   = f.label :nectar_goal, 'Nectar Goal (bee only)'
   = f.number_field :nectar_goal, :value => @level.nectar_goal
 .field
