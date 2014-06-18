@@ -62,7 +62,6 @@ class User < ActiveRecord::Base
     where(auth.slice(:provider, :uid)).first_or_create do |user|
       user.provider = auth.provider
       user.uid = auth.uid
-      user.username = auth.info.nickname
       user.name = auth.info.name
       user.email = auth.info.email
       user.user_type = params['user_type'] || User::TYPE_STUDENT
@@ -92,8 +91,7 @@ class User < ActiveRecord::Base
   end
 
   def username_required?
-    return false if provider == User::PROVIDER_SPONSORED
-    true
+    provider == User::PROVIDER_MANUAL
   end
 
   def update_with_password(params, *options)

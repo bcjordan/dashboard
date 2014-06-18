@@ -7,7 +7,7 @@ class ReportsControllerTest < ActionController::TestCase
     @admin = create(:admin)
     sign_in(@admin)
 
-    @not_admin = create(:user)
+    @not_admin = create(:user, username: 'notadmin')
 
     @script = create(:script, name: 'Report Script')
     @stage = create(:stage, script: @script, name: 'Report Stage 1')
