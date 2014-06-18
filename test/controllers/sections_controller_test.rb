@@ -34,14 +34,20 @@ class SectionsControllerTest < ActionController::TestCase
     assert_redirected_to_sign_in
   end
 
-  test "should get new if not a teacher" do
+  test "should not get new if not a teacher" do
     # hmmm, is this really what we want?
     sign_in @student
 
     get :new
 
-    assert assigns(:section)
-    
+    assert_response :forbidden
+  end
+
+  test "should get new if teacher" do
+    sign_in @laurel
+
+    get :new
+
     assert_response :success
   end
 
@@ -64,6 +70,16 @@ class SectionsControllerTest < ActionController::TestCase
     end
 
     assert_redirected_to_sign_in
+  end
+
+  test "should not create section if not teacher" do
+    sign_in @student
+
+    assert_no_difference('Section.count') do
+      post :create, :section => {:name => "Mrow"}
+    end
+
+    assert_response :forbidden
   end
 
   test "should create section with the same name as another teacher" do
