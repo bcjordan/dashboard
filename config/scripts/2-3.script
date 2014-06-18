@@ -52,7 +52,9 @@ level '2-3 Artist 12'
 
 stage 'The Artist Debugging'
 level '2-3 Artist Debugging 1'
+level '2-3 Artist Debugging 2'
 level '2-3 Artist Debugging 3'
+level '2-3 Artist Debugging 6'
 
 stage 'Studio: Create a Story'
 skin 'studio'
