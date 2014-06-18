@@ -13,6 +13,7 @@ level 'Jigsaw_Level_11'
 level 'Jigsaw_Level_12'
 
 stage 'Maze: Sequence'
+level 'Maze_111111'
 level 'k-1 maze 1'
 concepts 'sequence'
 level 'K-1 Maze 2'
