@@ -1,10 +1,9 @@
 FactoryGirl.define do
   factory :user do
-    sequence(:username) { |n| "testuser#{n}" }
-    email { "#{username}@example.com.xx" }
+    sequence(:email) { |n| "testuser#{n}@example.com.xx" }
     password "00secret"
     locale 'en-US'
-    name { "#{username} Codeberg" }
+    sequence(:name) { |n| "User#{n} Codeberg" }
     user_type User::TYPE_STUDENT
 
     # Child of :user factory, since it's in the `factory :user` block

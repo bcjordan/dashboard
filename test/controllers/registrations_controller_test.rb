@@ -13,8 +13,7 @@ class RegistrationsControllerTest < ActionController::TestCase
 
   test "create as student with age" do
     Timecop.travel Time.local(2013, 9, 1, 12, 0, 0) do
-      student_params = {username: 'student1',
-                        name: "A name",
+      student_params = {name: "A name",
                         password: "apassword",
                         email: 'an@email.address',
                         gender: 'F',
@@ -27,7 +26,6 @@ class RegistrationsControllerTest < ActionController::TestCase
 
       assert_redirected_to '/'
 
-      assert_equal 'student1', assigns(:user).username
       assert_equal 'A name', assigns(:user).name
       assert_equal 'F', assigns(:user).gender
       assert_equal Date.today - 13.years, assigns(:user).birthday
@@ -38,8 +36,7 @@ class RegistrationsControllerTest < ActionController::TestCase
   end
 
   test "create as student without age" do
-    student_params = {username: 'student1',
-                      name: "A name",
+    student_params = {name: "A name",
                       password: "apassword",
                       email: 'an@email.address',
                       gender: 'F',
@@ -56,11 +53,10 @@ class RegistrationsControllerTest < ActionController::TestCase
   end
 
 
-  test "create as student requires username" do
-    student_params = {username: nil,
-                      name: "A name",
+  test "create as student requires email" do
+    student_params = {name: "A name",
                       password: "apassword",
-                      email: 'an@email.address',
+                      email: nil,
                       user_type: 'student'}
     
     assert_does_not_create(User) do
