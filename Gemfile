@@ -96,3 +96,6 @@ gem 'videojs_rails'
 
 gem 'retryable' # retry code blocks when they throw exceptions
 
+# Used by a build script.
+gem 'execjs'
+gem 'therubyracer', :platforms => :ruby
