@@ -86,7 +86,7 @@ module.exports = function(app, levels, options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":35,"./utils":50}],2:[function(require,module,exports){
+},{"./base":2,"./blocksCommon":4,"./dom":7,"./required_block_utils":36,"./utils":51}],2:[function(require,module,exports){
 /**
  * Blockly Apps: Common code
  *
@@ -935,7 +935,7 @@ var getIdealBlockNumberMsg = function() {
       msg.infinity() : BlocklyApps.IDEAL_BLOCK_NUM;
 };
 
-},{"../locale/de_de/common":52,"./builder":5,"./dom":7,"./feedback.js":9,"./lodash":11,"./slider":37,"./templates/buttons.html":39,"./templates/instructions.html":41,"./templates/learn.html":42,"./templates/makeYourOwn.html":43,"./utils":50,"./xml":51}],3:[function(require,module,exports){
+},{"../locale/de_de/common":53,"./builder":5,"./dom":7,"./feedback.js":9,"./lodash":11,"./slider":38,"./templates/buttons.html":40,"./templates/instructions.html":42,"./templates/learn.html":43,"./templates/makeYourOwn.html":44,"./utils":51,"./xml":52}],3:[function(require,module,exports){
 var xml = require('./xml');
 
 exports.createToolbox = function(blocks) {
@@ -1022,7 +1022,7 @@ exports.domStringToBlock = function(blockDOMString) {
   return exports.domToBlock(xml.parseElement(blockDOMString).firstChild);
 };
 
-},{"./xml":51}],4:[function(require,module,exports){
+},{"./xml":52}],4:[function(require,module,exports){
 /**
  * Defines blocks useful in multiple blockly apps
  */
@@ -1085,7 +1085,7 @@ exports.builderForm = function(onAttemptCallback) {
   dialog.show({ backdrop: 'static' });
 };
 
-},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":38,"./utils.js":50,"url":64}],6:[function(require,module,exports){
+},{"./dom.js":7,"./feedback.js":9,"./templates/builder.html":39,"./utils.js":51,"url":65}],6:[function(require,module,exports){
 var INFINITE_LOOP_TRAP = '  executionInfo.checkTimeout(); if (executionInfo.isTerminated()){return;}\n';
 
 var LOOP_HIGHLIGHT = 'loopHighlight();\n';
@@ -2125,7 +2125,7 @@ var generateXMLForBlocks = function(blocks) {
 };
 
 
-},{"../locale/de_de/common":52,"./codegen":6,"./dom":7,"./templates/buttons.html":39,"./templates/code.html":40,"./templates/readonly.html":45,"./templates/sharing.html":46,"./templates/showCode.html":47,"./templates/trophy.html":48,"./utils":50}],10:[function(require,module,exports){
+},{"../locale/de_de/common":53,"./codegen":6,"./dom":7,"./templates/buttons.html":40,"./templates/code.html":41,"./templates/readonly.html":46,"./templates/sharing.html":47,"./templates/showCode.html":48,"./templates/trophy.html":49,"./utils":51}],10:[function(require,module,exports){
 // Functions for checking required blocks.
 
 /**
@@ -5205,7 +5205,7 @@ for (var functionName in Bee.api) {
   exports[functionName] = API_FUNCTION(Bee.api[functionName]);
 }
 
-},{"../utils":50,"./bee":13,"./tiles":27}],13:[function(require,module,exports){
+},{"../utils":51,"./bee":13,"./tiles":28}],13:[function(require,module,exports){
 var utils = require('../utils');
 
 var UNLIMITED_HONEY = -99;
@@ -5451,7 +5451,7 @@ Bee.api.honeyCreated = function (id) {
   return Maze.bee.honey_;
 };
 
-},{"../utils":50}],14:[function(require,module,exports){
+},{"../utils":51}],14:[function(require,module,exports){
 /**
  * Blocks specific to Bee
  */
@@ -5613,7 +5613,7 @@ function addConditionalComparisonBlock(blockly, generator, name, type, arg1) {
   };
 }
 
-},{"../../locale/de_de/maze":53,"../block_utils":3,"../codegen":6}],15:[function(require,module,exports){
+},{"../../locale/de_de/maze":54,"../block_utils":3,"../codegen":6}],15:[function(require,module,exports){
 /*jshint -W086 */
 
 var DirtDrawer = require('./dirtDrawer');
@@ -5773,7 +5773,7 @@ BeeItemDrawer.prototype.updateNectarCounter = function (nectarCount) {
   }
 };
 
-},{"../utils":50,"./dirtDrawer":18}],16:[function(require,module,exports){
+},{"../utils":51,"./dirtDrawer":18}],16:[function(require,module,exports){
 /**
  * Blockly Demo: Maze
  *
@@ -6159,7 +6159,7 @@ exports.install = function(blockly, blockInstallOptions) {
 
 };
 
-},{"../../locale/de_de/common":52,"../../locale/de_de/maze":53,"../block_utils":3,"../codegen":6,"./beeBlocks":14}],17:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"../../locale/de_de/maze":54,"../block_utils":3,"../codegen":6,"./beeBlocks":14}],17:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -6180,7 +6180,9 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/maze":53,"ejs":54}],18:[function(require,module,exports){
+},{"../../locale/de_de/maze":54,"ejs":55}],18:[function(require,module,exports){
+var cellId = require('./mazeUtils').cellId;
+
 // The number line is [-inf, min, min+1, ... no zero ..., max-1, max, +inf]
 var DIRT_MAX = 10;
 var DIRT_COUNT = DIRT_MAX * 2 + 2;
@@ -6199,11 +6201,6 @@ var DirtDrawer = module.exports = function (dirtMap, dirtAsset) {
     unclippedWidth: SQUARE_SIZE * DIRT_COUNT
   };
 };
-
-/**
- * Export cellId as static function on DirtDrawer
- */
-DirtDrawer.cellId = cellId;
 
 /**
  * Update the image at the given row,col by determining the spriteIndex for the
@@ -6290,11 +6287,6 @@ DirtDrawer.prototype.createDirtImage_ = function (row, col) {
   return spriteIndex;
 }
 
-function cellId (prefix, row, col) {
-  return prefix + '_' + row + '_' + col;
-}
-
-
 /* start-test-block */
 // export private function(s) to expose to unit testing
 DirtDrawer.__testonly__ = {
@@ -6302,7 +6294,7 @@ DirtDrawer.__testonly__ = {
 };
 /* end-test-block */
 
-},{}],19:[function(require,module,exports){
+},{"./mazeUtils":24}],19:[function(require,module,exports){
 /*jshint multistr: true */
 
 var levelBase = require('../level_base');
@@ -7524,7 +7516,7 @@ module.exports = {
     'scale': {
       'snapRadius': 2.0
     },
-    honeyGoal: 3,
+    honeyGoal: 1,
     // nectarGoal: 2,
     step: true,
     'map': [
@@ -7543,7 +7535,7 @@ module.exports = {
       [ 0, 0,  0,  0, 0, 0, 0, 0 ],
       [ 0, 0,  0,  0, 0, 0, 0, 0 ],
       [ 0, 0,  0,  0, 0, 0, 0, 0 ],
-      [ 0, 3, -2, -1, -99, 0, 0, 0 ],
+      [ 0, 1, -99, 0, 0, 0, 0, 0 ],
       [ 0, 0,  0,  0, 0, 0, 0, 0 ],
       [ 0, 0,  0,  0, 0, 0, 0, 0 ],
       [ 0, 0,  0,  0, 0, 0, 0, 0 ]
@@ -7552,7 +7544,7 @@ module.exports = {
   }
 };
 
-},{"../../locale/de_de/maze":53,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":20,"./tiles":27,"./toolboxes/karel1.xml":28,"./toolboxes/karel2.xml":29,"./toolboxes/karel3.xml":30}],20:[function(require,module,exports){
+},{"../../locale/de_de/maze":54,"../block_utils":3,"../level_base":10,"./karelStartBlocks.xml":20,"./tiles":28,"./toolboxes/karel1.xml":29,"./toolboxes/karel2.xml":30,"./toolboxes/karel3.xml":31}],20:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -7584,7 +7576,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/maze":53,"ejs":54}],21:[function(require,module,exports){
+},{"../../locale/de_de/maze":54,"ejs":55}],21:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var karelLevels = require('./karelLevels');
 var wordsearchLevels = require('./wordsearchLevels');
@@ -8220,7 +8212,7 @@ cloneWithStep('2_17', true, false);
 cloneWithStep('karel_1_9', true, false);
 cloneWithStep('karel_2_9', true, false);
 
-},{"../block_utils":3,"../utils":50,"./karelLevels":19,"./requiredBlocks":24,"./startBlocks.xml":26,"./tiles":27,"./toolboxes/maze.xml":31,"./wordsearchLevels":34}],22:[function(require,module,exports){
+},{"../block_utils":3,"../utils":51,"./karelLevels":19,"./requiredBlocks":25,"./startBlocks.xml":27,"./tiles":28,"./toolboxes/maze.xml":32,"./wordsearchLevels":35}],22:[function(require,module,exports){
 (function (global){
 var appMain = require('../appMain');
 window.Maze = require('./maze');
@@ -8239,7 +8231,7 @@ window.mazeMain = function(options) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../appMain":1,"./blocks":16,"./levels":21,"./maze":23,"./skins":25}],23:[function(require,module,exports){
+},{"../appMain":1,"./blocks":16,"./levels":21,"./maze":23,"./skins":26}],23:[function(require,module,exports){
 /**
  * Blockly Apps: Maze
  *
@@ -8465,7 +8457,7 @@ function drawMap () {
   pegmanIcon.setAttribute('clip-path', 'url(#pegmanClipPath)');
   svg.appendChild(pegmanIcon);
 
-  if (Maze.finish_) {
+  if (Maze.finish_ && skin.goal) {
     // Add finish marker.
     var finishMarker = document.createElementNS(Blockly.SVG_NS, 'image');
     finishMarker.setAttribute('id', 'finish');
@@ -8603,7 +8595,7 @@ Maze.drawTile = function (svg, tileSheetLocation, row, col, tileId) {
   var left = tileSheetLocation[0];
   var top = tileSheetLocation[1];
 
-  var tileSheetWidth = Maze.SQUARE_SIZE * skin.tileSheetWidth;
+  var tileSheetWidth = Maze.SQUARE_SIZE * 5;
   var tileSheetHeight = Maze.SQUARE_SIZE * 4;
 
   // Tile's clipPath element.
@@ -8615,9 +8607,9 @@ Maze.drawTile = function (svg, tileSheetLocation, row, col, tileId) {
 
   tileClipRect.setAttribute('x', col * Maze.SQUARE_SIZE);
   tileClipRect.setAttribute('y', row * Maze.SQUARE_SIZE);
-
   tileClip.appendChild(tileClipRect);
   svg.appendChild(tileClip);
+
   // Tile sprite.
   var tileElement = document.createElementNS(Blockly.SVG_NS, 'image');
   tileElement.setAttribute('id', 'tileElement' + tileId);
@@ -8914,9 +8906,9 @@ BlocklyApps.reset = function(first) {
 
   var svg = document.getElementById('svgMaze');
 
-  if (Maze.finish_) {
+  var finishIcon = document.getElementById('finish');
+  if (finishIcon) {
     // Move the finish icon into position.
-    var finishIcon = document.getElementById('finish');
     finishIcon.setAttribute('x', Maze.SQUARE_SIZE * (Maze.finish_.x + 0.5) -
       finishIcon.getAttribute('width') / 2);
     finishIcon.setAttribute('y', Maze.SQUARE_SIZE * (Maze.finish_.y + 0.9) -
@@ -8979,10 +8971,18 @@ BlocklyApps.reset = function(first) {
     }
   }
 
+  if (Maze.wordSearch) {
+    Maze.wordSearch.resetTiles();
+  } else {
+    resetTiles();
+  }
+};
+
+function resetTiles() {
   // Reset the tiles
   var tileId = 0;
-  for (y = 0; y < Maze.ROWS; y++) {
-    for (x = 0; x < Maze.COLS; x++) {
+  for (var y = 0; y < Maze.ROWS; y++) {
+    for (var x = 0; x < Maze.COLS; x++) {
       // Tile's clipPath element.
       var tileClip = document.getElementById('tileClipPath' + tileId);
       tileClip.setAttribute('visibility', 'visible');
@@ -8994,8 +8994,7 @@ BlocklyApps.reset = function(first) {
       tileId++;
     }
   }
-
-};
+}
 
 /**
  * Click the run button.  Start the program.
@@ -9238,7 +9237,7 @@ Maze.execute = function(stepMode) {
  */
 Maze.performStep = function(stepMode) {
   // Speeding up specific levels
-  var timePerStep = stepSpeed * Maze.scale.stepSpeed *
+  var timePerAction = stepSpeed * Maze.scale.stepSpeed *
     skin.movePegmanAnimationSpeedScale;
 
   // All tasks should be complete now.  Clean up the PID list.
@@ -9261,9 +9260,11 @@ Maze.performStep = function(stepMode) {
     return;
   }
 
-  for (var i = 0; i < step.length; i++) {
-    animateAction(step[i], stepMode, timePerStep);
-  }
+  step.forEach(function (action, index) {
+    timeoutList.setTimeout(function() {
+      animateAction(action, stepMode, timePerAction);
+    }, timePerAction * index);
+  });
 
   var finishSteps = !stepMode;
   if (stepMode) {
@@ -9278,7 +9279,7 @@ Maze.performStep = function(stepMode) {
   if (finishSteps) {
     timeoutList.setTimeout(function () {
       Maze.performStep(false);
-    }, timePerStep);
+    }, timePerAction * step.length);
   }
 };
 
@@ -9419,6 +9420,9 @@ Maze.scheduleMove = function (endX, endY) {
       movePegmanIcon.setAttribute('visibility', 'hidden');
       pegmanIcon.setAttribute('visibility', 'visible');
       Maze.displayPegman(endX, endY, tiles.directionToFrame(direction));
+      if (Maze.wordSearch) {
+        Maze.wordSearch.updateTileHighlight(endY, endX, true);
+      }
     }, animateSpeed * numFrames);
   } else {
     numFrames = 4;
@@ -9811,7 +9815,15 @@ Maze.checkSuccess = function() {
   return finished;
 };
 
-},{"../../locale/de_de/common":52,"../../locale/de_de/maze":53,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":36,"../templates/page.html":44,"../timeoutList":49,"../utils":50,"./api":12,"./bee":13,"./beeItemDrawer":15,"./controls.html":17,"./dirtDrawer":18,"./tiles":27,"./visualization.html":32,"./wordsearch":33}],24:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"../../locale/de_de/maze":54,"../base":2,"../codegen":6,"../dom":7,"../executionInfo":8,"../feedback.js":9,"../skins":37,"../templates/page.html":45,"../timeoutList":50,"../utils":51,"./api":12,"./bee":13,"./beeItemDrawer":15,"./controls.html":17,"./dirtDrawer":18,"./tiles":28,"./visualization.html":33,"./wordsearch":34}],24:[function(require,module,exports){
+/**
+ * Generalized function for generating ids for cells in a table
+ */
+exports.cellId = function (prefix, row, col) {
+  return prefix + '_' + row + '_' + col;
+};
+
+},{}],25:[function(require,module,exports){
 var requiredBlockUtils = require('../required_block_utils');
 
 var MOVE_FORWARD = {'test': 'moveForward', 'type': 'maze_moveForward'};
@@ -9839,7 +9851,7 @@ module.exports = {
   FOR_LOOP: FOR_LOOP
 };
 
-},{"../required_block_utils":35}],25:[function(require,module,exports){
+},{"../required_block_utils":36}],26:[function(require,module,exports){
 /**
  * Load Skin for Maze.
  */
@@ -9848,7 +9860,6 @@ module.exports = {
 // background: Number of 400x400 background images. Randomly select one if
 // specified, otherwise, use background.png.
 // look: Colour of sonar-like look icon.
-// tileSheetWidth: How many tiles wide skin.tiles is
 
 var skinsBase = require('../skins');
 var _ = require('../lodash');
@@ -9856,10 +9867,15 @@ var _ = require('../lodash');
 var CONFIGS = {
   letters: {
     nonDisappearingPegmanHittingObstacle: true,
-    pegmanHeight: 68,
-    pegmanWidth: 51,
-    pegmanYOffset: -6,
-    tileSheetWidth: 7
+    pegmanHeight: 50,
+    pegmanWidth: 50,
+    danceOnLoad: false,
+    goal: '',
+    idlePegmanAnimation: 'idle_avatar.gif',
+    movePegmanAnimation: 'move_avatar.png',
+    movePegmanAnimationSpeedScale: 1.5,
+    // This is required when move pegman animation is set
+    movePegmanAnimationFrameNumber: 9
   },
 
   bee: {
@@ -9970,7 +9986,6 @@ exports.load = function(assetUrl, id) {
   var config = CONFIGS[skin.id];
 
   // (2) Default values for properties common across maze skins.
-  skin.tileSheetWidth = 5;
   skin.obstacleScale = 1.0;
   skin.obstacleAnimation = skin.assetUrl('obstacle.gif');
   skin.movePegmanAnimationSpeedScale = 1;
@@ -10010,7 +10025,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{"../lodash":11,"../skins":36}],26:[function(require,module,exports){
+},{"../lodash":11,"../skins":37}],27:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10031,7 +10046,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],27:[function(require,module,exports){
+},{"ejs":55}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -10094,7 +10109,7 @@ Tiles.constrainDirection4 = function(d) {
   return utils.mod(d, 4);
 };
 
-},{"../utils":50}],28:[function(require,module,exports){
+},{"../utils":51}],29:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10115,7 +10130,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],29:[function(require,module,exports){
+},{"ejs":55}],30:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10141,7 +10156,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/de_de/common":52,"../../../locale/de_de/maze":53,"ejs":54}],30:[function(require,module,exports){
+},{"../../../locale/de_de/common":53,"../../../locale/de_de/maze":54,"ejs":55}],31:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10175,7 +10190,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../../locale/de_de/common":52,"ejs":54}],31:[function(require,module,exports){
+},{"../../../locale/de_de/common":53,"ejs":55}],32:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10196,7 +10211,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],32:[function(require,module,exports){
+},{"ejs":55}],33:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -10217,8 +10232,9 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],33:[function(require,module,exports){
+},{"ejs":55}],34:[function(require,module,exports){
 var _ = require('../lodash');
+var cellId = require('./mazeUtils').cellId;
 
 var SquareType = require('./tiles').SquareType;
 
@@ -10227,61 +10243,31 @@ var WordSearch = module.exports = function (map, drawTileFn) {
   this.drawTileFn_ = drawTileFn;
 };
 
-var TILE_SHAPES = {
-  'A': [0, 0],  // A
-  'B': [1, 0],  // B
-  'C': [2, 0],  // C
-  'D': [3, 0],  // D
-  'E': [4, 0],  // E
-  'F': [5, 0],  // F
-  'G': [6, 0],  // G
-  'H': [0, 1],  // H
-  'I': [1, 1],  // I
-  'J': [2, 1],  // J
-  'K': [3, 1],  // K
-  'L': [4, 1],  // L
-  'M': [5, 1],  // M
-  'N': [6, 1],  // N
-  'O': [0, 2],  // O
-  'P': [1, 2],  // P
-  'Q': [2, 2],  // Q
-  'R': [3, 2],  // R
-  'S': [4, 2],  // S
-  'T': [5, 2],  // T
-  'U': [6, 2],  // U
-  'V': [0, 3],  // V
-  'W': [1, 3],  // W
-  'X': [2, 3],  // X
-  'Y': [3, 3],  // Y
-  'Z': [4, 3],  // Z
-};
-TILE_SHAPES[SquareType.START] = [5, 3]; // START char
-
 var ALL_CHARS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
   "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+var START_CHAR = '-';
+var EMPTY_CHAR = '_';
 
 /**
  * Generate random tiles for walls (with some restrictions) and draw them to
  * the svg.
  */
 WordSearch.prototype.drawMapTiles = function (svg) {
-  var tileId = 0;
-  var tile;
+  var letter;
   var restricted;
 
   for (var row = 0; row < this.map_.length; row++) {
     for (var col = 0; col < this.map_[row].length; col++) {
       var mapVal = this.map_[row][col];
-      if (mapVal === SquareType.WALL) {
+      if (mapVal === EMPTY_CHAR) {
         restricted = this.restrictedValues_(row, col);
-        tile = TILE_SHAPES[randomLetter(restricted)];
+        letter = randomLetter(restricted);
       } else {
-        tile = TILE_SHAPES[letterValue(mapVal, true)];
+        letter = letterValue(mapVal, true);
       }
 
-      this.drawTileFn_(svg, tile, row, col, tileId);
-
-      tileId++;
+      this.drawTile_(svg, letter, row, col);
     }
   }
 };
@@ -10341,23 +10327,95 @@ WordSearch.prototype.restrictedValues_ = function (row, col) {
       var neighborRow = secondNeighbors[j][0];
       var neighborCol = secondNeighbors[j][1];
       // push value to restricted list
-      var val = letterValue(map[neighborRow][neighborCol]);
+      var val = letterValue(map[neighborRow][neighborCol], false);
       values.push(val, false);
     }
   }
   return values;
 };
 
+/**
+ * Draw a given tile.  Overrides the logic of Maze.drawTile
+ */
+WordSearch.prototype.drawTile_ = function (svg, letter, row, col) {
+  var backgroundId = cellId('backgroundLetter', row, col);
+  var textId = cellId('letter', row, col);
+
+  var group = document.createElementNS(Blockly.SVG_NS, 'g');
+  var background = document.createElementNS(Blockly.SVG_NS, 'rect');
+  background.setAttribute('id', backgroundId);
+  background.setAttribute('width', Maze.SQUARE_SIZE);
+  background.setAttribute('height', Maze.SQUARE_SIZE);
+  background.setAttribute('x', col * Maze.SQUARE_SIZE);
+  background.setAttribute('y', row * Maze.SQUARE_SIZE);
+  background.setAttribute('stroke', '#000000');
+  background.setAttribute('stroke-width', 3);
+  group.appendChild(background);
+
+  var text = document.createElementNS(Blockly.SVG_NS, 'text');
+  text.setAttribute('id', textId);
+  text.setAttribute('width', Maze.SQUARE_SIZE);
+  text.setAttribute('height', Maze.SQUARE_SIZE);
+  text.setAttribute('x', (col + 0.5) * Maze.SQUARE_SIZE);
+  text.setAttribute('y', (row + 0.5) * Maze.SQUARE_SIZE);
+  text.setAttribute('font-size', 32);
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('font-family', 'Verdana');
+  text.textContent = letter;
+  group.appendChild(text);
+  svg.appendChild(group);
+};
+
+/**
+ * Reset all tiles to beginning state
+ */
+WordSearch.prototype.resetTiles = function () {
+  for (var row = 0; row < this.map_.length; row++) {
+    for (var col = 0; col < this.map_[row].length; col++) {
+      this.updateTileHighlight(row, col, false);
+    }
+  }
+};
+
+/**
+ * Update a tile's highlighting. If we've flown over it, it should be green.
+ * Otherwise we have a checkboard approach.
+ */
+WordSearch.prototype.updateTileHighlight = function (row, col, highlighted) {
+  var backColor = (row + col) % 2 === 0 ? '#dae3f3' : '#ffffff';
+  var textColor = highlighted ? 'white' : 'black';
+  if (highlighted) {
+    backColor = '#00b050';
+  }
+  var backgroundId = cellId('backgroundLetter', row, col);
+  var textId = cellId('letter', row, col);
+
+  document.getElementById(backgroundId).setAttribute('fill', backColor);
+  var text = document.getElementById(textId);
+  text.setAttribute('fill', textColor);
+
+  // should only be false in unit tests
+  if (text.getBBox) {
+    // center text.
+    var bbox = text.getBBox();
+    var heightDiff = Maze.SQUARE_SIZE - bbox.height;
+    var targetTopY = row * Maze.SQUARE_SIZE + heightDiff / 2;
+    var offset = targetTopY - bbox.y;
+
+    text.setAttribute("transform", "translate(0, " + offset + ")");
+  }
+
+};
 
 /**
  * For wordsearch, values in Maze.map can take the form of a number (i.e. 2 means
  * start), a letter ('A' means A), or a letter followed by x ('Nx' means N and
- * that this is the finish.  This function will strip the x, and will ignore
- * non-letter values unless includeNumbers is true
+ * that this is the finish.  This function will strip the x, and will convert
+ * number values to START_CHAR
  */
-function letterValue(val, includeNumbers) {
+function letterValue(val) {
   if (typeof(val) === "number") {
-    return includeNumbers ? val : undefined;
+    return START_CHAR;
   }
 
   if (typeof(val) === "string") {
@@ -10384,15 +10442,19 @@ function randomLetter (restrictions) {
   return _.sample(letterPool);
 }
 
+
+
 /* start-test-block */
 // export private function(s) to expose to unit testing
 WordSearch.__testonly__ = {
   letterValue: letterValue,
-  randomLetter: randomLetter
+  randomLetter: randomLetter,
+  START_CHAR: START_CHAR,
+  EMPTY_CHAR: EMPTY_CHAR
 };
 /* end-test-block */
 
-},{"../lodash":11,"./tiles":27}],34:[function(require,module,exports){
+},{"../lodash":11,"./mazeUtils":24,"./tiles":28}],35:[function(require,module,exports){
 var Direction = require('./tiles').Direction;
 var reqBlocks = require('./requiredBlocks');
 var blockUtils = require('../block_utils');
@@ -10421,14 +10483,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2, 'R', 'U', 'Nx',   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, 'R', 'U','Nx', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ],
     'startBlocks': blockUtils.blockOfType('maze_moveEast')
   },
@@ -10440,14 +10502,14 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   2,   0,   0,   0,   0],
-      [0,   0,   0, 'S',   0,   0,   0,   0],
-      [0,   0,   0, 'E',   0,   0,   0,   0],
-      [0,   0,   0, 'Tx',   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_',   2, '_', '_', '_', '_'],
+      ['_', '_', '_', 'S', '_', '_', '_', '_'],
+      ['_', '_', '_', 'E', '_', '_', '_', '_'],
+      ['_', '_', '_','Tx', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ],
     'startBlocks': blockUtils.blockOfType('maze_moveSouth')
   },
@@ -10459,14 +10521,14 @@ module.exports = {
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2, 'M', 'O', 'V', 'Ex',   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, 'M', 'O', 'V','Ex', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ],
     'startBlocks': blockUtils.blockOfType('maze_moveEast')
   },
@@ -10478,14 +10540,14 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2,   0,   0,   0,   0,   0],
-      [0,   0, 'C',   0,   0,   0,   0,   0],
-      [0,   0, 'O',   0,   0,   0,   0,   0],
-      [0,   0, 'D',   0,   0,   0,   0,   0],
-      [0,   0, 'Ex',   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, '_', '_', '_', '_', '_'],
+      ['_', '_', 'C', '_', '_', '_', '_', '_'],
+      ['_', '_', 'O', '_', '_', '_', '_', '_'],
+      ['_', '_', 'D', '_', '_', '_', '_', '_'],
+      ['_', '_','Ex', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_5': {
@@ -10496,86 +10558,90 @@ module.exports = {
     ],
     'startDirection': Direction.NORTH,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0, 'Wx',   0,   0,   0,   0,   0,   0],
-      [0, 'A',   0,   0,   0,   0,   0,   0],
-      [0, 'R',   0,   0,   0,   0,   0,   0],
-      [0, 'D',   0,   0,   0,   0,   0,   0],
-      [0,   2,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_','Wx', '_', '_', '_', '_', '_', '_'],
+      ['_', 'A', '_', '_', '_', '_', '_', '_'],
+      ['_', 'R', '_', '_', '_', '_', '_', '_'],
+      ['_', 'D', '_', '_', '_', '_', '_', '_'],
+      ['_',   2, '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_6': {
       'toolbox': wordSearchToolbox(),
     'ideal': 4,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveSouth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2, 'J', 'U', 'M',   0,   0],
-      [0,   0,   0,   0,   0, 'P',   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, 'J', 'U', 'M', '_', '_'],
+      ['_', '_', '_', '_', '_','Px', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_7': {
     'toolbox': wordSearchToolbox(),
     'ideal': 4,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveNorth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0, 'Tx',  0,   0,   0],
-      [0,   0,   0,   0, 'X',   0,   0,   0],
-      [0,   0,   2, 'N', 'E',   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_','Tx', '_', '_', '_'],
+      ['_', '_', '_', '_', 'X', '_', '_', '_'],
+      ['_', '_',   2, 'N', 'E', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_8': {
     'toolbox': wordSearchToolbox(),
     'ideal': 4,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveSouth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2, 'W',   0,   0,   0,   0],
-      [0,   0,   0, 'E', 'S', 'Tx',  0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, 'W', '_', '_', '_', '_'],
+      ['_', '_', '_', 'E', 'S','Tx', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_9': {
     'toolbox': wordSearchToolbox(),
     'ideal': 4,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveNorth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0, 'S', 'Tx',  0,   0,   0],
-      [0,   2, 'E', 'A',   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', 'S','Tx', '_', '_', '_'],
+      ['_',   2, 'E', 'A', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_10': {
@@ -10586,68 +10652,71 @@ module.exports = {
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2,   0,   0,   0,   0,   0],
-      [0,   0, 'N',   0,   0,   0,   0,   0],
-      [0,   0, 'O',   0,   0,   0,   0,   0],
-      [0,   0, 'R',   0,   0,   0,   0,   0],
-      [0,   0, 'T',   0,   0,   0,   0,   0],
-      [0,   0, 'Hx',  0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, '_', '_', '_', '_', '_'],
+      ['_', '_', 'N', '_', '_', '_', '_', '_'],
+      ['_', '_', 'O', '_', '_', '_', '_', '_'],
+      ['_', '_', 'R', '_', '_', '_', '_', '_'],
+      ['_', '_', 'T', '_', '_', '_', '_', '_'],
+      ['_', '_','Hx', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_11': {
     'toolbox': wordSearchToolbox(),
     'ideal': 5,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveSouth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2, 'S', 'O',   0,   0,   0],
-      [0,   0,   0,   0, 'U',   0,   0,   0],
-      [0,   0,   0,   0, 'T',   0,   0,   0],
-      [0,   0,   0,   0, 'Hx',  0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, 'S', 'O', '_', '_', '_'],
+      ['_', '_', '_', '_', 'U', '_', '_', '_'],
+      ['_', '_', '_', '_', 'T', '_', '_', '_'],
+      ['_', '_', '_', '_','Hx', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_12': {
     'toolbox': wordSearchToolbox(),
     'ideal': 5,
     'requiredBlocks': [
+      [reqBlocks.moveNorth],
       [reqBlocks.moveEast]
     ],
     'startDirection': Direction.NORTH,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0, 'I', 'G', 'H', 'Tx',  0,   0,   0],
-      [0, 'R',   0,   0,   0,   0,   0,   0],
-      [0,   2,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', 'I', 'G', 'H','Tx', '_', '_', '_'],
+      ['_', 'R', '_', '_', '_', '_', '_', '_'],
+      ['_',   2, '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_13': {
     'toolbox': wordSearchToolbox(),
     'ideal': 5,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveSouth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   2, 'D', 'E',   0,   0,   0,   0],
-      [0,   0,   0, 'B',   0,   0,   0,   0],
-      [0,   0,   0, 'U', 'Gx',  0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_',   2, 'D', 'E', '_', '_', '_', '_'],
+      ['_', '_', '_', 'B', '_', '_', '_', '_'],
+      ['_', '_', '_', 'U','Gx', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_14': {
@@ -10655,94 +10724,100 @@ module.exports = {
     'ideal': 5,
     'requiredBlocks': [
       [reqBlocks.moveEast],
+      [reqBlocks.moveNorth],
+      [reqBlocks.moveEast]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0, 'S', 'E', 'Tx',  0,   0],
-      [0,   0,   0, 'E',   0,   0,   0,   0],
-      [0,   0,   2, 'R',   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', 'S', 'E','Tx', '_', '_'],
+      ['_', '_', '_', 'E', '_', '_', '_', '_'],
+      ['_', '_',   2, 'R', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_15': {
     'toolbox': wordSearchToolbox(),
     'ideal': 5,
     'requiredBlocks': [
+      [reqBlocks.moveSouth],
       [reqBlocks.moveEast]
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2,   0,   0,   0,   0,   0],
-      [0,   0, 'A',   0,   0,   0,   0,   0],
-      [0,   0, 'B', 'O',   0,   0,   0,   0],
-      [0,   0,   0, 'V', 'Ex',  0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, '_', '_', '_', '_', '_'],
+      ['_', '_', 'A', '_', '_', '_', '_', '_'],
+      ['_', '_', 'B', 'O', '_', '_', '_', '_'],
+      ['_', '_', '_', 'V','Ex', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_16': {
     'toolbox': wordSearchToolbox(),
     'ideal': 5,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveNorth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0, 'Wx',  0,   0,   0],
-      [0,   0,   0,   0, 'O',   0,   0,   0],
-      [0,   0,   0, 'E', 'L',   0,   0,   0],
-      [0,   0,   2, 'B',   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_','Wx', '_', '_', '_'],
+      ['_', '_', '_', '_', 'O', '_', '_', '_'],
+      ['_', '_', '_', 'E', 'L', '_', '_', '_'],
+      ['_', '_',   2, 'B', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_17': {
     'toolbox': wordSearchToolbox(),
     'ideal': 6,
     'requiredBlocks': [
+      [reqBlocks.moveSouth],
       [reqBlocks.moveEast]
     ],
     'startDirection': Direction.SOUTH,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   2,   0,   0,   0,   0,   0],
-      [0,   0, 'S', 'Q',   0,   0,   0,   0],
-      [0,   0,   0, 'U', 'A',   0,   0,   0],
-      [0,   0,   0,   0, 'R',   0,   0,   0],
-      [0,   0,   0,   0, 'Ex',  0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_',   2, '_', '_', '_', '_', '_'],
+      ['_', '_', 'S', 'Q', '_', '_', '_', '_'],
+      ['_', '_', '_', 'U', 'A', '_', '_', '_'],
+      ['_', '_', '_', '_', 'R', '_', '_', '_'],
+      ['_', '_', '_', '_','Ex', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   },
   'k_18': {
     'toolbox': wordSearchToolbox(),
     'ideal': 7,
     'requiredBlocks': [
-      [reqBlocks.moveEast]
+      [reqBlocks.moveEast],
+      [reqBlocks.moveNorth]
     ],
     'startDirection': Direction.EAST,
     'map': [
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0, 'A', 'Mx',  0],
-      [0,   0,   0,   0,   0, 'R',   0,   0],
-      [0,   0,   0, 'R', 'O', 'G',   0,   0],
-      [0,   0,   2, 'P',   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0],
-      [0,   0,   0,   0,   0,   0,   0,   0]
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', 'A','Mx', '_'],
+      ['_', '_', '_', '_', '_', 'R', '_', '_'],
+      ['_', '_', '_', 'R', 'O', 'G', '_', '_'],
+      ['_', '_',   2, 'P', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_']
     ]
   }
 };
 
-},{"../block_utils":3,"./requiredBlocks":24,"./tiles":27}],35:[function(require,module,exports){
+},{"../block_utils":3,"./requiredBlocks":25,"./tiles":28}],36:[function(require,module,exports){
 var xml = require('./xml');
 var blockUtils = require('./block_utils');
 var utils = require('./utils');
@@ -10862,7 +10937,7 @@ var titlesMatch = function(titleA, titleB) {
     titleB.getValue() === titleA.getValue();
 };
 
-},{"./block_utils":3,"./utils":50,"./xml":51}],36:[function(require,module,exports){
+},{"./block_utils":3,"./utils":51,"./xml":52}],37:[function(require,module,exports){
 // avatar: A 1029x51 set of 21 avatar images.
 
 exports.load = function(assetUrl, id) {
@@ -10919,7 +10994,7 @@ exports.load = function(assetUrl, id) {
   return skin;
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /**
  * Blockly Apps: SVG Slider
  *
@@ -11124,7 +11199,7 @@ Slider.bindEvent_ = function(element, name, func) {
 
 module.exports = Slider;
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11145,7 +11220,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],39:[function(require,module,exports){
+},{"ejs":55}],40:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11166,7 +11241,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/common":52,"ejs":54}],40:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"ejs":55}],41:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11187,7 +11262,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],41:[function(require,module,exports){
+},{"ejs":55}],42:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11208,7 +11283,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/common":52,"ejs":54}],42:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"ejs":55}],43:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11231,7 +11306,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/common":52,"ejs":54}],43:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"ejs":55}],44:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11252,7 +11327,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/common":52,"ejs":54}],44:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"ejs":55}],45:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11277,7 +11352,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/common":52,"ejs":54}],45:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"ejs":55}],46:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11299,7 +11374,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],46:[function(require,module,exports){
+},{"ejs":55}],47:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11320,7 +11395,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/common":52,"ejs":54}],47:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"ejs":55}],48:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11341,7 +11416,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"../../locale/de_de/common":52,"ejs":54}],48:[function(require,module,exports){
+},{"../../locale/de_de/common":53,"ejs":55}],49:[function(require,module,exports){
 module.exports= (function() {
   var t = function anonymous(locals, filters, escape, rethrow) {
 escape = escape || function (html){
@@ -11362,7 +11437,7 @@ return buf.join('');
     return t(locals, require("ejs").filters);
   }
 }());
-},{"ejs":54}],49:[function(require,module,exports){
+},{"ejs":55}],50:[function(require,module,exports){
 var list = [];
 
 /**
@@ -11380,7 +11455,7 @@ exports.clearTimeouts = function () {
   list = [];
 };
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var _ = require('./lodash');
 
 exports.shallowCopy = function(source) {
@@ -11490,7 +11565,7 @@ Function.prototype.inherits = function (parent) {
   this.prototype = _.create(parent.prototype, { constructor: parent });
 };
 
-},{"./lodash":11}],51:[function(require,module,exports){
+},{"./lodash":11}],52:[function(require,module,exports){
 // Serializes an XML DOM node to a string.
 exports.serialize = function(node) {
   var serializer = new XMLSerializer();
@@ -11518,7 +11593,7 @@ exports.parseElement = function(text) {
   return element;
 };
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.de=function(n){return n===1?"one":"other"}
 exports.and = function(d){return "and"};
 
@@ -11667,7 +11742,7 @@ exports.signup = function(d){return "Für den Einführungskurs anmelden"};
 exports.hintHeader = function(d){return "Here's a tip:"};
 
 
-},{"messageformat":65}],53:[function(require,module,exports){
+},{"messageformat":66}],54:[function(require,module,exports){
 var MessageFormat = require("messageformat");MessageFormat.locale.de=function(n){return n===1?"one":"other"}
 exports.atBeehive = function(d){return "at beehive"};
 
@@ -11800,7 +11875,7 @@ exports.whileTooltip = function(d){return "Wiederhole diese Aktionen bis das Zie
 exports.yes = function(d){return "Ja"};
 
 
-},{"messageformat":65}],54:[function(require,module,exports){
+},{"messageformat":66}],55:[function(require,module,exports){
 
 /*!
  * EJS
@@ -12159,7 +12234,7 @@ if (require.extensions) {
   });
 }
 
-},{"./filters":55,"./utils":56,"fs":57,"path":59}],55:[function(require,module,exports){
+},{"./filters":56,"./utils":57,"fs":58,"path":60}],56:[function(require,module,exports){
 /*!
  * EJS - Filters
  * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
@@ -12362,7 +12437,7 @@ exports.json = function(obj){
   return JSON.stringify(obj);
 };
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 
 /*!
  * EJS
@@ -12388,9 +12463,9 @@ exports.escape = function(html){
 };
  
 
-},{}],57:[function(require,module,exports){
-
 },{}],58:[function(require,module,exports){
+
+},{}],59:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -12445,7 +12520,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12673,7 +12748,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":58}],60:[function(require,module,exports){
+},{"/home/ubuntu/website-ci/blockly/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":59}],61:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -13184,7 +13259,7 @@ var substr = 'ab'.substr(-1) === 'b'
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13270,7 +13345,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13357,13 +13432,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":61,"./encode":62}],64:[function(require,module,exports){
+},{"./decode":62,"./encode":63}],65:[function(require,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -13996,7 +14071,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":60,"querystring":63}],65:[function(require,module,exports){
+},{"punycode":61,"querystring":64}],66:[function(require,module,exports){
 /**
  * messageformat.js
  *
